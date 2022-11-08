@@ -15,12 +15,12 @@
     <application>
 <!--        <activity android:name="id.kakzaki.smartble_sdk.activity.MainActivity" />-->
         <activity android:name="id.kakzaki.smartble_sdk.activity.CommandListActivity" />
-        <activity android:name="id.kakzaki.smartble_sdk.activity.KeyListActivity" />
+<!--        <activity android:name="id.kakzaki.smartble_sdk.activity.KeyListActivity" />-->
 <!--        <activity android:name="id.kakzaki.smartble_sdk.activity.KeyFlagListActivity" />-->
         <activity android:name="id.kakzaki.smartble_sdk.activity.NotificationActivity" />
         <activity android:name="id.kakzaki.smartble_sdk.activity.Notification2Activity" />
         <activity android:name="id.kakzaki.smartble_sdk.activity.MusicControlActivity" />
-        <activity android:name="id.kakzaki.smartble_sdk.activity.OtherFunctionActivity" />
+<!--        <activity android:name="id.kakzaki.smartble_sdk.activity.OtherFunctionActivity" />-->
 <!--        <activity android:name="id.kakzaki.smartble_sdk.activity.WatchFaceActivity" />-->
 <!--        <activity android:name="id.kakzaki.smartble_sdk.firmware.g.FirmwareUpgradeGActivity" />-->
 <!--        <activity android:name="id.kakzaki.smartble_sdk.firmware.m.FirmwareUpgradeMActivity" />-->

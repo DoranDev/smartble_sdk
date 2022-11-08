@@ -25,6 +25,7 @@ import com.szabh.smable3.BleKey
 import com.szabh.smable3.BleKeyFlag
 import com.szabh.smable3.component.*
 import com.szabh.smable3.entity.*
+import com.szabh.smable3.entity.BleAlarm
 import id.kakzaki.smartble_sdk.activity.MusicControlActivity
 import id.kakzaki.smartble_sdk.tools.*
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -37,12 +38,13 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import java.io.File
+import java.nio.channels.FileChannel
 import java.util.*
 import kotlin.random.Random
 
 
 /** SmartbleSdkPlugin */
-class SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
+class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
   /// The MethodChannel that will the communication between Flutter and native Android
   ///
   /// This local reference serves to register the plugin with the Flutter Engine and unregister it
@@ -59,8 +61,92 @@ class SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
   private var sportState = BleAppSportState.STATE_START
 
   private lateinit var channel : MethodChannel
+
   private var scanChannel : EventChannel?=null
   private lateinit var scanSink: EventSink
+  private var onDeviceConnectedChannel : EventChannel?=null
+  private lateinit var onDeviceConnectedSink: EventSink
+  private var onIdentityCreateChannel : EventChannel?=null
+  private lateinit var onIdentityCreateSink: EventSink
+  private var onCommandReplyChannel : EventChannel?=null
+  private lateinit var onCommandReplySink: EventSink
+  private var onOTAChannel : EventChannel?=null
+  private lateinit var onOTASink: EventSink
+  private var onReadPowerChannel : EventChannel?=null
+  private lateinit var onReadPowerSink: EventSink
+  private var onReadFirmwareVersionChannel : EventChannel?=null
+  private lateinit var onReadFirmwareVersionSink: EventSink
+  private var onReadBleAddressChannel : EventChannel?=null
+  private lateinit var onReadBleAddressSink: EventSink
+  private var onReadSedentarinessChannel : EventChannel?=null
+  private lateinit var onReadSedentarinessSink: EventSink
+  private var onReadNoDisturbChannel : EventChannel?=null
+  private lateinit var onReadNoDisturbSink: EventSink
+  private var onReadAlarmChannel : EventChannel?=null
+  private lateinit var onReadAlarmSink: EventSink
+  private var onReadCoachingIdsChannel : EventChannel?=null
+  private lateinit var onReadCoachingIdsSink: EventSink
+  private var onReadUiPackVersionChannel : EventChannel?=null
+  private lateinit var onReadUiPackVersionSink: EventSink
+  private var onReadLanguagePackVersionChannel : EventChannel?=null
+  private lateinit var onReadLanguagePackVersionSink: EventSink
+  private var onIdentityDeleteByDeviceChannel : EventChannel?=null
+  private lateinit var onIdentityDeleteByDeviceSink: EventSink
+  private var onCameraStateChangeChannel : EventChannel?=null
+  private lateinit var onCameraStateChangeSink: EventSink
+  private var onCameraResponseChannel : EventChannel?=null
+  private lateinit var onCameraResponseSink: EventSink
+  private var onSyncDataChannel : EventChannel?=null
+  private lateinit var onSyncDataSink: EventSink
+  private var onReadActivityChannel : EventChannel?=null
+  private lateinit var onReadActivitySink: EventSink
+  private var onReadHeartRateChannel : EventChannel?=null
+  private lateinit var onReadHeartRateSink: EventSink
+  private var onUpdateHeartRateChannel : EventChannel?=null
+  private lateinit var onUpdateHeartRateSink: EventSink
+  private var onReadBloodPressureChannel : EventChannel?=null
+  private lateinit var onReadBloodPressureSink: EventSink
+  private var onReadSleepChannel : EventChannel?=null
+  private lateinit var onReadSleepSink: EventSink
+  private var onReadLocationChannel : EventChannel?=null
+  private lateinit var onReadLocationSink: EventSink
+  private var onReadTemperatureChannel : EventChannel?=null
+  private lateinit var onReadTemperatureSink: EventSink
+  private var onReadWorkout2Channel : EventChannel?=null
+  private lateinit var onReadWorkout2Sink: EventSink
+  private var onStreamProgressChannel : EventChannel?=null
+  private lateinit var onStreamProgressSink: EventSink
+  private var onUpdateAppSportStateChannel : EventChannel?=null
+  private lateinit var onUpdateAppSportStateSink: EventSink
+  private var onClassicBluetoothStateChangeChannel : EventChannel?=null
+  private lateinit var onClassicBluetoothStateChangeSink: EventSink
+  private var onDeviceFileUpdateChannel : EventChannel?=null
+  private lateinit var onDeviceFileUpdateSink: EventSink
+  private var onReadDeviceFileChannel : EventChannel?=null
+  private lateinit var onReadDeviceFileSink: EventSink
+  private var onReadTemperatureUnitChannel : EventChannel?=null
+  private lateinit var onReadTemperatureUnitSink: EventSink
+  private var onReadDateFormatChannel : EventChannel?=null
+  private lateinit var onReadDateFormatSink: EventSink
+  private var onReadWatchFaceSwitchChannel : EventChannel?=null
+  private lateinit var onReadWatchFaceSwitchSink: EventSink
+  private var onUpdateWatchFaceSwitchChannel : EventChannel?=null
+  private lateinit var onUpdateWatchFaceSwitchSink: EventSink
+  private var onAppSportDataResponseChannel : EventChannel?=null
+  private lateinit var onAppSportDataResponseSink: EventSink
+  private var onReadWatchFaceIdChannel : EventChannel?=null
+  private lateinit var onReadWatchFaceIdSink: EventSink
+  private var onWatchFaceIdUpdateChannel : EventChannel?=null
+  private lateinit var onWatchFaceIdUpdateSink: EventSink
+  private var onHIDStateChannel : EventChannel?=null
+  private lateinit var onHIDStateSink: EventSink
+  private var onHIDValueChangeChannel : EventChannel?=null
+  private lateinit var onHIDValueChangeSink: EventSink
+  private var onDeviceSMSQuickReplyChannel : EventChannel?=null
+  private lateinit var onDeviceSMSQuickReplySink: EventSink
+  private var onReadDeviceInfoChannel : EventChannel?=null
+  private lateinit var onReadDeviceInfoSink: EventSink
+
 
   private var mResult: Result? = null
   private val mDevices = mutableListOf<Any>()
@@ -112,6 +198,9 @@ class SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         if (BuildConfig.DEBUG) {
           Log.d("onDeviceConnected","$device")
         }
+        val item: MutableMap<String, Any> = HashMap()
+        item["device"] = device
+        onDeviceConnectedSink.success(item)
       }
 
       override fun onIdentityCreate(status: Boolean, deviceInfo: BleDeviceInfo?) {
@@ -121,14 +210,23 @@ class SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         if (BuildConfig.DEBUG) {
           Log.d("onIdentityCre","$status")
         }
+        val item: MutableMap<String, Any> = HashMap()
+        item["status"] = status
+        item["deviceInfo"] = deviceInfo.toString()
+        onIdentityCreateSink.success(item)
       }
 
       override fun onCommandReply(bleKey: BleKey, bleKeyFlag: BleKeyFlag, status: Boolean) {
-        print( "onCommandReply $bleKey $bleKeyFlag -> $status")
+        if (BuildConfig.DEBUG) {
+          Log.d("onCommandReply","$bleKey $bleKeyFlag -> $status")
+        }
+        
       }
 
       override fun onOTA(status: Boolean) {
-        print( "onOTA $status")
+        if (BuildConfig.DEBUG) {
+          Log.d("onOTA","$status")
+        }
         if (!status) return
 
         if (mContext != null) {
@@ -138,55 +236,77 @@ class SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
 
       override fun onReadMtkOtaMeta() {
         if (mContext != null) {
-          //FirmwareHelper.gotoOtaReally(mContext)
+         // FirmwareHelper.gotoOtaReally(mContext)
         }
       }
 
       override fun onReadPower(power: Int) {
-        print( "onReadPower $power")
+        if (BuildConfig.DEBUG) {
+          Log.d("onReadPower","$power")
+        }
       }
 
       override fun onReadFirmwareVersion(version: String) {
-        print( "onReadFirmwareVersion $version")
+        if (BuildConfig.DEBUG) {
+          Log.d("onReadFirmware","$version")
+        }
       }
 
       override fun onReadBleAddress(address: String) {
-        print( "onReadBleAddress $address")
+        if (BuildConfig.DEBUG) {
+          Log.d("onReadBleAddress","$address")
+        }
       }
 
       override fun onReadSedentariness(sedentarinessSettings: BleSedentarinessSettings) {
-        print( "onReadSedentariness $sedentarinessSettings")
+        if (BuildConfig.DEBUG) {
+          Log.d("onReadSedentariness","$sedentarinessSettings")
+        }
       }
 
       override fun onReadNoDisturb(noDisturbSettings: BleNoDisturbSettings) {
-        print( "onReadNoDisturb $noDisturbSettings")
+        if (BuildConfig.DEBUG) {
+          Log.d("onReadNoDisturb","$noDisturbSettings")
+        }
       }
 
       override fun onReadAlarm(alarms: List<BleAlarm>) {
-        print( "onReadAlarm $alarms")
+        if (BuildConfig.DEBUG) {
+          Log.d("onReadAlarm","$alarms")
+        }
       }
 
       override fun onReadCoachingIds(bleCoachingIds: BleCoachingIds) {
-        print( "onReadCoachingIds $bleCoachingIds")
+        if (BuildConfig.DEBUG) {
+          Log.d("onReadCoachingIds","$bleCoachingIds")
+        }
       }
 
       override fun onReadUiPackVersion(version: String) {
-        print( "onReadUiPackVersion $version")
+        if (BuildConfig.DEBUG) {
+          Log.d("onReadUiPackVersion","$version")
+        }
       }
 
       override fun onReadLanguagePackVersion(version: BleLanguagePackVersion) {
-        print( "onReadLanguagePackVersion $version")
+        if (BuildConfig.DEBUG) {
+          Log.d("onReadLanguagePackVersi","$version")
+        }
       }
 
 
       override fun onIdentityDeleteByDevice(isDevice: Boolean) {
-        print( "onIdentityDeleteByDevice $isDevice")
+        if (BuildConfig.DEBUG) {
+          Log.d("onIdentityDeleteByDevic","$isDevice")
+        }
         BleConnector.unbind()
         unbindCompleted()
       }
 
       override fun onCameraStateChange(cameraState: Int) {
-        print( "onCameraStateChange ${CameraState.getState(cameraState)}")
+        if (BuildConfig.DEBUG) {
+          Log.d("onCameraStateChange","${CameraState.getState(cameraState)}")
+        }
         if (cameraState == CameraState.ENTER) {
           mCameraEntered = true
         } else if (cameraState == CameraState.EXIT) {
@@ -195,7 +315,9 @@ class SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
       }
 
       override fun onCameraResponse(status: Boolean, cameraState: Int) {
-        print( "onCameraResponse $status ${CameraState.getState(cameraState)}")
+        if (BuildConfig.DEBUG) {
+          Log.d("onCameraResponse","$status ${CameraState.getState(cameraState)}")
+        }
         if (status) {
           if (cameraState == CameraState.ENTER) {
             mCameraEntered = true
@@ -206,39 +328,61 @@ class SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
       }
 
       override fun onSyncData(syncState: Int, bleKey: BleKey) {
-        print( "onSyncData syncState=$syncState, bleKey=$bleKey")
+        if (BuildConfig.DEBUG) {
+          Log.d("onSyncData","syncState=$syncState, bleKey=$bleKey")
+        }
       }
 
       override fun onReadActivity(activities: List<BleActivity>) {
-        print( "$activities")
+        if (BuildConfig.DEBUG) {
+          Log.d("onReadActivity","$activities")
+        }
       }
 
       override fun onReadHeartRate(heartRates: List<BleHeartRate>) {
-        print( "$heartRates")
+        if (BuildConfig.DEBUG) {
+          Log.d("onReadHeartRate","$heartRates")
+        }
       }
 
       override fun onUpdateHeartRate(heartRate: BleHeartRate) {
-        print( "$heartRate")
+        if (BuildConfig.DEBUG) {
+          Log.d("onUpdateHeartRate","$heartRate")
+        }
       }
 
       override fun onReadBloodPressure(bloodPressures: List<BleBloodPressure>) {
+        if (BuildConfig.DEBUG) {
+          Log.d("onReadBloodPressure","$bloodPressures")
+        }
         // print( "$bloodPressures")
       }
 
       override fun onReadSleep(sleeps: List<BleSleep>) {
+        if (BuildConfig.DEBUG) {
+          Log.d("onReadSleep","$sleeps")
+        }
         // print( "$sleeps")
       }
 
       override fun onReadLocation(locations: List<BleLocation>) {
+        if (BuildConfig.DEBUG) {
+          Log.d("onReadLocation","$locations")
+        }
         // print( "$locations")
       }
 
       override fun onReadTemperature(temperatures: List<BleTemperature>) {
+        if (BuildConfig.DEBUG) {
+          Log.d("onReadTemperature","$temperatures")
+        }
         // print( "$temperatures")
       }
 
       override fun onReadWorkout2(workouts: List<BleWorkout2>) {
-        print( "$workouts")
+        if (BuildConfig.DEBUG) {
+          Log.d("onReadWorkout2","$workouts")
+        }
       }
 
       override fun onStreamProgress(
@@ -247,7 +391,9 @@ class SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         total: Int,
         completed: Int
       ) {
-        print( "onStreamProgress $status $errorCode $total $completed")
+        if (BuildConfig.DEBUG) {
+          Log.d("onStreamProgress","$status $errorCode $total $completed")
+        }
       }
 
       @SuppressLint("MissingPermission")
@@ -355,25 +501,32 @@ class SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
       }
 
       override fun onUpdateAppSportState(appSportState: BleAppSportState) {
-        print( "$appSportState")
+        if (BuildConfig.DEBUG) {
+          Log.d("onUpdateAppSportState","$appSportState")
+        }
       }
 
       override fun onClassicBluetoothStateChange(state: Int) {
+        if (BuildConfig.DEBUG) {
+          Log.d("onClassicBluetoot","$state")
+        }
         print( ClassicBluetoothState.getState(state))
         mClassicBluetoothState = state
       }
 
       override fun onDeviceFileUpdate(deviceFile: BleDeviceFile) {
-        LogUtils.d("onDeviceFileUpdate $deviceFile")
-        print( "$deviceFile")
+        if (BuildConfig.DEBUG) {
+          Log.d("onDeviceFileUpdate","$deviceFile")
+        }
       }
 
       override fun onReadDeviceFile(deviceFile: BleDeviceFile) {
         if (deviceFile.mFileSize != 0) {
           BleConnector.sendData(BleKey.DEVICE_FILE, BleKeyFlag.READ_CONTINUE)
         }
-        LogUtils.d("onReadDeviceFile $deviceFile")
-        print( "$deviceFile")
+        if (BuildConfig.DEBUG) {
+          Log.d("onReadDeviceFile","$deviceFile")
+        }
         FileIOUtils.writeFileFromBytesByStream(
           File(PathUtils.getExternalAppDataPath() + "/voice/${deviceFile.mTime}.wav"),
           deviceFile.mFileContent,
@@ -383,50 +536,130 @@ class SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
       }
 
       override fun onReadTemperatureUnit(value: Int) {
-        print( "onReadTemperatureUnit $value")
+        if (BuildConfig.DEBUG) {
+          Log.d("onReadTemperatureUnit","$value")
+        }
       }
 
       override fun onReadDateFormat(value: Int) {
-        print( "onReadDateFormat $value")
+        if (BuildConfig.DEBUG) {
+          Log.d("onReadDateFormat","$value")
+        }
       }
 
       override fun onReadWatchFaceSwitch(value: Int) {
-        print( "onReadWatchFaceSwitch $value")
+        if (BuildConfig.DEBUG) {
+          Log.d("onReadWatchFaceSwitch","$value")
+        }
       }
 
       override fun onUpdateWatchFaceSwitch(status: Boolean) {
-        print( "onUpdateWatchFaceSwitch $status")
+        if (BuildConfig.DEBUG) {
+          Log.d("onUpdateWatchFaceSwitch","$status")
+        }
       }
 
       override fun onAppSportDataResponse(status: Boolean) {
-        print( "$status")
+        if (BuildConfig.DEBUG) {
+          Log.d("onAppSportDataResponse","$status")
+        }
       }
 
       override fun onReadWatchFaceId(watchFaceId: BleWatchFaceId) {
-        print( "onReadWatchFaceId ${watchFaceId.mIdList}")
+        if (BuildConfig.DEBUG) {
+          Log.d("onReadWatchFaceId","${watchFaceId.mIdList}")
+        }
       }
 
       override fun onWatchFaceIdUpdate(status: Boolean) {
+        if (BuildConfig.DEBUG) {
+          Log.d("onWatchFaceIdUpdate","$status")
+        }
         //chooseFile(mContext, BleKey.WATCH_FACE.mKey)
       }
 
       override fun onHIDState(state: Int) {
-        print( "$state")
+        if (BuildConfig.DEBUG) {
+          Log.d("onHIDState","$state")
+        }
         if(state == HIDState.DISCONNECTED){
           BleConnector.connectHID()
         }
       }
 
       override fun onHIDValueChange(value: Int) {
-        print( "$value")
+        if (BuildConfig.DEBUG) {
+          Log.d("onHIDValueChange","$value")
+        }
       }
 
       override fun onDeviceSMSQuickReply(smsQuickReply: BleSMSQuickReply) {
-        print( smsQuickReply.toString())
+        if (BuildConfig.DEBUG) {
+          Log.d("onDeviceSMSQuickReply", smsQuickReply.toString())
+        }
       }
 
       override fun onReadDeviceInfo(deviceInfo: BleDeviceInfo) {
-        print( deviceInfo.toString())
+        if (BuildConfig.DEBUG) {
+          Log.d("onReadDeviceInfo","$deviceInfo")
+        }
+      }
+
+      override fun onSessionStateChange(status: Boolean) {
+        if (BuildConfig.DEBUG) {
+          Log.d("onSessionStateChange","$status")
+        }
+      }
+
+      override fun onNoDisturbUpdate(noDisturbSettings: BleNoDisturbSettings) {
+        if (BuildConfig.DEBUG) {
+          Log.d("onNoDisturbUpdate","$noDisturbSettings")
+        }
+      }
+
+      override fun onAlarmUpdate(alarm: BleAlarm) {
+        if (BuildConfig.DEBUG) {
+          Log.d("onAlarmUpdate","$alarm")
+        }
+      }
+
+      override fun onAlarmDelete(id: Int) {
+        if (BuildConfig.DEBUG) {
+          Log.d("onAlarmDelete","$id")
+        }
+      }
+
+      override fun onAlarmAdd(alarm: BleAlarm) {
+        if (BuildConfig.DEBUG) {
+          Log.d("onAlarmAdd","$alarm")
+        }
+      }
+
+      override fun onFindPhone(start: Boolean) {
+        if (BuildConfig.DEBUG) {
+          Log.d("onFindPhone","onFindPhone ${if (start) "started" else "stopped"}")
+        }
+      }
+
+      override fun onRequestLocation(workoutState: Int) {
+        if (BuildConfig.DEBUG) {
+          Log.d("onRequestLocation","${WorkoutState.getState(workoutState)}")
+        }
+      }
+
+      override fun onDeviceRequestAGpsFile(url: String) {
+        if (BuildConfig.DEBUG) {
+          Log.d("onDeviceRequestAGpsFile","$url")
+        }
+        // 以下是示例代码，sdk中的文件会过期，只是用于演示
+//        when (BleCache.mAGpsType) {
+//          1 -> BleConnector.sendStream(BleKey.AGPS_FILE, assets.open("type1_epo_gr_3_1.dat"))
+//          2 -> BleConnector.sendStream(BleKey.AGPS_FILE, assets.open("type2_current_1d.alp"))
+//          6 -> BleConnector.sendStream(BleKey.AGPS_FILE, assets.open("type6_ble_epo_offline.bin"))
+//        }
+        // 实际工程要从url下载aGps文件，然后发送该aGps文件
+        // val file = download(url)
+        // BleConnector.sendStream(BleKey.AGPS_FILE, file)
       }
 
     }
@@ -438,6 +671,88 @@ class SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
     channel.setMethodCallHandler(this)
     scanChannel = EventChannel(flutterPluginBinding.binaryMessenger, "smartble_sdk/scan")
     scanChannel!!.setStreamHandler(scanResultsHandler)
+    onDeviceConnectedChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onDeviceConnected")
+    onDeviceConnectedChannel!!.setStreamHandler(onDeviceConnectedResultsHandler)
+    onIdentityCreateChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onIdentityCreate")
+    onIdentityCreateChannel!!.setStreamHandler(onIdentityCreateResultsHandler)
+    onCommandReplyChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onCommandReply")
+    onCommandReplyChannel!!.setStreamHandler(onCommandReplyResultsHandler)
+    onOTAChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onOTA")
+    onOTAChannel!!.setStreamHandler(onOTAResultsHandler)
+    onReadPowerChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onReadPower")
+    onReadPowerChannel!!.setStreamHandler(onReadPowerResultsHandler)
+    onReadFirmwareVersionChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onReadFirmwareVersion")
+    onReadFirmwareVersionChannel!!.setStreamHandler(onReadFirmwareVersionResultsHandler)
+    onReadBleAddressChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onReadBleAddress")
+    onReadBleAddressChannel!!.setStreamHandler(onReadBleAddressResultsHandler)
+    onReadSedentarinessChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onReadSedentariness")
+    onReadSedentarinessChannel!!.setStreamHandler(onReadSedentarinessResultsHandler)
+    onReadNoDisturbChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onReadNoDisturb")
+    onReadNoDisturbChannel!!.setStreamHandler(onReadNoDisturbResultsHandler)
+    onReadAlarmChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onReadAlarm")
+    onReadAlarmChannel!!.setStreamHandler(onReadAlarmResultsHandler)
+    onReadCoachingIdsChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onReadCoachingIds")
+    onReadCoachingIdsChannel!!.setStreamHandler(onReadCoachingIdsResultsHandler)
+    onReadUiPackVersionChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onReadUiPackVersion")
+    onReadUiPackVersionChannel!!.setStreamHandler(onReadUiPackVersionResultsHandler)
+    onReadLanguagePackVersionChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onReadLanguagePackVersion")
+    onReadLanguagePackVersionChannel!!.setStreamHandler(onReadLanguagePackVersionResultsHandler)
+    onIdentityDeleteByDeviceChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onIdentityDeleteByDevice")
+    onIdentityDeleteByDeviceChannel!!.setStreamHandler(onIdentityDeleteByDeviceResultsHandler)
+    onCameraStateChangeChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onCameraStateChange")
+    onCameraStateChangeChannel!!.setStreamHandler(onCameraStateChangeResultsHandler)
+    onCameraResponseChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onCameraResponse")
+    onCameraResponseChannel!!.setStreamHandler(onCameraResponseResultsHandler)
+    onSyncDataChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onSyncData")
+    onSyncDataChannel!!.setStreamHandler(onSyncDataResultsHandler)
+    onReadActivityChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onReadActivity")
+    onReadActivityChannel!!.setStreamHandler(onReadActivityResultsHandler)
+    onReadHeartRateChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onReadHeartRate")
+    onReadHeartRateChannel!!.setStreamHandler(onReadHeartRateResultsHandler)
+    onUpdateHeartRateChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onUpdateHeartRate")
+    onUpdateHeartRateChannel!!.setStreamHandler(onUpdateHeartRateResultsHandler)
+    onReadBloodPressureChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onReadBloodPressure")
+    onReadBloodPressureChannel!!.setStreamHandler(onReadBloodPressureResultsHandler)
+    onReadSleepChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onReadSleep")
+    onReadSleepChannel!!.setStreamHandler(onReadSleepResultsHandler)
+    onReadLocationChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onReadLocation")
+    onReadLocationChannel!!.setStreamHandler(onReadLocationResultsHandler)
+    onReadTemperatureChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onReadTemperature")
+    onReadTemperatureChannel!!.setStreamHandler(onReadTemperatureResultsHandler)
+    onReadWorkout2Channel = EventChannel(flutterPluginBinding.binaryMessenger, "onReadWorkout2")
+    onReadWorkout2Channel!!.setStreamHandler(onReadWorkout2ResultsHandler)
+    onStreamProgressChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onStreamProgress")
+    onStreamProgressChannel!!.setStreamHandler(onStreamProgressResultsHandler)
+    onUpdateAppSportStateChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onUpdateAppSportState")
+    onUpdateAppSportStateChannel!!.setStreamHandler(onUpdateAppSportStateResultsHandler)
+    onClassicBluetoothStateChangeChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onClassicBluetoothStateChange")
+    onClassicBluetoothStateChangeChannel!!.setStreamHandler(onClassicBluetoothStateChangeResultsHandler)
+    onDeviceFileUpdateChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onDeviceFileUpdate")
+    onDeviceFileUpdateChannel!!.setStreamHandler(onDeviceFileUpdateResultsHandler)
+    onReadDeviceFileChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onReadDeviceFile")
+    onReadDeviceFileChannel!!.setStreamHandler(onReadDeviceFileResultsHandler)
+    onReadTemperatureUnitChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onReadTemperatureUnit")
+    onReadTemperatureUnitChannel!!.setStreamHandler(onReadTemperatureUnitResultsHandler)
+    onReadDateFormatChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onReadDateFormat")
+    onReadDateFormatChannel!!.setStreamHandler(onReadDateFormatResultsHandler)
+    onReadWatchFaceSwitchChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onReadWatchFaceSwitch")
+    onReadWatchFaceSwitchChannel!!.setStreamHandler(onReadWatchFaceSwitchResultsHandler)
+    onUpdateWatchFaceSwitchChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onUpdateWatchFaceSwitch")
+    onUpdateWatchFaceSwitchChannel!!.setStreamHandler(onUpdateWatchFaceSwitchResultsHandler)
+    onAppSportDataResponseChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onAppSportDataResponse")
+    onAppSportDataResponseChannel!!.setStreamHandler(onAppSportDataResponseResultsHandler)
+    onReadWatchFaceIdChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onReadWatchFaceId")
+    onReadWatchFaceIdChannel!!.setStreamHandler(onReadWatchFaceIdResultsHandler)
+    onWatchFaceIdUpdateChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onWatchFaceIdUpdate")
+    onWatchFaceIdUpdateChannel!!.setStreamHandler(onWatchFaceIdUpdateResultsHandler)
+    onHIDStateChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onHIDState")
+    onHIDStateChannel!!.setStreamHandler(onHIDStateResultsHandler)
+    onHIDValueChangeChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onHIDValueChange")
+    onHIDValueChangeChannel!!.setStreamHandler(onHIDValueChangeResultsHandler)
+    onDeviceSMSQuickReplyChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onDeviceSMSQuickReply")
+    onDeviceSMSQuickReplyChannel!!.setStreamHandler(onDeviceSMSQuickReplyResultsHandler)
+    onReadDeviceInfoChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onReadDeviceInfo")
+    onReadDeviceInfoChannel!!.setStreamHandler(onReadDeviceInfoResultsHandler)
     val connector = BleConnector.Builder(flutterPluginBinding.applicationContext)
       .supportRealtekDfu(false) // Whether to support Realtek device Dfu, pass false if no support is required.
       .supportMtkOta(false) // Whether to support MTK device Ota, pass false if no support is required.
@@ -503,7 +818,309 @@ class SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
           }
       }
       else -> {
-        result.notImplemented()
+        when (call.method) {
+          "OTA" -> {
+           mBleKey=BleKey.OTA
+          }
+          "XMODEM" -> {
+            mBleKey=BleKey.XMODEM
+          }
+          "TIME" -> {
+            mBleKey=BleKey.TIME
+          }
+          "TIME_ZONE" -> {
+            mBleKey=BleKey.TIME_ZONE
+          }
+          "POWER" -> {
+            mBleKey=BleKey.POWER
+          }
+          "XMODEM" -> {
+            mBleKey=BleKey.XMODEM
+          }
+          "FIRMWARE_VERSION" -> {
+            mBleKey=BleKey.FIRMWARE_VERSION
+          }
+          "BLE_ADDRESS" -> {
+            mBleKey=BleKey.BLE_ADDRESS
+          }
+          "USER_PROFILE" -> {
+            mBleKey=BleKey.USER_PROFILE
+          }
+          "STEP_GOAL" -> {
+            mBleKey=BleKey.STEP_GOAL
+          }
+          "BACK_LIGHT" -> {
+            mBleKey=BleKey.BACK_LIGHT
+          }
+          "SEDENTARINESS" -> {
+            mBleKey=BleKey.SEDENTARINESS
+          }
+          "NO_DISTURB_RANGE" -> {
+            mBleKey=BleKey.NO_DISTURB_RANGE
+          }
+          "VIBRATION" -> {
+            mBleKey=BleKey.VIBRATION
+          }
+          "GESTURE_WAKE" -> {
+            mBleKey=BleKey.GESTURE_WAKE
+          }
+          "HR_ASSIST_SLEEP" -> {
+            mBleKey=BleKey.HR_ASSIST_SLEEP
+          }
+          "HOUR_SYSTEM" -> {
+            mBleKey=BleKey.HOUR_SYSTEM
+          }
+          "LANGUAGE" -> {
+            mBleKey=BleKey.LANGUAGE
+          }
+          "ALARM" -> {
+            mBleKey=BleKey.ALARM
+          }
+          "COACHING" -> {
+            mBleKey=BleKey.COACHING
+          }
+          "FIND_PHONE" -> {
+            mBleKey=BleKey.FIND_PHONE
+          }
+          "NOTIFICATION_REMINDER" -> {
+            mBleKey=BleKey.NOTIFICATION_REMINDER
+          }
+          "ANTI_LOST" -> {
+            mBleKey=BleKey.ANTI_LOST
+          }
+          "HR_MONITORING" -> {
+            mBleKey=BleKey.HR_MONITORING
+          }
+          "UI_PACK_VERSION" -> {
+            mBleKey=BleKey.UI_PACK_VERSION
+          }
+          "LANGUAGE_PACK_VERSION" -> {
+            mBleKey=BleKey.LANGUAGE_PACK_VERSION
+          }
+          "SLEEP_QUALITY" -> {
+            mBleKey=BleKey.SLEEP_QUALITY
+          }
+          "GIRL_CARE" -> {
+            mBleKey=BleKey.GIRL_CARE
+          }
+          "TEMPERATURE_DETECTING" -> {
+            mBleKey=BleKey.TEMPERATURE_DETECTING
+          }
+          "AEROBIC_EXERCISE" -> {
+            mBleKey=BleKey.AEROBIC_EXERCISE
+          }
+          "TEMPERATURE_UNIT" -> {
+            mBleKey=BleKey.TEMPERATURE_UNIT
+          }
+          "DATE_FORMAT" -> {
+            mBleKey=BleKey.DATE_FORMAT
+          }
+          "WATCH_FACE_SWITCH" -> {
+            mBleKey=BleKey.WATCH_FACE_SWITCH
+          }
+          "AGPS_PREREQUISITE" -> {
+            mBleKey=BleKey.AGPS_PREREQUISITE
+          }
+          "DRINK_WATER" -> {
+            mBleKey=BleKey.DRINK_WATER
+          }
+          "SHUTDOWN" -> {
+            mBleKey=BleKey.SHUTDOWN
+          }
+          "APP_SPORT_DATA" -> {
+            mBleKey=BleKey.APP_SPORT_DATA
+          }
+          "REAL_TIME_HEART_RATE" -> {
+            mBleKey=BleKey.REAL_TIME_HEART_RATE
+          }
+          "BLOOD_OXYGEN_SET" -> {
+            mBleKey=BleKey.BLOOD_OXYGEN_SET
+          }
+          "WASH_SET" -> {
+            mBleKey=BleKey.WASH_SET
+          }
+          "WATCHFACE_ID" -> {
+            mBleKey=BleKey.WATCHFACE_ID
+          }
+          "IBEACON_SET" -> {
+            mBleKey=BleKey.IBEACON_SET
+          }
+          "MAC_QRCODE" -> {
+            mBleKey=BleKey.MAC_QRCODE
+          }
+          "REAL_TIME_TEMPERATURE" -> {
+            mBleKey=BleKey.REAL_TIME_TEMPERATURE
+          }
+          "REAL_TIME_BLOOD_PRESSURE" -> {
+            mBleKey=BleKey.REAL_TIME_BLOOD_PRESSURE
+          }
+          "TEMPERATURE_VALUE" -> {
+            mBleKey=BleKey.TEMPERATURE_VALUE
+          }
+          "GAME_SET" -> {
+            mBleKey=BleKey.GAME_SET
+          }
+          "FIND_WATCH" -> {
+            mBleKey=BleKey.FIND_WATCH
+          }
+          "SET_WATCH_PASSWORD" -> {
+            mBleKey=BleKey.SET_WATCH_PASSWORD
+          }
+          "REALTIME_MEASUREMENT" -> {
+            mBleKey=BleKey.REALTIME_MEASUREMENT
+          }
+          "LOCATION_GSV" -> {
+            mBleKey=BleKey.LOCATION_GSV
+          }
+          "HR_RAW" -> {
+            mBleKey=BleKey.HR_RAW
+          }
+          "REALTIME_LOG" -> {
+            mBleKey=BleKey.REALTIME_LOG
+          }
+          "GSENSOR_OUTPUT" -> {
+            mBleKey=BleKey.GSENSOR_OUTPUT
+          }
+          "GSENSOR_RAW" -> {
+            mBleKey=BleKey.GSENSOR_RAW
+          }
+          "MOTION_DETECT" -> {
+            mBleKey=BleKey.MOTION_DETECT
+          }
+          "LOCATION_GGA" -> {
+            mBleKey=BleKey.LOCATION_GGA
+          }
+          "RAW_SLEEP" -> {
+            mBleKey=BleKey.RAW_SLEEP
+          }
+          "NO_DISTURB_GLOBAL" -> {
+            mBleKey=BleKey.NO_DISTURB_GLOBAL
+          }
+          "IDENTITY" -> {
+            mBleKey=BleKey.IDENTITY
+          }
+          "SESSION" -> {
+            mBleKey=BleKey.SESSION
+          }
+          "NOTIFICATION" -> {
+            mBleKey=BleKey.NOTIFICATION
+          }
+          "MUSIC_CONTROL" -> {
+            mBleKey=BleKey.MUSIC_CONTROL
+          }
+          "SCHEDULE" -> {
+            mBleKey=BleKey.SCHEDULE
+          }
+          "WEATHER_REALTIME" -> {
+            mBleKey=BleKey.WEATHER_REALTIME
+          }
+          "WEATHER_FORECAST" -> {
+            mBleKey=BleKey.WEATHER_FORECAST
+          }
+          "HID" -> {
+            mBleKey=BleKey.HID
+          }
+          "WORLD_CLOCK" -> {
+            mBleKey=BleKey.WORLD_CLOCK
+          }
+          "STOCK" -> {
+            mBleKey=BleKey.STOCK
+          }
+          "SMS_QUICK_REPLY_CONTENT" -> {
+            mBleKey=BleKey.SMS_QUICK_REPLY_CONTENT
+          }
+          "NOTIFICATION2" -> {
+            mBleKey=BleKey.NOTIFICATION2
+          }
+          "DATA_ALL" -> {
+            mBleKey=BleKey.DATA_ALL
+          }
+          "ACTIVITY_REALTIME" -> {
+            mBleKey=BleKey.ACTIVITY_REALTIME
+          }
+          "ACTIVITY" -> {
+            mBleKey=BleKey.ACTIVITY
+          }
+          "HEART_RATE" -> {
+            mBleKey=BleKey.HEART_RATE
+          }
+          "SLEEP" -> {
+            mBleKey=BleKey.SLEEP
+          }
+          "LOCATION" -> {
+            mBleKey=BleKey.LOCATION
+          }
+          "TEMPERATURE" -> {
+            mBleKey=BleKey.TEMPERATURE
+          }
+          "BLOOD_OXYGEN" -> {
+            mBleKey=BleKey.BLOOD_OXYGEN
+          }
+          "HRV" -> {
+            mBleKey=BleKey.HRV
+          }
+          "LOG" -> {
+            mBleKey=BleKey.LOG
+          }
+          "SLEEP_RAW_DATA" -> {
+            mBleKey=BleKey.SLEEP_RAW_DATA
+          }
+          "PRESSURE" -> {
+            mBleKey=BleKey.PRESSURE
+          }
+          "WORKOUT2" -> {
+            mBleKey=BleKey.WORKOUT2
+          }
+          "MATCH_RECORD" -> {
+            mBleKey=BleKey.MATCH_RECORD
+          }
+          "CAMERA" -> {
+            mBleKey=BleKey.CAMERA
+          }
+          "REQUEST_LOCATION" -> {
+            mBleKey=BleKey.REQUEST_LOCATION
+          }
+          "INCOMING_CALL" -> {
+            mBleKey=BleKey.INCOMING_CALL
+          }
+          "APP_SPORT_STATE" -> {
+            mBleKey=BleKey.APP_SPORT_STATE
+          }
+          "CLASSIC_BLUETOOTH_STATE" -> {
+            mBleKey=BleKey.CLASSIC_BLUETOOTH_STATE
+          }
+          "DEVICE_SMS_QUICK_REPLY" -> {
+            mBleKey=BleKey.DEVICE_SMS_QUICK_REPLY
+          }
+          "WATCH_FACE" -> {
+            mBleKey=BleKey.WATCH_FACE
+          }
+          "AGPS_FILE" -> {
+            mBleKey=BleKey.AGPS_FILE
+          }
+          "FONT_FILE" -> {
+            mBleKey=BleKey.FONT_FILE
+          }
+          "CONTACT" -> {
+            mBleKey=BleKey.CONTACT
+          }
+          "UI_FILE" -> {
+            mBleKey=BleKey.UI_FILE
+          }
+          "DEVICE_FILE" -> {
+            mBleKey=BleKey.DEVICE_FILE
+          }
+          "LANGUAGE_FILE" -> {
+            mBleKey=BleKey.LANGUAGE_FILE
+          }
+          "BRAND_INFO_FILE" -> {
+            mBleKey=BleKey.BRAND_INFO_FILE
+          }
+          else -> {
+            mBleKey=BleKey.NONE
+          }
+        }
+        setupKeyFlagList(mBleKey)
       }
     }
   }
@@ -512,7 +1129,7 @@ class SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
   private fun setupKeyFlagList(bleKey: BleKey) {
     val bleKeyFlags = bleKey.getBleKeyFlags()
     //Todo : isi dulu perintahnya
-    handleCommand(mBleKey, bleKeyFlags[0])
+    handleCommand(bleKey, bleKeyFlags[0])
 
     when (bleKey) {
       BleKey.WATCH_FACE -> {
@@ -1327,9 +1944,423 @@ class SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         scanSink = eventSink
       }
     }
-
     override fun onCancel(o: Any?) {
+    }
+  }
 
+  private val onDeviceConnectedResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onDeviceConnectedSink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
+
+  private val onIdentityCreateResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onIdentityCreateSink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
+
+  private val onCommandReplyResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onCommandReplySink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
+
+  private val onOTAResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onOTASink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
+
+  private val onReadPowerResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onReadPowerSink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
+
+  private val onReadFirmwareVersionResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onReadFirmwareVersionSink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
+
+  private val onReadBleAddressResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onReadBleAddressSink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
+
+  private val onReadSedentarinessResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onReadSedentarinessSink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
+
+  private val onReadNoDisturbResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onReadNoDisturbSink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
+
+  private val onReadAlarmResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onReadAlarmSink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
+
+  private val onReadCoachingIdsResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onReadCoachingIdsSink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
+
+  private val onReadUiPackVersionResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onReadUiPackVersionSink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
+
+  private val onReadLanguagePackVersionResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onReadLanguagePackVersionSink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
+
+  private val onIdentityDeleteByDeviceResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onIdentityDeleteByDeviceSink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
+
+  private val onCameraStateChangeResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onCameraStateChangeSink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
+
+  private val onCameraResponseResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onCameraResponseSink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
+
+  private val onSyncDataResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onSyncDataSink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
+
+  private val onReadActivityResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onReadActivitySink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
+
+  private val onReadHeartRateResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onReadHeartRateSink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
+
+  private val onUpdateHeartRateResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onUpdateHeartRateSink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
+
+  private val onReadBloodPressureResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onReadBloodPressureSink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
+
+  private val onReadSleepResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onReadSleepSink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
+
+  private val onReadLocationResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onReadLocationSink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
+
+  private val onReadTemperatureResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onReadTemperatureSink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
+
+  private val onReadWorkout2ResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onReadWorkout2Sink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
+
+  private val onStreamProgressResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onStreamProgressSink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
+
+  private val onUpdateAppSportStateResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onUpdateAppSportStateSink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
+
+  private val onClassicBluetoothStateChangeResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onClassicBluetoothStateChangeSink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
+
+  private val onDeviceFileUpdateResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onDeviceFileUpdateSink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
+
+
+  private val onReadDeviceFileResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onReadDeviceFileSink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
+
+  private val onReadTemperatureUnitResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onReadTemperatureUnitSink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
+
+
+
+  private val onReadDateFormatResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onReadDateFormatSink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
+
+  private val onReadWatchFaceSwitchResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onReadWatchFaceSwitchSink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
+
+  private val onUpdateWatchFaceSwitchResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onUpdateWatchFaceSwitchSink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
+
+  private val onAppSportDataResponseResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onAppSportDataResponseSink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
+
+  private val onReadWatchFaceIdResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onReadWatchFaceIdSink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
+
+  private val onWatchFaceIdUpdateResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onWatchFaceIdUpdateSink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
+
+  private val onHIDStateResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onHIDStateSink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
+
+  private val onHIDValueChangeResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onHIDValueChangeSink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
+
+
+
+  private val onDeviceSMSQuickReplyResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onDeviceSMSQuickReplySink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
+
+
+  private val onReadDeviceInfoResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onReadDeviceInfoSink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
     }
   }
 

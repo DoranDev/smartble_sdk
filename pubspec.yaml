@@ -1,7 +1,7 @@
 name: smartble_sdk
-description: A new Flutter project.
+description: this is for internal purpose only
 version: 0.0.1
-homepage:
+homepage: https://github.con/kakzaki
 
 environment:
   sdk: '>=2.18.2 <3.0.0'
@@ -10,7 +10,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  plugin_platform_interface: ^2.0.2
 
 dev_dependencies:
   flutter_test:
