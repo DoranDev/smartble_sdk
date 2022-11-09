@@ -387,4 +387,50 @@ class SmartbleSdk {
   static Stream<dynamic> get onReadDeviceInfoStream {
     return _onReadDeviceInfoChannel.receiveBroadcastStream().cast();
   }
+
+  static const EventChannel _onSessionStateChangeChannel =
+      EventChannel('onSessionStateChange');
+  static Stream<dynamic> get onSessionStateChangeStream {
+    return _onSessionStateChangeChannel.receiveBroadcastStream().cast();
+  }
+
+  static const EventChannel _onNoDisturbUpdateChannel =
+      EventChannel('onNoDisturbUpdate');
+  static Stream<dynamic> get onNoDisturbUpdateStream {
+    return _onNoDisturbUpdateChannel.receiveBroadcastStream().cast();
+  }
+
+  static const EventChannel _onAlarmUpdateChannel =
+      EventChannel('onAlarmUpdate');
+  static Stream<dynamic> get onAlarmUpdateStream {
+    return _onAlarmUpdateChannel.receiveBroadcastStream().cast();
+  }
+
+  static const EventChannel _onAlarmDeleteChannel =
+      EventChannel('onAlarmDelete');
+  static Stream<dynamic> get onAlarmDeleteStream {
+    return _onAlarmDeleteChannel.receiveBroadcastStream().cast();
+  }
+
+  static const EventChannel _onAlarmAddChannel = EventChannel('onAlarmAdd');
+  static Stream<dynamic> get onAlarmAddStream {
+    return _onAlarmAddChannel.receiveBroadcastStream().cast();
+  }
+
+  static const EventChannel _onFindPhoneChannel = EventChannel('onFindPhone');
+  static Stream<dynamic> get onFindPhoneStream {
+    return _onFindPhoneChannel.receiveBroadcastStream().cast();
+  }
+
+  static const EventChannel _onRequestLocationChannel =
+      EventChannel('onRequestLocation');
+  static Stream<dynamic> get onRequestLocationStream {
+    return _onRequestLocationChannel.receiveBroadcastStream().cast();
+  }
+
+  static const EventChannel _onDeviceRequestAGpsFileChannel =
+      EventChannel('onDeviceRequestAGpsFile');
+  static Stream<dynamic> get onDeviceRequestAGpsFileStream {
+    return _onDeviceRequestAGpsFileChannel.receiveBroadcastStream().cast();
+  }
 }
