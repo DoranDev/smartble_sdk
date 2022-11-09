@@ -146,7 +146,22 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
   private lateinit var onDeviceSMSQuickReplySink: EventSink
   private var onReadDeviceInfoChannel : EventChannel?=null
   private lateinit var onReadDeviceInfoSink: EventSink
-
+  private var onSessionStateChangeChannel : EventChannel?=null
+  private lateinit var onSessionStateChangeSink: EventSink
+  private var onNoDisturbUpdateChannel : EventChannel?=null
+  private lateinit var onNoDisturbUpdateSink: EventSink
+  private var onAlarmUpdateChannel : EventChannel?=null
+  private lateinit var onAlarmUpdateSink: EventSink
+  private var onAlarmDeleteChannel : EventChannel?=null
+  private lateinit var onAlarmDeleteSink: EventSink
+  private var onAlarmAddChannel : EventChannel?=null
+  private lateinit var onAlarmAddSink: EventSink
+  private var onFindPhoneChannel : EventChannel?=null
+  private lateinit var onFindPhoneSink: EventSink
+  private var onRequestLocationChannel : EventChannel?=null
+  private lateinit var onRequestLocationSink: EventSink
+  private var onDeviceRequestAGpsFileChannel : EventChannel?=null
+  private lateinit var onDeviceRequestAGpsFileSink: EventSink
 
   private var mResult: Result? = null
   private val mDevices = mutableListOf<Any>()
@@ -220,7 +235,11 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         if (BuildConfig.DEBUG) {
           Log.d("onCommandReply","$bleKey $bleKeyFlag -> $status")
         }
-        
+        val item: MutableMap<String, Any> = HashMap()
+        item["status"] = status
+        item["bleKey"] = bleKey.toString()
+        item["bleKeyFlag"] = bleKeyFlag.toString()
+        onCommandReplySink.success(item)
       }
 
       override fun onOTA(status: Boolean) {
@@ -244,54 +263,81 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         if (BuildConfig.DEBUG) {
           Log.d("onReadPower","$power")
         }
+        val item: MutableMap<String, Any> = HashMap()
+        item["power"] = power
+        onReadPowerSink.success(item)
       }
 
       override fun onReadFirmwareVersion(version: String) {
         if (BuildConfig.DEBUG) {
           Log.d("onReadFirmware","$version")
         }
+        val item: MutableMap<String, Any> = HashMap()
+        item["version"] = version
+        onReadFirmwareVersionSink.success(item)
       }
 
       override fun onReadBleAddress(address: String) {
         if (BuildConfig.DEBUG) {
           Log.d("onReadBleAddress","$address")
         }
+        val item: MutableMap<String, Any> = HashMap()
+        item["address"] = address
+        onReadBleAddressSink.success(item)
       }
 
       override fun onReadSedentariness(sedentarinessSettings: BleSedentarinessSettings) {
         if (BuildConfig.DEBUG) {
           Log.d("onReadSedentariness","$sedentarinessSettings")
         }
+        val item: MutableMap<String, Any> = HashMap()
+        item["sedentarinessSettings"] = sedentarinessSettings.toString()
+        onReadSedentarinessSink.success(item)
       }
 
       override fun onReadNoDisturb(noDisturbSettings: BleNoDisturbSettings) {
         if (BuildConfig.DEBUG) {
           Log.d("onReadNoDisturb","$noDisturbSettings")
         }
+        val item: MutableMap<String, Any> = HashMap()
+        item["noDisturbSettings"] = noDisturbSettings.toString()
+        onReadNoDisturbSink.success(item)
       }
 
       override fun onReadAlarm(alarms: List<BleAlarm>) {
         if (BuildConfig.DEBUG) {
           Log.d("onReadAlarm","$alarms")
         }
+        val item: MutableMap<String, Any> = HashMap()
+        item["alarms"] = alarms.toString()
+        onReadAlarmSink.success(item)
       }
 
       override fun onReadCoachingIds(bleCoachingIds: BleCoachingIds) {
         if (BuildConfig.DEBUG) {
           Log.d("onReadCoachingIds","$bleCoachingIds")
         }
+        val item: MutableMap<String, Any> = HashMap()
+        item["onReadCoachingIds"] = bleCoachingIds.toString()
+        onReadCoachingIdsSink.success(item)
       }
 
       override fun onReadUiPackVersion(version: String) {
         if (BuildConfig.DEBUG) {
           Log.d("onReadUiPackVersion","$version")
         }
+        val item: MutableMap<String, Any> = HashMap()
+        item["version"] = version
+        onReadUiPackVersionSink.success(item)
       }
 
       override fun onReadLanguagePackVersion(version: BleLanguagePackVersion) {
         if (BuildConfig.DEBUG) {
           Log.d("onReadLanguagePackVersi","$version")
         }
+        val item: MutableMap<String, Any> = HashMap()
+        item["version"] = version
+        onReadLanguagePackVersionSink.success(item)
       }
 
 
@@ -301,6 +347,9 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         }
         BleConnector.unbind()
         unbindCompleted()
+        val item: MutableMap<String, Any> = HashMap()
+        item["isDevice"] = isDevice
+        onIdentityDeleteByDeviceSink.success(item)
       }
 
       override fun onCameraStateChange(cameraState: Int) {
@@ -312,6 +361,9 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         } else if (cameraState == CameraState.EXIT) {
           mCameraEntered = false
         }
+        val item: MutableMap<String, Any> = HashMap()
+        item["cameraState"] = cameraState
+        onCameraStateChangeSink.success(item)
       }
 
       override fun onCameraResponse(status: Boolean, cameraState: Int) {
@@ -325,36 +377,56 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             mCameraEntered = false
           }
         }
+        val item: MutableMap<String, Any> = HashMap()
+        item["status"] = status
+        item["cameraState"] = cameraState
+        onCameraResponseSink.success(item)
       }
 
       override fun onSyncData(syncState: Int, bleKey: BleKey) {
         if (BuildConfig.DEBUG) {
           Log.d("onSyncData","syncState=$syncState, bleKey=$bleKey")
         }
+        val item: MutableMap<String, Any> = HashMap()
+        item["syncState"] = syncState
+        item["bleKey"] = bleKey
+        onSyncDataSink.success(item)
       }
 
       override fun onReadActivity(activities: List<BleActivity>) {
         if (BuildConfig.DEBUG) {
           Log.d("onReadActivity","$activities")
         }
+        val item: MutableMap<String, Any> = HashMap()
+        item["activities"] = activities.toString()
+        onReadActivitySink.success(item)
       }
 
       override fun onReadHeartRate(heartRates: List<BleHeartRate>) {
         if (BuildConfig.DEBUG) {
           Log.d("onReadHeartRate","$heartRates")
         }
+        val item: MutableMap<String, Any> = HashMap()
+        item["heartRates"] = heartRates.toString()
+        onReadHeartRateSink.success(item)
       }
 
       override fun onUpdateHeartRate(heartRate: BleHeartRate) {
         if (BuildConfig.DEBUG) {
           Log.d("onUpdateHeartRate","$heartRate")
         }
+        val item: MutableMap<String, Any> = HashMap()
+        item["heartRate"] = heartRate.toString()
+        onUpdateHeartRateSink.success(item)
       }
 
       override fun onReadBloodPressure(bloodPressures: List<BleBloodPressure>) {
         if (BuildConfig.DEBUG) {
           Log.d("onReadBloodPressure","$bloodPressures")
         }
+        val item: MutableMap<String, Any> = HashMap()
+        item["bloodPressures"] = bloodPressures.toString()
+        onReadBloodPressureSink.success(item)
         // print( "$bloodPressures")
       }
 
@@ -362,27 +434,36 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         if (BuildConfig.DEBUG) {
           Log.d("onReadSleep","$sleeps")
         }
-        // print( "$sleeps")
+        val item: MutableMap<String, Any> = HashMap()
+        item["sleeps"] = sleeps.toString()
+        onReadSleepSink.success(item)
       }
 
       override fun onReadLocation(locations: List<BleLocation>) {
         if (BuildConfig.DEBUG) {
           Log.d("onReadLocation","$locations")
         }
-        // print( "$locations")
+        val item: MutableMap<String, Any> = HashMap()
+        item["locations"] = locations.toString()
+        onReadLocationSink.success(item)
       }
 
       override fun onReadTemperature(temperatures: List<BleTemperature>) {
         if (BuildConfig.DEBUG) {
           Log.d("onReadTemperature","$temperatures")
         }
-        // print( "$temperatures")
+        val item: MutableMap<String, Any> = HashMap()
+        item["temperatures"] = temperatures.toString()
+        onReadTemperatureSink.success(item)
       }
 
       override fun onReadWorkout2(workouts: List<BleWorkout2>) {
         if (BuildConfig.DEBUG) {
           Log.d("onReadWorkout2","$workouts")
         }
+        val item: MutableMap<String, Any> = HashMap()
+        item["workouts"] = workouts.toString()
+        onReadWorkout2Sink.success(item)
       }
 
       override fun onStreamProgress(
@@ -394,6 +475,12 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         if (BuildConfig.DEBUG) {
           Log.d("onStreamProgress","$status $errorCode $total $completed")
         }
+        val item: MutableMap<String, Any> = HashMap()
+        item["status"] = status
+        item["errorCode"] = errorCode
+        item["total"] = total
+        item["completed"] = completed
+        onStreamProgressSink.success(item)
       }
 
       @SuppressLint("MissingPermission")
@@ -504,6 +591,9 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         if (BuildConfig.DEBUG) {
           Log.d("onUpdateAppSportState","$appSportState")
         }
+        val item: MutableMap<String, Any> = HashMap()
+        item["appSportState"] = appSportState.toString()
+        onUpdateAppSportStateSink.success(item)
       }
 
       override fun onClassicBluetoothStateChange(state: Int) {
@@ -512,12 +602,18 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         }
         print( ClassicBluetoothState.getState(state))
         mClassicBluetoothState = state
+        val item: MutableMap<String, Any> = HashMap()
+        item["state"] = state
+        onClassicBluetoothStateChangeSink.success(item)
       }
 
       override fun onDeviceFileUpdate(deviceFile: BleDeviceFile) {
         if (BuildConfig.DEBUG) {
           Log.d("onDeviceFileUpdate","$deviceFile")
         }
+        val item: MutableMap<String, Any> = HashMap()
+        item["deviceFile"] = deviceFile.toString()
+        onDeviceFileUpdateSink.success(item)
       }
 
       override fun onReadDeviceFile(deviceFile: BleDeviceFile) {
@@ -532,49 +628,72 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
           deviceFile.mFileContent,
           true
         )
-
+        val item: MutableMap<String, Any> = HashMap()
+        item["deviceFile"] = deviceFile.toString()
+        onReadDeviceFileSink.success(item)
       }
 
       override fun onReadTemperatureUnit(value: Int) {
         if (BuildConfig.DEBUG) {
           Log.d("onReadTemperatureUnit","$value")
         }
+        val item: MutableMap<String, Any> = HashMap()
+        item["value"] = value
+        onReadTemperatureUnitSink.success(item)
       }
 
       override fun onReadDateFormat(value: Int) {
         if (BuildConfig.DEBUG) {
           Log.d("onReadDateFormat","$value")
         }
+        val item: MutableMap<String, Any> = HashMap()
+        item["value"] = value
+        onReadDateFormatSink.success(item)
       }
 
       override fun onReadWatchFaceSwitch(value: Int) {
         if (BuildConfig.DEBUG) {
           Log.d("onReadWatchFaceSwitch","$value")
         }
+        val item: MutableMap<String, Any> = HashMap()
+        item["value"] = value
+        onReadWatchFaceSwitchSink.success(item)
       }
 
       override fun onUpdateWatchFaceSwitch(status: Boolean) {
         if (BuildConfig.DEBUG) {
           Log.d("onUpdateWatchFaceSwitch","$status")
         }
+        val item: MutableMap<String, Any> = HashMap()
+        item["status"] = status
+        onUpdateWatchFaceSwitchSink.success(item)
       }
 
       override fun onAppSportDataResponse(status: Boolean) {
         if (BuildConfig.DEBUG) {
           Log.d("onAppSportDataResponse","$status")
         }
+        val item: MutableMap<String, Any> = HashMap()
+        item["status"] = status
+        onAppSportDataResponseSink.success(item)
       }
 
       override fun onReadWatchFaceId(watchFaceId: BleWatchFaceId) {
         if (BuildConfig.DEBUG) {
           Log.d("onReadWatchFaceId","${watchFaceId.mIdList}")
         }
+        val item: MutableMap<String, Any> = HashMap()
+        item["watchFaceId"] = watchFaceId.toString()
+        onReadWatchFaceIdSink.success(item)
       }
 
       override fun onWatchFaceIdUpdate(status: Boolean) {
         if (BuildConfig.DEBUG) {
           Log.d("onWatchFaceIdUpdate","$status")
         }
+        val item: MutableMap<String, Any> = HashMap()
+        item["status"] = status
+        onWatchFaceIdUpdateSink.success(item)
         //chooseFile(mContext, BleKey.WATCH_FACE.mKey)
       }
 
@@ -585,72 +704,108 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         if(state == HIDState.DISCONNECTED){
           BleConnector.connectHID()
         }
+        val item: MutableMap<String, Any> = HashMap()
+        item["status"] = state
+        onHIDStateSink.success(item)
       }
 
       override fun onHIDValueChange(value: Int) {
         if (BuildConfig.DEBUG) {
           Log.d("onHIDValueChange","$value")
         }
+        val item: MutableMap<String, Any> = HashMap()
+        item["value"] = value
+        onHIDValueChangeSink.success(item)
       }
 
       override fun onDeviceSMSQuickReply(smsQuickReply: BleSMSQuickReply) {
         if (BuildConfig.DEBUG) {
           Log.d("onDeviceSMSQuickReply", smsQuickReply.toString())
         }
+        val item: MutableMap<String, Any> = HashMap()
+        item["smsQuickReply"] = smsQuickReply.toString()
+        onDeviceSMSQuickReplySink.success(item)
       }
 
       override fun onReadDeviceInfo(deviceInfo: BleDeviceInfo) {
         if (BuildConfig.DEBUG) {
           Log.d("onReadDeviceInfo","$deviceInfo")
         }
+        val item: MutableMap<String, Any> = HashMap()
+        item["deviceInfo"] = deviceInfo.toString()
+        onReadDeviceInfoSink.success(item)
       }
 
       override fun onSessionStateChange(status: Boolean) {
         if (BuildConfig.DEBUG) {
           Log.d("onSessionStateChange","$status")
         }
+        val item: MutableMap<String, Any> = HashMap()
+        item["status"] = status
+        onSessionStateChangeSink.success(item)
       }
 
       override fun onNoDisturbUpdate(noDisturbSettings: BleNoDisturbSettings) {
         if (BuildConfig.DEBUG) {
           Log.d("onNoDisturbUpdate","$noDisturbSettings")
         }
+        val item: MutableMap<String, Any> = HashMap()
+        item["noDisturbSettings"] = noDisturbSettings.toString()
+        onNoDisturbUpdateSink.success(item)
       }
 
       override fun onAlarmUpdate(alarm: BleAlarm) {
         if (BuildConfig.DEBUG) {
           Log.d("onAlarmUpdate","$alarm")
         }
+        val item: MutableMap<String, Any> = HashMap()
+        item["alarm"] = alarm.toString()
+        onAlarmUpdateSink.success(item)
       }
 
       override fun onAlarmDelete(id: Int) {
         if (BuildConfig.DEBUG) {
           Log.d("onAlarmDelete","$id")
         }
+        val item: MutableMap<String, Any> = HashMap()
+        item["id"] = id
+        onAlarmDeleteSink.success(item)
       }
 
       override fun onAlarmAdd(alarm: BleAlarm) {
         if (BuildConfig.DEBUG) {
           Log.d("onAlarmAdd","$alarm")
         }
+        val item: MutableMap<String, Any> = HashMap()
+        item["alarm"] = alarm.toString()
+        onAlarmAddSink.success(item)
       }
 
       override fun onFindPhone(start: Boolean) {
         if (BuildConfig.DEBUG) {
           Log.d("onFindPhone","onFindPhone ${if (start) "started" else "stopped"}")
         }
+        val item: MutableMap<String, Any> = HashMap()
+        item["start"] = start
+        onFindPhoneSink.success(item)
       }
 
       override fun onRequestLocation(workoutState: Int) {
         if (BuildConfig.DEBUG) {
           Log.d("onRequestLocation","${WorkoutState.getState(workoutState)}")
         }
+        val item: MutableMap<String, Any> = HashMap()
+        item["workoutState"] = workoutState
+        onRequestLocationSink.success(item)
       }
 
       override fun onDeviceRequestAGpsFile(url: String) {
         if (BuildConfig.DEBUG) {
           Log.d("onDeviceRequestAGpsFile","$url")
         }
+        val item: MutableMap<String, Any> = HashMap()
+        item["url"] = url
+        onDeviceRequestAGpsFileSink.success(item)
         // 以下是示例代码，sdk中的文件会过期，只是用于演示
 //        when (BleCache.mAGpsType) {
 //          1 -> BleConnector.sendStream(BleKey.AGPS_FILE, assets.open("type1_epo_gr_3_1.dat"))
@@ -753,6 +908,22 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
     onDeviceSMSQuickReplyChannel!!.setStreamHandler(onDeviceSMSQuickReplyResultsHandler)
     onReadDeviceInfoChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onReadDeviceInfo")
     onReadDeviceInfoChannel!!.setStreamHandler(onReadDeviceInfoResultsHandler)
+    onSessionStateChangeChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onSessionStateChange")
+    onSessionStateChangeChannel!!.setStreamHandler(onSessionStateChangeResultsHandler)
+    onNoDisturbUpdateChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onNoDisturbUpdate")
+    onNoDisturbUpdateChannel!!.setStreamHandler(onNoDisturbUpdateResultsHandler)
+    onAlarmUpdateChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onAlarmUpdate")
+    onAlarmUpdateChannel!!.setStreamHandler(onAlarmUpdateResultsHandler)
+    onAlarmDeleteChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onAlarmDelete")
+    onAlarmDeleteChannel!!.setStreamHandler(onAlarmDeleteResultsHandler)
+    onAlarmAddChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onAlarmAdd")
+    onAlarmAddChannel!!.setStreamHandler(onAlarmAddResultsHandler)
+    onFindPhoneChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onFindPhone")
+    onFindPhoneChannel!!.setStreamHandler(onFindPhoneResultsHandler)
+    onRequestLocationChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onRequestLocation")
+    onRequestLocationChannel!!.setStreamHandler(onRequestLocationResultsHandler)
+    onDeviceRequestAGpsFileChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onDeviceRequestAGpsFile")
+    onDeviceRequestAGpsFileChannel!!.setStreamHandler(onDeviceRequestAGpsFileResultsHandler)
     val connector = BleConnector.Builder(flutterPluginBinding.applicationContext)
       .supportRealtekDfu(false) // Whether to support Realtek device Dfu, pass false if no support is required.
       .supportMtkOta(false) // Whether to support MTK device Ota, pass false if no support is required.
@@ -2363,5 +2534,87 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
     override fun onCancel(o: Any?) {
     }
   }
+
+  private val onSessionStateChangeResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onSessionStateChangeSink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
+
+  private val onNoDisturbUpdateResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onNoDisturbUpdateSink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
+
+  private val onAlarmUpdateResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onAlarmUpdateSink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
+
+  private val onAlarmDeleteResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onAlarmDeleteSink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
+
+  private val onAlarmAddResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onAlarmAddSink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
+
+  private val onFindPhoneResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onFindPhoneSink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
+
+  private val onRequestLocationResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onRequestLocationSink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
+
+  private val onDeviceRequestAGpsFileResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onDeviceRequestAGpsFileSink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
+
+
 
 }
