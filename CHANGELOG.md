@@ -1,3 +1,7 @@
+## 0.0.3
+
+* fix ondevice connected
+
 ## 0.0.2
 
 * converted a lot of function

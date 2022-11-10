@@ -53,6 +53,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
   private val mActivity: Activity?=null
   private val ID_ALL = 0xff
   private lateinit var mBleKey: BleKey
+  private lateinit var mBleKeyFlag: BleKeyFlag
   private var mType = 0
   data class Contact(var name: String, var phone: String)
   private var mCameraEntered = false
@@ -214,7 +215,8 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
           Log.d("onDeviceConnected","$device")
         }
         val item: MutableMap<String, Any> = HashMap()
-        item["device"] = device
+        item["deviceName"] = device.name
+        item["deviceMacAddress"] = device.address
         onDeviceConnectedSink.success(item)
       }
 
@@ -1291,17 +1293,38 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             mBleKey=BleKey.NONE
           }
         }
-        setupKeyFlagList(mBleKey)
+        when(call.argument<String>("flag")){
+          "UPDATE" -> {
+            mBleKeyFlag=BleKeyFlag.UPDATE
+          }
+          "READ" -> {
+            mBleKeyFlag=BleKeyFlag.READ
+          }
+          "CREATE" -> {
+            mBleKeyFlag=BleKeyFlag.CREATE
+          }
+          "DELETE" -> {
+            mBleKeyFlag=BleKeyFlag.DELETE
+          }
+          "READ_CONTINUE" -> {
+            mBleKeyFlag=BleKeyFlag.READ_CONTINUE
+          }
+          "RESET" -> {
+            mBleKeyFlag=BleKeyFlag.RESET
+          }
+          else -> {
+            mBleKeyFlag=BleKeyFlag.NONE
+          }
+        }
+        setupKeyFlagList(mBleKey,mBleKeyFlag)
       }
     }
   }
 
   // 显示该BleKey对应的Flag列表
-  private fun setupKeyFlagList(bleKey: BleKey) {
-    val bleKeyFlags = bleKey.getBleKeyFlags()
+  private fun setupKeyFlagList(bleKey: BleKey,bleKeyFlag:BleKeyFlag) {
     //Todo : isi dulu perintahnya
-    handleCommand(bleKey, bleKeyFlags[0])
-
+    handleCommand(bleKey, bleKeyFlag)
     when (bleKey) {
       BleKey.WATCH_FACE -> {
 //                findViewById<TextView>(R.id.tv_custom1).apply {
@@ -1338,10 +1361,10 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
   // 发送相应的指令
   private fun handleCommand(bleKey: BleKey, bleKeyFlag: BleKeyFlag) {
     if (bleKey == BleKey.IDENTITY) {
-      if (bleKeyFlag == BleKeyFlag.DELETE) { // 解除绑定
-        // 发送解除绑定指令, 有些设备回复后会触发BleHandleCallback.onIdentityDelete()
+      if (bleKeyFlag == BleKeyFlag.DELETE) { // unbind
+        // Send the unbinding command, some devices will trigger BleHandleCallback.onIdentityDelete() after replying
         BleConnector.sendData(bleKey, bleKeyFlag)
-        // 等待一会再解绑
+        // wait for a while to unbind
         Handler().postDelayed({
           BleConnector.unbind()
           unbindCompleted()
