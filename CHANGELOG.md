@@ -1,3 +1,11 @@
+## 0.0.7
+
+* fix bugs
+
+## 0.0.6
+
+* other plugin crash
+
 ## 0.0.5
 
 * ble key flags

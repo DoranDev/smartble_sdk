@@ -1,7 +1,16 @@
 import 'dart:async';
 
 import 'package:flutter/services.dart';
-import 'package:smartble_sdk/selected_blekey_flag.dart';
+
+enum SelectedBlekeyFlag {
+  UPDATE,
+  READ,
+  CREATE,
+  DELETE,
+  READ_CONTINUE,
+  RESET,
+  NONE,
+}
 
 class SmartbleSdk {
   static const MethodChannel _channel = MethodChannel('smartble_sdk');
@@ -237,8 +246,7 @@ class SmartbleSdk {
   static const EventChannel _onCommandReplyChannel =
       EventChannel('onCommandReply');
   static Stream<dynamic> get onCommandReplyStream {
-    return _
-    onCommandReplyChannel.receiveBroadcastStream().cast();
+    return _onCommandReplyChannel.receiveBroadcastStream().cast();
   }
 
   static const EventChannel _onOTAChannel = EventChannel('onOTA');
