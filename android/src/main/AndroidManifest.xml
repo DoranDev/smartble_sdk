@@ -14,7 +14,7 @@
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <application>
 <!--        <activity android:name="id.kakzaki.smartble_sdk.activity.MainActivity" />-->
-        <activity android:name="id.kakzaki.smartble_sdk.activity.CommandListActivity" />
+<!--        <activity android:name="id.kakzaki.smartble_sdk.activity.CommandListActivity" />-->
 <!--        <activity android:name="id.kakzaki.smartble_sdk.activity.KeyListActivity" />-->
 <!--        <activity android:name="id.kakzaki.smartble_sdk.activity.KeyFlagListActivity" />-->
         <activity android:name="id.kakzaki.smartble_sdk.activity.NotificationActivity" />
@@ -32,7 +32,7 @@
 <!--        <activity android:name="id.kakzaki.smartble_sdk.firmware.j.FirmwareUpgradeJActivity" />-->
 
 <!--        <service android:name="id.kakzaki.smartble_sdk.firmware.n.DfuService" />-->
-        <service android:name="com.realsil.sdk.dfu.DfuService" />
+<!--        <service android:name="com.realsil.sdk.dfu.DfuService" />-->
 
         <service
             android:name=".MyNotificationListenerService"

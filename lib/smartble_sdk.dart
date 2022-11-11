@@ -1,7 +1,16 @@
 import 'dart:async';
 
 import 'package:flutter/services.dart';
-import 'package:smartble_sdk/selected_blekey_flag.dart';
+
+enum SelectedBlekeyFlag {
+  UPDATE,
+  READ,
+  CREATE,
+  DELETE,
+  READ_CONTINUE,
+  RESET,
+  NONE,
+}
 
 class SmartbleSdk {
   static const MethodChannel _channel = MethodChannel('smartble_sdk');
