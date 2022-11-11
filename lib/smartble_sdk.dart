@@ -237,7 +237,8 @@ class SmartbleSdk {
   static const EventChannel _onCommandReplyChannel =
       EventChannel('onCommandReply');
   static Stream<dynamic> get onCommandReplyStream {
-    return _onCommandReplyChannel.receiveBroadcastStream().cast();
+    return _
+    onCommandReplyChannel.receiveBroadcastStream().cast();
   }
 
   static const EventChannel _onOTAChannel = EventChannel('onOTA');

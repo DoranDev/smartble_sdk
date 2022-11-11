@@ -173,7 +173,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
       .setScanFilter(object : BleScanFilter {
 
         override fun match(device: BleDevice): Boolean {
-          //过滤蓝牙信号值，信号值越大，说明信号越强，例如 -66 > -88
+          //Filter the Bluetooth signal value, the larger the signal value, the stronger the signal, for example -66 > -88
           return device.mRssi > -88
         }
       })
