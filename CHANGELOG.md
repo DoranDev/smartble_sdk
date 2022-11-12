@@ -1,3 +1,7 @@
+## 0.0.8
+
+* change dev lib
+
 ## 0.0.7
 
 * fix bugs
