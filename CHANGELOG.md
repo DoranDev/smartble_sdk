@@ -1,3 +1,7 @@
+## 0.1.2
+
+* camera remote
+
 ## 0.1.1
 
 * event sinks error
