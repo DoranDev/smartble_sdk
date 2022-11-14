@@ -13,7 +13,6 @@ import android.telecom.TelecomManager
 import android.text.format.DateFormat
 import android.util.Log
 import android.view.KeyEvent
-import androidx.annotation.NonNull
 import com.bestmafen.baseble.scanner.BleDevice
 import com.bestmafen.baseble.scanner.BleScanCallback
 import com.bestmafen.baseble.scanner.BleScanFilter
@@ -221,7 +220,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         item["deviceName"] = device.name
         item["deviceMacAddress"] = device.address
         if(onDeviceConnectedSink!=null)
-        onDeviceConnectedSink!!.success(item)
+          onDeviceConnectedSink!!.success(item)
       }
 
       override fun onIdentityCreate(status: Boolean, deviceInfo: BleDeviceInfo?) {
@@ -235,7 +234,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         item["status"] = status
         item["deviceInfo"] = deviceInfo.toString()
         if(onIdentityCreateSink!=null)
-        onIdentityCreateSink!!.success(item)
+          onIdentityCreateSink!!.success(item)
       }
 
       override fun onCommandReply(bleKey: BleKey, bleKeyFlag: BleKeyFlag, status: Boolean) {
@@ -247,7 +246,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         item["bleKey"] = bleKey.toString()
         item["bleKeyFlag"] = bleKeyFlag.toString()
         if(onCommandReplySink!=null)
-        onCommandReplySink!!.success(item)
+          onCommandReplySink!!.success(item)
       }
 
       override fun onOTA(status: Boolean) {
@@ -274,27 +273,27 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         val item: MutableMap<String, Any> = HashMap()
         item["power"] = power
         if(onReadPowerSink!=null)
-        onReadPowerSink!!.success(item)
+          onReadPowerSink!!.success(item)
       }
 
       override fun onReadFirmwareVersion(version: String) {
         if (BuildConfig.DEBUG) {
-          Log.d("onReadFirmware","$version")
+          Log.d("onReadFirmware", version)
         }
         val item: MutableMap<String, Any> = HashMap()
         item["version"] = version
         if(onReadFirmwareVersionSink!=null)
-        onReadFirmwareVersionSink!!.success(item)
+          onReadFirmwareVersionSink!!.success(item)
       }
 
       override fun onReadBleAddress(address: String) {
         if (BuildConfig.DEBUG) {
-          Log.d("onReadBleAddress","$address")
+          Log.d("onReadBleAddress", address)
         }
         val item: MutableMap<String, Any> = HashMap()
         item["address"] = address
         if(onReadBleAddressSink!=null)
-        onReadBleAddressSink!!.success(item)
+          onReadBleAddressSink!!.success(item)
       }
 
       override fun onReadSedentariness(sedentarinessSettings: BleSedentarinessSettings) {
@@ -304,7 +303,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         val item: MutableMap<String, Any> = HashMap()
         item["sedentarinessSettings"] = sedentarinessSettings.toString()
         if(onReadSedentarinessSink!=null)
-        onReadSedentarinessSink!!.success(item)
+          onReadSedentarinessSink!!.success(item)
       }
 
       override fun onReadNoDisturb(noDisturbSettings: BleNoDisturbSettings) {
@@ -314,7 +313,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         val item: MutableMap<String, Any> = HashMap()
         item["noDisturbSettings"] = noDisturbSettings.toString()
         if(onReadNoDisturbSink!=null)
-        onReadNoDisturbSink!!.success(item)
+          onReadNoDisturbSink!!.success(item)
       }
 
       override fun onReadAlarm(alarms: List<BleAlarm>) {
@@ -324,7 +323,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         val item: MutableMap<String, Any> = HashMap()
         item["alarms"] = alarms.toString()
         if(onReadAlarmSink!=null)
-        onReadAlarmSink!!.success(item)
+          onReadAlarmSink!!.success(item)
       }
 
       override fun onReadCoachingIds(bleCoachingIds: BleCoachingIds) {
@@ -334,7 +333,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         val item: MutableMap<String, Any> = HashMap()
         item["onReadCoachingIds"] = bleCoachingIds.toString()
         if(onReadCoachingIdsSink!=null)
-        onReadCoachingIdsSink!!.success(item)
+          onReadCoachingIdsSink!!.success(item)
       }
 
       override fun onReadUiPackVersion(version: String) {
@@ -344,7 +343,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         val item: MutableMap<String, Any> = HashMap()
         item["version"] = version
         if(onReadUiPackVersionSink!=null)
-        onReadUiPackVersionSink!!.success(item)
+          onReadUiPackVersionSink!!.success(item)
       }
 
       override fun onReadLanguagePackVersion(version: BleLanguagePackVersion) {
@@ -354,7 +353,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         val item: MutableMap<String, Any> = HashMap()
         item["version"] = version
         if(onReadLanguagePackVersionSink!=null)
-        onReadLanguagePackVersionSink!!.success(item)
+          onReadLanguagePackVersionSink!!.success(item)
       }
 
 
@@ -367,7 +366,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         val item: MutableMap<String, Any> = HashMap()
         item["isDevice"] = isDevice
         if(onIdentityDeleteByDeviceSink!=null)
-        onIdentityDeleteByDeviceSink!!.success(item)
+          onIdentityDeleteByDeviceSink!!.success(item)
       }
 
       override fun onCameraStateChange(cameraState: Int) {
@@ -381,8 +380,9 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         }
         val item: MutableMap<String, Any> = HashMap()
         item["cameraState"] = cameraState
+        item["cameraStateName"] = "${CameraState.getState(cameraState)}"
         if(onCameraStateChangeSink!=null)
-        onCameraStateChangeSink!!.success(item)
+          onCameraStateChangeSink!!.success(item)
       }
 
       override fun onCameraResponse(status: Boolean, cameraState: Int) {
@@ -399,8 +399,9 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         val item: MutableMap<String, Any> = HashMap()
         item["status"] = status
         item["cameraState"] = cameraState
+        item["cameraStateName"] = "${CameraState.getState(cameraState)}"
         if(onCameraResponseSink!=null)
-        onCameraResponseSink!!.success(item)
+          onCameraResponseSink!!.success(item)
       }
 
       override fun onSyncData(syncState: Int, bleKey: BleKey) {
@@ -624,7 +625,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         val item: MutableMap<String, Any> = HashMap()
         item["appSportState"] = appSportState.toString()
         if(onUpdateAppSportStateSink!=null)
-        onUpdateAppSportStateSink!!.success(item)
+          onUpdateAppSportStateSink!!.success(item)
       }
 
       override fun onClassicBluetoothStateChange(state: Int) {
@@ -636,7 +637,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         val item: MutableMap<String, Any> = HashMap()
         item["state"] = state
         if(onClassicBluetoothStateChangeSink!=null)
-        onClassicBluetoothStateChangeSink!!.success(item)
+          onClassicBluetoothStateChangeSink!!.success(item)
       }
 
       override fun onDeviceFileUpdate(deviceFile: BleDeviceFile) {
@@ -646,7 +647,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         val item: MutableMap<String, Any> = HashMap()
         item["deviceFile"] = deviceFile.toString()
         if(onDeviceFileUpdateSink!=null)
-        onDeviceFileUpdateSink!!.success(item)
+          onDeviceFileUpdateSink!!.success(item)
       }
 
       override fun onReadDeviceFile(deviceFile: BleDeviceFile) {
@@ -664,7 +665,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         val item: MutableMap<String, Any> = HashMap()
         item["deviceFile"] = deviceFile.toString()
         if(onReadDeviceFileSink!=null)
-        onReadDeviceFileSink!!.success(item)
+          onReadDeviceFileSink!!.success(item)
       }
 
       override fun onReadTemperatureUnit(value: Int) {
@@ -853,7 +854,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
 
       override fun onDeviceRequestAGpsFile(url: String) {
         if (BuildConfig.DEBUG) {
-          Log.d("onDeviceRequestAGpsFile","$url")
+          Log.d("onDeviceRequestAGpsFile", url)
         }
         val item: MutableMap<String, Any> = HashMap()
         item["url"] = url
@@ -874,7 +875,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
   }
 
 
-  override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPluginBinding) {
+  override fun onAttachedToEngine(flutterPluginBinding: FlutterPluginBinding) {
     pluginBinding=flutterPluginBinding
     mContext=flutterPluginBinding.applicationContext
     channel = MethodChannel(flutterPluginBinding.binaryMessenger, "smartble_sdk")
@@ -1004,7 +1005,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
     BleConnector.addHandleCallback(mBleHandleCallback)
   }
 
-  override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
+  override fun onMethodCall(call: MethodCall, result: Result) {
     this.mResult = result
     when (call.method) {
       "scan" -> {
@@ -2041,15 +2042,19 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
           }
           BleKey.CLASSIC_BLUETOOTH_STATE -> {
             // 3.0 开关
-            if (mClassicBluetoothState == ClassicBluetoothState.CLOSE_SUCCESSFULLY) {
-              mClassicBluetoothState = ClassicBluetoothState.OPEN
-              BleConnector.sendInt8(bleKey, bleKeyFlag, mClassicBluetoothState)
-            } else if (mClassicBluetoothState == ClassicBluetoothState.OPEN_SUCCESSFULLY) {
-              mClassicBluetoothState = ClassicBluetoothState.CLOSE
-              BleConnector.sendInt8(bleKey, bleKeyFlag, mClassicBluetoothState)
-            } else {
-              //3.0状态正在切换中，请稍等
-              print("3.0 status is switching, please wait")
+            when (mClassicBluetoothState) {
+                ClassicBluetoothState.CLOSE_SUCCESSFULLY -> {
+                  mClassicBluetoothState = ClassicBluetoothState.OPEN
+                  BleConnector.sendInt8(bleKey, bleKeyFlag, mClassicBluetoothState)
+                }
+                ClassicBluetoothState.OPEN_SUCCESSFULLY -> {
+                  mClassicBluetoothState = ClassicBluetoothState.CLOSE
+                  BleConnector.sendInt8(bleKey, bleKeyFlag, mClassicBluetoothState)
+                }
+                else -> {
+                  //3.0状态正在切换中，请稍等
+                  print("3.0 status is switching, please wait")
+                }
             }
           }
 
@@ -2163,7 +2168,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
 
   }
 
-  override fun onDetachedFromEngine(@NonNull binding: FlutterPluginBinding) {
+  override fun onDetachedFromEngine(binding: FlutterPluginBinding) {
 //    channel.setMethodCallHandler(null)
 //    BleConnector.removeHandleCallback(mBleHandleCallback)
 //   mBleScanner.exit()
