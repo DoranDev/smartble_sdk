@@ -29,6 +29,7 @@ import com.szabh.smable3.entity.BleAlarm
 import id.kakzaki.smartble_sdk.activity.MusicControlActivity
 import id.kakzaki.smartble_sdk.tools.*
 import io.flutter.embedding.engine.plugins.FlutterPlugin
+import io.flutter.embedding.engine.plugins.FlutterPlugin.FlutterPluginBinding
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.plugin.common.EventChannel
@@ -38,7 +39,6 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import java.io.File
-import java.nio.channels.FileChannel
 import java.util.*
 import kotlin.random.Random
 
@@ -49,8 +49,11 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
   ///
   /// This local reference serves to register the plugin with the Flutter Engine and unregister it
   /// when the Flutter Engine is detached from the Activity
-  private val mContext: Context?=null
-  private val mActivity: Activity?=null
+  private var mContext: Context?=null
+  private var mActivity: Activity?=null
+  private var pluginBinding: FlutterPluginBinding? = null
+  private var activityBinding: ActivityPluginBinding? = null
+
   private val ID_ALL = 0xff
   private lateinit var mBleKey: BleKey
   private lateinit var mBleKeyFlag: BleKeyFlag
@@ -824,6 +827,8 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
 
 
   override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
+    pluginBinding=flutterPluginBinding
+    mContext=flutterPluginBinding.applicationContext
     channel = MethodChannel(flutterPluginBinding.binaryMessenger, "smartble_sdk")
     channel.setMethodCallHandler(this)
     scanChannel = EventChannel(flutterPluginBinding.binaryMessenger, "smartble_sdk/scan")
@@ -1374,7 +1379,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
     }
 
     if (mContext != null) {
-      doBle(mContext) {
+      doBle(mContext!!) {
         when (bleKey) {
           // BleCommand.UPDATE
 //          BleKey.OTA -> FirmwareHelper.gotoOta(mContext)
@@ -2004,7 +2009,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             if (bleKeyFlag == BleKeyFlag.UPDATE) {
               // 发送文件
               if (mActivity != null) {
-                chooseFile(mActivity, bleKey.mKey)
+                chooseFile(mActivity!!, bleKey.mKey)
               }
             }/* else if (bleKeyFlag == BleKeyFlag.DELETE) {
                         // 删除设备上的文件
@@ -2062,7 +2067,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         val disPlayName: String =
           cursor.getString(displayNameColumn)
         val phones =
-          mContext.contentResolver.query(
+          mContext!!.contentResolver.query(
             ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
             null,
             ContactsContract.CommonDataKinds.Phone.CONTACT_ID
@@ -2110,25 +2115,26 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
   }
 
   override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
-    channel.setMethodCallHandler(null)
-    BleConnector.removeHandleCallback(mBleHandleCallback)
-    mBleScanner.exit()
+//    channel.setMethodCallHandler(null)
+//    BleConnector.removeHandleCallback(mBleHandleCallback)
+//   mBleScanner.exit()
   }
 
   override fun onAttachedToActivity(binding: ActivityPluginBinding) {
-    TODO("Not yet implemented")
+    activityBinding = binding
+    mActivity = binding.activity
   }
 
   override fun onDetachedFromActivityForConfigChanges() {
-    TODO("Not yet implemented")
+
   }
 
   override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
-    TODO("Not yet implemented")
+
   }
 
   override fun onDetachedFromActivity() {
-    TODO("Not yet implemented")
+
   }
 
 
