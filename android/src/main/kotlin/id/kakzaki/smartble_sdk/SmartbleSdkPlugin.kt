@@ -1729,8 +1729,8 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
           // 表盘id
           BleKey.WATCHFACE_ID -> {
             if (bleKeyFlag == BleKeyFlag.UPDATE) {
-              mType = 1//表盘在设备上的位置
-              BleConnector.sendInt32(bleKey, bleKeyFlag, 100)//只有>=100或者无效
+              mType = 1//Posisi tampilan jam di perangkat
+              BleConnector.sendInt32(bleKey, bleKeyFlag, 100)// hanya >=100 atau tidak valid
             } else if (bleKeyFlag == BleKeyFlag.READ) {
               BleConnector.sendData(bleKey, bleKeyFlag)
             }
