@@ -1,3 +1,7 @@
+## 0.1.3
+
+* object to json
+
 ## 0.1.2
 
 * camera remote
