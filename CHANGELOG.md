@@ -1,3 +1,11 @@
+## 0.1.4
+
+* fix minor bug improvement
+
+## 0.1.3
+
+* object to json
+
 ## 0.1.2
 
 * camera remote
