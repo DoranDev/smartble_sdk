@@ -3,12 +3,12 @@ package id.kakzaki.smartble_sdk.activity
 import android.app.ListActivity
 import android.os.Bundle
 import android.widget.ArrayAdapter
-import id.kakzaki.smartble_sdk.tools.toast
 import com.szabh.smable3.BleKey
 import com.szabh.smable3.BleKeyFlag
 import com.szabh.smable3.component.BleConnector
 import com.szabh.smable3.component.BleHandleCallback
 import com.szabh.smable3.entity.*
+import io.flutter.Log
 import kotlin.random.Random
 
 class MusicControlActivity : ListActivity() {
@@ -16,7 +16,7 @@ class MusicControlActivity : ListActivity() {
     private val mBleHandleCallback = object : BleHandleCallback {
 
         override fun onReceiveMusicCommand(musicCommand: MusicCommand) {
-            toast(mContext, "$musicCommand")
+            Log.d("onReceiveMusicCommand" ,"$musicCommand")
         }
     }
 

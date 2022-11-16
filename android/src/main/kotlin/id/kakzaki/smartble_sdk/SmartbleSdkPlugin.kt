@@ -480,7 +480,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         val item: MutableMap<String, Any> = HashMap()
         item["locations"] = gson.toJson(locations)
         if(onReadLocationSink!=null)
-        onReadLocationSink!!.success(item)
+          onReadLocationSink!!.success(item)
       }
 
       override fun onReadTemperature(temperatures: List<BleTemperature>) {
@@ -682,7 +682,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         val item: MutableMap<String, Any> = HashMap()
         item["value"] = value
         if(onReadTemperatureUnitSink!=null)
-        onReadTemperatureUnitSink!!.success(item)
+          onReadTemperatureUnitSink!!.success(item)
       }
 
       override fun onReadDateFormat(value: Int) {
@@ -692,7 +692,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         val item: MutableMap<String, Any> = HashMap()
         item["value"] = value
         if(onReadDateFormatSink!=null)
-        onReadDateFormatSink!!.success(item)
+          onReadDateFormatSink!!.success(item)
       }
 
       override fun onReadWatchFaceSwitch(value: Int) {
@@ -702,7 +702,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         val item: MutableMap<String, Any> = HashMap()
         item["value"] = value
         if(onReadWatchFaceSwitchSink!=null)
-        onReadWatchFaceSwitchSink!!.success(item)
+          onReadWatchFaceSwitchSink!!.success(item)
       }
 
       override fun onUpdateWatchFaceSwitch(status: Boolean) {
@@ -712,7 +712,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         val item: MutableMap<String, Any> = HashMap()
         item["status"] = status
         if(onUpdateWatchFaceSwitchSink!=null)
-        onUpdateWatchFaceSwitchSink!!.success(item)
+          onUpdateWatchFaceSwitchSink!!.success(item)
       }
 
       override fun onAppSportDataResponse(status: Boolean) {
@@ -722,7 +722,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         val item: MutableMap<String, Any> = HashMap()
         item["status"] = status
         if(onAppSportDataResponseSink!=null)
-        onAppSportDataResponseSink!!.success(item)
+          onAppSportDataResponseSink!!.success(item)
       }
 
       override fun onReadWatchFaceId(watchFaceId: BleWatchFaceId) {
@@ -732,7 +732,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         val item: MutableMap<String, Any> = HashMap()
         item["watchFaceId"] = gson.toJson(watchFaceId)
         if(onReadWatchFaceIdSink!=null)
-        onReadWatchFaceIdSink!!.success(item)
+          onReadWatchFaceIdSink!!.success(item)
       }
 
       override fun onWatchFaceIdUpdate(status: Boolean) {
@@ -742,7 +742,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         val item: MutableMap<String, Any> = HashMap()
         item["status"] = status
         if(onWatchFaceIdUpdateSink!=null)
-        onWatchFaceIdUpdateSink!!.success(item)
+          onWatchFaceIdUpdateSink!!.success(item)
         //chooseFile(mContext, BleKey.WATCH_FACE.mKey)
       }
 
@@ -756,7 +756,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         val item: MutableMap<String, Any> = HashMap()
         item["status"] = state
         if(onHIDStateSink!=null)
-        onHIDStateSink!!.success(item)
+          onHIDStateSink!!.success(item)
       }
 
       override fun onHIDValueChange(value: Int) {
@@ -766,7 +766,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         val item: MutableMap<String, Any> = HashMap()
         item["value"] = value
         if(onHIDValueChangeSink!=null)
-        onHIDValueChangeSink!!.success(item)
+          onHIDValueChangeSink!!.success(item)
       }
 
       override fun onDeviceSMSQuickReply(smsQuickReply: BleSMSQuickReply) {
@@ -776,7 +776,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         val item: MutableMap<String, Any> = HashMap()
         item["smsQuickReply"] = gson.toJson(smsQuickReply)
         if(onDeviceSMSQuickReplySink!=null)
-        onDeviceSMSQuickReplySink!!.success(item)
+          onDeviceSMSQuickReplySink!!.success(item)
       }
 
       override fun onReadDeviceInfo(deviceInfo: BleDeviceInfo) {
@@ -786,7 +786,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         val item: MutableMap<String, Any> = HashMap()
         item["deviceInfo"] = gson.toJson(deviceInfo)
         if(onReadDeviceInfoSink!=null)
-        onReadDeviceInfoSink!!.success(item)
+          onReadDeviceInfoSink!!.success(item)
       }
 
       override fun onSessionStateChange(status: Boolean) {
@@ -796,7 +796,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         val item: MutableMap<String, Any> = HashMap()
         item["status"] = status
         if(onSessionStateChangeSink!=null)
-        onSessionStateChangeSink!!.success(item)
+          onSessionStateChangeSink!!.success(item)
       }
 
       override fun onNoDisturbUpdate(noDisturbSettings: BleNoDisturbSettings) {
@@ -806,7 +806,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         val item: MutableMap<String, Any> = HashMap()
         item["noDisturbSettings"] = gson.toJson(noDisturbSettings)
         if(onNoDisturbUpdateSink!=null)
-        onNoDisturbUpdateSink!!.success(item)
+          onNoDisturbUpdateSink!!.success(item)
       }
 
       override fun onAlarmUpdate(alarm: BleAlarm) {
@@ -816,7 +816,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         val item: MutableMap<String, Any> = HashMap()
         item["alarm"] = gson.toJson(alarm)
         if(onAlarmUpdateSink!=null)
-        onAlarmUpdateSink!!.success(item)
+          onAlarmUpdateSink!!.success(item)
       }
 
       override fun onAlarmDelete(id: Int) {
@@ -826,7 +826,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         val item: MutableMap<String, Any> = HashMap()
         item["id"] = id
         if(onAlarmDeleteSink!=null)
-        onAlarmDeleteSink!!.success(item)
+          onAlarmDeleteSink!!.success(item)
       }
 
       override fun onAlarmAdd(alarm: BleAlarm) {
@@ -836,7 +836,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         val item: MutableMap<String, Any> = HashMap()
         item["alarm"] = gson.toJson(alarm)
         if(onAlarmAddSink!=null)
-        onAlarmAddSink!!.success(item)
+          onAlarmAddSink!!.success(item)
       }
 
       override fun onFindPhone(start: Boolean) {
@@ -846,7 +846,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         val item: MutableMap<String, Any> = HashMap()
         item["start"] = start
         if(onFindPhoneSink!=null)
-        onFindPhoneSink!!.success(item)
+          onFindPhoneSink!!.success(item)
       }
 
       override fun onRequestLocation(workoutState: Int) {
@@ -856,7 +856,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         val item: MutableMap<String, Any> = HashMap()
         item["workoutState"] = workoutState
         if(onRequestLocationSink!=null)
-        onRequestLocationSink!!.success(item)
+          onRequestLocationSink!!.success(item)
       }
 
       override fun onDeviceRequestAGpsFile(url: String) {
@@ -866,7 +866,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         val item: MutableMap<String, Any> = HashMap()
         item["url"] = url
         if(onDeviceRequestAGpsFileSink!=null)
-        onDeviceRequestAGpsFileSink!!.success(item)
+          onDeviceRequestAGpsFileSink!!.success(item)
         // 以下是示例代码，sdk中的文件会过期，只是用于演示
 //        when (BleCache.mAGpsType) {
 //          1 -> BleConnector.sendStream(BleKey.AGPS_FILE, assets.open("type1_epo_gr_3_1.dat"))
