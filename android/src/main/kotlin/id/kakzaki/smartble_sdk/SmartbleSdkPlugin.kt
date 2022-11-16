@@ -490,7 +490,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         val item: MutableMap<String, Any> = HashMap()
         item["temperatures"] = gson.toJson(temperatures)
         if(onReadTemperatureSink!=null)
-        onReadTemperatureSink!!.success(item)
+          onReadTemperatureSink!!.success(item)
       }
 
       override fun onReadWorkout2(workouts: List<BleWorkout2>) {
@@ -500,7 +500,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         val item: MutableMap<String, Any> = HashMap()
         item["workouts"] = gson.toJson(workouts)
         if(onReadWorkout2Sink!=null)
-        onReadWorkout2Sink!!.success(item)
+          onReadWorkout2Sink!!.success(item)
       }
 
       override fun onStreamProgress(
@@ -518,7 +518,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         item["total"] = total
         item["completed"] = completed
         if(onStreamProgressSink!=null)
-        onStreamProgressSink!!.success(item)
+          onStreamProgressSink!!.success(item)
       }
 
       @SuppressLint("MissingPermission")
