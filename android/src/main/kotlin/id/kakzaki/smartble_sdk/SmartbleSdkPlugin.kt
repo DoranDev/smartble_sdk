@@ -218,10 +218,13 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
           Log.d("onDeviceConnected","$device")
         }
         val item: MutableMap<String, Any> = HashMap()
-        item["deviceName"] = device.name
-        item["deviceMacAddress"] = device.address
-        if(onDeviceConnectedSink!=null)
-          onDeviceConnectedSink!!.success(item)
+        if(device!=null){
+          item["deviceName"] = device.name
+          item["deviceMacAddress"] = device.address
+          if(onDeviceConnectedSink!=null){
+            onDeviceConnectedSink!!.success(item)
+          }
+        }
       }
 
       override fun onIdentityCreate(status: Boolean, deviceInfo: BleDeviceInfo?) {

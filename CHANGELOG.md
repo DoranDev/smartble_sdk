@@ -1,3 +1,7 @@
+## 0.1.5
+
+* device connected null
+
 ## 0.1.4
 
 * fix minor bug improvement
