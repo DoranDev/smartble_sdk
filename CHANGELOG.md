@@ -1,3 +1,7 @@
+## 0.1.8
+
+* fix blood pressure
+
 ## 0.1.7
 
 * blood oxygen, workout 1
