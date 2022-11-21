@@ -519,4 +519,16 @@ class SmartbleSdk {
   static Stream<dynamic> get onDeviceRequestAGpsFileStream {
     return _onDeviceRequestAGpsFileChannel.receiveBroadcastStream().cast();
   }
+
+  static const EventChannel _onReadWorkoutChannel =
+      EventChannel('onReadWorkout');
+  static Stream<dynamic> get onReadWorkoutStream {
+    return _onReadWorkoutChannel.receiveBroadcastStream().cast();
+  }
+
+  static const EventChannel _onReadBloodOxygenChannel =
+      EventChannel('onReadBloodOxygen');
+  static Stream<dynamic> get onReadBloodOxygenStream {
+    return _onReadBloodOxygenChannel.receiveBroadcastStream().cast();
+  }
 }
