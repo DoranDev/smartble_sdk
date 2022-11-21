@@ -16,7 +16,8 @@ class SmartbleSdk {
   static const MethodChannel _channel = MethodChannel('smartble_sdk');
 
   ///scan(BluetoothDevice device)
-  Future<dynamic> scan() => _channel.invokeMethod('scan');
+  Future<dynamic> scan({required bool isScan}) =>
+      _channel.invokeMethod('scan', {'isScan': isScan});
 
   ///connect(BluetoothDevice device)
   Future<dynamic> connect({required String bname, required String bmac}) =>

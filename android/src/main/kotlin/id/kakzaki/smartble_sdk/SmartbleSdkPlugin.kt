@@ -166,13 +166,17 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
   private var onRequestLocationSink: EventSink?=null
   private var onDeviceRequestAGpsFileChannel : EventChannel?=null
   private var onDeviceRequestAGpsFileSink: EventSink?=null
+  private var onReadBloodOxygenChannel : EventChannel?=null
+  private var onReadBloodOxygenSink: EventSink?=null
+  private var onReadWorkoutChannel : EventChannel?=null
+  private var onReadWorkoutSink: EventSink?=null
 
   private var mResult: Result? = null
   private val mDevices = mutableListOf<Any>()
   private val mBleScanner by lazy {
     // ScannerFactory.newInstance(arrayOf(UUID.fromString(BleConnector.BLE_SERVICE)))
     ScannerFactory.newInstance()
-      .setScanDuration(10)
+      .setScanDuration(30)
       .setScanFilter(object : BleScanFilter {
 
         override fun match(device: BleDevice): Boolean {
@@ -433,7 +437,6 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         if(onReadActivitySink!=null)
           onReadActivitySink!!.success(item)
       }
-
 
       override fun onReadHeartRate(heartRates: List<BleHeartRate>) {
         if (BuildConfig.DEBUG) {
@@ -881,6 +884,27 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         // BleConnector.sendStream(BleKey.AGPS_FILE, file)
       }
 
+
+      override fun onReadBloodOxygen(bloodOxygen: List<BleBloodOxygen>){
+        if (BuildConfig.DEBUG) {
+          Log.d("onReadBloodOxygen","$bloodOxygen")
+        }
+        val item: MutableMap<String, Any> = HashMap()
+        item["bloodOxygen"] = gson.toJson(bloodOxygen)
+        if(onReadBloodOxygenSink!=null)
+          onReadBloodOxygenSink!!.success(item)
+      }
+
+      override fun onReadWorkout(workouts: List<BleWorkout>){
+        if (BuildConfig.DEBUG) {
+          Log.d("onReadWorkout","$workouts")
+        }
+        val item: MutableMap<String, Any> = HashMap()
+        item["workouts"] = gson.toJson(workouts)
+        if(onReadWorkoutSink!=null)
+          onReadWorkoutSink!!.success(item)
+      }
+
     }
   }
 
@@ -990,6 +1014,10 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
     onRequestLocationChannel!!.setStreamHandler(onRequestLocationResultsHandler)
     onDeviceRequestAGpsFileChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onDeviceRequestAGpsFile")
     onDeviceRequestAGpsFileChannel!!.setStreamHandler(onDeviceRequestAGpsFileResultsHandler)
+    onReadBloodOxygenChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onReadBloodOxygen")
+    onReadBloodOxygenChannel!!.setStreamHandler(onReadBloodOxygenResultsHandler)
+    onReadWorkoutChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onReadWorkout")
+    onReadWorkoutChannel!!.setStreamHandler(onReadWorkoutResultsHandler)
     val connector = BleConnector.Builder(flutterPluginBinding.applicationContext)
       .supportRealtekDfu(false) // Whether to support Realtek device Dfu, pass false if no support is required.
       .supportMtkOta(false) // Whether to support MTK device Ota, pass false if no support is required.
@@ -1034,7 +1062,10 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
               Manifest.permission.BLUETOOTH_ADVERTISE,
             ) { granted ->
               if (granted) {
-                mBleScanner.scan(!mBleScanner.isScanning)
+                val isScan : Boolean? = call.argument<Boolean>("isScan")
+                if (isScan != null) {
+                  mBleScanner.scan(isScan)
+                }
               }
             }
         } else {
@@ -1042,7 +1073,10 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             .permission(PermissionConstants.LOCATION)
             .require(Manifest.permission.ACCESS_FINE_LOCATION) { granted ->
               if (granted) {
-                mBleScanner.scan(!mBleScanner.isScanning)
+                val isScan : Boolean? = call.argument<Boolean>("isScan")
+                if (isScan != null) {
+                  mBleScanner.scan(isScan)
+                }
               }
             }
         }
@@ -2708,6 +2742,24 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
     }
   }
 
+  private val onReadBloodOxygenResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onReadBloodOxygenSink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
 
+  private val onReadWorkoutResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onReadWorkoutSink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
 
 }
