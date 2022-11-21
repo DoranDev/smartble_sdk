@@ -1388,6 +1388,9 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
           "BRAND_INFO_FILE" -> {
             mBleKey=BleKey.BRAND_INFO_FILE
           }
+          "BLOOD_PRESSURE" -> {
+            mBleKey=BleKey.BLOOD_PRESSURE
+          }
           else -> {
             mBleKey=BleKey.NONE
           }
