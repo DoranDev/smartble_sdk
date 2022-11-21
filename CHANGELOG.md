@@ -1,3 +1,7 @@
+## 0.1.7
+
+* blood oxygen, workout 1
+
 ## 0.1.6
 
 * blood oxygen, workout 1
