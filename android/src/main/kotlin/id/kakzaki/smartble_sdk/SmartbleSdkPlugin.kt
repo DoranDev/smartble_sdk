@@ -170,6 +170,10 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
   private var onReadBloodOxygenSink: EventSink?=null
   private var onReadWorkoutChannel : EventChannel?=null
   private var onReadWorkoutSink: EventSink?=null
+  private var onReadBleHrvChannel : EventChannel?=null
+  private var onReadBleHrvSink: EventSink?=null
+  private var onReadPressureChannel : EventChannel?=null
+  private var onReadPressureSink: EventSink?=null
 
   private var mResult: Result? = null
   private val mDevices = mutableListOf<Any>()
@@ -905,6 +909,26 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
           onReadWorkoutSink!!.success(item)
       }
 
+      override fun onReadBleHrv(hrv: List<BleHrv>){
+        if (BuildConfig.DEBUG) {
+          Log.d("onReadBleHrv","$hrv")
+        }
+        val item: MutableMap<String, Any> = HashMap()
+        item["hrv"] = gson.toJson(hrv)
+        if(onReadBleHrvSink!=null)
+          onReadBleHrvSink!!.success(item)
+      }
+
+      override fun onReadPressure(pressures: List<BlePressure>){
+        if (BuildConfig.DEBUG) {
+          Log.d("onReadPressure","$pressures")
+        }
+        val item: MutableMap<String, Any> = HashMap()
+        item["pressures"] = gson.toJson(pressures)
+        if(onReadPressureSink!=null)
+          onReadPressureSink!!.success(item)
+      }
+
     }
   }
 
@@ -1018,6 +1042,10 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
     onReadBloodOxygenChannel!!.setStreamHandler(onReadBloodOxygenResultsHandler)
     onReadWorkoutChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onReadWorkout")
     onReadWorkoutChannel!!.setStreamHandler(onReadWorkoutResultsHandler)
+    onReadBleHrvChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onReadBleHrv")
+    onReadBleHrvChannel!!.setStreamHandler(onReadBleHrvResultsHandler)
+    onReadPressureChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onReadPressure")
+    onReadPressureChannel!!.setStreamHandler(onReadPressureResultsHandler)
     val connector = BleConnector.Builder(flutterPluginBinding.applicationContext)
       .supportRealtekDfu(false) // Whether to support Realtek device Dfu, pass false if no support is required.
       .supportMtkOta(false) // Whether to support MTK device Ota, pass false if no support is required.
@@ -2759,6 +2787,26 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
     override fun onListen(o: Any?, eventSink: EventSink?) {
       if (eventSink != null) {
         onReadWorkoutSink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
+
+  private val onReadBleHrvResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onReadBleHrvSink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
+
+  private val onReadPressureResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onReadPressureSink = eventSink
       }
     }
     override fun onCancel(o: Any?) {

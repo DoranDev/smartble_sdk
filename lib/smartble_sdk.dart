@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:core';
 
 import 'package:flutter/services.dart';
 
@@ -14,6 +15,26 @@ enum SelectedBlekeyFlag {
 
 class SmartbleSdk {
   static const MethodChannel _channel = MethodChannel('smartble_sdk');
+
+  ///convert mTime real to DateTime format
+  DateTime mTimeRealToDateTime({required int mTimeReal}) {
+    return DateTime.fromMillisecondsSinceEpoch(mTimeReal * 1000);
+  }
+
+  ///convert mTime(BluetoothDevice device) to DateTime format
+  DateTime mTimeDeviceToDateTime({required int mTimeDevice}) {
+    int offset = DateTime.now().timeZoneOffset.inSeconds;
+    const int dataEpoch = 946684800;
+    return DateTime.fromMillisecondsSinceEpoch(
+        (mTimeDevice + dataEpoch - offset) * 1000);
+  }
+
+  ///convert mTime(BluetoothDevice device) to real timestamp
+  int mTimeReal({required int mTime}) {
+    int offset = DateTime.now().timeZoneOffset.inSeconds;
+    const int dataEpoch = 946684800;
+    return mTime + dataEpoch - offset;
+  }
 
   ///scan(BluetoothDevice device)
   Future<dynamic> scan({required bool isScan}) =>
@@ -530,5 +551,16 @@ class SmartbleSdk {
       EventChannel('onReadBloodOxygen');
   static Stream<dynamic> get onReadBloodOxygenStream {
     return _onReadBloodOxygenChannel.receiveBroadcastStream().cast();
+  }
+
+  static const EventChannel _onReadBleHrvChannel = EventChannel('onReadBleHrv');
+  static Stream<dynamic> get onReadBleHrvStream {
+    return _onReadBleHrvChannel.receiveBroadcastStream().cast();
+  }
+
+  static const EventChannel _onReadPressureChannel =
+      EventChannel('onReadPressure');
+  static Stream<dynamic> get onReadPressureStream {
+    return _onReadPressureChannel.receiveBroadcastStream().cast();
   }
 }
