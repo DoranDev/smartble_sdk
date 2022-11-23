@@ -552,4 +552,15 @@ class SmartbleSdk {
   static Stream<dynamic> get onReadBloodOxygenStream {
     return _onReadBloodOxygenChannel.receiveBroadcastStream().cast();
   }
+
+  static const EventChannel _onReadBleHrvChannel = EventChannel('onReadBleHrv');
+  static Stream<dynamic> get onReadBleHrvStream {
+    return _onReadBleHrvChannel.receiveBroadcastStream().cast();
+  }
+
+  static const EventChannel _onReadPressureChannel =
+      EventChannel('onReadPressure');
+  static Stream<dynamic> get onReadPressureStream {
+    return _onReadPressureChannel.receiveBroadcastStream().cast();
+  }
 }
