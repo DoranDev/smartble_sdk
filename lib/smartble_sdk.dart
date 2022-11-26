@@ -40,9 +40,18 @@ class SmartbleSdk {
   Future<dynamic> scan({required bool isScan}) =>
       _channel.invokeMethod('scan', {'isScan': isScan});
 
+  ///setAddress(BluetoothDevice device)
+  Future<dynamic> setAddress({required String bname, required String bmac}) =>
+      _channel.invokeMethod('setAddress', {'bname': bname, 'bmac': bmac});
+
   ///connect(BluetoothDevice device)
-  Future<dynamic> connect({required String bname, required String bmac}) =>
-      _channel.invokeMethod('connect', {'bname': bname, 'bmac': bmac});
+  Future<dynamic> connect() => _channel.invokeMethod('connect');
+
+  ///isConnecting(BluetoothDevice device)
+  Future<dynamic> isConnecting() => _channel.invokeMethod('isConnecting');
+
+  ///isNeedBind(BluetoothDevice device)
+  Future<dynamic> isNeedBind() => _channel.invokeMethod('isNeedBind');
 
   Future<dynamic> kOTA({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('OTA', {'flag': flag.name});
@@ -573,6 +582,12 @@ class SmartbleSdk {
       EventChannel('onReadPressure');
   static Stream<dynamic> get onReadPressureStream {
     return _onReadPressureChannel.receiveBroadcastStream().cast();
+  }
+
+  static const EventChannel _onDeviceConnectingChannel =
+      EventChannel('onDeviceConnecting');
+  static Stream<dynamic> get onDeviceConnectingStream {
+    return _onDeviceConnectingChannel.receiveBroadcastStream().cast();
   }
 }
 

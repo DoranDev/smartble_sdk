@@ -174,6 +174,8 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
   private var onReadBleHrvSink: EventSink?=null
   private var onReadPressureChannel : EventChannel?=null
   private var onReadPressureSink: EventSink?=null
+  private var onDeviceConnectingChannel : EventChannel?=null
+  private var onDeviceConnectingSink: EventSink?=null
 
   private var mResult: Result? = null
   private val mDevices = mutableListOf<Any>()
@@ -929,6 +931,17 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
           onReadPressureSink!!.success(item)
       }
 
+
+      override fun onDeviceConnecting(status: Boolean) {
+        if (BuildConfig.DEBUG) {
+          Log.d("onDeviceConnecting","$status")
+        }
+        val item: MutableMap<String, Any> = HashMap()
+        item["status"] = status
+        if(onDeviceConnectingSink!=null){
+          onDeviceConnectingSink!!.success(item)
+        }
+      }
     }
   }
 
@@ -1046,6 +1059,8 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
     onReadBleHrvChannel!!.setStreamHandler(onReadBleHrvResultsHandler)
     onReadPressureChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onReadPressure")
     onReadPressureChannel!!.setStreamHandler(onReadPressureResultsHandler)
+    onDeviceConnectingChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onDeviceConnecting")
+    onDeviceConnectingChannel!!.setStreamHandler(onDeviceConnectingResultsHandler)
     val connector = BleConnector.Builder(flutterPluginBinding.applicationContext)
       .supportRealtekDfu(false) // Whether to support Realtek device Dfu, pass false if no support is required.
       .supportMtkOta(false) // Whether to support MTK device Ota, pass false if no support is required.
@@ -1109,13 +1124,21 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             }
         }
       }
-      "connect" -> {
+      "setAddress" -> {
         mBleScanner.scan(false)
-          val bname: String? = call.argument<String>("bname")
           val bmac : String? = call.argument<String>("bmac")
           if (bmac != null) {
-            BleConnector.setAddress(bmac).connect(true)
+            BleConnector.setAddress(bmac)
           }
+      }
+      "connect" -> {
+        BleConnector.connect(true)
+      }
+      "isConnecting" -> {
+         result.success(BleConnector.isConnecting)
+      }
+      "isNeedBind" -> {
+        result.success(BleConnector.isNeedBind)
       }
       else -> {
         when (call.method) {
@@ -2188,10 +2211,6 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
 
   }
 
-  // 发送相应的指令
-  private fun handleCommand(bleKey: BleKey, bleKeyFlag: BleKeyFlag) {
-
-  }
 
   @SuppressLint("Range")
   private fun getContactBytes(): ByteArray {
@@ -2826,6 +2845,16 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
     override fun onListen(o: Any?, eventSink: EventSink?) {
       if (eventSink != null) {
         onReadPressureSink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
+
+  private val onDeviceConnectingResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onDeviceConnectingSink = eventSink
       }
     }
     override fun onCancel(o: Any?) {
