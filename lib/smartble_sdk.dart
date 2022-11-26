@@ -165,8 +165,19 @@ class SmartbleSdk {
       _channel.invokeMethod('IDENTITY', {'flag': flag.name});
   Future<dynamic> kSESSION({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('SESSION', {'flag': flag.name});
-  Future<dynamic> kNOTIFICATION({required SelectedBlekeyFlag flag}) =>
-      _channel.invokeMethod('NOTIFICATION', {'flag': flag.name});
+  Future<dynamic> kNOTIFICATION(
+          {required SelectedBlekeyFlag flag,
+          required String mTitle,
+          required String mContent,
+          required String mCategory,
+          required String mPackage}) =>
+      _channel.invokeMethod('NOTIFICATION', {
+        'flag': flag.name,
+        'mTitle': mTitle,
+        'mContent': mContent,
+        'mCategory': mCategory,
+        'mPackage': mPackage
+      });
   Future<dynamic> kMUSIC_CONTROL({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('MUSIC_CONTROL', {'flag': flag.name});
   Future<dynamic> kSCHEDULE({required SelectedBlekeyFlag flag}) =>
@@ -563,4 +574,9 @@ class SmartbleSdk {
   static Stream<dynamic> get onReadPressureStream {
     return _onReadPressureChannel.receiveBroadcastStream().cast();
   }
+}
+
+class BleNotificationCategory {
+  static String categoryIncomingCall = "1";
+  static String categoryMessage = "2";
 }
