@@ -1,3 +1,7 @@
+## 0.2.2
+
+* New Connect
+
 ## 0.2.1
 
 * Notification data
