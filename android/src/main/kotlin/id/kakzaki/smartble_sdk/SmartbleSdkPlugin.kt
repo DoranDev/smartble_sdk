@@ -1446,17 +1446,32 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             mBleKeyFlag=BleKeyFlag.NONE
           }
         }
-        setupKeyFlagList(mBleKey,mBleKeyFlag)
+        setupKeyFlagList(mBleKey,mBleKeyFlag,call)
       }
     }
   }
 
   // 显示该BleKey对应的Flag列表
-  private fun setupKeyFlagList(bleKey: BleKey,bleKeyFlag:BleKeyFlag) {
-    //Todo : isi dulu perintahnya
-    handleCommand(bleKey, bleKeyFlag)
-    when (bleKey) {
-      BleKey.WATCH_FACE -> {
+  private fun setupKeyFlagList(bleKey: BleKey,bleKeyFlag:BleKeyFlag, call: MethodCall) {
+    if (bleKey == BleKey.IDENTITY) {
+      if (bleKeyFlag == BleKeyFlag.DELETE) { // unbind
+        // Send the unbinding command, some devices will trigger BleHandleCallback.onIdentityDelete() after replying
+        BleConnector.sendData(bleKey, bleKeyFlag)
+        // wait for a while to unbind
+        Handler().postDelayed({
+          BleConnector.unbind()
+          unbindCompleted()
+        }, 2000)
+        return
+      }
+    }
+
+    if (mContext != null) {
+      doBle(mContext!!) {
+        when (bleKey) {
+          // BleCommand.UPDATE
+//          BleKey.OTA -> FirmwareHelper.gotoOta(mContext)
+          BleKey.WATCH_FACE -> {
 //                findViewById<TextView>(R.id.tv_custom1).apply {
 //                    visibility = View.VISIBLE
 //                    text = "custom 240*240"
@@ -1482,34 +1497,32 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
 //                        )
 //                    }
 //                }
-      }
-      else -> {}
-    }
-
-  }
-
-  // 发送相应的指令
-  private fun handleCommand(bleKey: BleKey, bleKeyFlag: BleKeyFlag) {
-    if (bleKey == BleKey.IDENTITY) {
-      if (bleKeyFlag == BleKeyFlag.DELETE) { // unbind
-        // Send the unbinding command, some devices will trigger BleHandleCallback.onIdentityDelete() after replying
-        BleConnector.sendData(bleKey, bleKeyFlag)
-        // wait for a while to unbind
-        Handler().postDelayed({
-          BleConnector.unbind()
-          unbindCompleted()
-        }, 2000)
-        return
-      }
-    }
-
-    if (mContext != null) {
-      doBle(mContext!!) {
-        when (bleKey) {
-          // BleCommand.UPDATE
-//          BleKey.OTA -> FirmwareHelper.gotoOta(mContext)
+          }
           BleKey.XMODEM -> BleConnector.sendData(bleKey, bleKeyFlag)
+          BleKey.NOTIFICATION -> {
+            if (bleKeyFlag == BleKeyFlag.UPDATE) {
+              val mTitle: String? = call.argument<String>("mTitle")
+              val mContent : String? = call.argument<String>("mContent")
+              val mCategory : String? = call.argument<String>("mCategory")
+              val mPackage : String? = call.argument<String>("mPackage")
 
+              BleNotification(
+                mCategory = if(mCategory=="1"){
+                  BleNotification.CATEGORY_INCOMING_CALL
+                }else{
+                  BleNotification.CATEGORY_MESSAGE
+                },
+                mTime = Date().time,
+                mPackage = "$mPackage",
+                mTitle = "$mTitle",
+                mContent = "$mContent"
+              ).let { notification ->
+                BleConnector.sendObject(BleKey.NOTIFICATION, BleKeyFlag.UPDATE, notification)
+              }
+            } else if (bleKeyFlag == BleKeyFlag.READ) {
+              BleConnector.sendData(bleKey, bleKeyFlag)
+            }
+          }
           // BleCommand.SET
           BleKey.TIME -> {
             if (bleKeyFlag == BleKeyFlag.UPDATE) {
@@ -2118,18 +2131,18 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
           BleKey.CLASSIC_BLUETOOTH_STATE -> {
             // 3.0 开关
             when (mClassicBluetoothState) {
-                ClassicBluetoothState.CLOSE_SUCCESSFULLY -> {
-                  mClassicBluetoothState = ClassicBluetoothState.OPEN
-                  BleConnector.sendInt8(bleKey, bleKeyFlag, mClassicBluetoothState)
-                }
-                ClassicBluetoothState.OPEN_SUCCESSFULLY -> {
-                  mClassicBluetoothState = ClassicBluetoothState.CLOSE
-                  BleConnector.sendInt8(bleKey, bleKeyFlag, mClassicBluetoothState)
-                }
-                else -> {
-                  //3.0状态正在切换中，请稍等
-                  print("3.0 status is switching, please wait")
-                }
+              ClassicBluetoothState.CLOSE_SUCCESSFULLY -> {
+                mClassicBluetoothState = ClassicBluetoothState.OPEN
+                BleConnector.sendInt8(bleKey, bleKeyFlag, mClassicBluetoothState)
+              }
+              ClassicBluetoothState.OPEN_SUCCESSFULLY -> {
+                mClassicBluetoothState = ClassicBluetoothState.CLOSE
+                BleConnector.sendInt8(bleKey, bleKeyFlag, mClassicBluetoothState)
+              }
+              else -> {
+                //3.0状态正在切换中，请稍等
+                print("3.0 status is switching, please wait")
+              }
             }
           }
 
@@ -2172,6 +2185,12 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         }
       }
     }
+
+  }
+
+  // 发送相应的指令
+  private fun handleCommand(bleKey: BleKey, bleKeyFlag: BleKeyFlag) {
+
   }
 
   @SuppressLint("Range")
