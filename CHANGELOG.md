@@ -1,3 +1,7 @@
+## 0.2.5
+
+* back light, gesture wake
+
 ## 0.2.4
 
 * anti lost, do not distrub
