@@ -83,14 +83,17 @@ class SmartbleSdk {
       _channel.invokeMethod('USER_PROFILE', {'flag': flag.name});
   Future<dynamic> kSTEP_GOAL({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('STEP_GOAL', {'flag': flag.name});
-  Future<dynamic> kBACK_LIGHT({required SelectedBlekeyFlag flag}) =>
-      _channel.invokeMethod('BACK_LIGHT', {'flag': flag.name});
+  Future<dynamic> kBACK_LIGHT(
+          {required SelectedBlekeyFlag flag, required int times}) =>
+      _channel.invokeMethod('BACK_LIGHT', {'flag': flag.name, 'times': times});
   Future<dynamic> kSEDENTARINESS({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('SEDENTARINESS', {'flag': flag.name});
   Future<dynamic> kNO_DISTURB_RANGE({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('NO_DISTURB_RANGE', {'flag': flag.name});
-  Future<dynamic> kVIBRATION({required SelectedBlekeyFlag flag}) =>
-      _channel.invokeMethod('VIBRATION', {'flag': flag.name});
+  Future<dynamic> kVIBRATION(
+          {required SelectedBlekeyFlag flag, required int frequency}) =>
+      _channel.invokeMethod(
+          'VIBRATION', {'flag': flag.name, 'frequency': frequency});
   Future<dynamic> kGESTURE_WAKE({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('GESTURE_WAKE', {'flag': flag.name});
   Future<dynamic> kHR_ASSIST_SLEEP({required SelectedBlekeyFlag flag}) =>
@@ -127,8 +130,10 @@ class SmartbleSdk {
       _channel.invokeMethod('AEROBIC_EXERCISE', {'flag': flag.name});
   Future<dynamic> kTEMPERATURE_UNIT({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('TEMPERATURE_UNIT', {'flag': flag.name});
-  Future<dynamic> kDATE_FORMAT({required SelectedBlekeyFlag flag}) =>
-      _channel.invokeMethod('DATE_FORMAT', {'flag': flag.name});
+  Future<dynamic> kDATE_FORMAT(
+          {required SelectedBlekeyFlag flag, required int format}) =>
+      _channel
+          .invokeMethod('DATE_FORMAT', {'flag': flag.name, 'format': format});
   Future<dynamic> kWATCH_FACE_SWITCH({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('WATCH_FACE_SWITCH', {'flag': flag.name});
   Future<dynamic> kAGPS_PREREQUISITE({required SelectedBlekeyFlag flag}) =>
@@ -610,4 +615,10 @@ class SmartbleSdk {
 class BleNotificationCategory {
   static String categoryIncomingCall = "1";
   static String categoryMessage = "2";
+}
+
+class KDateFormat {
+  static int yearMonthDay = 0;
+  static int dayMonthYear = 1;
+  static int monthDayYear = 2;
 }

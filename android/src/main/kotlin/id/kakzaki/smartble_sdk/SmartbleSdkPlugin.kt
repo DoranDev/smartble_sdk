@@ -1605,7 +1605,10 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
           BleKey.BACK_LIGHT -> {
             if (bleKeyFlag == BleKeyFlag.UPDATE) {
               // 设置背光时长
-              BleConnector.sendInt8(bleKey, bleKeyFlag, 6) // 0 is off, or 5 ~ 20
+              val times: Int? = call.argument<Int>("times")
+              if (times != null) {
+                BleConnector.sendInt8(bleKey, bleKeyFlag, times)
+              } // 0 is off, or 5 ~ 20
             } else if (bleKeyFlag == BleKeyFlag.READ) {
               BleConnector.sendData(bleKey, bleKeyFlag)
             }
@@ -1648,9 +1651,12 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             }
           }
           BleKey.VIBRATION -> {
+            val frequency: Int? = call.argument<Int>("frequency")
             if (bleKeyFlag == BleKeyFlag.UPDATE) {
               // 设置震动次数
-              BleConnector.sendInt8(bleKey, bleKeyFlag, 3) // 0~10, 0 is off
+              if (frequency != null) {
+                BleConnector.sendInt8(bleKey, bleKeyFlag, frequency)
+              } // 0~10, 0 is off
             } else if (bleKeyFlag == BleKeyFlag.READ) {
               BleConnector.sendData(bleKey, bleKeyFlag)
             }
@@ -1853,9 +1859,14 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             BleConnector.sendInt8(bleKey, bleKeyFlag, BleCache.getInt(bleKey, 0) xor 1)
 
           // 日期格式设置
-          BleKey.DATE_FORMAT ->
+          BleKey.DATE_FORMAT -> {
             // 切换, 0: 年月日; 1: 日月年; 2: 月日年;
-            BleConnector.sendInt8(bleKey, bleKeyFlag, (BleCache.getInt(bleKey, 0) + 1) % 3)
+            // switch, 0: year month day; 1: day month year; 2: month day year;
+            val format: Int? = call.argument<Int>("format")
+            if (format != null) {
+              BleConnector.sendInt8(bleKey, bleKeyFlag, format)
+            }
+          }
           BleKey.RAW_SLEEP ->
             BleConnector.sendData(bleKey, bleKeyFlag)
 
