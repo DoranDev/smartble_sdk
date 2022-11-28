@@ -1664,9 +1664,14 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
           BleKey.GESTURE_WAKE -> {
             if (bleKeyFlag == BleKeyFlag.UPDATE) {
               // 设置抬手亮
+              val mEnabled: Int? = call.argument<Int>("mEnabled")
+              val mStartHour: Int? = call.argument<Int>("mStartHour")
+              val mStartMinute: Int? = call.argument<Int>("mStartMinute")
+              val mEndHour: Int? = call.argument<Int>("mEndHour")
+              val mEndMinute: Int? = call.argument<Int>("mEndMinute")
               BleConnector.sendObject(
                 bleKey, bleKeyFlag,
-                BleGestureWake(BleTimeRange(1, 8, 0, 22, 0))
+                BleGestureWake(BleTimeRange(mEnabled!!, mStartHour!!, mStartMinute!!, mEndHour!!, mEndMinute!!))
               )
             } else if (bleKeyFlag == BleKeyFlag.READ) {
               BleConnector.sendData(bleKey, bleKeyFlag)

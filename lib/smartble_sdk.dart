@@ -94,8 +94,20 @@ class SmartbleSdk {
           {required SelectedBlekeyFlag flag, required int frequency}) =>
       _channel.invokeMethod(
           'VIBRATION', {'flag': flag.name, 'frequency': frequency});
-  Future<dynamic> kGESTURE_WAKE({required SelectedBlekeyFlag flag}) =>
-      _channel.invokeMethod('GESTURE_WAKE', {'flag': flag.name});
+  Future<dynamic> kGESTURE_WAKE(
+          {required SelectedBlekeyFlag flag,
+          required int mEnabled,
+          required int mStartHour,
+          required int mStartMinute,
+          required int mEndHour,
+          mEndMinute}) =>
+      _channel.invokeMethod('GESTURE_WAKE', {
+        'flag': flag.name,
+        'mEnabled': mEnabled,
+        'mStartHour': mStartHour,
+        'mStartMinute': mStartMinute,
+        'mEndHour': mEndHour
+      });
   Future<dynamic> kHR_ASSIST_SLEEP({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('HR_ASSIST_SLEEP', {'flag': flag.name});
   Future<dynamic> kHOUR_SYSTEM({required SelectedBlekeyFlag flag}) =>
