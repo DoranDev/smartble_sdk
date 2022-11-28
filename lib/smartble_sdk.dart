@@ -53,6 +53,18 @@ class SmartbleSdk {
   ///isNeedBind(BluetoothDevice device)
   Future<dynamic> isNeedBind() => _channel.invokeMethod('isNeedBind');
 
+  ///connectHID(BluetoothDevice device)
+  Future<dynamic> connectHID() => _channel.invokeMethod('connectHID');
+
+  ///connectClassic(BluetoothDevice device)
+  Future<dynamic> connectClassic() => _channel.invokeMethod('connectClassic');
+
+  ///closeConnection(BluetoothDevice device)
+  Future<dynamic> closeConnection() => _channel.invokeMethod('closeConnection');
+
+  ///unbind(BluetoothDevice device)
+  Future<dynamic> unbind() => _channel.invokeMethod('unbind');
+
   Future<dynamic> kOTA({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('OTA', {'flag': flag.name});
   Future<dynamic> kXMODEM({required SelectedBlekeyFlag flag}) =>
@@ -95,8 +107,10 @@ class SmartbleSdk {
       _channel.invokeMethod('FIND_PHONE', {'flag': flag.name});
   Future<dynamic> kNOTIFICATION_REMINDER({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('NOTIFICATION_REMINDER', {'flag': flag.name});
-  Future<dynamic> kANTI_LOST({required SelectedBlekeyFlag flag}) =>
-      _channel.invokeMethod('ANTI_LOST', {'flag': flag.name});
+  Future<dynamic> kANTI_LOST(
+          {required SelectedBlekeyFlag flag, required bool isAntiLost}) =>
+      _channel.invokeMethod(
+          'ANTI_LOST', {'flag': flag.name, 'isAntiLost': isAntiLost});
   Future<dynamic> kHR_MONITORING({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('HR_MONITORING', {'flag': flag.name});
   Future<dynamic> kUI_PACK_VERSION({required SelectedBlekeyFlag flag}) =>
@@ -168,8 +182,10 @@ class SmartbleSdk {
       _channel.invokeMethod('LOCATION_GGA', {'flag': flag.name});
   Future<dynamic> kRAW_SLEEP({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('RAW_SLEEP', {'flag': flag.name});
-  Future<dynamic> kNO_DISTURB_GLOBAL({required SelectedBlekeyFlag flag}) =>
-      _channel.invokeMethod('NO_DISTURB_GLOBAL', {'flag': flag.name});
+  Future<dynamic> kNO_DISTURB_GLOBAL(
+          {required SelectedBlekeyFlag flag, required bool isDoNotDistrub}) =>
+      _channel.invokeMethod('NO_DISTURB_GLOBAL',
+          {'flag': flag.name, 'isDoNotDistrub': isDoNotDistrub});
   Future<dynamic> kIDENTITY({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('IDENTITY', {'flag': flag.name});
   Future<dynamic> kSESSION({required SelectedBlekeyFlag flag}) =>
