@@ -942,6 +942,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
           onDeviceConnectingSink!!.success(item)
         }
       }
+
     }
   }
 
@@ -1135,10 +1136,22 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         BleConnector.connect(true)
       }
       "isConnecting" -> {
-         result.success(BleConnector.isConnecting)
+        result.success(BleConnector.isConnecting)
       }
       "isNeedBind" -> {
         result.success(BleConnector.isNeedBind)
+      }
+      "connectHID" -> {
+        BleConnector.connectHID();
+      }
+      "connectClassic" -> {
+        BleConnector.connectClassic();
+      }
+      "closeConnection" -> {
+        BleConnector.closeConnection(stopReconnecting = true);
+      }
+      "unbind" -> {
+        BleConnector.unbind();
       }
       else -> {
         when (call.method) {
@@ -1624,7 +1637,16 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
               BleConnector.sendData(bleKey, bleKeyFlag)
             }
           }
-//                BleKey.NO_DISTURB_GLOBAL -> BleConnector.sendBoolean(bleKey, bleKeyFlag, true) // on
+          BleKey.NO_DISTURB_GLOBAL -> {
+            val isDoNotDistrub: Boolean? = call.argument<Boolean>("isDoNotDistrub")
+            if (isDoNotDistrub != null) {
+              BleConnector.sendBoolean(
+                bleKey,
+                bleKeyFlag,
+                isDoNotDistrub
+              )
+            }
+          }
           BleKey.VIBRATION -> {
             if (bleKeyFlag == BleKeyFlag.UPDATE) {
               // 设置震动次数
@@ -1748,12 +1770,17 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
               !BleCache.getBoolean(bleKey, false)
             ) // 切换
           // 设置防丢提醒
-          BleKey.ANTI_LOST ->
-            BleConnector.sendBoolean(
-              bleKey,
-              bleKeyFlag,
-              !BleCache.getBoolean(bleKey, false)
-            ) // 切换
+          BleKey.ANTI_LOST -> {
+            val isAntiLost: Boolean? = call.argument<Boolean>("isAntiLost")
+            if (isAntiLost != null) {
+              BleConnector.sendBoolean(
+                bleKey,
+                bleKeyFlag,
+                isAntiLost
+                // !BleCache.getBoolean(bleKey, false)
+              )
+            } // 切换
+          }
           // 设置心率自动检测
           BleKey.HR_MONITORING -> {
             if (bleKeyFlag == BleKeyFlag.UPDATE) {

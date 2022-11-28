@@ -1209,6 +1209,18 @@ object BleConnector : AbsBleConnector() {
                             }
                     }
                 }
+                BleKey.ACTIVITY_REALTIME -> {
+                    if (bleKeyFlag == BleKeyFlag.READ && isReply) {
+                        BleReadable.ofList<BleActivity>(data, BleActivity.ITEM_LENGTH, LENGTH_BEFORE_DATA)
+                            .let { activities ->
+                                BleLog.v("$TAG handleData onReadActivity -> $activities")
+                                dataCount = activities.size
+                                if (!mSupportFilterEmpty || activities.isNotEmpty()) {
+                                    notifyHandlers { it.onReadActivity(activities) }
+                                }
+                            }
+                    }
+                }
                 BleKey.HEART_RATE -> {
                     if (bleKeyFlag == BleKeyFlag.READ && isReply) {
                         BleReadable.ofList<BleHeartRate>(data, BleHeartRate.ITEM_LENGTH, LENGTH_BEFORE_DATA)

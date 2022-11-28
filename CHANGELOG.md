@@ -1,3 +1,11 @@
+## 0.2.4
+
+* anti lost, do not distrub
+
+## 0.2.3
+
+* New Connect
+
 ## 0.2.2
 
 * New Connect
