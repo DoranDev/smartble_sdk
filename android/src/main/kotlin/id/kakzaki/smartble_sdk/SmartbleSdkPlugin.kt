@@ -7,8 +7,10 @@ import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.content.Intent
 import android.media.AudioManager
+import android.net.Uri
 import android.os.*
 import android.provider.ContactsContract
+import android.system.Os.open
 import android.telecom.TelecomManager
 import android.text.format.DateFormat
 import android.util.Log
@@ -39,6 +41,10 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import java.io.File
+import java.io.FileOutputStream
+import java.io.InputStream
+import java.net.URL
+import java.nio.channels.FileChannel.open
 import java.util.*
 import kotlin.random.Random
 
@@ -1875,12 +1881,12 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
           BleKey.RAW_SLEEP ->
             BleConnector.sendData(bleKey, bleKeyFlag)
 
-          //默认表盘切换设置
+          //Default dial switch settings
           BleKey.WATCH_FACE_SWITCH ->
             // value, 0-4;
             BleConnector.sendInt8(bleKey, bleKeyFlag, (BleCache.getInt(bleKey, 0) + 1) % 5)
 
-          // 表盘id
+          // dial id
           BleKey.WATCHFACE_ID -> {
             if (bleKeyFlag == BleKeyFlag.UPDATE) {
               mType = 1//Posisi tampilan jam di perangkat
@@ -2133,7 +2139,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             }
           }
           // BleCommand.DATA
-          BleKey.DATA_ALL, BleKey.ACTIVITY, BleKey.HEART_RATE, BleKey.BLOOD_PRESSURE, BleKey.SLEEP,
+          BleKey.DATA_ALL, BleKey.ACTIVITY_REALTIME, BleKey.HEART_RATE, BleKey.BLOOD_PRESSURE, BleKey.SLEEP,
           BleKey.WORKOUT, BleKey.LOCATION, BleKey.TEMPERATURE, BleKey.BLOOD_OXYGEN, BleKey.HRV, BleKey.LOG, BleKey.WORKOUT2 ->
             // 读取数据
             BleConnector.sendData(bleKey, bleKeyFlag)
@@ -2216,13 +2222,16 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
           BleKey.WATCH_FACE, BleKey.AGPS_FILE, BleKey.FONT_FILE, BleKey.UI_FILE, BleKey.LANGUAGE_FILE, BleKey.BRAND_INFO_FILE -> {
             if (bleKeyFlag == BleKeyFlag.UPDATE) {
               // 发送文件
-              if (mActivity != null) {
-                chooseFile(mActivity!!, bleKey.mKey)
+              val path: String? = call.argument<String>("path")
+              if(path!=null){
+                val inputStream: InputStream = mContext!!.assets.open(path)
+//                val bytes = inputStream.use {
+//                  it.readBytes()
+//                }
+                BleConnector.sendStream(bleKey ,inputStream,0)
               }
-            }/* else if (bleKeyFlag == BleKeyFlag.DELETE) {
-                        // 删除设备上的文件
-                        BleConnector.sendInt8(bleKey, bleKeyFlag, 1)
-                    }*/
+            }
+
           }
           BleKey.CONTACT -> {
             PermissionUtils

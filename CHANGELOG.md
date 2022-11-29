@@ -1,3 +1,7 @@
+## 0.2.6
+
+* dial send
+
 ## 0.2.5
 
 * back light, gesture wake

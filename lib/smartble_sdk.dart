@@ -284,8 +284,9 @@ class SmartbleSdk {
       _channel.invokeMethod('CLASSIC_BLUETOOTH_STATE', {'flag': flag.name});
   Future<dynamic> kDEVICE_SMS_QUICK_REPLY({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('DEVICE_SMS_QUICK_REPLY', {'flag': flag.name});
-  Future<dynamic> kWATCH_FACE({required SelectedBlekeyFlag flag}) =>
-      _channel.invokeMethod('WATCH_FACE', {'flag': flag.name});
+  Future<dynamic> kWATCH_FACE(
+          {required SelectedBlekeyFlag flag, required String path}) =>
+      _channel.invokeMethod('WATCH_FACE', {'flag': flag.name, 'path': path});
   Future<dynamic> kAGPS_FILE({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('AGPS_FILE', {'flag': flag.name});
   Future<dynamic> kFONT_FILE({required SelectedBlekeyFlag flag}) =>
