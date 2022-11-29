@@ -1513,33 +1513,33 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         when (bleKey) {
           // BleCommand.UPDATE
 //          BleKey.OTA -> FirmwareHelper.gotoOta(mContext)
-          BleKey.WATCH_FACE -> {
-//                findViewById<TextView>(R.id.tv_custom1).apply {
-//                    visibility = View.VISIBLE
-//                    text = "custom 240*240"
-//                    setOnClickListener {
-//                        startActivity(
-//                            Intent(
-//                                this@KeyFlagListActivity,
-//                                WatchFaceActivity::class.java
-//                            ).putExtra("custom", 1)
-//                        )
-//                    }
-//                }
-//
-//                findViewById<TextView>(R.id.tv_custom2).apply {
-//                    visibility = View.VISIBLE
-//                    text = "custom 454*454"
-//                    setOnClickListener {
-//                        startActivity(
-//                            Intent(
-//                                this@KeyFlagListActivity,
-//                                WatchFaceActivity::class.java
-//                            ).putExtra("custom", 2)
-//                        )
-//                    }
-//                }
-          }
+//          BleKey.WATCH_FACE -> {
+////                findViewById<TextView>(R.id.tv_custom1).apply {
+////                    visibility = View.VISIBLE
+////                    text = "custom 240*240"
+////                    setOnClickListener {
+////                        startActivity(
+////                            Intent(
+////                                this@KeyFlagListActivity,
+////                                WatchFaceActivity::class.java
+////                            ).putExtra("custom", 1)
+////                        )
+////                    }
+////                }
+////
+////                findViewById<TextView>(R.id.tv_custom2).apply {
+////                    visibility = View.VISIBLE
+////                    text = "custom 454*454"
+////                    setOnClickListener {
+////                        startActivity(
+////                            Intent(
+////                                this@KeyFlagListActivity,
+////                                WatchFaceActivity::class.java
+////                            ).putExtra("custom", 2)
+////                        )
+////                    }
+////                }
+//          }
           BleKey.XMODEM -> BleConnector.sendData(bleKey, bleKeyFlag)
           BleKey.NOTIFICATION -> {
             if (bleKeyFlag == BleKeyFlag.UPDATE) {
