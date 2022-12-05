@@ -1801,9 +1801,15 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
           // 设置心率自动检测
           BleKey.HR_MONITORING -> {
             if (bleKeyFlag == BleKeyFlag.UPDATE) {
+              val mEnabled: Int? = call.argument<Int>("mEnabled")
+              val mStartHour: Int? = call.argument<Int>("mStartHour")
+              val mStartMinute: Int? = call.argument<Int>("mStartMinute")
+              val mEndHour: Int? = call.argument<Int>("mEndHour")
+              val mEndMinute: Int? = call.argument<Int>("mEndMinute")
+              val mInterval: Int? = call.argument<Int>("mInterval")
               val hrMonitoring = BleHrMonitoringSettings(
-                mBleTimeRange = BleTimeRange(1, 8, 0, 22, 0),
-                mInterval = 1 // an hour
+                mBleTimeRange = BleTimeRange(mEnabled!!, mStartHour!!, mStartMinute!!, mEndHour!!, mEndMinute!!),
+                mInterval = mInterval!! // an hour
               )
               BleConnector.sendObject(bleKey, bleKeyFlag, hrMonitoring)
             } else if (bleKeyFlag == BleKeyFlag.READ) {
@@ -1865,10 +1871,11 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             }
           }
           // 温度单位设置
-          BleKey.TEMPERATURE_UNIT ->
-            // 切换, 0: 摄氏度; 1: 华氏度
-            BleConnector.sendInt8(bleKey, bleKeyFlag, BleCache.getInt(bleKey, 0) xor 1)
-
+          BleKey.TEMPERATURE_UNIT ->{
+            val unit: Int? = call.argument<Int>("unit")
+            // Beralih, 0: Celcius; 1: Fahrenheit
+            BleConnector.sendInt8(bleKey, bleKeyFlag, unit!!)
+          }
           // 日期格式设置
           BleKey.DATE_FORMAT -> {
             // 切换, 0: 年月日; 1: 日月年; 2: 月日年;
