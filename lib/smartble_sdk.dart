@@ -100,7 +100,7 @@ class SmartbleSdk {
           required int mStartHour,
           required int mStartMinute,
           required int mEndHour,
-          mEndMinute}) =>
+          required int mEndMinute}) =>
       _channel.invokeMethod('GESTURE_WAKE', {
         'flag': flag.name,
         'mEnabled': mEnabled,
@@ -127,8 +127,24 @@ class SmartbleSdk {
           {required SelectedBlekeyFlag flag, required bool isAntiLost}) =>
       _channel.invokeMethod(
           'ANTI_LOST', {'flag': flag.name, 'isAntiLost': isAntiLost});
-  Future<dynamic> kHR_MONITORING({required SelectedBlekeyFlag flag}) =>
-      _channel.invokeMethod('HR_MONITORING', {'flag': flag.name});
+  Future<dynamic> kHR_MONITORING({
+    required SelectedBlekeyFlag flag,
+    required int mEnabled,
+    required int mStartHour,
+    required int mStartMinute,
+    required int mEndHour,
+    required int mEndMinute,
+    required int mInterval,
+  }) =>
+      _channel.invokeMethod('HR_MONITORING', {
+        'flag': flag.name,
+        'mEnabled': mEnabled,
+        'mStartHour': mStartHour,
+        'mStartMinute': mStartMinute,
+        'mEndHour': mEndHour,
+        'mEndMinute': mEndMinute,
+        'mInterval': mInterval,
+      });
   Future<dynamic> kUI_PACK_VERSION({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('UI_PACK_VERSION', {'flag': flag.name});
   Future<dynamic> kLANGUAGE_PACK_VERSION({required SelectedBlekeyFlag flag}) =>
