@@ -22,26 +22,7 @@
 
 
     <application>
-<!--        <activity android:name="id.kakzaki.smartble_sdk.activity.MainActivity" />-->
-<!--        <activity android:name="id.kakzaki.smartble_sdk.activity.CommandListActivity" />-->
-<!--        <activity android:name="id.kakzaki.smartble_sdk.activity.KeyListActivity" />-->
-<!--        <activity android:name="id.kakzaki.smartble_sdk.activity.KeyFlagListActivity" />-->
-        <activity android:name="id.kakzaki.smartble_sdk.activity.NotificationActivity" />
-        <activity android:name="id.kakzaki.smartble_sdk.activity.Notification2Activity" />
         <activity android:name="id.kakzaki.smartble_sdk.activity.MusicControlActivity" />
-<!--        <activity android:name="id.kakzaki.smartble_sdk.activity.OtherFunctionActivity" />-->
-<!--        <activity android:name="id.kakzaki.smartble_sdk.activity.WatchFaceActivity" />-->
-<!--        <activity android:name="id.kakzaki.smartble_sdk.firmware.g.FirmwareUpgradeGActivity" />-->
-<!--        <activity android:name="id.kakzaki.smartble_sdk.firmware.m.FirmwareUpgradeMActivity" />-->
-<!--        <activity android:name="id.kakzaki.smartble_sdk.firmware.n.FirmwareUpgradeNActivity" />-->
-<!--        <activity android:name="id.kakzaki.smartble_sdk.firmware.n.DfuNotificationActivity" />-->
-<!--        <activity android:name="id.kakzaki.smartble_sdk.firmware.r.OtaTargetSelectorR" />-->
-<!--        <activity android:name="id.kakzaki.smartble_sdk.firmware.r.FirmwareUpgradeRActivity" />-->
-<!--        <activity android:name="id.kakzaki.smartble_sdk.firmware.r.ExtraPackUpgradeRActivity" />-->
-<!--        <activity android:name="id.kakzaki.smartble_sdk.firmware.j.FirmwareUpgradeJActivity" />-->
-
-<!--        <service android:name="id.kakzaki.smartble_sdk.firmware.n.DfuService" />-->
-<!--        <service android:name="com.realsil.sdk.dfu.DfuService" />-->
 
         <service
             android:name=".MyNotificationListenerService"

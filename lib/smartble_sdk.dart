@@ -106,7 +106,8 @@ class SmartbleSdk {
         'mEnabled': mEnabled,
         'mStartHour': mStartHour,
         'mStartMinute': mStartMinute,
-        'mEndHour': mEndHour
+        'mEndHour': mEndHour,
+        'mEndMinute': mEndMinute
       });
   Future<dynamic> kHR_ASSIST_SLEEP({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('HR_ASSIST_SLEEP', {'flag': flag.name});
