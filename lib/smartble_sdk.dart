@@ -115,8 +115,30 @@ class SmartbleSdk {
       _channel.invokeMethod('HOUR_SYSTEM', {'flag': flag.name});
   Future<dynamic> kLANGUAGE({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('LANGUAGE', {'flag': flag.name});
-  Future<dynamic> kALARM({required SelectedBlekeyFlag flag}) =>
-      _channel.invokeMethod('ALARM', {'flag': flag.name});
+  Future<dynamic> kALARM({
+    required SelectedBlekeyFlag flag,
+    int? index,
+    int? mEnabled,
+    String? mRepeat,
+    int? mYear,
+    int? mMonth,
+    int? mDay,
+    int? mHour,
+    int? mMinute,
+    String? mTag,
+  }) =>
+      _channel.invokeMethod('ALARM', {
+        'flag': flag.name,
+        'index': index,
+        'mEnabled': mEnabled,
+        'mRepeat': BleRepeat,
+        'mYear': mYear,
+        'mMonth': mMonth,
+        'mDay': mDay,
+        'mHour': mHour,
+        'mMinute': mMinute,
+        'mTag': mTag,
+      });
   Future<dynamic> kCOACHING({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('COACHING', {'flag': flag.name});
   Future<dynamic> kFIND_PHONE({required SelectedBlekeyFlag flag}) =>
@@ -651,4 +673,18 @@ class KDateFormat {
   static int yearMonthDay = 0;
   static int dayMonthYear = 1;
   static int monthDayYear = 2;
+}
+
+class BleRepeat {
+  static String MONDAY = "MONDAY";
+  static String TUESDAY = "TUESDAY";
+  static String WEDNESDAY = "WEDNESDAY";
+  static String THURSDAY = "THURSDAY";
+  static String FRIDAY = "FRIDAY";
+  static String SATURDAY = "SATURDAY";
+  static String SUNDAY = "SUNDAY";
+  static String ONCE = "ONCE";
+  static String WORKDAY = "WORKDAY";
+  static String WEEKEND = "WEEKEND";
+  static String EVERYDAY = "EVERYDAY";
 }

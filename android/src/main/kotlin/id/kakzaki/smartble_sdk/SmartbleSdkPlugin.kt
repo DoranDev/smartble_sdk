@@ -1696,33 +1696,110 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
           )
           BleKey.ALARM -> {
             // 创建一个1分钟后的闹钟
+            val index: Int? = call.argument<Int>("index")
+            val mEnabled: Int? = call.argument<Int>("mEnabled")
+            val mRepeat: String? = call.argument<String>("mRepeat")
+            val mYear: Int? = call.argument<Int>("mYear")
+            val mMonth: Int? = call.argument<Int>("mMonth")
+            val mDay: Int? = call.argument<Int>("mDay")
+            val mHour: Int? = call.argument<Int>("mHour")
+            val mMinute: Int? = call.argument<Int>("mMinute")
+            val mTag: String? = call.argument<String>("mTag")
+            var bleRepeat : Int? = null;
+            if (mRepeat != null) {
+              when (mRepeat){
+                "MONDAY" -> {
+                  bleRepeat =BleRepeat.MONDAY
+                }
+                "TUESDAY" -> {
+                  bleRepeat =BleRepeat.TUESDAY
+                }
+                "THURSDAY" -> {
+                  bleRepeat =BleRepeat.THURSDAY
+                }
+                "FRIDAY" -> {
+                  bleRepeat =BleRepeat.FRIDAY
+                }
+                "SATURDAY" -> {
+                  bleRepeat =BleRepeat.SATURDAY
+                }
+                "SUNDAY" -> {
+                  bleRepeat =BleRepeat.SUNDAY
+                }
+                "ONCE" -> {
+                  bleRepeat =BleRepeat.ONCE
+                }
+                "WORKDAY" -> {
+                  bleRepeat =BleRepeat.WORKDAY
+                }
+                "WEEKEND" -> {
+                  bleRepeat =BleRepeat.WEEKEND
+                }
+                "EVERYDAY" -> {
+                  bleRepeat =BleRepeat.EVERYDAY
+                }
+              }
+            }
             if (bleKeyFlag == BleKeyFlag.CREATE) {
-              val calendar = Calendar.getInstance().apply { add(Calendar.MINUTE, 1) }
+//              val calendar = Calendar.getInstance().apply { add(Calendar.MINUTE, 1) }
               BleConnector.sendObject(
                 bleKey, bleKeyFlag,
-                BleAlarm(
-                  mEnabled = 1,
-                  mRepeat = BleRepeat.EVERYDAY,
-                  mYear = calendar.get(Calendar.YEAR),
-                  mMonth = calendar.get(Calendar.MONTH) + 1,
-                  mDay = calendar.get(Calendar.DAY_OF_MONTH),
-                  mHour = calendar.get(Calendar.HOUR_OF_DAY),
-                  mMinute = calendar.get(Calendar.MINUTE),
-                  mTag = "tag"
-                )
+//                BleAlarm(
+//                  mEnabled = 1,
+//                  mRepeat = BleRepeat.,
+//                  mYear = calendar.get(Calendar.YEAR),
+//                  mMonth = calendar.get(Calendar.MONTH) + 1,
+//                  mDay = calendar.get(Calendar.DAY_OF_MONTH),
+//                  mHour = calendar.get(Calendar.HOUR_OF_DAY),
+//                  mMinute = calendar.get(Calendar.MINUTE),
+//                  mTag = "tag"
+//                )
+               BleAlarm(
+                mEnabled = mEnabled!!,
+                mRepeat = bleRepeat!!,
+                mYear = mYear!!,
+                mMonth = mMonth!!,
+                mDay = mDay!!,
+                mHour = mHour!!,
+                mMinute = mMinute!!,
+                mTag = mTag!!
+              )
               )
             } else if (bleKeyFlag == BleKeyFlag.DELETE) {
               // 如果缓存中有闹钟的话，删除第一个
               val alarms = BleCache.getList(BleKey.ALARM, BleAlarm::class.java)
               if (alarms.isNotEmpty()) {
-                BleConnector.sendInt8(bleKey, bleKeyFlag, alarms[0].mId)
+                BleConnector.sendInt8(bleKey, bleKeyFlag, alarms[index!!].mId)
               }
             } else if (bleKeyFlag == BleKeyFlag.UPDATE) {
               // 如果缓存中有闹钟的话，切换第一个闹钟的开启状态
               val alarms = BleCache.getList(BleKey.ALARM, BleAlarm::class.java)
               if (alarms.isNotEmpty()) {
-                alarms[0].let { alarm ->
-                  alarm.mEnabled = if (alarm.mEnabled == 0) 1 else 0
+                alarms[index!!].let { alarm ->
+                  if (mEnabled != null) {
+                    alarm.mEnabled = mEnabled
+                  }
+                  if (bleRepeat != null) {
+                    alarm.mRepeat = bleRepeat
+                  }
+                  if (mYear != null) {
+                    alarm.mYear = mYear
+                  }
+                  if (mMonth != null) {
+                    alarm.mMonth = mMonth
+                  }
+                  if (mDay != null) {
+                    alarm.mDay = mDay
+                  }
+                  if (mHour != null) {
+                    alarm.mHour = mHour
+                  }
+                  if (mMinute != null) {
+                    alarm.mMinute = mMinute
+                  }
+                  if (mTag != null) {
+                    alarm.mTag = mTag
+                  }
                   BleConnector.sendObject(bleKey, bleKeyFlag, alarm)
                 }
               }
@@ -2316,7 +2393,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
       cursor.close()
     }
     LogUtils.d(contact.toString())
-    //固件拟定:姓名 24和电话号码 16个字节,所以此处依据数据大小,创建array
+//Firmware drafting: name 24 and phone number 16 bytes, so create an array here based on the data size
     val bytes = ByteArray(contact.size * 40)
     for (index in contact.indices) {
       val nameBytes = contact[index].name.toByteArray()
