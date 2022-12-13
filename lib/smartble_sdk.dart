@@ -330,8 +330,10 @@ class SmartbleSdk {
       _channel.invokeMethod('WORKOUT2', {'flag': flag.name});
   Future<dynamic> kMATCH_RECORD({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('MATCH_RECORD', {'flag': flag.name});
-  Future<dynamic> kCAMERA({required SelectedBlekeyFlag flag}) =>
-      _channel.invokeMethod('CAMERA', {'flag': flag.name});
+  Future<dynamic> kCAMERA(
+          {required SelectedBlekeyFlag flag, required bool mCameraEntered}) =>
+      _channel.invokeMethod(
+          'CAMERA', {'flag': flag.name, 'mCameraEntered': mCameraEntered});
   Future<dynamic> kREQUEST_LOCATION({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('REQUEST_LOCATION', {'flag': flag.name});
   Future<dynamic> kINCOMING_CALL({required SelectedBlekeyFlag flag}) =>

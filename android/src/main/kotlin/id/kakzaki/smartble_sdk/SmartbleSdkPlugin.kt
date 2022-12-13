@@ -65,7 +65,6 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
   private lateinit var mBleKeyFlag: BleKeyFlag
   private var mType = 0
   data class Contact(var name: String, var phone: String)
-  private var mCameraEntered = false
   private var mLocationTimes = 1
   private var mClassicBluetoothState = 2
   private var sportState = BleAppSportState.STATE_START
@@ -393,11 +392,6 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         if (BuildConfig.DEBUG) {
           Log.d("onCameraStateChange","${CameraState.getState(cameraState)}")
         }
-        if (cameraState == CameraState.ENTER) {
-          mCameraEntered = true
-        } else if (cameraState == CameraState.EXIT) {
-          mCameraEntered = false
-        }
         val item: MutableMap<String, Any> = HashMap()
         item["cameraState"] = cameraState
         item["cameraStateName"] = "${CameraState.getState(cameraState)}"
@@ -408,13 +402,6 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
       override fun onCameraResponse(status: Boolean, cameraState: Int) {
         if (BuildConfig.DEBUG) {
           Log.d("onCameraResponse","$status ${CameraState.getState(cameraState)}")
-        }
-        if (status) {
-          if (cameraState == CameraState.ENTER) {
-            mCameraEntered = true
-          } else if (cameraState == CameraState.EXIT) {
-            mCameraEntered = false
-          }
         }
         val item: MutableMap<String, Any> = HashMap()
         item["status"] = status
@@ -542,7 +529,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
       @SuppressLint("MissingPermission")
       override fun onIncomingCallStatus(status: Int) {
         if (status == 0) {
-          //接听电话
+          //answer the phone
           try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
               val manager =
@@ -598,7 +585,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             e.printStackTrace()
           }
         } else {
-          //拒接
+          //Reject
           if (Build.VERSION.SDK_INT < 28) {
             try {
               val telephonyClass =
@@ -2373,7 +2360,8 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
 
           // BleCommand.CONTROL
           BleKey.CAMERA -> {
-            if (mCameraEntered) {
+            val mCameraEntered: Boolean? = call.argument<Boolean>("mCameraEntered")
+            if (mCameraEntered!!) {
               // 退出相机
               BleConnector.sendInt8(bleKey, bleKeyFlag, CameraState.EXIT)
             } else {
