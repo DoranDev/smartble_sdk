@@ -65,7 +65,6 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
   private lateinit var mBleKeyFlag: BleKeyFlag
   private var mType = 0
   data class Contact(var name: String, var phone: String)
-  private var mCameraEntered = false
   private var mLocationTimes = 1
   private var mClassicBluetoothState = 2
   private var sportState = BleAppSportState.STATE_START
@@ -393,11 +392,6 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         if (BuildConfig.DEBUG) {
           Log.d("onCameraStateChange","${CameraState.getState(cameraState)}")
         }
-        if (cameraState == CameraState.ENTER) {
-          mCameraEntered = true
-        } else if (cameraState == CameraState.EXIT) {
-          mCameraEntered = false
-        }
         val item: MutableMap<String, Any> = HashMap()
         item["cameraState"] = cameraState
         item["cameraStateName"] = "${CameraState.getState(cameraState)}"
@@ -408,13 +402,6 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
       override fun onCameraResponse(status: Boolean, cameraState: Int) {
         if (BuildConfig.DEBUG) {
           Log.d("onCameraResponse","$status ${CameraState.getState(cameraState)}")
-        }
-        if (status) {
-          if (cameraState == CameraState.ENTER) {
-            mCameraEntered = true
-          } else if (cameraState == CameraState.EXIT) {
-            mCameraEntered = false
-          }
         }
         val item: MutableMap<String, Any> = HashMap()
         item["status"] = status
@@ -542,7 +529,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
       @SuppressLint("MissingPermission")
       override fun onIncomingCallStatus(status: Int) {
         if (status == 0) {
-          //接听电话
+          //answer the phone
           try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
               val manager =
@@ -598,7 +585,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             e.printStackTrace()
           }
         } else {
-          //拒接
+          //Reject
           if (Build.VERSION.SDK_INT < 28) {
             try {
               val telephonyClass =
@@ -1621,14 +1608,98 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
           }
           BleKey.SEDENTARINESS -> {
             if (bleKeyFlag == BleKeyFlag.UPDATE) {
+              val mEnabled: Int? = call.argument<Int>("mEnabled")
+              val mRepeat: String? = call.argument<String>("mRepeat")
+              val mStartHour: Int? = call.argument<Int>("mStartHour")
+              val mStartMinute: Int? = call.argument<Int>("mStartMinute")
+              val mEndHour: Int? = call.argument<Int>("mEndHour")
+              val mEndMinute: Int? = call.argument<Int>("mEndMinute")
+              val mInterval: Int? = call.argument<Int>("mInterval")
+              val listRepeat : List<String>? = call.argument<List<String>>("listRepeat")
+              var bleRepeat : Int? = null
+              if(listRepeat!=null){
+                bleRepeat=0
+                for (item in listRepeat) {
+                  var itemRepeat : Int? = null
+                  when (item){
+                    "MONDAY" -> {
+                      itemRepeat =BleRepeat.MONDAY
+                    }
+                    "TUESDAY" -> {
+                      itemRepeat =BleRepeat.TUESDAY
+                    }
+                    "THURSDAY" -> {
+                      itemRepeat =BleRepeat.THURSDAY
+                    }
+                    "FRIDAY" -> {
+                      itemRepeat =BleRepeat.FRIDAY
+                    }
+                    "SATURDAY" -> {
+                      itemRepeat =BleRepeat.SATURDAY
+                    }
+                    "SUNDAY" -> {
+                      itemRepeat =BleRepeat.SUNDAY
+                    }
+                    "ONCE" -> {
+                      itemRepeat =BleRepeat.ONCE
+                    }
+                    "WORKDAY" -> {
+                      itemRepeat =BleRepeat.WORKDAY
+                    }
+                    "WEEKEND" -> {
+                      itemRepeat =BleRepeat.WEEKEND
+                    }
+                    "EVERYDAY" -> {
+                      itemRepeat =BleRepeat.EVERYDAY
+                    }
+                  }
+                  bleRepeat = bleRepeat!!.or(itemRepeat!!)
+                }
+              }
+              if (mRepeat != null) {
+                when (mRepeat){
+                  "MONDAY" -> {
+                    bleRepeat =BleRepeat.MONDAY
+                  }
+                  "TUESDAY" -> {
+                    bleRepeat =BleRepeat.TUESDAY
+                  }
+                  "THURSDAY" -> {
+                    bleRepeat =BleRepeat.THURSDAY
+                  }
+                  "FRIDAY" -> {
+                    bleRepeat =BleRepeat.FRIDAY
+                  }
+                  "SATURDAY" -> {
+                    bleRepeat =BleRepeat.SATURDAY
+                  }
+                  "SUNDAY" -> {
+                    bleRepeat =BleRepeat.SUNDAY
+                  }
+                  "ONCE" -> {
+                    bleRepeat =BleRepeat.ONCE
+                  }
+                  "WORKDAY" -> {
+                    bleRepeat =BleRepeat.WORKDAY
+                  }
+                  "WEEKEND" -> {
+                    bleRepeat =BleRepeat.WEEKEND
+                  }
+                  "EVERYDAY" -> {
+                    bleRepeat =BleRepeat.EVERYDAY
+                  }
+                }
+              }
               // 设置久坐
               val bleSedentariness = BleSedentarinessSettings(
-                mEnabled = 1,
+                mEnabled = mEnabled!!,
                 // Monday ~ Saturday
-                mRepeat = BleRepeat.MONDAY or BleRepeat.TUESDAY or BleRepeat.WEDNESDAY or BleRepeat.THURSDAY or BleRepeat.FRIDAY or BleRepeat.SATURDAY,
-                mStartHour = 1,
-                mEndHour = 22,
-                mInterval = 60
+                mRepeat = bleRepeat!!,
+                mStartHour = mStartHour!!,
+                mStartMinute = mStartMinute!!,
+                mEndHour = mEndHour!!,
+                mEndMinute = mEndMinute!!,
+                mInterval = mInterval!!
               )
               BleConnector.sendObject(bleKey, bleKeyFlag, bleSedentariness)
             } else if (bleKeyFlag == BleKeyFlag.READ) {
@@ -1705,7 +1776,47 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             val mHour: Int? = call.argument<Int>("mHour")
             val mMinute: Int? = call.argument<Int>("mMinute")
             val mTag: String? = call.argument<String>("mTag")
-            var bleRepeat : Int? = null;
+            val listRepeat : List<String>? = call.argument<List<String>>("listRepeat")
+            var bleRepeat : Int? = null
+            if(listRepeat!=null){
+              bleRepeat=0
+              for (item in listRepeat) {
+                var itemRepeat : Int? = null
+                when (item){
+                  "MONDAY" -> {
+                    itemRepeat =BleRepeat.MONDAY
+                  }
+                  "TUESDAY" -> {
+                    itemRepeat =BleRepeat.TUESDAY
+                  }
+                  "THURSDAY" -> {
+                    itemRepeat =BleRepeat.THURSDAY
+                  }
+                  "FRIDAY" -> {
+                    itemRepeat =BleRepeat.FRIDAY
+                  }
+                  "SATURDAY" -> {
+                    itemRepeat =BleRepeat.SATURDAY
+                  }
+                  "SUNDAY" -> {
+                    itemRepeat =BleRepeat.SUNDAY
+                  }
+                  "ONCE" -> {
+                    itemRepeat =BleRepeat.ONCE
+                  }
+                  "WORKDAY" -> {
+                    itemRepeat =BleRepeat.WORKDAY
+                  }
+                  "WEEKEND" -> {
+                    itemRepeat =BleRepeat.WEEKEND
+                  }
+                  "EVERYDAY" -> {
+                    itemRepeat =BleRepeat.EVERYDAY
+                  }
+                }
+                bleRepeat = bleRepeat!!.or(itemRepeat!!)
+              }
+            }
             if (mRepeat != null) {
               when (mRepeat){
                 "MONDAY" -> {
@@ -2249,12 +2360,11 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
 
           // BleCommand.CONTROL
           BleKey.CAMERA -> {
-            if (mCameraEntered) {
-              // 退出相机
-              BleConnector.sendInt8(bleKey, bleKeyFlag, CameraState.EXIT)
-            } else {
-              // 进入相机
+            val mCameraEntered: Boolean? = call.argument<Boolean>("mCameraEntered")
+            if (mCameraEntered!!) {
               BleConnector.sendInt8(bleKey, bleKeyFlag, CameraState.ENTER)
+            } else {
+              BleConnector.sendInt8(bleKey, bleKeyFlag, CameraState.EXIT)
             }
           }
           BleKey.REQUEST_LOCATION -> {

@@ -1,3 +1,23 @@
+## 0.3.4
+
+* Camera
+
+## 0.3.3
+
+* Camera
+
+## 0.3.2
+
+* sedentary
+
+## 0.3.1
+
+* add other dials
+
+## 0.3.0
+
+* alarm fix
+
 ## 0.2.9
 
 * alarm
