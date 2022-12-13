@@ -91,7 +91,9 @@ class SmartbleSdk {
     required int mEnabled,
     String? mRepeat,
     required int mStartHour,
+    required int mStartMinute,
     required int mEndHour,
+    required int mEndMinute,
     required int mInterval,
     List? listRepeat,
   }) =>
@@ -99,7 +101,9 @@ class SmartbleSdk {
         'flag': flag.name,
         'mEnabled': mEnabled,
         'mStartHour': mStartHour,
+        'mStartMinute': mStartMinute,
         'mEndHour': mEndHour,
+        'mEndMinute': mEndMinute,
         'mRepeat': mRepeat,
         'listRepeat': listRepeat,
       });

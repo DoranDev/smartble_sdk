@@ -1624,7 +1624,9 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
               val mEnabled: Int? = call.argument<Int>("mEnabled")
               val mRepeat: String? = call.argument<String>("mRepeat")
               val mStartHour: Int? = call.argument<Int>("mStartHour")
+              val mStartMinute: Int? = call.argument<Int>("mStartMinute")
               val mEndHour: Int? = call.argument<Int>("mEndHour")
+              val mEndMinute: Int? = call.argument<Int>("mEndMinute")
               val mInterval: Int? = call.argument<Int>("mInterval")
               val listRepeat : List<String>? = call.argument<List<String>>("listRepeat")
               var bleRepeat : Int? = null
@@ -1707,7 +1709,9 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
                 // Monday ~ Saturday
                 mRepeat = bleRepeat!!,
                 mStartHour = mStartHour!!,
+                mStartMinute = mStartMinute!!,
                 mEndHour = mEndHour!!,
+                mEndMinute = mEndMinute!!,
                 mInterval = mInterval!!
               )
               BleConnector.sendObject(bleKey, bleKeyFlag, bleSedentariness)
