@@ -2362,11 +2362,9 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
           BleKey.CAMERA -> {
             val mCameraEntered: Boolean? = call.argument<Boolean>("mCameraEntered")
             if (mCameraEntered!!) {
-              // 退出相机
-              BleConnector.sendInt8(bleKey, bleKeyFlag, CameraState.EXIT)
-            } else {
-              // 进入相机
               BleConnector.sendInt8(bleKey, bleKeyFlag, CameraState.ENTER)
+            } else {
+              BleConnector.sendInt8(bleKey, bleKeyFlag, CameraState.EXIT)
             }
           }
           BleKey.REQUEST_LOCATION -> {
