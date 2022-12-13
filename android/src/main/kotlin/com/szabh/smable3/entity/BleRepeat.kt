@@ -29,13 +29,13 @@ object BleRepeat {
     }
 
     /**
-     * 把Int值的重复转换成索引集合，比如 MONDAY | TUESDAY 转换成 (0 ,1), 具体依赖transfer的返回值，默认:
-     * MONDAY索引为0
-     * TUESDAY索引为1
-     *   ..
-     *   ..
-     * SATURDAY索引为5
-     * SUNDAY索引为6
+     * Convert repetitions of Int values ​​into index sets, such as MONDAY | TUESDAY into (0 ,1), depending on the return value of transfer, default:
+     * MONDAY index is 0
+     * TUESDAY index is 1
+     *..
+     *..
+     * SATURDAY index is 5
+     * SUNDAY index is 6
      */
     fun toIndices(repeat: Int, transfer: (Int) -> Int = { WEEKDAYS.indexOf(it) }): Set<Int> {
         val indices = mutableSetOf<Int>()

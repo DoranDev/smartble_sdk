@@ -34,7 +34,7 @@ class _MyAppState extends State<MyApp> {
             children: [
               TextButton(
                   onPressed: () {
-                    smartble.scan();
+                    smartble.scan(isScan: true);
                   },
                   child: const Text("Scan")),
               StreamBuilder<dynamic>(
@@ -68,10 +68,11 @@ class _MyAppState extends State<MyApp> {
                               padding: const EdgeInsets.all(16.0),
                               child: InkWell(
                                 onTap: () {
-                                  smartble.connect(
+                                  smartble.setAddress(
                                       bname: "${listdata[i]['deviceName']}",
                                       bmac:
                                           "${listdata[i]['deviceMacAddress']}");
+                                  smartble.connect();
                                 },
                                 child: Text(
                                   "${listdata[i]['deviceName']} ${listdata[i]['deviceMacAddress']}",

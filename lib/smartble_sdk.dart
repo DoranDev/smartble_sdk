@@ -86,8 +86,23 @@ class SmartbleSdk {
   Future<dynamic> kBACK_LIGHT(
           {required SelectedBlekeyFlag flag, required int times}) =>
       _channel.invokeMethod('BACK_LIGHT', {'flag': flag.name, 'times': times});
-  Future<dynamic> kSEDENTARINESS({required SelectedBlekeyFlag flag}) =>
-      _channel.invokeMethod('SEDENTARINESS', {'flag': flag.name});
+  Future<dynamic> kSEDENTARINESS({
+    required SelectedBlekeyFlag flag,
+    required int mEnabled,
+    String? mRepeat,
+    required int mStartHour,
+    required int mEndHour,
+    required int mInterval,
+    List? listRepeat,
+  }) =>
+      _channel.invokeMethod('SEDENTARINESS', {
+        'flag': flag.name,
+        'mEnabled': mEnabled,
+        'mStartHour': mStartHour,
+        'mEndHour': mEndHour,
+        'mRepeat': mRepeat,
+        'listRepeat': listRepeat,
+      });
   Future<dynamic> kNO_DISTURB_RANGE({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('NO_DISTURB_RANGE', {'flag': flag.name});
   Future<dynamic> kVIBRATION(
@@ -115,29 +130,30 @@ class SmartbleSdk {
       _channel.invokeMethod('HOUR_SYSTEM', {'flag': flag.name});
   Future<dynamic> kLANGUAGE({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('LANGUAGE', {'flag': flag.name});
-  Future<dynamic> kALARM({
-    required SelectedBlekeyFlag flag,
-    int? index,
-    int? mEnabled,
-    String? mRepeat,
-    int? mYear,
-    int? mMonth,
-    int? mDay,
-    int? mHour,
-    int? mMinute,
-    String? mTag,
-  }) =>
+  Future<dynamic> kALARM(
+          {required SelectedBlekeyFlag flag,
+          int? index,
+          int? mEnabled,
+          String? mRepeat,
+          int? mYear,
+          int? mMonth,
+          int? mDay,
+          int? mHour,
+          int? mMinute,
+          String? mTag,
+          List? listRepeat}) =>
       _channel.invokeMethod('ALARM', {
         'flag': flag.name,
         'index': index,
         'mEnabled': mEnabled,
-        'mRepeat': BleRepeat,
+        'mRepeat': mRepeat,
         'mYear': mYear,
         'mMonth': mMonth,
         'mDay': mDay,
         'mHour': mHour,
         'mMinute': mMinute,
         'mTag': mTag,
+        'listRepeat': listRepeat
       });
   Future<dynamic> kCOACHING({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('COACHING', {'flag': flag.name});

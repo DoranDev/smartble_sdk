@@ -1621,14 +1621,94 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
           }
           BleKey.SEDENTARINESS -> {
             if (bleKeyFlag == BleKeyFlag.UPDATE) {
+              val mEnabled: Int? = call.argument<Int>("mEnabled")
+              val mRepeat: String? = call.argument<String>("mRepeat")
+              val mStartHour: Int? = call.argument<Int>("mStartHour")
+              val mEndHour: Int? = call.argument<Int>("mEndHour")
+              val mInterval: Int? = call.argument<Int>("mInterval")
+              val listRepeat : List<String>? = call.argument<List<String>>("listRepeat")
+              var bleRepeat : Int? = null
+              if(listRepeat!=null){
+                bleRepeat=0
+                for (item in listRepeat) {
+                  var itemRepeat : Int? = null
+                  when (item){
+                    "MONDAY" -> {
+                      itemRepeat =BleRepeat.MONDAY
+                    }
+                    "TUESDAY" -> {
+                      itemRepeat =BleRepeat.TUESDAY
+                    }
+                    "THURSDAY" -> {
+                      itemRepeat =BleRepeat.THURSDAY
+                    }
+                    "FRIDAY" -> {
+                      itemRepeat =BleRepeat.FRIDAY
+                    }
+                    "SATURDAY" -> {
+                      itemRepeat =BleRepeat.SATURDAY
+                    }
+                    "SUNDAY" -> {
+                      itemRepeat =BleRepeat.SUNDAY
+                    }
+                    "ONCE" -> {
+                      itemRepeat =BleRepeat.ONCE
+                    }
+                    "WORKDAY" -> {
+                      itemRepeat =BleRepeat.WORKDAY
+                    }
+                    "WEEKEND" -> {
+                      itemRepeat =BleRepeat.WEEKEND
+                    }
+                    "EVERYDAY" -> {
+                      itemRepeat =BleRepeat.EVERYDAY
+                    }
+                  }
+                  bleRepeat = bleRepeat!!.or(itemRepeat!!)
+                }
+              }
+              if (mRepeat != null) {
+                when (mRepeat){
+                  "MONDAY" -> {
+                    bleRepeat =BleRepeat.MONDAY
+                  }
+                  "TUESDAY" -> {
+                    bleRepeat =BleRepeat.TUESDAY
+                  }
+                  "THURSDAY" -> {
+                    bleRepeat =BleRepeat.THURSDAY
+                  }
+                  "FRIDAY" -> {
+                    bleRepeat =BleRepeat.FRIDAY
+                  }
+                  "SATURDAY" -> {
+                    bleRepeat =BleRepeat.SATURDAY
+                  }
+                  "SUNDAY" -> {
+                    bleRepeat =BleRepeat.SUNDAY
+                  }
+                  "ONCE" -> {
+                    bleRepeat =BleRepeat.ONCE
+                  }
+                  "WORKDAY" -> {
+                    bleRepeat =BleRepeat.WORKDAY
+                  }
+                  "WEEKEND" -> {
+                    bleRepeat =BleRepeat.WEEKEND
+                  }
+                  "EVERYDAY" -> {
+                    bleRepeat =BleRepeat.EVERYDAY
+                  }
+                }
+              }
               // 设置久坐
               val bleSedentariness = BleSedentarinessSettings(
-                mEnabled = 1,
+                mEnabled = mEnabled!!,
                 // Monday ~ Saturday
-                mRepeat = BleRepeat.MONDAY or BleRepeat.TUESDAY or BleRepeat.WEDNESDAY or BleRepeat.THURSDAY or BleRepeat.FRIDAY or BleRepeat.SATURDAY,
-                mStartHour = 1,
-                mEndHour = 22,
-                mInterval = 60
+                mRepeat = bleRepeat!!,
+                mStartHour = mStartHour!!,
+                mEndHour = mEndHour!!,
+                mInterval = mInterval!!
               )
               BleConnector.sendObject(bleKey, bleKeyFlag, bleSedentariness)
             } else if (bleKeyFlag == BleKeyFlag.READ) {
@@ -1705,7 +1785,47 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             val mHour: Int? = call.argument<Int>("mHour")
             val mMinute: Int? = call.argument<Int>("mMinute")
             val mTag: String? = call.argument<String>("mTag")
-            var bleRepeat : Int? = null;
+            val listRepeat : List<String>? = call.argument<List<String>>("listRepeat")
+            var bleRepeat : Int? = null
+            if(listRepeat!=null){
+              bleRepeat=0
+              for (item in listRepeat) {
+                var itemRepeat : Int? = null
+                when (item){
+                  "MONDAY" -> {
+                    itemRepeat =BleRepeat.MONDAY
+                  }
+                  "TUESDAY" -> {
+                    itemRepeat =BleRepeat.TUESDAY
+                  }
+                  "THURSDAY" -> {
+                    itemRepeat =BleRepeat.THURSDAY
+                  }
+                  "FRIDAY" -> {
+                    itemRepeat =BleRepeat.FRIDAY
+                  }
+                  "SATURDAY" -> {
+                    itemRepeat =BleRepeat.SATURDAY
+                  }
+                  "SUNDAY" -> {
+                    itemRepeat =BleRepeat.SUNDAY
+                  }
+                  "ONCE" -> {
+                    itemRepeat =BleRepeat.ONCE
+                  }
+                  "WORKDAY" -> {
+                    itemRepeat =BleRepeat.WORKDAY
+                  }
+                  "WEEKEND" -> {
+                    itemRepeat =BleRepeat.WEEKEND
+                  }
+                  "EVERYDAY" -> {
+                    itemRepeat =BleRepeat.EVERYDAY
+                  }
+                }
+                bleRepeat = bleRepeat!!.or(itemRepeat!!)
+              }
+            }
             if (mRepeat != null) {
               when (mRepeat){
                 "MONDAY" -> {
