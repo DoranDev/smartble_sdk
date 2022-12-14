@@ -105,6 +105,7 @@ class SmartbleSdk {
         'mEndHour': mEndHour,
         'mEndMinute': mEndMinute,
         'mRepeat': mRepeat,
+        'mInterval': mInterval,
         'listRepeat': listRepeat,
       });
   Future<dynamic> kNO_DISTURB_RANGE({required SelectedBlekeyFlag flag}) =>
