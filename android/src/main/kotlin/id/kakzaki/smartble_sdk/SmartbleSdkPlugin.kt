@@ -46,6 +46,8 @@ import java.io.InputStream
 import java.net.URL
 import java.nio.channels.FileChannel.open
 import java.util.*
+import java.util.concurrent.Executors
+import java.util.concurrent.Future
 import kotlin.random.Random
 
 
@@ -2331,17 +2333,21 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
               // 发送文件
               val url: String? = call.argument<String>("url")
               if(url!=null){
-                val urlCon = URL(url)
-                val connection = urlCon.openConnection()
-                val inputStream = connection.getInputStream()
-                BleConnector.sendStream(bleKey ,inputStream,0)
+                DownloadTask(bleKey).execute(url)
+//                val executor = Executors.newSingleThreadExecutor()
+//                val future = executor.submit {
+//                  val url = URL(url)
+//                  val connection = url.openConnection()
+//                  connection.getInputStream()
+//                }
+//                val inputStream = future.get()
+//                if (inputStream != null) {
+//                  BleConnector.sendStream(bleKey ,inputStream as InputStream,0)
+//                }
               }
               val path: String? = call.argument<String>("path")
               if(path!=null){
-                val url = URL(path)
-                val connection = url.openConnection()
-                val inputStream = connection.getInputStream()
-//                val inputStream: InputStream = mContext!!.assets.open(path)
+                val inputStream: InputStream = mContext!!.assets.open(path)
                 BleConnector.sendStream(bleKey ,inputStream,0)
               }
             }
@@ -2999,4 +3005,18 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
     }
   }
 
+}
+
+
+class DownloadTask(val bleKey: BleKey) : AsyncTask<String, Int, ByteArray>() {
+
+  override fun doInBackground(vararg urls: String): ByteArray {
+    val url = URL(urls[0])
+    val connection = url.openConnection()
+    return connection.getInputStream().readBytes()
+  }
+
+  override fun onPostExecute(result: ByteArray) {
+    BleConnector.sendStream(bleKey ,result)
+  }
 }
