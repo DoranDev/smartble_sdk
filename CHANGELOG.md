@@ -1,3 +1,7 @@
+## 0.3.9
+
+* Sedentary
+
 ## 0.3.8
 
 * DownloadTask Url
