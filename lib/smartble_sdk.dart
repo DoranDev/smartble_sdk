@@ -353,7 +353,8 @@ class SmartbleSdk {
   Future<dynamic> kFONT_FILE({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('FONT_FILE', {'flag': flag.name});
   Future<dynamic> kCONTACT(
-          {required SelectedBlekeyFlag flag, required List listContact}) =>
+          {required SelectedBlekeyFlag flag,
+          required List<Map<String, String>> listContact}) =>
       _channel.invokeMethod(
           'CONTACT', {'flag': flag.name, 'listContact': listContact});
   Future<dynamic> kUI_FILE({required SelectedBlekeyFlag flag}) =>

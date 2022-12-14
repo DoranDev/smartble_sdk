@@ -2446,7 +2446,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             val contact = ArrayList<Contact>()
             if (listContact != null) {
               for (cont in listContact) {
-                contact.add(Contact(cont["disPlayName"]!!, cont["phone"]!!))
+                contact.add(Contact(cont["displayName"]!!, cont["phone"]!!))
               }
             }
             //Firmware drafting: name 24 and phone number 16 bytes, so create an array here based on the data size
