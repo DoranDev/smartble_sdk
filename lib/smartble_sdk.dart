@@ -346,14 +346,16 @@ class SmartbleSdk {
   Future<dynamic> kDEVICE_SMS_QUICK_REPLY({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('DEVICE_SMS_QUICK_REPLY', {'flag': flag.name});
   Future<dynamic> kWATCH_FACE(
-          {required SelectedBlekeyFlag flag, required String path}) =>
-      _channel.invokeMethod('WATCH_FACE', {'flag': flag.name, 'path': path});
+          {required SelectedBlekeyFlag flag, String? path, String? url}) =>
+      _channel.invokeMethod(
+          'WATCH_FACE', {'flag': flag.name, 'path': path, 'url': url});
   Future<dynamic> kAGPS_FILE({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('AGPS_FILE', {'flag': flag.name});
   Future<dynamic> kFONT_FILE({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('FONT_FILE', {'flag': flag.name});
   Future<dynamic> kCONTACT(
-          {required SelectedBlekeyFlag flag, required List listContact}) =>
+          {required SelectedBlekeyFlag flag,
+          required List<Map<String, String>> listContact}) =>
       _channel.invokeMethod(
           'CONTACT', {'flag': flag.name, 'listContact': listContact});
   Future<dynamic> kUI_FILE({required SelectedBlekeyFlag flag}) =>
@@ -685,6 +687,12 @@ class SmartbleSdk {
       EventChannel('onDeviceConnecting');
   static Stream<dynamic> get onDeviceConnectingStream {
     return _onDeviceConnectingChannel.receiveBroadcastStream().cast();
+  }
+
+  static const EventChannel _onIncomingCallStatusChannel =
+      EventChannel('onIncomingCallStatus');
+  static Stream<dynamic> get onIncomingCallStatusStream {
+    return _onIncomingCallStatusChannel.receiveBroadcastStream().cast();
   }
 }
 

@@ -46,6 +46,8 @@ import java.io.InputStream
 import java.net.URL
 import java.nio.channels.FileChannel.open
 import java.util.*
+import java.util.concurrent.Executors
+import java.util.concurrent.Future
 import kotlin.random.Random
 
 
@@ -181,6 +183,8 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
   private var onReadPressureSink: EventSink?=null
   private var onDeviceConnectingChannel : EventChannel?=null
   private var onDeviceConnectingSink: EventSink?=null
+  private var onIncomingCallStatusChannel : EventChannel?=null
+  private var onIncomingCallStatusSink: EventSink?=null
 
   private var mResult: Result? = null
   private val mDevices = mutableListOf<Any>()
@@ -526,108 +530,17 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
           onStreamProgressSink!!.success(item)
       }
 
-      @SuppressLint("MissingPermission")
+
       override fun onIncomingCallStatus(status: Int) {
-        if (status == 0) {
-          //answer the phone
-          try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-              val manager =
-                mContext!!.getSystemService(Context.TELECOM_SERVICE) as TelecomManager?
-              manager?.acceptRingingCall()
-            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-              //其中  NotificationListenerService 需要在 Manifest 中定义为服务后才可以使用，例如
-              /**
-              <service
-              android:name=".ble.MyNotificationListenerService"
-              android:label="@string/app_name"
-              android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
-              <intent-filter>
-              <action android:name="android.service.notification.NotificationListenerService" />
-              </intent-filter>
-              </service>
-               */
-
-//                            val mediaSessionManager =
-//                                getSystemService(Context.MEDIA_SESSION_SERVICE) as MediaSessionManager
-//                            val mediaControllerList = mediaSessionManager.getActiveSessions(
-//                                ComponentName(this, NotificationListenerService::class.java)
-//                            )
-//                            for (m in mediaControllerList) {
-//                                if ("com.android.server.telecom" == m.packageName) {
-//                                    m.dispatchMediaButtonEvent(
-//                                        KeyEvent(
-//                                            KeyEvent.ACTION_DOWN,
-//                                            KeyEvent.KEYCODE_HEADSETHOOK
-//                                        )
-//                                    )
-//                                    m.dispatchMediaButtonEvent(
-//                                        KeyEvent(
-//                                            KeyEvent.ACTION_UP,
-//                                            KeyEvent.KEYCODE_HEADSETHOOK
-//                                        )
-//                                    )
-//                                    break
-//                                }
-//                            }
-            } else {
-              val audioManager =
-                mContext!!.getSystemService(Context.AUDIO_SERVICE) as AudioManager?
-              val eventDown =
-                KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_HEADSETHOOK)
-              val eventUp = KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_HEADSETHOOK)
-              audioManager?.dispatchMediaKeyEvent(eventDown)
-              audioManager?.dispatchMediaKeyEvent(eventUp)
-              Runtime.getRuntime()
-                .exec("input keyevent " + Integer.toString(KeyEvent.KEYCODE_HEADSETHOOK))
-            }
-          } catch (e: Exception) {
-            e.printStackTrace()
-          }
-        } else {
-          //Reject
-          if (Build.VERSION.SDK_INT < 28) {
-            try {
-              val telephonyClass =
-                Class.forName("com.android.internal.telephony.ITelephony")
-              val telephonyStubClass = telephonyClass.classes[0]
-              val serviceManagerClass = Class.forName("android.os.ServiceManager")
-              val serviceManagerNativeClass =
-                Class.forName("android.os.ServiceManagerNative")
-              val getService =
-                serviceManagerClass.getMethod("getService", String::class.java)
-              val tempInterfaceMethod =
-                serviceManagerNativeClass.getMethod(
-                  "asInterface",
-                  IBinder::class.java
-                )
-              val tmpBinder = Binder()
-              tmpBinder.attachInterface(null, "fake")
-              val serviceManagerObject = tempInterfaceMethod.invoke(null, tmpBinder)
-              val retbinder =
-                getService.invoke(serviceManagerObject, "phone") as IBinder
-              val serviceMethod =
-                telephonyStubClass.getMethod("asInterface", IBinder::class.java)
-              val telephonyObject = serviceMethod.invoke(null, retbinder)
-              val telephonyEndCall = telephonyClass.getMethod("endCall")
-              telephonyEndCall.invoke(telephonyObject)
-            } catch (e: Exception) {
-              LogUtils.d("hang up error " + e.message)
-            }
-          } else {
-            PermissionUtils
-              .permission(PermissionConstants.PHONE)
-              .request2 {
-                if (it == PermissionStatus.GRANTED) {
-                  LogUtils.d("hang up OK")
-                  val manager =
-                    mContext!!.getSystemService(Context.TELECOM_SERVICE) as TelecomManager
-                  manager.endCall()
-                }
-              }
-          }
+        if (BuildConfig.DEBUG) {
+          Log.d("onIncomingCallStatus","$status ${if (status == 0) "Answer" else "Reject"}")
         }
-
+        val item: MutableMap<String, Any> = HashMap()
+        item["status"] = status
+        item["message"] = if (status == 0) "Answer" else "Reject"
+        if(onIncomingCallStatusSink!=null){
+          onIncomingCallStatusSink!!.success(item)
+        }
       }
 
       override fun onUpdateAppSportState(appSportState: BleAppSportState) {
@@ -1055,6 +968,8 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
     onReadPressureChannel!!.setStreamHandler(onReadPressureResultsHandler)
     onDeviceConnectingChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onDeviceConnecting")
     onDeviceConnectingChannel!!.setStreamHandler(onDeviceConnectingResultsHandler)
+    onIncomingCallStatusChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onIncomingCallStatus")
+    onIncomingCallStatusChannel!!.setStreamHandler(onIncomingCallStatusResultsHandler)
     val connector = BleConnector.Builder(flutterPluginBinding.applicationContext)
       .supportRealtekDfu(false) // Whether to support Realtek device Dfu, pass false if no support is required.
       .supportMtkOta(false) // Whether to support MTK device Ota, pass false if no support is required.
@@ -2416,12 +2331,23 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
           BleKey.WATCH_FACE, BleKey.AGPS_FILE, BleKey.FONT_FILE, BleKey.UI_FILE, BleKey.LANGUAGE_FILE, BleKey.BRAND_INFO_FILE -> {
             if (bleKeyFlag == BleKeyFlag.UPDATE) {
               // 发送文件
+              val url: String? = call.argument<String>("url")
+              if(url!=null){
+                DownloadTask(bleKey).execute(url)
+//                val executor = Executors.newSingleThreadExecutor()
+//                val future = executor.submit {
+//                  val url = URL(url)
+//                  val connection = url.openConnection()
+//                  connection.getInputStream()
+//                }
+//                val inputStream = future.get()
+//                if (inputStream != null) {
+//                  BleConnector.sendStream(bleKey ,inputStream as InputStream,0)
+//                }
+              }
               val path: String? = call.argument<String>("path")
               if(path!=null){
                 val inputStream: InputStream = mContext!!.assets.open(path)
-//                val bytes = inputStream.use {
-//                  it.readBytes()
-//                }
                 BleConnector.sendStream(bleKey ,inputStream,0)
               }
             }
@@ -2446,7 +2372,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             val contact = ArrayList<Contact>()
             if (listContact != null) {
               for (cont in listContact) {
-                contact.add(Contact(cont["disPlayName"]!!, cont["phone"]!!))
+                contact.add(Contact(cont["displayName"]!!, cont["phone"]!!))
               }
             }
             //Firmware drafting: name 24 and phone number 16 bytes, so create an array here based on the data size
@@ -3069,5 +2995,28 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
     override fun onCancel(o: Any?) {
     }
   }
+  private val onIncomingCallStatusResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onIncomingCallStatusSink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
 
+}
+
+
+class DownloadTask(val bleKey: BleKey) : AsyncTask<String, Int, ByteArray>() {
+
+  override fun doInBackground(vararg urls: String): ByteArray {
+    val url = URL(urls[0])
+    val connection = url.openConnection()
+    return connection.getInputStream().readBytes()
+  }
+
+  override fun onPostExecute(result: ByteArray) {
+    BleConnector.sendStream(bleKey ,result)
+  }
 }
