@@ -1,3 +1,7 @@
+## 0.3.7
+
+* State incoming call & watch face url
+
 ## 0.3.6
 
 * List Contact
