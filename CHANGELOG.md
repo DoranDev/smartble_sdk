@@ -1,3 +1,7 @@
+## 0.3.5
+
+* List Contact
+
 ## 0.3.4
 
 * Camera

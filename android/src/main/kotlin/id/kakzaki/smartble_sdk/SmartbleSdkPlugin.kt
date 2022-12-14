@@ -2427,21 +2427,50 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             }
 
           }
+//          BleKey.CONTACT -> {
+//            PermissionUtils
+//              .permission(PermissionConstants.CONTACTS)
+//              .require(Manifest.permission.READ_CONTACTS) { granted ->
+//                if (granted) {
+//                  val bytes = getContactBytes()
+//                  if (bytes.isNotEmpty()) {
+//                    BleConnector.sendStream(BleKey.CONTACT, bytes)
+//                  } else {
+//                    LogUtils.d("contact is empty")
+//                  }
+//                }
+//              }
+//          }
           BleKey.CONTACT -> {
-            PermissionUtils
-              .permission(PermissionConstants.CONTACTS)
-              .require(Manifest.permission.READ_CONTACTS) { granted ->
-                if (granted) {
-                  val bytes = getContactBytes()
-                  if (bytes.isNotEmpty()) {
-                    BleConnector.sendStream(BleKey.CONTACT, bytes)
-                  } else {
-                    LogUtils.d("contact is empty")
-                  }
+            val listContact : List<Map<String,String>>? = call.argument<List<Map<String,String>>>("listContact")
+            val contact = ArrayList<Contact>()
+            if (listContact != null) {
+              for (cont in listContact) {
+                contact.add(Contact(cont["disPlayName"]!!, cont["phone"]!!))
+              }
+            }
+            //Firmware drafting: name 24 and phone number 16 bytes, so create an array here based on the data size
+            val bytes = ByteArray(contact.size * 40)
+            for (index in contact.indices) {
+              val nameBytes = contact[index].name.toByteArray()
+              for (valueIndex in nameBytes.indices) {
+                if (valueIndex < 24) {
+                  bytes[index * 40 + valueIndex] = nameBytes[valueIndex]
                 }
               }
+              val phoneBytes = contact[index].phone.toByteArray()
+              for (valueIndex in phoneBytes.indices) {
+                if (valueIndex < 16) {
+                  bytes[index * 40 + 24 + valueIndex] = phoneBytes[valueIndex]
+                }
+              }
+            }
+            if (bytes.isNotEmpty()) {
+              BleConnector.sendStream(BleKey.CONTACT, bytes)
+            } else {
+              LogUtils.d("contact is empty")
+            }
           }
-
           BleKey.DEVICE_FILE -> {
             if (bleKeyFlag == BleKeyFlag.READ) {
               BleConnector.sendData(bleKey, bleKeyFlag)
@@ -2454,74 +2483,8 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         }
       }
     }
-
   }
 
-
-  @SuppressLint("Range")
-  private fun getContactBytes(): ByteArray {
-    val cursor = mContext!!.contentResolver.query(
-      ContactsContract.Contacts.CONTENT_URI,
-      null,
-      null,
-      null,
-      "${ContactsContract.Contacts.DISPLAY_NAME} COLLATE LOCALIZED ASC"
-    )
-    val contact = ArrayList<Contact>()
-    if (cursor != null && cursor.moveToFirst()) {
-      do {
-        val idColumn: Int =
-          cursor.getColumnIndex(ContactsContract.Contacts._ID)
-        val displayNameColumn: Int =
-          cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME)
-        // 获得联系人的ID号
-        val contactId: String = cursor.getString(idColumn)
-        // 获得联系人姓名
-        val disPlayName: String =
-          cursor.getString(displayNameColumn)
-        val phones =
-          mContext!!.contentResolver.query(
-            ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-            null,
-            ContactsContract.CommonDataKinds.Phone.CONTACT_ID
-                    + " = " + contactId, null, null
-          )
-        if (phones != null && phones.moveToFirst()) {
-          //电话号码如果有多个,则只取第一个,
-          var phone: String =
-            phones.getString(
-              phones.getColumnIndex(
-                ContactsContract.CommonDataKinds.Phone.NUMBER
-              )
-            )
-          phone = phone.replace("-", "")
-          phone = phone.replace(" ", "")
-//          contact.add(KeyFlagListActivity.Contact(disPlayName, phone))
-          phones.close()
-        }
-      } while (cursor.moveToNext())
-      cursor.close()
-    }
-    LogUtils.d(contact.toString())
-//Firmware drafting: name 24 and phone number 16 bytes, so create an array here based on the data size
-    val bytes = ByteArray(contact.size * 40)
-    for (index in contact.indices) {
-      val nameBytes = contact[index].name.toByteArray()
-      for (valueIndex in nameBytes.indices) {
-        if (valueIndex < 24) {
-          bytes[index * 40 + valueIndex] = nameBytes[valueIndex]
-        }
-      }
-      val phoneBytes = contact[index].phone.toByteArray()
-      for (valueIndex in phoneBytes.indices) {
-        if (valueIndex < 16) {
-          bytes[index * 40 + 24 + valueIndex] = phoneBytes[valueIndex]
-        }
-      }
-    }
-  //  LogUtils.d(bytes.mHexString)
-    return bytes
-  }
 
   private fun unbindCompleted() {
 
