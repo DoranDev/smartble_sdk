@@ -1,3 +1,7 @@
+## 0.4.2
+
+* delete notification
+
 ## 0.4.1
 
 * notification 2
