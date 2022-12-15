@@ -280,6 +280,21 @@ class SmartbleSdk {
         'mCategory': mCategory,
         'mPackage': mPackage
       });
+  Future<dynamic> kNOTIFICATION2(
+          {required SelectedBlekeyFlag flag,
+          required String mTitle,
+          required String mContent,
+          required String mPhone,
+          required String mCategory,
+          required String mPackage}) =>
+      _channel.invokeMethod('NOTIFICATION2', {
+        'flag': flag.name,
+        'mTitle': mTitle,
+        'mContent': mContent,
+        'mPhone': mPhone,
+        'mCategory': mCategory,
+        'mPackage': mPackage
+      });
   Future<dynamic> kMUSIC_CONTROL({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('MUSIC_CONTROL', {'flag': flag.name});
   Future<dynamic> kSCHEDULE({required SelectedBlekeyFlag flag}) =>
@@ -297,8 +312,6 @@ class SmartbleSdk {
   Future<dynamic> kSMS_QUICK_REPLY_CONTENT(
           {required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('SMS_QUICK_REPLY_CONTENT', {'flag': flag.name});
-  Future<dynamic> kNOTIFICATION2({required SelectedBlekeyFlag flag}) =>
-      _channel.invokeMethod('NOTIFICATION2', {'flag': flag.name});
   Future<dynamic> kDATA_ALL({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('DATA_ALL', {'flag': flag.name});
   Future<dynamic> kACTIVITY_REALTIME({required SelectedBlekeyFlag flag}) =>

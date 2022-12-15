@@ -1467,6 +1467,31 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
               BleConnector.sendData(bleKey, bleKeyFlag)
             }
           }
+          BleKey.NOTIFICATION2 -> {
+            if (bleKeyFlag == BleKeyFlag.UPDATE) {
+              val mTitle: String? = call.argument<String>("mTitle")
+              val mContent : String? = call.argument<String>("mContent")
+              val mCategory : String? = call.argument<String>("mCategory")
+              val mPackage : String? = call.argument<String>("mPackage")
+              val mPhone : String? = call.argument<String>("mPhone")
+              BleNotification2(
+                mCategory = if(mCategory=="1"){
+                  BleNotification.CATEGORY_INCOMING_CALL
+                }else{
+                  BleNotification.CATEGORY_MESSAGE
+                },
+                mTime = Date().time,
+                mPackage = "$mPackage",
+                mTitle = "$mTitle",
+                mPhone = "$mPhone",
+                mContent = "$mContent"
+              ).let { notification ->
+                BleConnector.sendObject(BleKey.NOTIFICATION2, BleKeyFlag.UPDATE, notification)
+              }
+            } else if (bleKeyFlag == BleKeyFlag.READ) {
+              BleConnector.sendData(bleKey, bleKeyFlag)
+            }
+          }
           // BleCommand.SET
           BleKey.TIME -> {
             if (bleKeyFlag == BleKeyFlag.UPDATE) {

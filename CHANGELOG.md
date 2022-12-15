@@ -1,3 +1,7 @@
+## 0.4.1
+
+* notification 2
+
 ## 0.4.0
 
 * fix notification
