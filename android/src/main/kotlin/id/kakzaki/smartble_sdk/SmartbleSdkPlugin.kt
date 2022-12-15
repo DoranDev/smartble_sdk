@@ -2365,7 +2365,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             LogUtils.d(reply)
           }
           BleKey.INCOMING_CALL -> {
-            BleConnector.sendObject(bleKey, bleKeyFlag)
+            BleConnector.sendData(bleKey, bleKeyFlag)
           }
           BleKey.CLASSIC_BLUETOOTH_STATE -> {
             // 3.0 开关
