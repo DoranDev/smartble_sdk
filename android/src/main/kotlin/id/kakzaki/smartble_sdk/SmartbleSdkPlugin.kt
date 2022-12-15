@@ -1078,9 +1078,6 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
           "POWER" -> {
             mBleKey=BleKey.POWER
           }
-          "XMODEM" -> {
-            mBleKey=BleKey.XMODEM
-          }
           "FIRMWARE_VERSION" -> {
             mBleKey=BleKey.FIRMWARE_VERSION
           }
@@ -1478,6 +1475,9 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
                         BleConnector.sendObject(BleKey.NOTIFICATION, BleKeyFlag.DELETE, notification)
                   }
                 }
+              else -> {
+                Log.i("No Flag","")
+              }
             }
           }
           BleKey.NOTIFICATION2 -> {
@@ -1517,6 +1517,9 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
                         BleConnector.sendObject(BleKey.NOTIFICATION2, BleKeyFlag.DELETE, notification)
                   }
                 }
+              else -> {
+                Log.i("No Flag","")
+              }
             }
           }
           // BleCommand.SET
@@ -2348,10 +2351,10 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
           }
           BleKey.APP_SPORT_STATE -> {
             // App 主导的运动，发送运动状态变化
-            when (sportState) {
-              BleAppSportState.STATE_START -> sportState = BleAppSportState.STATE_PAUSE
-              BleAppSportState.STATE_PAUSE -> sportState = BleAppSportState.STATE_END
-              else -> sportState = BleAppSportState.STATE_START
+            sportState = when (sportState) {
+              BleAppSportState.STATE_START -> BleAppSportState.STATE_PAUSE
+              BleAppSportState.STATE_PAUSE -> BleAppSportState.STATE_END
+              else -> BleAppSportState.STATE_START
             }
             val reply = BleAppSportState(
               mMode = BleAppSportState.MODE_INDOOR,
@@ -2360,6 +2363,9 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             BleConnector.sendObject(bleKey, bleKeyFlag, reply)
             print("$reply")
             LogUtils.d(reply)
+          }
+          BleKey.INCOMING_CALL -> {
+            BleConnector.sendData(bleKey, bleKeyFlag)
           }
           BleKey.CLASSIC_BLUETOOTH_STATE -> {
             // 3.0 开关
