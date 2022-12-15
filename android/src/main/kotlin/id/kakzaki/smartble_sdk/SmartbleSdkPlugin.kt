@@ -1444,52 +1444,79 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
 //          }
           BleKey.XMODEM -> BleConnector.sendData(bleKey, bleKeyFlag)
           BleKey.NOTIFICATION -> {
-            if (bleKeyFlag == BleKeyFlag.UPDATE) {
-              val mTitle: String? = call.argument<String>("mTitle")
-              val mContent : String? = call.argument<String>("mContent")
-              val mCategory : String? = call.argument<String>("mCategory")
-              val mPackage : String? = call.argument<String>("mPackage")
-
-              BleNotification(
-                mCategory = if(mCategory=="1"){
-                  BleNotification.CATEGORY_INCOMING_CALL
-                }else{
-                  BleNotification.CATEGORY_MESSAGE
-                },
-                mTime = Date().time,
-                mPackage = "$mPackage",
-                mTitle = "$mTitle",
-                mContent = "$mContent"
-              ).let { notification ->
-                BleConnector.sendObject(BleKey.NOTIFICATION, BleKeyFlag.UPDATE, notification)
-              }
-            } else if (bleKeyFlag == BleKeyFlag.READ) {
-              BleConnector.sendData(bleKey, bleKeyFlag)
+            val mTitle: String? = call.argument<String>("mTitle")
+            val mContent : String? = call.argument<String>("mContent")
+            val mCategory : String? = call.argument<String>("mCategory")
+            val mPackage : String? = call.argument<String>("mPackage")
+            when (bleKeyFlag) {
+                BleKeyFlag.UPDATE -> {
+                  BleNotification(
+                        mCategory = if(mCategory=="1"){
+                          BleNotification.CATEGORY_INCOMING_CALL
+                        }else{
+                          BleNotification.CATEGORY_MESSAGE
+                        },
+                        mTime = Date().time,
+                        mPackage = "$mPackage",
+                        mTitle = "$mTitle",
+                        mContent = "$mContent"
+                  ).let { notification ->
+                        BleConnector.sendObject(BleKey.NOTIFICATION, BleKeyFlag.UPDATE, notification)
+                  }
+                }
+                BleKeyFlag.READ -> {
+                  BleConnector.sendData(bleKey, bleKeyFlag)
+                }
+                BleKeyFlag.DELETE -> {
+                  BleNotification(
+                        mCategory = if(mCategory=="1"){
+                          BleNotification.CATEGORY_INCOMING_CALL
+                        }else{
+                          BleNotification.CATEGORY_MESSAGE
+                        },
+                  ).let { notification ->
+                        BleConnector.sendObject(BleKey.NOTIFICATION, BleKeyFlag.DELETE, notification)
+                  }
+                }
             }
           }
           BleKey.NOTIFICATION2 -> {
-            if (bleKeyFlag == BleKeyFlag.UPDATE) {
-              val mTitle: String? = call.argument<String>("mTitle")
-              val mContent : String? = call.argument<String>("mContent")
-              val mCategory : String? = call.argument<String>("mCategory")
-              val mPackage : String? = call.argument<String>("mPackage")
-              val mPhone : String? = call.argument<String>("mPhone")
-              BleNotification2(
-                mCategory = if(mCategory=="1"){
-                  BleNotification.CATEGORY_INCOMING_CALL
-                }else{
-                  BleNotification.CATEGORY_MESSAGE
-                },
-                mTime = Date().time,
-                mPackage = "$mPackage",
-                mTitle = "$mTitle",
-                mPhone = "$mPhone",
-                mContent = "$mContent"
-              ).let { notification ->
-                BleConnector.sendObject(BleKey.NOTIFICATION2, BleKeyFlag.UPDATE, notification)
-              }
-            } else if (bleKeyFlag == BleKeyFlag.READ) {
-              BleConnector.sendData(bleKey, bleKeyFlag)
+            val mTitle: String? = call.argument<String>("mTitle")
+            val mContent : String? = call.argument<String>("mContent")
+            val mCategory : String? = call.argument<String>("mCategory")
+            val mPackage : String? = call.argument<String>("mPackage")
+            val mPhone : String? = call.argument<String>("mPhone")
+            when (bleKeyFlag) {
+                BleKeyFlag.UPDATE -> {
+                  BleNotification2(
+                        mCategory = if(mCategory=="1"){
+                          BleNotification.CATEGORY_INCOMING_CALL
+                        }else{
+                          BleNotification.CATEGORY_MESSAGE
+                        },
+                        mTime = Date().time,
+                        mPackage = "$mPackage",
+                        mTitle = "$mTitle",
+                        mPhone = "$mPhone",
+                        mContent = "$mContent"
+                  ).let { notification ->
+                        BleConnector.sendObject(BleKey.NOTIFICATION2, BleKeyFlag.UPDATE, notification)
+                  }
+                }
+                BleKeyFlag.READ -> {
+                  BleConnector.sendData(bleKey, bleKeyFlag)
+                }
+                BleKeyFlag.DELETE -> {
+                  BleNotification2(
+                        mCategory = if(mCategory=="1"){
+                          BleNotification.CATEGORY_INCOMING_CALL
+                        }else{
+                          BleNotification.CATEGORY_MESSAGE
+                        },
+                  ).let { notification ->
+                        BleConnector.sendObject(BleKey.NOTIFICATION2, BleKeyFlag.DELETE, notification)
+                  }
+                }
             }
           }
           // BleCommand.SET
