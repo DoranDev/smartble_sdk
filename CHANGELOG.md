@@ -1,3 +1,11 @@
+## 0.4.6
+
+* activity
+
+## 0.4.5
+
+* call permission
+
 ## 0.4.4
 
 * incoming call
