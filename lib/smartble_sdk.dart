@@ -65,6 +65,20 @@ class SmartbleSdk {
   ///unbind(BluetoothDevice device)
   Future<dynamic> unbind() => _channel.invokeMethod('unbind');
 
+  ///analyzeSleep
+  Future<dynamic> analyzeSleep({required List listSleep}) {
+    List<Map<String, int>> listSleepNew = [];
+    listSleep.forEach((element) {
+      Map<String, int> map = {};
+      map["mTime"] = DateTime.parse("${map["mTime"]}").millisecondsSinceEpoch;
+      map["mMode"] = int.parse("${map["mMode"]}");
+      map["mStrong"] = int.parse("${map["mStrong"]}");
+      map["mSoft"] = int.parse("${map["mSoft"]}");
+      listSleepNew.add(map);
+    });
+    return _channel.invokeMethod('analyzeSleep', {'listSleep': listSleepNew});
+  }
+
   Future<dynamic> kOTA({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('OTA', {'flag': flag.name});
   Future<dynamic> kXMODEM({required SelectedBlekeyFlag flag}) =>

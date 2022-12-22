@@ -1061,6 +1061,18 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
       "unbind" -> {
         BleConnector.unbind();
       }
+      "analyzeSleep" -> {
+        val listSleep : List<Map<String, Int>>? = call.argument<List<Map<String, Int>>>("listSleep")
+        if (listSleep != null) {
+          val listNew = ArrayList<BleSleep>()
+            for (item in listSleep) {
+              val bleS=BleSleep(mTime =  item["mTime"]!!, mMode =item["mMode"]!! , mSoft = item["mSoft"]!!, mStrong =item["mStrong"]!! )
+              listNew.add(bleS)
+            }
+          val res = BleSleep.getSleepStatusDuration(sleeps = BleSleep.analyseSleep(listNew), origin = listNew)
+          result.success(res);
+        }
+      }
       else -> {
         when (call.method) {
           "OTA" -> {
