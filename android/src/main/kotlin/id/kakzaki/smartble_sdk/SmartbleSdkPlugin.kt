@@ -1061,6 +1061,18 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
       "unbind" -> {
         BleConnector.unbind();
       }
+      "analyzeSleep" -> {
+        val listSleep : List<Map<String, Int>>? = call.argument<List<Map<String, Int>>>("listSleep")
+        if (listSleep != null) {
+          val listNew = ArrayList<BleSleep>()
+            for (item in listSleep) {
+              val bleS=BleSleep(mTime =  item["mTime"]!!, mMode =item["mMode"]!! , mSoft = item["mSoft"]!!, mStrong =item["mStrong"]!! )
+              listNew.add(bleS)
+            }
+          val res = BleSleep.getSleepStatusDuration(sleeps = BleSleep.analyseSleep(listNew), origin = listNew)
+          result.success(res);
+        }
+      }
       else -> {
         when (call.method) {
           "OTA" -> {
@@ -2304,7 +2316,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             }
           }
           // BleCommand.DATA
-          BleKey.DATA_ALL, BleKey.ACTIVITY_REALTIME, BleKey.HEART_RATE, BleKey.BLOOD_PRESSURE, BleKey.SLEEP,
+          BleKey.DATA_ALL,BleKey.ACTIVITY, BleKey.ACTIVITY_REALTIME, BleKey.HEART_RATE, BleKey.BLOOD_PRESSURE, BleKey.SLEEP,
           BleKey.WORKOUT, BleKey.LOCATION, BleKey.TEMPERATURE, BleKey.BLOOD_OXYGEN, BleKey.HRV, BleKey.LOG, BleKey.WORKOUT2 ->
             // 读取数据
             BleConnector.sendData(bleKey, bleKeyFlag)

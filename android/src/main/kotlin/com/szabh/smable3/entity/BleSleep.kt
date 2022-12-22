@@ -5,10 +5,10 @@ import com.bestmafen.baseble.data.BleReadable
 import kotlin.math.ceil
 
 data class BleSleep(
-    var mTime: Int = 0, // 距离当地2000/1/1 00:00:00的秒数
-    var mMode: Int = 0, // 睡眠状态
-    var mSoft: Int = 0, // 轻动，即睡眠过程中检测到相对轻微的动作
-    var mStrong: Int = 0 // 重动，即睡眠过程中检测到相对剧烈的运动
+    var mTime: Int = 0, //Seconds from local 2000/1/1 00:00:00
+    var mMode: Int = 0, // sleep state
+    var mSoft: Int = 0, // Light motion, that is, relatively slight motion detected during sleep
+    var mStrong: Int = 0 // Heavy movements, that is, relatively violent movements detected during sleep
 ) : BleReadable() {
 
     override fun decode() {
@@ -193,7 +193,7 @@ data class BleSleep(
         }
 
         /**
-         * 获取各个状态的时间，分钟数，数据必须是按时间升序排列的
+         * Get the time and minutes of each state, and the data must be arranged in ascending order of time
          */
         fun getSleepStatusDuration(sleeps: List<BleSleep>): SparseIntArray {
             val result = SparseIntArray()
@@ -212,9 +212,9 @@ data class BleSleep(
         }
 
         /**
-         * 这个方法主要是为了兼容含有 [TOTAL_LENGTH] [DEEP_LENGTH] [LIGHT_LENGTH] [AWAKE_LENGTH] 的睡眠时长数据的设备
-         * @param sleeps 已分析的睡眠数据
-         * @param origin 设备返回的原始睡眠数据
+         * This method is mainly for compatibility with devices with sleep duration data of [TOTAL_LENGTH] [DEEP_LENGTH] [LIGHT_LENGTH] [AWAKE_LENGTH]
+         * @param sleeps analyzed sleep data
+         * @param origin The original sleep data returned by the device
          */
         fun getSleepStatusDuration(sleeps: List<BleSleep>, origin: List<BleSleep>): SparseIntArray {
             var result = SparseIntArray()
