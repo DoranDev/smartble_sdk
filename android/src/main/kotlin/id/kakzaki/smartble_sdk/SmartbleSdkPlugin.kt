@@ -2350,12 +2350,13 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             }
           }
           BleKey.REQUEST_LOCATION -> {
-            // 回复位置信息
+            // reply location information
             val reply = BleLocationReply(
               mSpeed = 1.11f * mLocationTimes,
               mTotalDistance = 1.11f * mLocationTimes,
               mAltitude = 111 * mLocationTimes
             )
+            print("$bleKey $bleKeyFlag")
             BleConnector.sendObject(bleKey, bleKeyFlag, reply)
             print("$reply")
             mLocationTimes++
