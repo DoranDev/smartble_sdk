@@ -1,20 +1,13 @@
 package id.kakzaki.smartble_sdk
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.content.Intent
-import android.media.AudioManager
-import android.net.Uri
 import android.os.*
-import android.provider.ContactsContract
-import android.system.Os.open
-import android.telecom.TelecomManager
 import android.text.format.DateFormat
 import android.util.Log
-import android.view.KeyEvent
 import com.bestmafen.baseble.scanner.BleDevice
 import com.bestmafen.baseble.scanner.BleScanCallback
 import com.bestmafen.baseble.scanner.BleScanFilter
@@ -28,6 +21,8 @@ import com.szabh.smable3.BleKeyFlag
 import com.szabh.smable3.component.*
 import com.szabh.smable3.entity.*
 import com.szabh.smable3.entity.BleAlarm
+import com.szabh.smable3.watchface.Element
+import com.szabh.smable3.watchface.WatchFaceBuilder
 import id.kakzaki.smartble_sdk.activity.MusicControlActivity
 import id.kakzaki.smartble_sdk.tools.*
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -41,13 +36,9 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import java.io.File
-import java.io.FileOutputStream
 import java.io.InputStream
 import java.net.URL
-import java.nio.channels.FileChannel.open
 import java.util.*
-import java.util.concurrent.Executors
-import java.util.concurrent.Future
 import kotlin.random.Random
 
 
@@ -1065,13 +1056,78 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         val listSleep : List<Map<String, Int>>? = call.argument<List<Map<String, Int>>>("listSleep")
         if (listSleep != null) {
           val listNew = ArrayList<BleSleep>()
-            for (item in listSleep) {
-              val bleS=BleSleep(mTime =  item["mTime"]!!, mMode =item["mMode"]!! , mSoft = item["mSoft"]!!, mStrong =item["mStrong"]!! )
-              listNew.add(bleS)
-            }
+          for (item in listSleep) {
+            val bleS=BleSleep(mTime =  item["mTime"]!!, mMode =item["mMode"]!! , mSoft = item["mSoft"]!!, mStrong =item["mStrong"]!! )
+            listNew.add(bleS)
+          }
           val res = BleSleep.getSleepStatusDuration(sleeps = BleSleep.analyseSleep(listNew), origin = listNew)
           result.success(res);
         }
+      }
+      "customDials" -> {
+        var imageFormat = WatchFaceBuilder.BMP_565
+        var DIAL_CUSTOMIZE_DIR = "dial_customize_454"
+        var screenWidth = 0 //The actual size of the device screen - width
+        var screenHeight = 0 //The actual size of the device screen - height
+        var screenPreviewWidth = 0 //The actual preview size of the device screen - width
+        var screenPreviewHeight = 0 //The actual preview size of the device screen - height
+        var X_CENTER = WatchFaceBuilder.GRAVITY_X_CENTER //Relative coordinate mark, MTK and Realtek have different implementations
+        var Y_CENTER = WatchFaceBuilder.GRAVITY_Y_CENTER //Relative coordinate mark, MTK and Realtek have different implementations
+
+        val elements = ArrayList<Element>()
+        val bgPreviewBytes : ByteArray? = call.argument<ByteArray?>("bgPreviewBytes")
+        val custom : Int? = call.argument<Int>("custom")
+        if (custom == 2) {
+          DIAL_CUSTOMIZE_DIR = "dial_customize_454"
+          screenWidth = 454
+          screenHeight = 454
+          screenPreviewWidth = 280
+          screenPreviewHeight = 280
+        } else {
+          DIAL_CUSTOMIZE_DIR = "dial_customize_240"
+          screenWidth = 240
+          screenHeight = 240
+          screenPreviewWidth = 150
+          screenPreviewHeight = 150
+        }
+
+        // get the background preview
+        val elementPreview = Element(
+          type = WatchFaceBuilder.ELEMENT_PREVIEW,
+          w = screenPreviewWidth, //预览的尺寸为
+          h = screenPreviewHeight,
+          gravity = X_CENTER or Y_CENTER,
+          x = screenWidth / 2,
+          y = screenHeight / 2 + 2,
+          imageBuffers = arrayOf(bgPreviewBytes!!)
+        )
+        elements.add(elementPreview)
+
+        // get the backgroundsize
+        val bgBytes : ByteArray? = call.argument<ByteArray?>("bgBytes")
+        val elementBg = Element(
+          type = WatchFaceBuilder.ELEMENT_BACKGROUND,
+          w = screenWidth, //背景的尺寸
+          h = screenHeight,
+          gravity = X_CENTER or Y_CENTER,
+          x = screenWidth / 2,
+          y = screenHeight / 2,
+          imageBuffers = arrayOf(bgBytes!!)
+        )
+        elements.add(elementBg)
+        for (element in elements) {
+          LogUtils.d("customize dial length: ${element.imageBuffers.first().size * 10 / 1024 / 10.0} KB")
+        }
+
+        val bytes = WatchFaceBuilder.build(
+          elements.toTypedArray(),
+          imageFormat
+        )
+        LogUtils.d("customize dial bytes size  ${bytes.size}")
+        BleConnector.sendStream(
+          BleKey.WATCH_FACE,
+          bytes
+        )
       }
       else -> {
         when (call.method) {

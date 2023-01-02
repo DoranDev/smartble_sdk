@@ -1,3 +1,7 @@
+## 0.4.9
+
+* custom background dial test
+
 ## 0.4.8
 
 * request location

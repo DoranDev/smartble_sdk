@@ -79,6 +79,15 @@ class SmartbleSdk {
     return _channel.invokeMethod('analyzeSleep', {'listSleep': listSleepNew});
   }
 
+  ///customDials
+  Future<dynamic> customDials(
+      {required Uint8List bgPreviewBytes,
+      required Uint8List bgBytes,
+      required int custom}) {
+    return _channel.invokeMethod('customDials',
+        {'bgPreviewBytes': bgPreviewBytes, 'bgBytes': bgBytes, 'custom':custom});
+  }
+
   Future<dynamic> kOTA({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('OTA', {'flag': flag.name});
   Future<dynamic> kXMODEM({required SelectedBlekeyFlag flag}) =>
