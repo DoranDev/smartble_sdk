@@ -4,9 +4,9 @@ import com.bestmafen.baseble.data.BleWritable
 
 // 一些无Gps设备在锻炼时会请求手机定位，这个类是手机定位成功后对该指令的响应
 data class BleLocationReply(
-    var mSpeed: Float = 0f, // 千米/小时
-    var mTotalDistance: Float = 0f, // 千米
-    var mAltitude: Int = 0 // 米
+    var mSpeed: Float = 0f, // KM/JAM
+    var mTotalDistance: Float = 0f, // KM
+    var mAltitude: Int = 0 // Meter
 ) : BleWritable() {
     override val mLengthToWrite: Int
         get() = ITEM_LENGTH

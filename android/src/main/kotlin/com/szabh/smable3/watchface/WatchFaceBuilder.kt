@@ -22,7 +22,7 @@ object WatchFaceBuilder {
     const val GRAVITY_Y_BOTTOM_R = 1 shl 5
 
     const val ELEMENT_PREVIEW = 0x01
-    const val ELEMENT_BACKGROUND = 0x02     //背景无法移动,且默认全屏,设置坐标无意义
+    const val ELEMENT_BACKGROUND = 0x02     //The background cannot be moved, and the default is full screen, setting coordinates is meaningless
     const val ELEMENT_NEEDLE_HOUR = 0x03
     const val ELEMENT_NEEDLE_MIN = 0x04
     const val ELEMENT_NEEDLE_SEC = 0x05
