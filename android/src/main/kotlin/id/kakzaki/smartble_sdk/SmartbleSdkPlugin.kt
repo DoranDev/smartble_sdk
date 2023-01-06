@@ -8,6 +8,7 @@ import android.content.Intent
 import android.os.*
 import android.text.format.DateFormat
 import android.util.Log
+import androidx.multidex.BuildConfig
 import com.bestmafen.baseble.scanner.BleDevice
 import com.bestmafen.baseble.scanner.BleScanCallback
 import com.bestmafen.baseble.scanner.BleScanFilter
@@ -24,6 +25,7 @@ import com.szabh.smable3.entity.BleAlarm
 import com.szabh.smable3.watchface.Element
 import com.szabh.smable3.watchface.WatchFaceBuilder
 import id.kakzaki.smartble_sdk.activity.MusicControlActivity
+import id.kakzaki.smartble_sdk.activity.WatchFaceActivity
 import id.kakzaki.smartble_sdk.tools.*
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.FlutterPlugin.FlutterPluginBinding
@@ -1077,6 +1079,8 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         val elements = ArrayList<Element>()
         val bgPreviewBytes : ByteArray? = call.argument<ByteArray?>("bgPreviewBytes")
         val custom : Int? = call.argument<Int>("custom")
+        val isDigital : Boolean? = call.argument<Boolean>("isDigital")
+
         if (custom == 2) {
           DIAL_CUSTOMIZE_DIR = "dial_customize_454"
           screenWidth = 454
@@ -1115,6 +1119,19 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
           imageBuffers = arrayOf(bgBytes!!)
         )
         elements.add(elementBg)
+
+        // Get time related content
+        if (isDigital==true) {
+          WatchFaceActivity.getTimeDigitalCom(mContext!!,elements,custom!!)
+        }else{
+          val POINTER_HOUR = "pointer/hour"
+          val POINTER_MINUTE = "pointer/minute"
+          val POINTER_SECOND = "pointer/second"
+          WatchFaceActivity.getPointerCom(mContext!!,WatchFaceBuilder.ELEMENT_NEEDLE_HOUR, POINTER_HOUR, elements,custom!!)
+          WatchFaceActivity.getPointerCom(mContext!!,WatchFaceBuilder.ELEMENT_NEEDLE_MIN, POINTER_MINUTE, elements,custom!!)
+          WatchFaceActivity.getPointerCom(mContext!!,WatchFaceBuilder.ELEMENT_NEEDLE_SEC, POINTER_SECOND, elements,custom!!)
+        }
+
         for (element in elements) {
           LogUtils.d("customize dial length: ${element.imageBuffers.first().size * 10 / 1024 / 10.0} KB")
         }
@@ -3131,7 +3148,6 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
     override fun onCancel(o: Any?) {
     }
   }
-
 }
 
 

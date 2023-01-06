@@ -1,17 +1,14 @@
 package id.kakzaki.smartble_sdk.activity
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.os.Bundle
-import android.view.View
-import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
-import androidx.core.view.isVisible
 import com.blankj.utilcode.util.*
 import com.szabh.smable3.BleKey
 import com.szabh.smable3.BleKeyFlag
@@ -27,141 +24,101 @@ class WatchFaceActivity : AppCompatActivity() {
     //背景
 //    var customizeDialBg = false
     //步数
-    var controlViewStep = false
-    var controlViewStepX = 0
-    var controlViewStepY = 0
+    private var controlViewStep = false
+
     //心率
-    var controlViewHr = false
-    var controlViewHrX = 0
-    var controlViewHrY = 0
+    private var controlViewHr = false
+
     //卡路理
-    var controlViewCa = false
-    var controlViewCaX = 0
-    var controlViewCaY = 0
+    private var controlViewCa = false
 
     //距离
-    var controlViewDis = false
+    private var controlViewDis = false
     //数字时间
-    var timeDigitalView=false
-    var timeDigitalViewX=0
-    var timeDigitalViewY=0
-    var timeDigitalViewWidth=0
+    private var timeDigitalView=false
+    private var timeDigitalViewX=0
+    private var timeDigitalViewY=0
+    private  var timeDigitalViewWidth=0
     //指针
-    var timePointView = false
+    private var timePointView = false
     //刻度
-    var timeScaleView = false
+    private var timeScaleView = false
 
-    var cbDigital = false
-    var btnSync = false
+    private  var btnSync = false
 
-    var bgBitmapx: Bitmap? = null
-    var customizeDialBg: Bitmap? = null
+    private var bgBitmapx: Bitmap? = null
+    private  var customizeDialBg: Bitmap? = null
 
-    var isRound = true //whether it is a round screen
-    var roundCornerRadius = 0f //The corner radius of the rounded rectangle
-    var screenWidth = 0 //The actual size of the device screen - width
-    var screenHeight = 0 //The actual size of the device screen - height
-    var screenPreviewWidth = 0 //The actual preview size of the device screen - width
-    var screenPreviewHeight = 0 //The actual preview size of the device screen - height
-    var screenReservedBoundary = 0 //The actual resolution of some devices is inconsistent with the displayed area, and the boundary needs to be reserved to avoid deviations, such as T88_pro devices
-    var controlValueInterval = 0 //Controls such as distance and steps, the distance interval between the picture and the number part below
-    var controlValueRange = 9 //The content of the digital part below the control such as distance and steps
-    var fileFormat = "png" // The original format of the image of the dial element is generally in png format, and Realtek's is in bmp format
-    var imageFormat = WatchFaceBuilder.PNG_ARGB_8888 //Image encoding, the default is 8888, Realtek is RGB565
-    var X_CENTER = WatchFaceBuilder.GRAVITY_X_CENTER //Relative coordinate mark, MTK and Realtek have different implementations
-    var Y_CENTER = WatchFaceBuilder.GRAVITY_Y_CENTER //Relative coordinate mark, MTK and Realtek have different implementations
-    var borderSize = 0 //When drawing graphics, add the width of the ring
-    var ignoreBlack = 0 //Whether to ignore black, 0-do not ignore; 1-ignore
+    private  var isRound = false //whether it is a round screen
+    private  var roundCornerRadius = 0f //The corner radius of the rounded rectangle
+    private var screenReservedBoundary = 0 //The actual resolution of some devices is inconsistent with the displayed area, and the boundary needs to be reserved to avoid deviations, such as T88_pro devices
+    private var controlValueInterval = 0 //Controls such as distance and steps, the distance interval between the picture and the number part below
+    private var controlValueRange = 9 //The content of the digital part below the control such as distance and steps
+    private var fileFormat = "png" // The original format of the image of the dial element is generally in png format, and Realtek's is in bmp format
+    private var imageFormat = WatchFaceBuilder.PNG_ARGB_8888 //Image encoding, the default is 8888, Realtek is RGB565
+    private var X_CENTER = WatchFaceBuilder.GRAVITY_X_CENTER //Relative coordinate mark, MTK and Realtek have different implementations
+    private var Y_CENTER = WatchFaceBuilder.GRAVITY_Y_CENTER //Relative coordinate mark, MTK and Realtek have different implementations
+    private var borderSize = 0 //When drawing graphics, add the width of the ring
+    private var ignoreBlack = 0 //Whether to ignore black, 0-do not ignore; 1-ignore
 
 
     //控件相关
-    var stepValueCenterX = 0f
-    var stepValueCenterY = 0f
-    var caloriesValueCenterX = 0f
-    var caloriesValueCenterY = 0f
-    var distanceValueCenterX = 0f
-    var distanceValueCenterY = 0f
-    var heartRateValueCenterX = 0f
-    var heartRateValueCenterY = 0f
-    var valueColor = 0
+    private var stepValueCenterX = 0f
+    private var stepValueCenterY = 0f
+    private var caloriesValueCenterX = 0f
+    private var caloriesValueCenterY = 0f
+    private var distanceValueCenterX = 0f
+    private var distanceValueCenterY = 0f
+    private var heartRateValueCenterX = 0f
+    private var heartRateValueCenterY = 0f
+    private var valueColor = 0
 
     //数字时间
-    var amLeftX = 0f
-    var amTopY = 0f
-    var digitalTimeHourLeftX = 0f
-    var digitalTimeHourTopY = 0f
-    var digitalTimeMinuteLeftX = 0f
-    var digitalTimeMinuteRightX = 0f
-    var digitalTimeMinuteTopY = 0f
-    var digitalTimeSymbolLeftX = 0f
-    var digitalTimeSymbolTopY = 0f
-    var digitalDateMonthLeftX = 0f
-    var digitalDateMonthTopY = 0f
-    var digitalDateDayLeftX = 0f
-    var digitalDateDayTopY = 0f
-    var digitalDateSymbolLeftX = 0f
-    var digitalDateSymbolTopY = 0f
-    var digitalWeekLeftX = 0f
-    var digitalWeekTopY = 0f
-    var digitalValueColor = 0
+    private var amLeftX = 0f
+    private var amTopY = 0f
+    private var digitalTimeHourLeftX = 0f
+    private var digitalTimeHourTopY = 0f
+    private var digitalTimeMinuteLeftX = 0f
+    private var digitalTimeMinuteRightX = 0f
+    private var digitalTimeMinuteTopY = 0f
+    private var digitalTimeSymbolLeftX = 0f
+    private var digitalTimeSymbolTopY = 0f
+    private var digitalDateMonthLeftX = 0f
+    private var digitalDateMonthTopY = 0f
+    private var digitalDateDayLeftX = 0f
+    private var digitalDateDayTopY = 0f
+    private var digitalDateSymbolLeftX = 0f
+    private var digitalDateSymbolTopY = 0f
+    private var digitalWeekLeftX = 0f
+    private var digitalWeekTopY = 0f
+    private var digitalValueColor = 0
 
     //pointer
-    var pointerSelectNumber = 0
-
-    //scale
-    var scaleSelectNumber = 0
-
-    private lateinit var DIAL_CUSTOMIZE_DIR: String
-
-    //control
-    private lateinit var CONTROL_DIR: String
-    private lateinit var STEP_DIR: String
-    private lateinit var CALORIES_DIR: String
-    private lateinit var DISTANCE_DIR: String
-    private lateinit var HEART_RATE_DIR: String
-
-    //value
-    private lateinit var VALUE_DIR: String
-
-    //time
-    private lateinit var TIME_DIR: String
-
-    //digital
-    private lateinit var DIGITAL_DIR: String
-    private lateinit var POINTER_DIR: String
+    private var pointerSelectNumber = 0
 
     //digital_parameter
-    val DIGITAL_AM_DIR = "am_pm"
-    val DIGITAL_DATE_DIR = "date"
-    val DIGITAL_HOUR_MINUTE_DIR = "hour_minute"
-    val DIGITAL_WEEK_DIR = "week"
+    private val DIGITAL_AM_DIR = "am_pm"
+    private val DIGITAL_DATE_DIR = "date"
+    private val DIGITAL_HOUR_MINUTE_DIR = "hour_minute"
+    private val DIGITAL_WEEK_DIR = "week"
 
     //pointer_parameter
-    val POINTER_HOUR = "pointer/hour"
-    val POINTER_MINUTE = "pointer/minute"
-    val POINTER_SECOND = "pointer/second"
+    private val POINTER_HOUR = "pointer/hour"
+    private val POINTER_MINUTE = "pointer/minute"
+    private  val POINTER_SECOND = "pointer/second"
 
     private val mBleHandleCallback by lazy {
         object : BleHandleCallback {
             override fun onSessionStateChange(status: Boolean) {
-                btnSync = true
+
             }
 
             override fun onStreamProgress(status: Boolean, errorCode: Int, total: Int, completed: Int) {
-                if (status) {
                     ToastUtils.showShort("onStreamProgress $status $errorCode $total $completed")
-                    if (total == completed) {
-                        btnSync = true
-                    }
-                } else {
-                    btnSync = true
-                }
             }
 
             override fun onCommandSendTimeout(bleKey: BleKey, bleKeyFlag: BleKeyFlag) {
-                if (bleKey == BleKey.WATCH_FACE) {
-                    btnSync = true
-                }
+
             }
         }
     }
@@ -170,54 +127,38 @@ class WatchFaceActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         BleConnector.addHandleCallback(mBleHandleCallback)
 
-        //初始化参数
-        val custom = intent.getIntExtra("custom", 1)
+//        controlValueInterval = 1
+//        ignoreBlack = 1
+//        controlValueRange = 10
+//        isRound = true
+//        fileFormat = "bmp"
+//        imageFormat = WatchFaceBuilder.BMP_565
+//        X_CENTER = WatchFaceBuilder.GRAVITY_X_CENTER_R
+//        Y_CENTER = WatchFaceBuilder.GRAVITY_Y_CENTER_R
+
+    }
+
+    fun onSync( ) {
+        btnSync = false
+        val custom=1
+        val screenWidth:Int
+        val screenHeight :Int
+        val screenPreviewWidth :Int
+        val screenPreviewHeight :Int
         if (custom == 2) {
-            DIAL_CUSTOMIZE_DIR = "dial_customize_454"
             screenWidth = 454
             screenHeight = 454
             screenPreviewWidth = 280
             screenPreviewHeight = 280
         } else {
-            DIAL_CUSTOMIZE_DIR = "dial_customize_240"
             screenWidth = 240
             screenHeight = 240
             screenPreviewWidth = 150
             screenPreviewHeight = 150
         }
-        controlValueInterval = 1
-        ignoreBlack = 1
-        controlValueRange = 10
-        isRound = true
-        fileFormat = "bmp"
-        imageFormat = WatchFaceBuilder.BMP_565
-        X_CENTER = WatchFaceBuilder.GRAVITY_X_CENTER_R
-        Y_CENTER = WatchFaceBuilder.GRAVITY_Y_CENTER_R
-
-        //初始资源路径
-        CONTROL_DIR = "$DIAL_CUSTOMIZE_DIR/control"
-        STEP_DIR = "$CONTROL_DIR/step"
-        CALORIES_DIR = "$CONTROL_DIR/calories"
-        DISTANCE_DIR = "$CONTROL_DIR/distance"
-        HEART_RATE_DIR = "$CONTROL_DIR/heart_rate"
-
-        //value
-        VALUE_DIR = "$DIAL_CUSTOMIZE_DIR/value"
-
-        //time
-        TIME_DIR = "$DIAL_CUSTOMIZE_DIR/time"
-
-        //digital
-        DIGITAL_DIR = "$TIME_DIR/digital"
-        POINTER_DIR = "$TIME_DIR/pointer"
-    }
-
-    fun onSync(v: View) {
-        btnSync = false
-
         val elements = ArrayList<Element>()
         // get preview
-        val bgPreviewBytes = getPreview()
+        val bgPreviewBytes = getPreview(custom)
         val elementPreview = Element(
             type = WatchFaceBuilder.ELEMENT_PREVIEW,
             w = screenPreviewWidth, //预览的尺寸为
@@ -230,7 +171,7 @@ class WatchFaceActivity : AppCompatActivity() {
         elements.add(elementPreview)
 
         // get the background
-        val bgBytes = getBg()
+        val bgBytes = getBg(custom)
         val elementBg = Element(
             type = WatchFaceBuilder.ELEMENT_BACKGROUND,
             w = screenWidth, //背景的尺寸
@@ -243,16 +184,16 @@ class WatchFaceActivity : AppCompatActivity() {
         elements.add(elementBg)
 
         // Get the relevant content of the control value
-        getControl(elements)
+        getControl(elements,custom)
 
         // Get time related content
-        if (timeDigitalView==true) {
-            getTimeDigital(elements)
+        if (timeDigitalView) {
+            getTimeDigital(elements,custom)
         }
-        if (timePointView==true) {
-            getPointer(WatchFaceBuilder.ELEMENT_NEEDLE_HOUR, POINTER_HOUR, elements)
-            getPointer(WatchFaceBuilder.ELEMENT_NEEDLE_MIN, POINTER_MINUTE, elements)
-            getPointer(WatchFaceBuilder.ELEMENT_NEEDLE_SEC, POINTER_SECOND, elements)
+        if (timePointView) {
+            getPointer(WatchFaceBuilder.ELEMENT_NEEDLE_HOUR, POINTER_HOUR, elements,custom)
+            getPointer(WatchFaceBuilder.ELEMENT_NEEDLE_MIN, POINTER_MINUTE, elements,custom)
+            getPointer(WatchFaceBuilder.ELEMENT_NEEDLE_SEC, POINTER_SECOND, elements,custom)
         }
 
         for (element in elements) {
@@ -271,7 +212,24 @@ class WatchFaceActivity : AppCompatActivity() {
     }
 
 
-    private fun getPointer(type: Int, dir: String, elements: ArrayList<Element>) {
+    private fun getPointer(type: Int, dir: String, elements: ArrayList<Element>,custom:Int) {
+        val customDir: String
+        val screenWidth:Int
+        val screenHeight :Int
+        if (custom == 2) {
+            customDir = "dial_customize_454"
+            screenWidth = 454
+            screenHeight = 454
+        } else {
+            customDir = "dial_customize_240"
+            screenWidth = 240
+            screenHeight = 240
+        }
+
+        //time
+        val TIME_DIR = "$customDir/time"
+
+        val  POINTER_DIR = "$TIME_DIR/pointer"
         val pointerHour = ArrayList<ByteArray>()
         val tmpBitmap =
             ImageUtils.getBitmap(resources.assets.open("$POINTER_DIR/${dir}/${pointerSelectNumber}.${fileFormat}"))
@@ -297,9 +255,33 @@ class WatchFaceActivity : AppCompatActivity() {
         elements.add(elementAmPm)
     }
 
-    private fun getTimeDigital(elements: ArrayList<Element>) {
+    companion object {
+        fun getTimeDigitalCom(context: Context,elements: ArrayList<Element>,custom:Int) {
+            val activity = context as WatchFaceActivity
+            activity.getTimeDigital(elements, custom)
+        }
+
+        fun getPointerCom(context: Context,type: Int, dir: String,elements: ArrayList<Element>,custom:Int) {
+            val activity = context as WatchFaceActivity
+            activity.getPointer(type,dir,elements, custom)
+        }
+    }
+
+    private fun getTimeDigital(elements: ArrayList<Element>,custom:Int) {
         //AM PM
         val amPmValue = ArrayList<ByteArray>()
+
+        val customDir: String = if (custom == 2) {
+            "dial_customize_454"
+        } else {
+            "dial_customize_240"
+        }
+
+        //time
+        val TIME_DIR = "$customDir/time"
+
+        //digital
+        val DIGITAL_DIR = "$TIME_DIR/digital"
         val tmpBitmap =
             ImageUtils.getBitmap(resources.assets.open("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_AM_DIR/am.${fileFormat}"))
         var w = tmpBitmap.width
@@ -448,13 +430,20 @@ class WatchFaceActivity : AppCompatActivity() {
         elements.add(elementSymbol)
     }
 
-    private fun getControl(elements: ArrayList<Element>) {
+    private fun getControl(elements: ArrayList<Element>,custom:Int) {
+        val customDir: String = if (custom == 2) {
+            "dial_customize_454"
+        } else {
+            "dial_customize_240"
+        }
+        //value
+        val VALUE_DIR = "$customDir/value"
         val triple = getNumberBuffers("$VALUE_DIR/${valueColor}/", controlValueRange)
         val w = triple.first
         val h = triple.second
         val valueBuffers = triple.third.toTypedArray()
         //获取步数数值
-        if (controlViewStep==true) {
+        if (controlViewStep) {
             val elementStep = Element(
                 type = WatchFaceBuilder.ELEMENT_DIGITAL_STEP,
                 w = w,
@@ -468,7 +457,7 @@ class WatchFaceActivity : AppCompatActivity() {
             elements.add(elementStep)
         }
         //获取心率数值
-        if (controlViewHr==true) {
+        if (controlViewHr) {
             val elementHr = Element(
                 type = WatchFaceBuilder.ELEMENT_DIGITAL_HEART,
                 w = w,
@@ -482,7 +471,7 @@ class WatchFaceActivity : AppCompatActivity() {
             elements.add(elementHr)
         }
         //获取卡路里数值
-        if (controlViewCa==true) {
+        if (controlViewCa) {
             val elementCa = Element(
                 type = WatchFaceBuilder.ELEMENT_DIGITAL_CALORIE,
                 w = w,
@@ -496,7 +485,7 @@ class WatchFaceActivity : AppCompatActivity() {
             elements.add(elementCa)
         }
         //获取距离数值
-        if (controlViewDis==true) {
+        if (controlViewDis) {
             val elementDis = Element(
                 type = WatchFaceBuilder.ELEMENT_DIGITAL_DISTANCE,
                 w = w,
@@ -534,20 +523,29 @@ class WatchFaceActivity : AppCompatActivity() {
         return Triple(w, h, valueByte)
     }
 
-    private fun getBg(): ByteArray {
-        val finalBgBitMap = getBgBitmap(false)
+    private fun getBg(custom:Int): ByteArray {
+        val finalBgBitMap = getBgBitmap(false, custom)
         ImageUtils.save(finalBgBitMap, File(PathUtils.getExternalAppDataPath(),"dial_bg_file.png"), Bitmap.CompressFormat.PNG)
         return bitmap2Bytes(finalBgBitMap)
     }
 
 
-    private fun getPreview(): ByteArray {
+    private fun getPreview(custom:Int): ByteArray {
         // The size needs to be strictly corresponding, so the background needs to be generated twice
         // Get the background bitmap--with numbers, in preparation for generating a preview
         // Ukuran harus benar-benar sesuai, jadi latar belakang perlu dibuat dua kali
         // Dapatkan bitmap latar belakang--dengan angka, sebagai persiapan untuk membuat pratinjau
-        val finalBgBitMap = getBgBitmap(true)
+        val finalBgBitMap = getBgBitmap(true,custom)
         //根据此处表盘背景,生成背景对应的预览文件
+        val screenPreviewWidth :Int
+        val screenPreviewHeight :Int
+        if (custom == 2) {
+            screenPreviewWidth = 280
+            screenPreviewHeight = 280
+        } else {
+            screenPreviewWidth = 150
+            screenPreviewHeight = 150
+        }
         val previewScaleWidth = screenPreviewWidth.toFloat() / finalBgBitMap.width
         val previewScaleHeight = screenPreviewHeight.toFloat() / finalBgBitMap.height
         val previewScale = ImageUtils.scale(
@@ -572,7 +570,34 @@ class WatchFaceActivity : AppCompatActivity() {
         return bitmap2Bytes(finalPreviewBitMap)
     }
 
-    private fun getBgBitmap(isCanvasValue: Boolean): Bitmap {
+    private fun getBgBitmap(isCanvasValue: Boolean,custom:Int): Bitmap {
+        val customDir: String
+        val screenWidth:Int
+        val screenHeight :Int
+        if (custom == 2) {
+            customDir = "dial_customize_454"
+            screenWidth = 454
+            screenHeight = 454
+        } else {
+            customDir = "dial_customize_240"
+            screenWidth = 240
+            screenHeight = 240
+        }
+
+        //初始资源路径
+        val CONTROL_DIR = "$customDir/control"
+        val STEP_DIR = "$CONTROL_DIR/step"
+        val CALORIES_DIR = "$CONTROL_DIR/calories"
+        val DISTANCE_DIR = "$CONTROL_DIR/distance"
+        val HEART_RATE_DIR = "$CONTROL_DIR/heart_rate"
+
+        //time
+        val TIME_DIR = "$customDir/time"
+        val DIGITAL_DIR = "$TIME_DIR/digital"
+
+        //value
+        val VALUE_DIR = "$customDir/value"
+
         val bgBitmap = if (isRound) {
             //圆
             bgBitmapx!!
@@ -654,7 +679,7 @@ class WatchFaceActivity : AppCompatActivity() {
         heartRateValueCenterX = heartRateX
         heartRateValueCenterY = heartRateY
         //获取时间的bitmap
-        if (timeDigitalView==true) {
+        if (timeDigitalView) {
             //数字时间
             addDigitalTime(
                 "$DIGITAL_DIR/${digitalValueColor}/",
@@ -663,11 +688,11 @@ class WatchFaceActivity : AppCompatActivity() {
                 isCanvasValue
             )
         }
-        if (timePointView==true) {
+        if (timePointView) {
             //指针
          //   getPointerBg(timePointView, isCanvasValue, canvas)
         }
-        if (timeScaleView==true) {
+        if (timeScaleView) {
             //刻度如果有显示,则必然绘制
            // getPointerBg(timeScaleView, true, canvas)
         }
@@ -698,8 +723,19 @@ class WatchFaceActivity : AppCompatActivity() {
     private fun getPointerBg(
         timeView: ImageView,
         isCanvasValue: Boolean,
-        canvas: Canvas
+        canvas: Canvas,
+        custom:Int
     ) {
+        val screenWidth:Int
+        val screenHeight :Int
+
+        if (custom == 2) {
+            screenWidth = 454
+            screenHeight = 454
+        } else {
+            screenWidth = 240
+            screenHeight = 240
+        }
         val pointerBitmap = if (isRound) {
             //圆
             ImageUtils.view2Bitmap(timeView)
@@ -897,7 +933,7 @@ class WatchFaceActivity : AppCompatActivity() {
         scaleHeight: Float,
         isCanvasValue: Boolean
     ): Pair<Float, Float> {
-        if (elementView==true) {
+        if (elementView) {
             LogUtils.d("test addControlBitmap $controlFileName , $scaleWidth $scaleHeight")
             val viewBitmap = ImageUtils.getBitmap(resources.assets.open(controlFileName))
             val viewLeft = 0 * scaleWidth
@@ -940,7 +976,7 @@ class WatchFaceActivity : AppCompatActivity() {
         return Pair(0f, 0f)
     }
 
-    fun defaultConversion(
+    private fun defaultConversion(
         fileFormat: String,
         data: ByteArray,
         w: Int,                      //图片宽度
@@ -1002,9 +1038,4 @@ class WatchFaceActivity : AppCompatActivity() {
         BleConnector.removeHandleCallback(mBleHandleCallback)
     }
 
-    override fun onBackPressed() {
-        if(btnSync) {
-            super.onBackPressed()
-        }
-    }
 }

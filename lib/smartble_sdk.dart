@@ -83,9 +83,14 @@ class SmartbleSdk {
   Future<dynamic> customDials(
       {required Uint8List bgPreviewBytes,
       required Uint8List bgBytes,
-      required int custom}) {
-    return _channel.invokeMethod('customDials',
-        {'bgPreviewBytes': bgPreviewBytes, 'bgBytes': bgBytes, 'custom':custom});
+      required int custom,
+      required bool isDigital}) {
+    return _channel.invokeMethod('customDials', {
+      'bgPreviewBytes': bgPreviewBytes,
+      'bgBytes': bgBytes,
+      'custom': custom,
+      'isDigital': isDigital
+    });
   }
 
   Future<dynamic> kOTA({required SelectedBlekeyFlag flag}) =>
