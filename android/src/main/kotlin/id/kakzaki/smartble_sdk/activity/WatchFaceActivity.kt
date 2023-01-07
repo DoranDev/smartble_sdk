@@ -229,7 +229,7 @@ class WatchFaceActivity : AppCompatActivity() {
         //time
         val TIME_DIR = "$customDir/time"
 
-        val  POINTER_DIR = "$TIME_DIR/pointer"
+        val POINTER_DIR = "$TIME_DIR/pointer"
         val pointerHour = ArrayList<ByteArray>()
         val tmpBitmap =
             ImageUtils.getBitmap(resources.assets.open("$POINTER_DIR/${dir}/${pointerSelectNumber}.${fileFormat}"))
