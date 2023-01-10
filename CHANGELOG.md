@@ -1,3 +1,11 @@
+## 0.5.3
+
+* custom background dial test
+
+## 0.5.2
+
+* custom background dial test
+
 ## 0.5.1
 
 * custom background dial test
