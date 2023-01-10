@@ -1067,7 +1067,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         }
       }
       "customDials" -> {
-        var imageFormat = WatchFaceBuilder.BMP_565
+        var imageFormat = WatchFaceBuilder.PNG_ARGB_8888
         var DIAL_CUSTOMIZE_DIR = "dial_customize_454"
         var screenWidth = 0 //The actual size of the device screen - width
         var screenHeight = 0 //The actual size of the device screen - height
@@ -1120,17 +1120,17 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         )
         elements.add(elementBg)
 
-        // Get time related content
-        if (isDigital==true) {
-          WatchFaceActivity.getTimeDigitalCom(mContext!!,elements,custom!!)
-        }else{
-          val POINTER_HOUR = "pointer/hour"
-          val POINTER_MINUTE = "pointer/minute"
-          val POINTER_SECOND = "pointer/second"
-          WatchFaceActivity.getPointerCom(mContext!!,WatchFaceBuilder.ELEMENT_NEEDLE_HOUR, POINTER_HOUR, elements,custom!!)
-          WatchFaceActivity.getPointerCom(mContext!!,WatchFaceBuilder.ELEMENT_NEEDLE_MIN, POINTER_MINUTE, elements,custom!!)
-          WatchFaceActivity.getPointerCom(mContext!!,WatchFaceBuilder.ELEMENT_NEEDLE_SEC, POINTER_SECOND, elements,custom!!)
-        }
+//        // Get time related content
+//        if (isDigital==true) {
+//          WatchFaceActivity.getTimeDigitalCom(mContext!!,elements,custom!!)
+//        }else{
+//          val POINTER_HOUR = "pointer/hour"
+//          val POINTER_MINUTE = "pointer/minute"
+//          val POINTER_SECOND = "pointer/second"
+//          WatchFaceActivity.getPointerCom(mContext!!,WatchFaceBuilder.ELEMENT_NEEDLE_HOUR, POINTER_HOUR, elements,custom!!)
+//          WatchFaceActivity.getPointerCom(mContext!!,WatchFaceBuilder.ELEMENT_NEEDLE_MIN, POINTER_MINUTE, elements,custom!!)
+//          WatchFaceActivity.getPointerCom(mContext!!,WatchFaceBuilder.ELEMENT_NEEDLE_SEC, POINTER_SECOND, elements,custom!!)
+//        }
 
         for (element in elements) {
           LogUtils.d("customize dial length: ${element.imageBuffers.first().size * 10 / 1024 / 10.0} KB")
