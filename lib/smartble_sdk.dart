@@ -84,12 +84,14 @@ class SmartbleSdk {
       {required Uint8List bgPreviewBytes,
       required Uint8List bgBytes,
       required int custom,
-      required bool isDigital}) {
+      required bool isDigital,
+      required bool isRound}) {
     return _channel.invokeMethod('customDials', {
       'bgPreviewBytes': bgPreviewBytes,
       'bgBytes': bgBytes,
       'custom': custom,
-      'isDigital': isDigital
+      'isDigital': isDigital,
+      'isRound': isRound
     });
   }
 
