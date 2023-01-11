@@ -71,7 +71,7 @@ class WatchFaceActivity : AppCompatActivity() {
     private var distanceValueCenterY = 0f
     private var heartRateValueCenterX = 0f
     private var heartRateValueCenterY = 0f
-    private var valueColor = 0
+    var valueColor = 0
 
     //数字时间
     private var amLeftX = 0f
@@ -256,15 +256,24 @@ class WatchFaceActivity : AppCompatActivity() {
     }
 
     companion object {
-        fun getTimeDigitalCom(context: Context,elements: ArrayList<Element>,custom:Int) {
+        fun getTimeDigitalCom(context: Context,elements: ArrayList<Element>,custom:Int) : ArrayList<Element>{
             val activity = context as WatchFaceActivity
             activity.getTimeDigital(elements, custom)
+            return elements
         }
 
-        fun getPointerCom(context: Context,type: Int, dir: String,elements: ArrayList<Element>,custom:Int) {
+        fun getPointerCom(context: Context,type: Int, dir: String,elements: ArrayList<Element>,custom:Int): ArrayList<Element> {
             val activity = context as WatchFaceActivity
             activity.getPointer(type,dir,elements, custom)
+            return elements
         }
+
+        fun bitmap2Bytes(context: Context, bgBitMap: Bitmap) : ByteArray {
+            val activity = context as WatchFaceActivity
+            return activity.bitmap2Bytes(bgBitMap)
+
+        }
+
     }
 
     private fun getTimeDigital(elements: ArrayList<Element>,custom:Int) {
