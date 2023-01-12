@@ -85,13 +85,21 @@ class SmartbleSdk {
       required Uint8List bgBytes,
       required int custom,
       required bool isDigital,
-      required bool isRound}) {
+      required bool isRound,
+      required int screenWidth,
+      required int screenHeight,
+      required int screenPreviewWidth,
+      required int screenPreviewHeight}) {
     return _channel.invokeMethod('customDials', {
       'bgPreviewBytes': bgPreviewBytes,
       'bgBytes': bgBytes,
       'custom': custom,
       'isDigital': isDigital,
-      'isRound': isRound
+      'isRound': isRound,
+      'screenWidth': screenWidth,
+      'screenHeight': screenHeight,
+      'screenPreviewWidth': screenPreviewWidth,
+      'screenPreviewHeight': screenPreviewHeight
     });
   }
 
