@@ -986,8 +986,8 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
     BleConnector.addHandleCallback(mBleHandleCallback)
   }
 
-  private fun getBg(custom:Int,isRound: Boolean,bgBitmapx:Bitmap): ByteArray {
-    val finalBgBitMap = getBgBitmap(false, custom,isRound,bgBitmapx)
+  private fun getBg(isRound: Boolean,bgBitmapx:Bitmap): ByteArray {
+    val finalBgBitMap = getBgBitmap(false,isRound,bgBitmapx)
     ImageUtils.save(finalBgBitMap, File(PathUtils.getExternalAppDataPath(),"dial_bg_file.png"), Bitmap.CompressFormat.PNG)
     return bitmap2Bytes(finalBgBitMap)
   }
@@ -1030,7 +1030,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
   private var ignoreBlack = 0 //Whether to ignore black, 0-do not ignore; 1-ignore
 
 
-  var DIAL_CUSTOMIZE_DIR = "dial_customize_454"
+
   var screenWidth = 0 //The actual size of the device screen - width
   var screenHeight = 0 //The actual size of the device screen - height
   var screenPreviewWidth = 0 //The actual preview size of the device screen - width
@@ -1046,6 +1046,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
   private var heartRateValueCenterX = 0f
   private var heartRateValueCenterY = 0f
   var valueColor = 0
+  var custom = 0
 
   //数字时间
   private var amLeftX = 0f
@@ -1081,18 +1082,12 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
   private val POINTER_MINUTE = "pointer/minute"
   private  val POINTER_SECOND = "pointer/second"
 
-  private fun getBgBitmap(isCanvasValue: Boolean,custom:Int,isRound: Boolean,bgBitmapx:Bitmap): Bitmap {
+  private fun getBgBitmap(isCanvasValue: Boolean,isRound: Boolean,bgBitmapx:Bitmap): Bitmap {
     val customDir: String
-    val screenWidth:Int
-    val screenHeight :Int
     if (custom == 2) {
       customDir = "dial_customize_454"
-      screenWidth = 454
-      screenHeight = 454
     } else {
       customDir = "dial_customize_240"
-      screenWidth = 240
-      screenHeight = 240
     }
 
     //初始资源路径
@@ -1211,18 +1206,12 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
     return getFinalBgBitmap(bgBitMap)
   }
 
-  private fun getPointer(type: Int, dir: String, elements: ArrayList<Element>,custom:Int) {
+  private fun getPointer(type: Int, dir: String, elements: ArrayList<Element>) {
     val customDir: String
-    val screenWidth:Int
-    val screenHeight :Int
     if (custom == 2) {
       customDir = "dial_customize_454"
-      screenWidth = 454
-      screenHeight = 454
     } else {
       customDir = "dial_customize_240"
-      screenWidth = 240
-      screenHeight = 240
     }
 
     //time
@@ -1543,7 +1532,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
     }
   }
 
-  private fun getTimeDigital(elements: ArrayList<Element>,custom:Int) {
+  private fun getTimeDigital(elements: ArrayList<Element>) {
     //AM PM
     val amPmValue = ArrayList<ByteArray>()
 
@@ -1706,7 +1695,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
     elements.add(elementSymbol)
   }
 
-  private fun getControl(elements: ArrayList<Element>,custom:Int) {
+  private fun getControl(elements: ArrayList<Element>) {
     val customDir: String = if (custom == 2) {
       "dial_customize_454"
     } else {
@@ -1799,22 +1788,13 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
     return Triple(w, h, valueByte)
   }
 
-  private fun getPreview(custom:Int,isRound:Boolean,bgBitmax:Bitmap): ByteArray {
+  private fun getPreview(isRound:Boolean,bgBitmax:Bitmap): ByteArray {
     // The size needs to be strictly corresponding, so the background needs to be generated twice
     // Get the background bitmap--with numbers, in preparation for generating a preview
     // Ukuran harus benar-benar sesuai, jadi latar belakang perlu dibuat dua kali
     // Dapatkan bitmap latar belakang--dengan angka, sebagai persiapan untuk membuat pratinjau
-    val finalBgBitMap = getBgBitmap(true,custom,isRound,bgBitmax)
+    val finalBgBitMap = getBgBitmap(true,isRound,bgBitmax)
     //根据此处表盘背景,生成背景对应的预览文件
-    val screenPreviewWidth :Int
-    val screenPreviewHeight :Int
-    if (custom == 2) {
-      screenPreviewWidth = 280
-      screenPreviewHeight = 280
-    } else {
-      screenPreviewWidth = 150
-      screenPreviewHeight = 150
-    }
     val previewScaleWidth = screenPreviewWidth.toFloat() / finalBgBitMap.width
     val previewScaleHeight = screenPreviewHeight.toFloat() / finalBgBitMap.height
     val previewScale = ImageUtils.scale(
@@ -1838,6 +1818,8 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
     ImageUtils.save(finalPreviewBitMap, File(PathUtils.getExternalAppDataPath(), "dial_bg_preview_file.png"), Bitmap.CompressFormat.PNG)
     return bitmap2Bytes(finalPreviewBitMap)
   }
+
+  val elements = ArrayList<Element>()
 
   override fun onMethodCall(call: MethodCall, result: Result) {
     this.mResult = result
@@ -1918,32 +1900,30 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         }
       }
       "customDials" -> {
-
-        val elements = ArrayList<Element>()
-        val custom : Int? = call.argument<Int>("custom")
+        elements.clear()
         val isDigital : Boolean? = call.argument<Boolean>("isDigital")
         val isRound : Boolean? = call.argument<Boolean>("isRound")
         val offset = 0
+        custom = call.argument<Int>("custom")!!
+        screenWidth = call.argument<Int>("screenWidth")!!
+        screenHeight = call.argument<Int>("screenHeight")!!
+        screenPreviewWidth = call.argument<Int>("screenPreviewWidth")!!
+        screenPreviewHeight = call.argument<Int>("screenPreviewHeight")!!
 
-        if (custom == 2) {
-          DIAL_CUSTOMIZE_DIR = "dial_customize_454"
-          screenWidth = 454
-          screenHeight = 454
-          screenPreviewWidth = 280
-          screenPreviewHeight = 280
-        } else {
-          DIAL_CUSTOMIZE_DIR = "dial_customize_240"
-          screenWidth = 240
-          screenHeight = 240
-          screenPreviewWidth = 150
-          screenPreviewHeight = 150
-        }
+        controlValueInterval = 1
+        ignoreBlack = 1
+        controlValueRange = 10
+
+        fileFormat = "bmp"
+        imageFormat = WatchFaceBuilder.BMP_565
+        X_CENTER = WatchFaceBuilder.GRAVITY_X_CENTER_R
+        Y_CENTER = WatchFaceBuilder.GRAVITY_Y_CENTER_R
 
         val bgPreviewBytes : ByteArray? = call.argument<ByteArray?>("bgPreviewBytes")
         val bgPreviewlength = bgPreviewBytes!!.size
         val bgPreviewBitmapX = BitmapFactory.decodeByteArray(bgPreviewBytes, offset, bgPreviewlength)
 
-        val bgPreviewBytesNew = getPreview(custom!!,isRound!!,bgPreviewBitmapX!!)
+        val bgPreviewBytesNew = getPreview(isRound!!,bgPreviewBitmapX!!)
         // get the background preview
         val elementPreview = Element(
           type = WatchFaceBuilder.ELEMENT_PREVIEW,
@@ -1963,7 +1943,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         val bglength = bgBytes!!.size
         val bgBitmapX = BitmapFactory.decodeByteArray(bgBytes, offset, bglength)
 
-        val bgBytesNew = getBg(custom!!,isRound!!,bgBitmapX!!)
+        val bgBytesNew = getBg(isRound!!,bgBitmapX!!)
         val elementBg = Element(
           type = WatchFaceBuilder.ELEMENT_BACKGROUND,
           w = screenWidth, //背景的尺寸
@@ -1976,15 +1956,15 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         elements.add(elementBg)
 
         // Get the relevant content of the control value
-        getControl(elements,custom!!)
+        getControl(elements)
 
         // Get time related content
         if (isDigital==true) {
-          getTimeDigital(elements,custom!!)
+          getTimeDigital(elements)
         }else{
-          getPointer(WatchFaceBuilder.ELEMENT_NEEDLE_HOUR, POINTER_HOUR, elements,custom!!)
-          getPointer(WatchFaceBuilder.ELEMENT_NEEDLE_MIN, POINTER_MINUTE, elements,custom!!)
-          getPointer(WatchFaceBuilder.ELEMENT_NEEDLE_SEC, POINTER_SECOND, elements,custom!!)
+          getPointer(WatchFaceBuilder.ELEMENT_NEEDLE_HOUR, POINTER_HOUR, elements)
+          getPointer(WatchFaceBuilder.ELEMENT_NEEDLE_MIN, POINTER_MINUTE, elements)
+          getPointer(WatchFaceBuilder.ELEMENT_NEEDLE_SEC, POINTER_SECOND, elements)
         }
 
         for (element in elements) {
