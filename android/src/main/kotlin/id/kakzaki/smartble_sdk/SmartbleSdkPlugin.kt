@@ -993,19 +993,26 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
   }
 
   private var controlViewStep = false
+  private var controlViewStepX = 0
+  private var controlViewStepY = 0
 
   //心率
   private var controlViewHr = false
+  private var controlViewHrX = 0
+  private var controlViewHrY = 0
 
   //卡路理
   private var controlViewCa = false
+  private var controlViewCaX = 0
+  private var controlViewCaY = 0
 
   //距离
   private var controlViewDis = false
+  private var controlViewDisX = 0
+  private var controlViewDisY = 0
+
   //数字时间
   private var timeDigitalView=false
-  private var timeDigitalViewX=0
-  private var timeDigitalViewY=0
   private  var timeDigitalViewWidth=0
   //指针
   private var timePointView = false
@@ -1143,6 +1150,8 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
     val (stepX, stepY) = addControlBitmap(
       "$STEP_DIR/step_0.png",
       controlViewStep,
+      controlViewStepX,
+      controlViewStepY,
       "$VALUE_DIR/${valueColor}/",
       "18564",
       canvas,
@@ -1154,6 +1163,8 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
     val (caloriesX, caloriesY) = addControlBitmap(
       "$CALORIES_DIR/calories_0.png",
       controlViewCa,
+      controlViewCaX,
+      controlViewCaY,
       "$VALUE_DIR/${valueColor}/",
       "50",
       canvas,
@@ -1165,6 +1176,8 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
     val (distanceX, distanceY) = addControlBitmap(
       "$DISTANCE_DIR/distance_0.png",
       controlViewDis,
+      controlViewDisX,
+      controlViewDisY,
       "$VALUE_DIR/${valueColor}/",
       "6",
       canvas,
@@ -1176,6 +1189,8 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
     val (heartRateX, heartRateY) = addControlBitmap(
       "$HEART_RATE_DIR/heart_rate_0.png",
       controlViewHr,
+      controlViewHrX,
+      controlViewHrY,
       "$VALUE_DIR/${valueColor}/",
       "90",
       canvas,
@@ -1345,8 +1360,8 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
     canvas: Canvas,
     isCanvasValue: Boolean
   ) {
-    val timeLeft = timeDigitalViewX * scaleWidth
-    val timeTop = timeDigitalViewY * scaleHeight
+    val timeLeft = (screenWidth / 2) * scaleWidth
+    val timeTop = (screenHeight / 2) * scaleHeight
     LogUtils.d("test timeLeft=$timeLeft,  timeTop=$timeTop, timeDigitalView.width=${timeDigitalViewWidth} ,scaleWidth =$scaleWidth")
     //获取AM原始资源.此处涉及到预览，所以强制使用PNG图片，避免透明色不显示
     val amBitmap =
@@ -1405,6 +1420,8 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
   private fun addControlBitmap(
     controlFileName: String,
     elementView: Boolean,
+    elementViewX:Int,
+    elementViewY:Int,
     controlValueFileDir: String,
     controlValue: String,
     canvas: Canvas,
@@ -1413,10 +1430,10 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
     isCanvasValue: Boolean
   ): Pair<Float, Float> {
     if (elementView) {
-      LogUtils.d("test addControlBitmap $controlFileName , $scaleWidth $scaleHeight")
+      LogUtils.d("test addControlBitmap $controlFileName ,${elementViewX} ${elementViewY}  $scaleWidth $scaleHeight")
       val viewBitmap = ImageUtils.getBitmap(mContext!!.assets.open(controlFileName))
-      val viewLeft = 0 * scaleWidth
-      val viewTop = 0 * scaleHeight
+      val viewLeft = elementViewX * scaleWidth
+      val viewTop = elementViewY * scaleHeight
       //x.y 获取该view相对于父 view的的left,top坐标点
       canvas.drawBitmap(
         viewBitmap,
@@ -1909,6 +1926,22 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         screenHeight = call.argument<Int>("screenHeight")!!
         screenPreviewWidth = call.argument<Int>("screenPreviewWidth")!!
         screenPreviewHeight = call.argument<Int>("screenPreviewHeight")!!
+
+        controlViewStep = call.argument<Boolean>("controlViewStep")!!
+        controlViewStepX = call.argument<Int>("controlViewStepX")!!
+        controlViewStepY = call.argument<Int>("controlViewStepY")!!
+
+        controlViewCa = call.argument<Boolean>("controlViewCa")!!
+        controlViewCaX = call.argument<Int>("controlViewCaX")!!
+        controlViewCaY = call.argument<Int>("controlViewCaY")!!
+
+        controlViewDis = call.argument<Boolean>("controlViewDis")!!
+        controlViewDisX = call.argument<Int>("controlViewDisX")!!
+        controlViewDisY = call.argument<Int>("controlViewDisY")!!
+
+        controlViewHr = call.argument<Boolean>("controlViewHr")!!
+        controlViewHrX = call.argument<Int>("controlViewHrX")!!
+        controlViewHrY = call.argument<Int>("controlViewHrY")!!
 
         controlValueInterval = 1
         ignoreBlack = 1

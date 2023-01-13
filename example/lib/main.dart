@@ -59,7 +59,6 @@ class _MyAppState extends State<MyApp> {
                       );
                     } else if (snapshot.hasData) {
                       List listdata = snapshot.data ?? [];
-                      print(listdata);
                       return ListView.builder(
                           itemCount: listdata.length,
                           shrinkWrap: true,

@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:core';
 
 import 'package:flutter/services.dart';
@@ -68,14 +67,15 @@ class SmartbleSdk {
   ///analyzeSleep
   Future<dynamic> analyzeSleep({required List listSleep}) {
     List<Map<String, int>> listSleepNew = [];
-    listSleep.forEach((element) {
+    for (var element in listSleep) {
       Map<String, int> map = {};
-      map["mTime"] = DateTime.parse("${map["mTime"]}").millisecondsSinceEpoch;
-      map["mMode"] = int.parse("${map["mMode"]}");
-      map["mStrong"] = int.parse("${map["mStrong"]}");
-      map["mSoft"] = int.parse("${map["mSoft"]}");
+      map["mTime"] =
+          DateTime.parse("${element["mTime"]}").millisecondsSinceEpoch;
+      map["mMode"] = int.parse("${element["mMode"]}");
+      map["mStrong"] = int.parse("${element["mStrong"]}");
+      map["mSoft"] = int.parse("${element["mSoft"]}");
       listSleepNew.add(map);
-    });
+    }
     return _channel.invokeMethod('analyzeSleep', {'listSleep': listSleepNew});
   }
 
@@ -89,7 +89,19 @@ class SmartbleSdk {
       required int screenWidth,
       required int screenHeight,
       required int screenPreviewWidth,
-      required int screenPreviewHeight}) {
+      required int screenPreviewHeight,
+      required bool controlViewStep,
+      required int controlViewStepX,
+      required int controlViewStepY,
+      required bool controlViewCa,
+      required int controlViewCaX,
+      required int controlViewCaY,
+      required bool controlViewDis,
+      required int controlViewDisX,
+      required int controlViewDisY,
+      required bool controlViewHr,
+      required int controlViewHrX,
+      required int controlViewHrY}) {
     return _channel.invokeMethod('customDials', {
       'bgPreviewBytes': bgPreviewBytes,
       'bgBytes': bgBytes,
@@ -99,7 +111,19 @@ class SmartbleSdk {
       'screenWidth': screenWidth,
       'screenHeight': screenHeight,
       'screenPreviewWidth': screenPreviewWidth,
-      'screenPreviewHeight': screenPreviewHeight
+      'screenPreviewHeight': screenPreviewHeight,
+      'controlViewStep': controlViewStep,
+      'controlViewStepX': controlViewStepX,
+      'controlViewStepY': controlViewStepY,
+      'controlViewCa': controlViewCa,
+      'controlViewCaX': controlViewCaX,
+      'controlViewCaY': controlViewCaY,
+      'controlViewDis': controlViewDis,
+      'controlViewDisX': controlViewDisX,
+      'controlViewDisY': controlViewDisY,
+      'controlViewHr': controlViewHr,
+      'controlViewHrX': controlViewHrX,
+      'controlViewHrY': controlViewHrY
     });
   }
 
