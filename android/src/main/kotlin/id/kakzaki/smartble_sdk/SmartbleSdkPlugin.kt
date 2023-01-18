@@ -1918,8 +1918,8 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
       }
       "customDials" -> {
         elements.clear()
-        val isDigital : Boolean? = call.argument<Boolean>("isDigital")
-        val isRound : Boolean? = call.argument<Boolean>("isRound")
+        timeDigitalView  = call.argument<Boolean>("isDigital")!!
+        isRound = call.argument<Boolean>("isRound")!!
         val offset = 0
         custom = call.argument<Int>("custom")!!
         screenWidth = call.argument<Int>("screenWidth")!!
@@ -1992,7 +1992,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         getControl(elements)
 
         // Get time related content
-        if (isDigital==true) {
+        if (timeDigitalView==true) {
           getTimeDigital(elements)
         }else{
           getPointer(WatchFaceBuilder.ELEMENT_NEEDLE_HOUR, POINTER_HOUR, elements)
