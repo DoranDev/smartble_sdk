@@ -1360,8 +1360,8 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
     canvas: Canvas,
     isCanvasValue: Boolean
   ) {
-    val timeLeft = (screenWidth / 2) * scaleWidth
-    val timeTop = (screenHeight / 2) * scaleHeight
+    val timeLeft = (screenWidth/3.5f) * scaleWidth
+    val timeTop = (screenHeight/3) * scaleHeight
     LogUtils.d("test timeLeft=$timeLeft,  timeTop=$timeTop, timeDigitalView.width=${timeDigitalViewWidth} ,scaleWidth =$scaleWidth")
     //获取AM原始资源.此处涉及到预览，所以强制使用PNG图片，避免透明色不显示
     val amBitmap =
@@ -1992,7 +1992,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         getControl(elements)
 
         // Get time related content
-        if (timeDigitalView==true) {
+        if (timeDigitalView) {
           getTimeDigital(elements)
         }else{
           getPointer(WatchFaceBuilder.ELEMENT_NEEDLE_HOUR, POINTER_HOUR, elements)
