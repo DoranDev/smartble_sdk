@@ -2,7 +2,8 @@ package com.szabh.smable3.entity
 
 import com.bestmafen.baseble.data.BleWritable
 
-// 一些无Gps设备在锻炼时会请求手机定位，这个类是手机定位成功后对该指令的响应
+// Some non-Gps devices will request mobile phone positioning during exercise.
+// This class is the response to the command after the mobile phone is successfully positioned.
 data class BleLocationReply(
     var mSpeed: Float = 0f, // KM/JAM
     var mTotalDistance: Float = 0f, // KM

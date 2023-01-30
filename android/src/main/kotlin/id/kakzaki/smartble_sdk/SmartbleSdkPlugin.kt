@@ -1,6 +1,7 @@
 package id.kakzaki.smartble_sdk
 
 import android.Manifest
+import android.R
 import android.app.Activity
 import android.bluetooth.BluetoothDevice
 import android.content.Context
@@ -9,6 +10,7 @@ import android.graphics.*
 import android.os.*
 import android.text.format.DateFormat
 import android.util.Log
+import android.widget.ArrayAdapter
 import androidx.multidex.BuildConfig
 import com.bestmafen.baseble.scanner.BleDevice
 import com.bestmafen.baseble.scanner.BleScanCallback
@@ -178,6 +180,8 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
   private var onDeviceConnectingSink: EventSink?=null
   private var onIncomingCallStatusChannel : EventChannel?=null
   private var onIncomingCallStatusSink: EventSink?=null
+  private var onReceiveMusicCommandChannel : EventChannel?=null
+  private var onReceiveMusicCommandSink: EventSink?=null
 
   private var mResult: Result? = null
   private val mDevices = mutableListOf<Any>()
@@ -483,6 +487,8 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
           onReadLocationSink!!.success(item)
       }
 
+
+
       override fun onReadTemperature(temperatures: List<BleTemperature>) {
         if (BuildConfig.DEBUG) {
           Log.d("onReadTemperature","$temperatures")
@@ -776,7 +782,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         item["url"] = url
         if(onDeviceRequestAGpsFileSink!=null)
           onDeviceRequestAGpsFileSink!!.success(item)
-        // 以下是示例代码，sdk中的文件会过期，只是用于演示
+        // The following is a sample code, the files in the sdk will expire, just for demonstration
 //        when (BleCache.mAGpsType) {
 //          1 -> BleConnector.sendStream(BleKey.AGPS_FILE, assets.open("type1_epo_gr_3_1.dat"))
 //          2 -> BleConnector.sendStream(BleKey.AGPS_FILE, assets.open("type2_current_1d.alp"))
@@ -838,6 +844,16 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         if(onDeviceConnectingSink!=null){
           onDeviceConnectingSink!!.success(item)
         }
+      }
+
+      override fun onReceiveMusicCommand(musicCommand: MusicCommand) {
+        if (BuildConfig.DEBUG) {
+          Log.d("onReceiveMusicCommand","$musicCommand")
+        }
+        val item: MutableMap<String, Any> = HashMap()
+        item["musicCommand"] = gson.toJson(musicCommand)
+        if(onReceiveMusicCommandSink!=null)
+          onReceiveMusicCommandSink!!.success(item)
       }
 
     }
@@ -961,6 +977,10 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
     onDeviceConnectingChannel!!.setStreamHandler(onDeviceConnectingResultsHandler)
     onIncomingCallStatusChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onIncomingCallStatus")
     onIncomingCallStatusChannel!!.setStreamHandler(onIncomingCallStatusResultsHandler)
+    onReceiveMusicCommandChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onReceiveMusicCommand")
+    onReceiveMusicCommandChannel!!.setStreamHandler(onReceiveMusicCommandResultsHandler)
+
+
     val connector = BleConnector.Builder(flutterPluginBinding.applicationContext)
       .supportRealtekDfu(false) // Whether to support Realtek device Dfu, pass false if no support is required.
       .supportMtkOta(false) // Whether to support MTK device Ota, pass false if no support is required.
@@ -1360,8 +1380,8 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
     canvas: Canvas,
     isCanvasValue: Boolean
   ) {
-    val timeLeft = (screenWidth / 2) * scaleWidth
-    val timeTop = (screenHeight / 2) * scaleHeight
+    val timeLeft = (screenWidth/3.5f) * scaleWidth
+    val timeTop = (screenHeight/3) * scaleHeight
     LogUtils.d("test timeLeft=$timeLeft,  timeTop=$timeTop, timeDigitalView.width=${timeDigitalViewWidth} ,scaleWidth =$scaleWidth")
     //获取AM原始资源.此处涉及到预览，所以强制使用PNG图片，避免透明色不显示
     val amBitmap =
@@ -1918,8 +1938,8 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
       }
       "customDials" -> {
         elements.clear()
-        val isDigital : Boolean? = call.argument<Boolean>("isDigital")
-        val isRound : Boolean? = call.argument<Boolean>("isRound")
+        timeDigitalView  = call.argument<Boolean>("isDigital")!!
+        isRound = call.argument<Boolean>("isRound")!!
         val offset = 0
         custom = call.argument<Int>("custom")!!
         screenWidth = call.argument<Int>("screenWidth")!!
@@ -1992,7 +2012,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         getControl(elements)
 
         // Get time related content
-        if (isDigital==true) {
+        if (timeDigitalView) {
           getTimeDigital(elements)
         }else{
           getPointer(WatchFaceBuilder.ELEMENT_NEEDLE_HOUR, POINTER_HOUR, elements)
@@ -2015,6 +2035,34 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
           bytes
         )
 
+      },
+      "musicCommand"->{
+      val musicControls = arrayOf(
+        BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_NAME, "Music Player"),
+        BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_PLAYBACK_INFO, "${PlaybackState.PAUSED.mState}"),
+        BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_PLAYBACK_INFO, "${PlaybackState.PLAYING.mState}"),
+        BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_PLAYBACK_INFO, "${PlaybackState.REWINDING.mState}"),
+        BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_PLAYBACK_INFO, "${PlaybackState.FAST_FORWARDING.mState}"),
+        BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_VOLUME, String.format("%.2f", Random.nextDouble(0.0, 1.0))),
+        BleMusicControl(MusicEntity.QUEUE, MusicAttr.QUEUE_INDEX, "0"),
+        BleMusicControl(MusicEntity.QUEUE, MusicAttr.QUEUE_COUNT, "1"),
+        BleMusicControl(MusicEntity.TRACK, MusicAttr.TRACK_TITLE, "以父之名"),
+      )
+      val array = musicControls.map { musicControl ->
+        if (musicControl.mMusicEntity == MusicEntity.PLAYER
+          && musicControl.mMusicAttr == MusicAttr.PLAYER_PLAYBACK_INFO) {
+          "${musicControl.mMusicAttr}_" + when (musicControl.mContent) {
+            "${PlaybackState.PAUSED.mState}" -> "PAUSED"
+            "${PlaybackState.PLAYING.mState}" -> "PLAYING"
+            "${PlaybackState.REWINDING.mState}" -> "REWINDING"
+            "${PlaybackState.FAST_FORWARDING.mState}" -> "FAST_FORWARDING"
+            else -> "UNKNOWN"
+          }
+        } else {
+          "${musicControl.mMusicAttr}"
+        }
+      }
+          BleConnector.sendObject(BleKey.MUSIC_CONTROL, BleKeyFlag.UPDATE, musicControls[0])
       }
       else -> {
         when (call.method) {
@@ -3265,7 +3313,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             BleConnector.sendData(bleKey, bleKeyFlag)
 
           BleKey.APP_SPORT_DATA -> {
-            // App 主导的运动，发送运动过程中App计算的数据给设备
+// App-led movement, sending the data calculated by the App to the device during the movement
             val reply = BleAppSportData(
               mDuration = 132,
               mAltitude = -30,
@@ -4018,6 +4066,17 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
     override fun onCancel(o: Any?) {
     }
   }
+
+  private val onReceiveMusicCommandResultsHandler: EventChannel.StreamHandler = object : EventChannel.StreamHandler {
+    override fun onListen(o: Any?, eventSink: EventSink?) {
+      if (eventSink != null) {
+        onReceiveMusicCommandSink = eventSink
+      }
+    }
+    override fun onCancel(o: Any?) {
+    }
+  }
+
 }
 
 

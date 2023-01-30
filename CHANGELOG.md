@@ -1,3 +1,11 @@
+## 0.5.8
+
+* custom dial digital time
+
+## 0.5.7
+
+* custom dial digital time
+
 ## 0.5.6
 
 * custom background dial test
