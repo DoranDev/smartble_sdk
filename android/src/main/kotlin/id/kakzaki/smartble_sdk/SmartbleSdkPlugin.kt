@@ -1,16 +1,13 @@
 package id.kakzaki.smartble_sdk
 
 import android.Manifest
-import android.R
 import android.app.Activity
 import android.bluetooth.BluetoothDevice
 import android.content.Context
-import android.content.Intent
 import android.graphics.*
 import android.os.*
 import android.text.format.DateFormat
 import android.util.Log
-import android.widget.ArrayAdapter
 import androidx.multidex.BuildConfig
 import com.bestmafen.baseble.scanner.BleDevice
 import com.bestmafen.baseble.scanner.BleScanCallback
@@ -18,7 +15,6 @@ import com.bestmafen.baseble.scanner.BleScanFilter
 import com.bestmafen.baseble.scanner.ScannerFactory
 import com.blankj.utilcode.constant.PermissionConstants
 import com.blankj.utilcode.util.*
-import com.blankj.utilcode.util.ActivityUtils.startActivity
 import com.google.gson.Gson
 import com.szabh.smable3.BleKey
 import com.szabh.smable3.BleKeyFlag
@@ -27,7 +23,6 @@ import com.szabh.smable3.entity.*
 import com.szabh.smable3.entity.BleAlarm
 import com.szabh.smable3.watchface.Element
 import com.szabh.smable3.watchface.WatchFaceBuilder
-import id.kakzaki.smartble_sdk.activity.MusicControlActivity
 import id.kakzaki.smartble_sdk.tools.*
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.FlutterPlugin.FlutterPluginBinding
@@ -2035,8 +2030,8 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
           bytes
         )
 
-      },
-      "musicCommand"->{
+      }
+      "MUSIC_CONTROL" -> {
       val musicControls = arrayOf(
         BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_NAME, "Music Player"),
         BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_PLAYBACK_INFO, "${PlaybackState.PAUSED.mState}"),
@@ -2249,9 +2244,9 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
           "NOTIFICATION" -> {
             mBleKey=BleKey.NOTIFICATION
           }
-          "MUSIC_CONTROL" -> {
-            mBleKey=BleKey.MUSIC_CONTROL
-          }
+//          "MUSIC_CONTROL" -> {
+//            mBleKey=BleKey.MUSIC_CONTROL
+//          }
           "SCHEDULE" -> {
             mBleKey=BleKey.SCHEDULE
           }
@@ -3101,13 +3096,13 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
               BleConnector.sendData(bleKey, bleKeyFlag)
             }
 
-          // BleCommand.PUSH
-          BleKey.MUSIC_CONTROL -> startActivity(
-            Intent(
-              mContext,
-              MusicControlActivity::class.java
-            )
-          )
+//          // BleCommand.PUSH
+//          BleKey.MUSIC_CONTROL -> startActivity(
+//            Intent(
+//              mContext,
+//              MusicControlActivity::class.java
+//            )
+//          )
           BleKey.SCHEDULE -> {
             if (bleKeyFlag == BleKeyFlag.CREATE) {
               // 创建一个1分钟后的日程
