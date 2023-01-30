@@ -4,8 +4,9 @@ import com.bestmafen.baseble.data.BleReadable
 import java.nio.ByteOrder
 
 /**
- * 设备定位全程的GSV数据，和设备显示的数据对应
+ * The GSV data of the whole process of device positioning corresponds to the data displayed by the device
  */
+
 data class BleLocationGsv(
     var satelliteNo: Int = 0, // 卫星编号
     var elevation: Int = 0, // 仰角

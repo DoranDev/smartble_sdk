@@ -4,7 +4,7 @@ import com.bestmafen.baseble.data.BleReadable
 import java.nio.ByteOrder
 
 /**
- * 设备定位原始数据中的UTC时间
+ * The UTC time in the device positioning raw data
  */
 data class BleLocationUTC(
     var mHour: Int = 0,

@@ -4,7 +4,7 @@ import com.bestmafen.baseble.data.BleReadable
 import java.nio.ByteOrder
 
 /**
- * 设备定位原始GGA数据
+ * Device positioning raw GGA data
  */
 data class BleLocationGga(
     var mTime: BleLocationUTC = BleLocationUTC(), // UTC时间
