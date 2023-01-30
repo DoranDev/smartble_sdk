@@ -276,8 +276,32 @@ class SmartbleSdk {
       _channel.invokeMethod('DRINK_WATER', {'flag': flag.name});
   Future<dynamic> kSHUTDOWN({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('SHUTDOWN', {'flag': flag.name});
-  Future<dynamic> kAPP_SPORT_DATA({required SelectedBlekeyFlag flag}) =>
-      _channel.invokeMethod('APP_SPORT_DATA', {'flag': flag.name});
+  Future<dynamic> kAPP_SPORT_DATA({
+    required SelectedBlekeyFlag flag,
+    required int sportMode,
+    required int mDuration,
+    required int mAltitude,
+    required int mAirPressure,
+    required int mSpm,
+    required int mStep,
+    required int mDistance,
+    required int mCalorie,
+    required int mSpeed,
+    required int mPace,
+  }) =>
+      _channel.invokeMethod('APP_SPORT_DATA', {
+        'flag': flag.name,
+        'sportMode': sportMode,
+        'mDuration': mDuration,
+        'mAltitude': mAltitude,
+        'mAirPressure': mAirPressure,
+        'mSpm': mSpm,
+        'mStep': mStep,
+        'mDistance': mDistance,
+        'mCalorie': mCalorie,
+        'mSpeed': mSpeed,
+        'mPace': mPace
+      });
   Future<dynamic> kREAL_TIME_HEART_RATE({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('REAL_TIME_HEART_RATE', {'flag': flag.name});
   Future<dynamic> kBLOOD_OXYGEN_SET({required SelectedBlekeyFlag flag}) =>
@@ -414,8 +438,15 @@ class SmartbleSdk {
       _channel.invokeMethod('REQUEST_LOCATION', {'flag': flag.name});
   Future<dynamic> kINCOMING_CALL({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('INCOMING_CALL', {'flag': flag.name});
-  Future<dynamic> kAPP_SPORT_STATE({required SelectedBlekeyFlag flag}) =>
-      _channel.invokeMethod('APP_SPORT_STATE', {'flag': flag.name});
+  Future<dynamic> kAPP_SPORT_STATE(
+          {required SelectedBlekeyFlag flag,
+          required int sportMode,
+          required int sportState}) =>
+      _channel.invokeMethod('APP_SPORT_STATE', {
+        'flag': flag.name,
+        'sportMode': sportMode,
+        'sportState': sportState
+      });
   Future<dynamic> kCLASSIC_BLUETOOTH_STATE(
           {required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('CLASSIC_BLUETOOTH_STATE', {'flag': flag.name});
@@ -795,4 +826,16 @@ class BleRepeat {
   static String WORKDAY = "WORKDAY";
   static String WEEKEND = "WEEKEND";
   static String EVERYDAY = "EVERYDAY";
+}
+
+class BleAppSport {
+  static int STATE_START = 1;
+  static int STATE_RESUME = 2;
+  static int STATE_PAUSE = 3;
+  static int STATE_END = 4;
+
+  static int INDOOR = 1;
+  static int OUTDOOR = 2;
+  static int CYCLING = 3;
+  static int CLIMBING = 4;
 }
