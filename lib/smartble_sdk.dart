@@ -357,8 +357,8 @@ class SmartbleSdk {
         'mCategory': mCategory,
         'mPackage': mPackage
       });
-  Future<dynamic> kMUSIC_CONTROL({required SelectedBlekeyFlag flag}) =>
-      _channel.invokeMethod('MUSIC_CONTROL', {'flag': flag.name});
+  Future<dynamic> kMUSIC_CONTROL({required SelectedBlekeyFlag flag, required String mTitle, required String mContent}) =>
+      _channel.invokeMethod('MUSIC_CONTROL', {'flag': flag.name, 'mTitle':mTitle, 'mContent':mContent});
   Future<dynamic> kSCHEDULE({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('SCHEDULE', {'flag': flag.name});
   Future<dynamic> kWEATHER_REALTIME({required SelectedBlekeyFlag flag}) =>
