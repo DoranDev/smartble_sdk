@@ -215,7 +215,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             mDevices.add(item)
           }
 //         Handler(Looper.getMainLooper()).post {
-            scanSink.success(mDevices)
+          scanSink.success(mDevices)
 //          }
           if (BuildConfig.DEBUG) {
             Log.d("mDevices Found ","$mDevices")
@@ -278,7 +278,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
 
       override fun onReadMtkOtaMeta() {
         if (mContext != null) {
-         // FirmwareHelper.gotoOtaReally(mContext)
+          // FirmwareHelper.gotoOtaReally(mContext)
         }
       }
 
@@ -1571,7 +1571,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
     return defaultConversion(fileFormat, array, finalBgBitMap.width, 16, 0, false)
   }
 
-     private fun defaultConversion(
+  private fun defaultConversion(
     fileFormat: String,
     data: ByteArray,
     w: Int,                      //图片宽度
@@ -1957,10 +1957,10 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
       }
       "setAddress" -> {
         mBleScanner.scan(false)
-          val bmac : String? = call.argument<String>("bmac")
-          if (bmac != null) {
-            BleConnector.setAddress(bmac)
-          }
+        val bmac : String? = call.argument<String>("bmac")
+        if (bmac != null) {
+          BleConnector.setAddress(bmac)
+        }
       }
       "connect" -> {
         BleConnector.connect(true)
@@ -2095,38 +2095,38 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         )
 
       }
-      /*"musicCommand"*/ "MUSIC_CONTROL"->{
-      val musicControls = arrayOf(
-        BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_NAME, "Music Player"),
-        BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_PLAYBACK_INFO, "${PlaybackState.PAUSED.mState}"),
-        BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_PLAYBACK_INFO, "${PlaybackState.PLAYING.mState}"),
-        BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_PLAYBACK_INFO, "${PlaybackState.REWINDING.mState}"),
-        BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_PLAYBACK_INFO, "${PlaybackState.FAST_FORWARDING.mState}"),
-        BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_VOLUME, String.format("%.2f", Random.nextDouble(0.0, 1.0))),
-        BleMusicControl(MusicEntity.QUEUE, MusicAttr.QUEUE_INDEX, "0"),
-        BleMusicControl(MusicEntity.QUEUE, MusicAttr.QUEUE_COUNT, "1"),
-        BleMusicControl(MusicEntity.TRACK, MusicAttr.TRACK_TITLE, "以父之名"),
-      )
-      val array = musicControls.map { musicControl ->
-        if (musicControl.mMusicEntity == MusicEntity.PLAYER
-          && musicControl.mMusicAttr == MusicAttr.PLAYER_PLAYBACK_INFO) {
-          "${musicControl.mMusicAttr}_" + when (musicControl.mContent) {
-            "${PlaybackState.PAUSED.mState}" -> "PAUSED"
-            "${PlaybackState.PLAYING.mState}" -> "PLAYING"
-            "${PlaybackState.REWINDING.mState}" -> "REWINDING"
-            "${PlaybackState.FAST_FORWARDING.mState}" -> "FAST_FORWARDING"
-            else -> "UNKNOWN"
+      "musicCommand" /*"MUSIC_CONTROL"*/->{
+        val musicControls = arrayOf(
+          BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_NAME, "Music Player"),
+          BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_PLAYBACK_INFO, "${PlaybackState.PAUSED.mState}"),
+          BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_PLAYBACK_INFO, "${PlaybackState.PLAYING.mState}"),
+          BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_PLAYBACK_INFO, "${PlaybackState.REWINDING.mState}"),
+          BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_PLAYBACK_INFO, "${PlaybackState.FAST_FORWARDING.mState}"),
+          BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_VOLUME, String.format("%.2f", Random.nextDouble(0.0, 1.0))),
+          BleMusicControl(MusicEntity.QUEUE, MusicAttr.QUEUE_INDEX, "0"),
+          BleMusicControl(MusicEntity.QUEUE, MusicAttr.QUEUE_COUNT, "1"),
+          BleMusicControl(MusicEntity.TRACK, MusicAttr.TRACK_TITLE, "以父之名"),
+        )
+        val array = musicControls.map { musicControl ->
+          if (musicControl.mMusicEntity == MusicEntity.PLAYER
+            && musicControl.mMusicAttr == MusicAttr.PLAYER_PLAYBACK_INFO) {
+            "${musicControl.mMusicAttr}_" + when (musicControl.mContent) {
+              "${PlaybackState.PAUSED.mState}" -> "PAUSED"
+              "${PlaybackState.PLAYING.mState}" -> "PLAYING"
+              "${PlaybackState.REWINDING.mState}" -> "REWINDING"
+              "${PlaybackState.FAST_FORWARDING.mState}" -> "FAST_FORWARDING"
+              else -> "UNKNOWN"
+            }
+          } else {
+            "${musicControl.mMusicAttr}"
           }
-        } else {
-          "${musicControl.mMusicAttr}"
         }
-      }
-          BleConnector.sendObject(BleKey.MUSIC_CONTROL, BleKeyFlag.UPDATE, musicControls[0])
+        //BleConnector.sendObject(BleKey.MUSIC_CONTROL, BleKeyFlag.UPDATE, musicControls[0])
       }
       else -> {
         when (call.method) {
           "OTA" -> {
-           mBleKey=BleKey.OTA
+            mBleKey=BleKey.OTA
           }
           "XMODEM" -> {
             mBleKey=BleKey.XMODEM
@@ -2308,9 +2308,9 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
           "NOTIFICATION" -> {
             mBleKey=BleKey.NOTIFICATION
           }
-//          "MUSIC_CONTROL" -> {
-//            mBleKey=BleKey.MUSIC_CONTROL
-//          }
+          "MUSIC_CONTROL" -> {
+            mBleKey=BleKey.MUSIC_CONTROL
+          }
           "SCHEDULE" -> {
             mBleKey=BleKey.SCHEDULE
           }
@@ -2508,35 +2508,35 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             val mCategory : String? = call.argument<String>("mCategory")
             val mPackage : String? = call.argument<String>("mPackage")
             when (bleKeyFlag) {
-                BleKeyFlag.UPDATE -> {
-                  BleNotification(
-                        mCategory = if(mCategory=="1"){
-                          BleNotification.CATEGORY_INCOMING_CALL
-                        }else{
-                          BleNotification.CATEGORY_MESSAGE
-                        },
-                        mTime = Date().time,
-                        mPackage = "$mPackage",
-                        mTitle = "$mTitle",
-                        mContent = "$mContent"
-                  ).let { notification ->
-                        BleConnector.sendObject(BleKey.NOTIFICATION, BleKeyFlag.UPDATE, notification)
-                  }
+              BleKeyFlag.UPDATE -> {
+                BleNotification(
+                  mCategory = if(mCategory=="1"){
+                    BleNotification.CATEGORY_INCOMING_CALL
+                  }else{
+                    BleNotification.CATEGORY_MESSAGE
+                  },
+                  mTime = Date().time,
+                  mPackage = "$mPackage",
+                  mTitle = "$mTitle",
+                  mContent = "$mContent"
+                ).let { notification ->
+                  BleConnector.sendObject(BleKey.NOTIFICATION, BleKeyFlag.UPDATE, notification)
                 }
-                BleKeyFlag.READ -> {
-                  BleConnector.sendData(bleKey, bleKeyFlag)
+              }
+              BleKeyFlag.READ -> {
+                BleConnector.sendData(bleKey, bleKeyFlag)
+              }
+              BleKeyFlag.DELETE -> {
+                BleNotification(
+                  mCategory = if(mCategory=="1"){
+                    BleNotification.CATEGORY_INCOMING_CALL
+                  }else{
+                    BleNotification.CATEGORY_MESSAGE
+                  },
+                ).let { notification ->
+                  BleConnector.sendObject(BleKey.NOTIFICATION, BleKeyFlag.DELETE, notification)
                 }
-                BleKeyFlag.DELETE -> {
-                  BleNotification(
-                        mCategory = if(mCategory=="1"){
-                          BleNotification.CATEGORY_INCOMING_CALL
-                        }else{
-                          BleNotification.CATEGORY_MESSAGE
-                        },
-                  ).let { notification ->
-                        BleConnector.sendObject(BleKey.NOTIFICATION, BleKeyFlag.DELETE, notification)
-                  }
-                }
+              }
               else -> {
                 Log.i("No Flag","")
               }
@@ -2549,36 +2549,36 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             val mPackage : String? = call.argument<String>("mPackage")
             val mPhone : String? = call.argument<String>("mPhone")
             when (bleKeyFlag) {
-                BleKeyFlag.UPDATE -> {
-                  BleNotification2(
-                        mCategory = if(mCategory=="1"){
-                          BleNotification.CATEGORY_INCOMING_CALL
-                        }else{
-                          BleNotification.CATEGORY_MESSAGE
-                        },
-                        mTime = Date().time,
-                        mPackage = "$mPackage",
-                        mTitle = "$mTitle",
-                        mPhone = "$mPhone",
-                        mContent = "$mContent"
-                  ).let { notification ->
-                        BleConnector.sendObject(BleKey.NOTIFICATION2, BleKeyFlag.UPDATE, notification)
-                  }
+              BleKeyFlag.UPDATE -> {
+                BleNotification2(
+                  mCategory = if(mCategory=="1"){
+                    BleNotification.CATEGORY_INCOMING_CALL
+                  }else{
+                    BleNotification.CATEGORY_MESSAGE
+                  },
+                  mTime = Date().time,
+                  mPackage = "$mPackage",
+                  mTitle = "$mTitle",
+                  mPhone = "$mPhone",
+                  mContent = "$mContent"
+                ).let { notification ->
+                  BleConnector.sendObject(BleKey.NOTIFICATION2, BleKeyFlag.UPDATE, notification)
                 }
-                BleKeyFlag.READ -> {
-                  BleConnector.sendData(bleKey, bleKeyFlag)
+              }
+              BleKeyFlag.READ -> {
+                BleConnector.sendData(bleKey, bleKeyFlag)
+              }
+              BleKeyFlag.DELETE -> {
+                BleNotification2(
+                  mCategory = if(mCategory=="1"){
+                    BleNotification.CATEGORY_INCOMING_CALL
+                  }else{
+                    BleNotification.CATEGORY_MESSAGE
+                  },
+                ).let { notification ->
+                  BleConnector.sendObject(BleKey.NOTIFICATION2, BleKeyFlag.DELETE, notification)
                 }
-                BleKeyFlag.DELETE -> {
-                  BleNotification2(
-                        mCategory = if(mCategory=="1"){
-                          BleNotification.CATEGORY_INCOMING_CALL
-                        }else{
-                          BleNotification.CATEGORY_MESSAGE
-                        },
-                  ).let { notification ->
-                        BleConnector.sendObject(BleKey.NOTIFICATION2, BleKeyFlag.DELETE, notification)
-                  }
-                }
+              }
               else -> {
                 Log.i("No Flag","")
               }
@@ -2897,16 +2897,16 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
 //                  mMinute = calendar.get(Calendar.MINUTE),
 //                  mTag = "tag"
 //                )
-               BleAlarm(
-                mEnabled = mEnabled!!,
-                mRepeat = bleRepeat!!,
-                mYear = mYear!!,
-                mMonth = mMonth!!,
-                mDay = mDay!!,
-                mHour = mHour!!,
-                mMinute = mMinute!!,
-                mTag = mTag!!
-              )
+                BleAlarm(
+                  mEnabled = mEnabled!!,
+                  mRepeat = bleRepeat!!,
+                  mYear = mYear!!,
+                  mMonth = mMonth!!,
+                  mDay = mDay!!,
+                  mHour = mHour!!,
+                  mMinute = mMinute!!,
+                  mTag = mTag!!
+                )
               )
             } else if (bleKeyFlag == BleKeyFlag.DELETE) {
               // 如果缓存中有闹钟的话，删除第一个
@@ -3377,7 +3377,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             BleConnector.sendData(bleKey, bleKeyFlag)
 
           BleKey.APP_SPORT_DATA -> {
-          // App-led movement, sending the data calculated by the App to the device during the movement
+            // App-led movement, sending the data calculated by the App to the device during the movement
             sportMode = when (call.argument<Int>("sportMode")!!) {
               1 -> BleActivity.INDOOR
               2 -> BleActivity.OUTDOOR
