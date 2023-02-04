@@ -5,9 +5,11 @@ import android.app.Activity
 import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.graphics.*
+import android.media.AudioManager
 import android.os.*
 import android.text.format.DateFormat
 import android.util.Log
+import android.view.KeyEvent
 import androidx.multidex.BuildConfig
 import com.bestmafen.baseble.scanner.BleDevice
 import com.bestmafen.baseble.scanner.BleScanCallback
@@ -841,59 +843,60 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         }
       }
 
+      var isPlay = false;
+      val mAudioManager = mContext?.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+      var maxVolume = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
       override fun onReceiveMusicCommand(musicCommand: MusicCommand) {
         if (BuildConfig.DEBUG) {
           Log.d("onReceiveMusicCommand","$musicCommand")
           Log.d("receivedMusics","$musicCommand")
         }
-//        val item: MutableMap<String, Any> = HashMap()
-//        item["musicCommand"] = gson.toJson(musicCommand)
-
         var currentVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
-        lateinit var musicControl:BleMusicControl;
+        var format = String.format("%.2f", (currentVolume/10.0))
+        LogUtils.d("currenVolume: $currentVolume, format: $format")
+        var musicSoundLevel = BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_VOLUME, String.format("%.2f", (currentVolume/10.0)))
+        BleConnector.sendObject(BleKey.MUSIC_CONTROL, BleKeyFlag.UPDATE, musicSoundLevel)
 
-//        volume = currentVolume.roundToInt()
         var event = KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PLAY)
         when(musicCommand){
           MusicCommand.TOGGLE -> {
             if(isPlay){
               isPlay = false
               event = KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PAUSE)
-              var musicControlPause = BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_PLAYBACK_INFO, PlaybackState.PAUSED.name)
+              var musicControlPause = BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_PLAYBACK_INFO, "${PlaybackState.PAUSED.mState}")
               BleConnector.sendObject(BleKey.MUSIC_CONTROL, BleKeyFlag.UPDATE, musicControlPause)
             }else{
               isPlay = true
               event = KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PLAY)
-              var musicControlPlay = BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_PLAYBACK_INFO, PlaybackState.PLAYING.name)
+              var musicControlPlay = BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_PLAYBACK_INFO, "${PlaybackState.PLAYING.mState}")
               BleConnector.sendObject(BleKey.MUSIC_CONTROL, BleKeyFlag.UPDATE, musicControlPlay)
             }
           }
           MusicCommand.PLAY -> {
             event = KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PLAY)
-            var musicControlPlay = BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_PLAYBACK_INFO, PlaybackState.PLAYING.name)
+            var musicControlPlay = BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_PLAYBACK_INFO, "${PlaybackState.PAUSED.mState}")
             BleConnector.sendObject(BleKey.MUSIC_CONTROL, BleKeyFlag.UPDATE, musicControlPlay)
           }
           MusicCommand.PAUSE -> {
             event = KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PAUSE)
-            var musicControlPause = BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_PLAYBACK_INFO, PlaybackState.PAUSED.name)
+            var musicControlPause = BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_PLAYBACK_INFO, "${PlaybackState.PLAYING.mState}")
             BleConnector.sendObject(BleKey.MUSIC_CONTROL, BleKeyFlag.UPDATE, musicControlPause)
+
           }
           MusicCommand.NEXT -> {
             event = KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_NEXT)
 
           }
-          MusicCommand.PRE -> {event = KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PREVIOUS)}
+          MusicCommand.PRE -> {event = KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PREVIOUS)
+          }
           MusicCommand.VOLUME_UP -> {
-
             mAudioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_RAISE, AudioManager.FLAG_SHOW_UI)
-            var musicControlVolUp = BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_VOLUME, String.format("%.2f", currentVolume.toDouble()))
+            var musicControlVolUp = BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_VOLUME, String.format("%.2f", (currentVolume/10.0)))
             BleConnector.sendObject(BleKey.MUSIC_CONTROL, BleKeyFlag.UPDATE, musicControlVolUp)
           }
           MusicCommand.VOLUME_DOWN -> {
-
-
             mAudioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_LOWER, AudioManager.FLAG_SHOW_UI)
-            var musicControlVolDown = BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_VOLUME, String.format("%.2f", currentVolume.toDouble()))
+            var musicControlVolDown = BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_VOLUME, String.format("%.2f", (currentVolume/10.0)))
             BleConnector.sendObject(BleKey.MUSIC_CONTROL, BleKeyFlag.UPDATE, musicControlVolDown)
           }
           MusicCommand.UNKNOWN -> {}
