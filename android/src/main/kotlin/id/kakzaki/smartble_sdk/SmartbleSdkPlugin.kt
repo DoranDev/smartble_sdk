@@ -7,6 +7,7 @@ import android.content.Context
 import android.graphics.*
 import android.media.AudioManager
 import android.os.*
+import android.telecom.TelecomManager
 import android.text.format.DateFormat
 import android.util.Log
 import android.view.KeyEvent
@@ -536,6 +537,72 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         if(onIncomingCallStatusSink!=null){
           onIncomingCallStatusSink!!.success(item)
         }
+
+        if (status == 0) {
+          //angkat telepon
+          try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+              val manager =
+                mContext?.getSystemService(Context.TELECOM_SERVICE) as TelecomManager?
+              manager?.acceptRingingCall()
+            }  else {
+              val audioManager =
+                mContext?.getSystemService(Context.AUDIO_SERVICE) as AudioManager?
+              val eventDown =
+                KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_HEADSETHOOK)
+              val eventUp = KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_HEADSETHOOK)
+              audioManager?.dispatchMediaKeyEvent(eventDown)
+              audioManager?.dispatchMediaKeyEvent(eventUp)
+              Runtime.getRuntime()
+                .exec("input keyevent " + Integer.toString(KeyEvent.KEYCODE_HEADSETHOOK))
+            }
+          } catch (e: Exception) {
+            e.printStackTrace()
+          }
+        } else {
+          //reject telepon
+          if (Build.VERSION.SDK_INT < 28) {
+            try {
+              val telephonyClass =
+                Class.forName("com.android.internal.telephony.ITelephony")
+              val telephonyStubClass = telephonyClass.classes[0]
+              val serviceManagerClass = Class.forName("android.os.ServiceManager")
+              val serviceManagerNativeClass =
+                Class.forName("android.os.ServiceManagerNative")
+              val getService =
+                serviceManagerClass.getMethod("getService", String::class.java)
+              val tempInterfaceMethod =
+                serviceManagerNativeClass.getMethod(
+                  "asInterface",
+                  IBinder::class.java
+                )
+              val tmpBinder = Binder()
+              tmpBinder.attachInterface(null, "fake")
+              val serviceManagerObject = tempInterfaceMethod.invoke(null, tmpBinder)
+              val retbinder =
+                getService.invoke(serviceManagerObject, "phone") as IBinder
+              val serviceMethod =
+                telephonyStubClass.getMethod("asInterface", IBinder::class.java)
+              val telephonyObject = serviceMethod.invoke(null, retbinder)
+              val telephonyEndCall = telephonyClass.getMethod("endCall")
+              telephonyEndCall.invoke(telephonyObject)
+            } catch (e: Exception) {
+              LogUtils.d("hang up error " + e.message)
+            }
+          } else {
+            PermissionUtils
+              .permission(PermissionConstants.PHONE)
+              .request2 {
+                if (it == PermissionStatus.GRANTED) {
+                  LogUtils.d("hang up OK")
+                  val manager =
+                    mContext?.getSystemService(Context.TELECOM_SERVICE) as TelecomManager
+                  manager.endCall()
+                }
+              }
+          }
+        }
+
       }
 
       override fun onUpdateAppSportState(appSportState: BleAppSportState) {
@@ -3449,7 +3516,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             LogUtils.d(reply)
           }
           BleKey.INCOMING_CALL -> {
-            BleConnector.sendData(bleKey, bleKeyFlag)
+            BleConnector.sendData(bleKey, bleKeyFlag, /*null, true*/)
           }
           BleKey.CLASSIC_BLUETOOTH_STATE -> {
             // 3.0 开关
