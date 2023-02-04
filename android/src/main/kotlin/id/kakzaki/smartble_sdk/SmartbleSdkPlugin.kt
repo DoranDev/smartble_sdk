@@ -62,6 +62,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
   private var mLocationTimes = 1
   private var mClassicBluetoothState = 2
   private var sportState = BleAppSportState.STATE_START
+  private var sportMode = BleAppSportState.MODE_INDOOR
 
   private lateinit var channel : MethodChannel
 
@@ -906,7 +907,6 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
           }
           MusicCommand.UNKNOWN -> {}
         }
-
         mAudioManager.dispatchMediaKeyEvent(event)
 //        val intent = Intent("com.android.music.musicservicecommand")
 //        intent.putExtra("command","pause")
@@ -3371,24 +3371,31 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             }
           }
           // BleCommand.DATA
-          BleKey.DATA_ALL,BleKey.ACTIVITY, BleKey.ACTIVITY_REALTIME, BleKey.HEART_RATE, BleKey.BLOOD_PRESSURE, BleKey.SLEEP,
+          BleKey.DATA_ALL,BleKey.ACTIVITY, BleKey.ACTIVITY_REALTIME, BleKey.HEART_RATE,BleKey.REAL_TIME_HEART_RATE, BleKey.BLOOD_PRESSURE, BleKey.SLEEP,
           BleKey.WORKOUT, BleKey.LOCATION, BleKey.TEMPERATURE, BleKey.BLOOD_OXYGEN, BleKey.HRV, BleKey.LOG, BleKey.WORKOUT2 ->
             // 读取数据
             BleConnector.sendData(bleKey, bleKeyFlag)
 
           BleKey.APP_SPORT_DATA -> {
-// App-led movement, sending the data calculated by the App to the device during the movement
+          // App-led movement, sending the data calculated by the App to the device during the movement
+            sportMode = when (call.argument<Int>("sportMode")!!) {
+              1 -> BleActivity.INDOOR
+              2 -> BleActivity.OUTDOOR
+              3 -> BleActivity.CYCLING
+              4 -> BleActivity.CLIMBING
+              else -> BleActivity.INDOOR
+            }
             val reply = BleAppSportData(
-              mDuration = 132,
-              mAltitude = -30,
-              mAirPressure = 1000,
-              mSpm = 300,
-              mMode = BleAppSportState.MODE_INDOOR,
-              mStep = 898,
-              mDistance = 700,
-              mCalorie = 300,
-              mSpeed = 6000,
-              mPace = 900,
+              mDuration = call.argument<Int>("mDuration")!!,
+              mAltitude = call.argument<Int>("mAltitude")!!,
+              mAirPressure = call.argument<Int>("mAirPressure")!!,
+              mSpm = call.argument<Int>("mSpm")!!,
+              mMode = sportMode,
+              mStep = call.argument<Int>("mStep")!!,
+              mDistance = call.argument<Int>("mDistance")!!,
+              mCalorie = call.argument<Int>("mCalorie")!!,
+              mSpeed = call.argument<Int>("mSpeed")!!,
+              mPace = call.argument<Int>("mPace")!!,
             )
             BleConnector.sendObject(bleKey, bleKeyFlag, reply)
             print("$reply")
@@ -3418,14 +3425,23 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             if (mLocationTimes > 10) mLocationTimes = 1
           }
           BleKey.APP_SPORT_STATE -> {
-            // App 主导的运动，发送运动状态变化
-            sportState = when (sportState) {
-              BleAppSportState.STATE_START -> BleAppSportState.STATE_PAUSE
-              BleAppSportState.STATE_PAUSE -> BleAppSportState.STATE_END
+            // App-led movement, sending movement state changes
+            sportState = when (call.argument<Int>("sportState")!!) {
+              1 -> BleAppSportState.STATE_START
+              2 -> BleAppSportState.STATE_RESUME
+              3 -> BleAppSportState.STATE_PAUSE
+              4 -> BleAppSportState.STATE_END
               else -> BleAppSportState.STATE_START
             }
+            sportMode = when (call.argument<Int>("sportMode")!!) {
+              1 -> BleActivity.INDOOR
+              2 -> BleActivity.OUTDOOR
+              3 -> BleActivity.CYCLING
+              4 -> BleActivity.CLIMBING
+              else -> BleActivity.INDOOR
+            }
             val reply = BleAppSportState(
-              mMode = BleAppSportState.MODE_INDOOR,
+              mMode = sportMode,
               mState = sportState,
             )
             BleConnector.sendObject(bleKey, bleKeyFlag, reply)
