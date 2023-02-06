@@ -381,8 +381,12 @@ class SmartbleSdk {
         'mCategory': mCategory,
         'mPackage': mPackage
       });
-  Future<dynamic> kMUSIC_CONTROL({required SelectedBlekeyFlag flag, required String mTitle, required String mContent}) =>
-      _channel.invokeMethod('MUSIC_CONTROL', {'flag': flag.name, 'mTitle':mTitle, 'mContent':mContent});
+  Future<dynamic> kMUSIC_CONTROL(
+          {required SelectedBlekeyFlag flag,
+          required String mTitle,
+          required String mContent}) =>
+      _channel.invokeMethod('MUSIC_CONTROL',
+          {'flag': flag.name, 'mTitle': mTitle, 'mContent': mContent});
   Future<dynamic> kSCHEDULE({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('SCHEDULE', {'flag': flag.name});
   Future<dynamic> kWEATHER_REALTIME({required SelectedBlekeyFlag flag}) =>
@@ -434,8 +438,17 @@ class SmartbleSdk {
           {required SelectedBlekeyFlag flag, required bool mCameraEntered}) =>
       _channel.invokeMethod(
           'CAMERA', {'flag': flag.name, 'mCameraEntered': mCameraEntered});
-  Future<dynamic> kREQUEST_LOCATION({required SelectedBlekeyFlag flag}) =>
-      _channel.invokeMethod('REQUEST_LOCATION', {'flag': flag.name});
+  Future<dynamic> kREQUEST_LOCATION(
+          {required SelectedBlekeyFlag flag,
+          required double mSpeed,
+          required double mTotalDistance,
+          required int mAltitude}) =>
+      _channel.invokeMethod('REQUEST_LOCATION', {
+        'flag': flag.name,
+        'mSpeed': mSpeed,
+        'mTotalDistance': mTotalDistance,
+        'mAltitude': mAltitude
+      });
   Future<dynamic> kINCOMING_CALL({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('INCOMING_CALL', {'flag': flag.name});
   Future<dynamic> kAPP_SPORT_STATE(

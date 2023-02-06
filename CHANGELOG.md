@@ -1,3 +1,7 @@
+## 0.6.2
+
+* Request Location
+
 ## 0.6.1
 
 * music command

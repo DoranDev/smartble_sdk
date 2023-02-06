@@ -3481,15 +3481,15 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
           BleKey.REQUEST_LOCATION -> {
             // reply location information
             val reply = BleLocationReply(
-              mSpeed = 1.11f * mLocationTimes,
-              mTotalDistance = 1.11f * mLocationTimes,
-              mAltitude = 111 * mLocationTimes
+              mSpeed = call.argument<Float>("mSpeed")!!,
+              mTotalDistance = call.argument<Float>("mTotalDistance")!!,
+              mAltitude = call.argument<Int>("mAltitude")!!
             )
             print("$bleKey $bleKeyFlag")
             BleConnector.sendObject(bleKey, bleKeyFlag, reply)
             print("$reply")
-            mLocationTimes++
-            if (mLocationTimes > 10) mLocationTimes = 1
+//            mLocationTimes++
+//            if (mLocationTimes > 10) mLocationTimes = 1
           }
           BleKey.APP_SPORT_STATE -> {
             // App-led movement, sending movement state changes
