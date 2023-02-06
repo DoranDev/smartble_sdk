@@ -1,3 +1,7 @@
+## 0.6.1
+
+* music command
+
 ## 0.6.0
 
 * music command
