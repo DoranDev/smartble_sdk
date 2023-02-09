@@ -1,3 +1,7 @@
+## 0.6.4
+
+* Music
+
 ## 0.6.3
 
 * Request Location
