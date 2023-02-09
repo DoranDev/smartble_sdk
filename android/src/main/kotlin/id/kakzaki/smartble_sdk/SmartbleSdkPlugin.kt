@@ -2106,9 +2106,9 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             listNew.add(bleS)
           }
           val reversedListNew = listNew.reversed()
-          LogUtils.d("valueBle : ${reversedListNew.last().mTime} | ${reversedListNew.last().mMode} | ${reversedListNew.last().mSoft} | ${reversedListNew.last().mStrong}")
+//          LogUtils.d("valueBle : ${reversedListNew.last().mTime} | ${reversedListNew.last().mMode} | ${reversedListNew.last().mSoft} | ${reversedListNew.last().mStrong}")
           val res = BleSleep.getSleepStatusDuration(sleeps = BleSleep.analyseSleep(reversedListNew))
-          LogUtils.d("valueSMBLE : ${res.valueAt(0)} | ${res.valueAt(1)} | ${res.valueAt(2)}")
+//          LogUtils.d("valueSMBLE : ${res.valueAt(0)} | ${res.valueAt(1)} | ${res.valueAt(2)}")
           val mapSleep = mapOf("light" to res.valueAt(0), "deep" to res.valueAt(1), "awake" to res.valueAt(2) , "mStrong" to res.valueAt(3))
           result.success(mapSleep);
         }
@@ -3537,9 +3537,9 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
               mTotalDistance = call.argument<Float>("mTotalDistance")!!,
               mAltitude = call.argument<Int>("mAltitude")!!
             )
-            print("$bleKey $bleKeyFlag")
+//            print("$bleKey $bleKeyFlag")
             BleConnector.sendObject(bleKey, bleKeyFlag, reply)
-            print("$reply")
+//            print("$reply")
 //            mLocationTimes++
 //            if (mLocationTimes > 10) mLocationTimes = 1
           }
