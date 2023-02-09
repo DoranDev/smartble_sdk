@@ -936,6 +936,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
       var commandFired = false;
       val mAudioManager = mContext?.getSystemService(Context.AUDIO_SERVICE) as AudioManager
       var maxVolume = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+
       override fun onReceiveMusicCommand(musicCommand: MusicCommand) {
         if (BuildConfig.DEBUG) {
           Log.d("onReceiveMusicCommand","$musicCommand")
@@ -982,19 +983,20 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
           }
           MusicCommand.NEXT -> {
             val eventNext = KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_NEXT)
+            val eventNext2 = KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_MEDIA_NEXT)
             var musicControlPlay = BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_PLAYBACK_INFO, "${PlaybackState.PLAYING.mState}")
             isPlay = true
             BleConnector.sendObject(BleKey.MUSIC_CONTROL, BleKeyFlag.UPDATE, musicControlPlay)
             LogUtils.d("MediaNext")
 //            Log.d("mediaNext","mediaNext")
             mAudioManager.dispatchMediaKeyEvent(eventNext)
-
+            mAudioManager.dispatchMediaKeyEvent(eventNext2)
 //            var musicControlFastFoward = BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_PLAYBACK_INFO, "${PlaybackState.FAST_FORWARDING.mState}")
 //            BleConnector.sendObject(BleKey.MUSIC_CONTROL, BleKeyFlag.UPDATE, musicControlFastFoward)
           }
           MusicCommand.PRE -> {
             val eventPrev = KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PREVIOUS)
-
+            val eventPrev2 = KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_MEDIA_PREVIOUS)
             var musicControlPlay = BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_PLAYBACK_INFO, "${PlaybackState.PLAYING.mState}")
             isPlay = true
             BleConnector.sendObject(BleKey.MUSIC_CONTROL, BleKeyFlag.UPDATE, musicControlPlay)
@@ -1002,6 +1004,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             LogUtils.d("MediaPrevious")
 //            Log.d("mediaPre","mediaPre")
             mAudioManager.dispatchMediaKeyEvent(eventPrev)
+            mAudioManager.dispatchMediaKeyEvent(eventPrev2)
           }
           MusicCommand.VOLUME_UP -> {
             mAudioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_RAISE, AudioManager.FLAG_SHOW_UI)
