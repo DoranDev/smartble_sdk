@@ -24,6 +24,7 @@ import com.szabh.smable3.BleKeyFlag
 import com.szabh.smable3.component.*
 import com.szabh.smable3.entity.*
 import com.szabh.smable3.entity.BleAlarm
+import com.szabh.smable3.music.MusicController
 import com.szabh.smable3.watchface.Element
 import com.szabh.smable3.watchface.WatchFaceBuilder
 import id.kakzaki.smartble_sdk.tools.*
@@ -469,7 +470,23 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
       override fun onReadSleep(sleeps: List<BleSleep>) {
         if (BuildConfig.DEBUG) {
           Log.d("onReadSleep","$sleeps")
+          LogUtils.d("onReadSleep $sleeps")
         }
+
+//        val listSleep : List<Map<String, Int>>? = call.argument<List<Map<String, Int>>>("listSleep")
+//        if (listSleep != null) {
+//          val listNew = ArrayList<BleSleep>()
+//          for (item in listSleep) {
+//            val bleS=BleSleep(mTime =  item["mTime"]!!, mMode =item["mMode"]!! , mSoft = item["mSoft"]!!, mStrong =item["mStrong"]!! )
+//            listNew.add(bleS)
+//          }
+//          val res = BleSleep.getSleepStatusDuration(sleeps = BleSleep.analyseSleep(listNew), origin = listNew)
+//          result.success(res);
+//        }
+        //val analyze = BleSleep.analyseSleep(origin = sleeps)
+        //val sleepQuality = BleSleep.getSleepStatusDuration(sleeps = BleSleep.analyseSleep(sleeps), origin = sleeps)
+        //result.success(res);
+
         val item: MutableMap<String, Any> = HashMap()
         item["sleeps"] = gson.toJson(sleeps)
         if(onReadSleepSink!=null)
@@ -862,7 +879,9 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
       override fun onReadBloodOxygen(bloodOxygen: List<BleBloodOxygen>){
         if (BuildConfig.DEBUG) {
           Log.d("onReadBloodOxygen","$bloodOxygen")
+
         }
+        LogUtils.d("onReadBloodOxygentes $bloodOxygen")
         val item: MutableMap<String, Any> = HashMap()
         item["bloodOxygen"] = gson.toJson(bloodOxygen)
         if(onReadBloodOxygenSink!=null)
@@ -882,7 +901,9 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
       override fun onReadBleHrv(hrv: List<BleHrv>){
         if (BuildConfig.DEBUG) {
           Log.d("onReadBleHrv","$hrv")
+
         }
+        LogUtils.d("onReadBleHrvtes $hrv")
         val item: MutableMap<String, Any> = HashMap()
         item["hrv"] = gson.toJson(hrv)
         if(onReadBleHrvSink!=null)
@@ -912,6 +933,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
       }
 
       var isPlay = false;
+      var commandFired = false;
       val mAudioManager = mContext?.getSystemService(Context.AUDIO_SERVICE) as AudioManager
       var maxVolume = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
       override fun onReceiveMusicCommand(musicCommand: MusicCommand) {
@@ -919,62 +941,87 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
           Log.d("onReceiveMusicCommand","$musicCommand")
           Log.d("receivedMusics","$musicCommand")
         }
-        var currentVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
-        var format = String.format("%.2f", (currentVolume/10.0))
+        val currentVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
+        val format = String.format("%.2f", (currentVolume/10.0))
         LogUtils.d("currenVolume: $currentVolume, format: $format")
-        var musicSoundLevel = BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_VOLUME, String.format("%.2f", (currentVolume/10.0)))
+        val musicSoundLevel = BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_VOLUME, String.format("%.2f", (currentVolume/10.0)))
         BleConnector.sendObject(BleKey.MUSIC_CONTROL, BleKeyFlag.UPDATE, musicSoundLevel)
 
-        var event = KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PLAY)
+        //var event = KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PLAY)
+
+
         when(musicCommand){
           MusicCommand.TOGGLE -> {
             if(isPlay){
               isPlay = false
-              event = KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PAUSE)
-              var musicControlPause = BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_PLAYBACK_INFO, "${PlaybackState.PAUSED.mState}")
+              val event = KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PAUSE)
+              val musicControlPause = BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_PLAYBACK_INFO, "${PlaybackState.PAUSED.mState}")
               BleConnector.sendObject(BleKey.MUSIC_CONTROL, BleKeyFlag.UPDATE, musicControlPause)
+              mAudioManager.dispatchMediaKeyEvent(event)
             }else{
               isPlay = true
-              event = KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PLAY)
-              var musicControlPlay = BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_PLAYBACK_INFO, "${PlaybackState.PLAYING.mState}")
+              val event = KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PLAY)
+              val musicControlPlay = BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_PLAYBACK_INFO, "${PlaybackState.PLAYING.mState}")
               BleConnector.sendObject(BleKey.MUSIC_CONTROL, BleKeyFlag.UPDATE, musicControlPlay)
+              mAudioManager.dispatchMediaKeyEvent(event)
             }
+
           }
           MusicCommand.PLAY -> {
-            event = KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PLAY)
-            var musicControlPlay = BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_PLAYBACK_INFO, "${PlaybackState.PAUSED.mState}")
+            val eventPlay = KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PLAY)
+            val musicControlPlay = BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_PLAYBACK_INFO, "${PlaybackState.PAUSED.mState}")
             BleConnector.sendObject(BleKey.MUSIC_CONTROL, BleKeyFlag.UPDATE, musicControlPlay)
+            mAudioManager.dispatchMediaKeyEvent(eventPlay)
           }
           MusicCommand.PAUSE -> {
-            event = KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PAUSE)
-            var musicControlPause = BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_PLAYBACK_INFO, "${PlaybackState.PLAYING.mState}")
+            val eventPause = KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PAUSE)
+            val musicControlPause = BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_PLAYBACK_INFO, "${PlaybackState.PLAYING.mState}")
             BleConnector.sendObject(BleKey.MUSIC_CONTROL, BleKeyFlag.UPDATE, musicControlPause)
+            mAudioManager.dispatchMediaKeyEvent(eventPause)
 
           }
           MusicCommand.NEXT -> {
-            event = KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_NEXT)
+            val eventNext = KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_NEXT)
+            var musicControlPlay = BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_PLAYBACK_INFO, "${PlaybackState.PLAYING.mState}")
+            isPlay = true
+            BleConnector.sendObject(BleKey.MUSIC_CONTROL, BleKeyFlag.UPDATE, musicControlPlay)
+            LogUtils.d("MediaNext")
+//            Log.d("mediaNext","mediaNext")
+            mAudioManager.dispatchMediaKeyEvent(eventNext)
 
+//            var musicControlFastFoward = BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_PLAYBACK_INFO, "${PlaybackState.FAST_FORWARDING.mState}")
+//            BleConnector.sendObject(BleKey.MUSIC_CONTROL, BleKeyFlag.UPDATE, musicControlFastFoward)
           }
-          MusicCommand.PRE -> {event = KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PREVIOUS)}
+          MusicCommand.PRE -> {
+            val eventPrev = KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PREVIOUS)
+
+            var musicControlPlay = BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_PLAYBACK_INFO, "${PlaybackState.PLAYING.mState}")
+            isPlay = true
+            BleConnector.sendObject(BleKey.MUSIC_CONTROL, BleKeyFlag.UPDATE, musicControlPlay)
+
+            LogUtils.d("MediaPrevious")
+//            Log.d("mediaPre","mediaPre")
+            mAudioManager.dispatchMediaKeyEvent(eventPrev)
+          }
           MusicCommand.VOLUME_UP -> {
             mAudioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_RAISE, AudioManager.FLAG_SHOW_UI)
-            var musicControlVolUp = BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_VOLUME, String.format("%.2f", (currentVolume/10.0)))
-            var musicControlPlay = BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_PLAYBACK_INFO, "${PlaybackState.PLAYING.mState}")
+            val musicControlVolUp = BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_VOLUME, String.format("%.2f", (currentVolume/10.0)))
+            val musicControlPlay = BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_PLAYBACK_INFO, "${PlaybackState.PLAYING.mState}")
             isPlay = true
             BleConnector.sendObject(BleKey.MUSIC_CONTROL, BleKeyFlag.UPDATE, musicControlVolUp)
             BleConnector.sendObject(BleKey.MUSIC_CONTROL, BleKeyFlag.UPDATE, musicControlPlay)
           }
           MusicCommand.VOLUME_DOWN -> {
             mAudioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_LOWER, AudioManager.FLAG_SHOW_UI)
-            var musicControlVolDown = BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_VOLUME, String.format("%.2f", (currentVolume/10.0)))
-            var musicControlPlay = BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_PLAYBACK_INFO, "${PlaybackState.PLAYING.mState}")
+            val musicControlVolDown = BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_VOLUME, String.format("%.2f", (currentVolume/10.0)))
+            val musicControlPlay = BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_PLAYBACK_INFO, "${PlaybackState.PLAYING.mState}")
             isPlay = true
             BleConnector.sendObject(BleKey.MUSIC_CONTROL, BleKeyFlag.UPDATE, musicControlVolDown)
             BleConnector.sendObject(BleKey.MUSIC_CONTROL, BleKeyFlag.UPDATE, musicControlPlay)
           }
           MusicCommand.UNKNOWN -> {}
         }
-        mAudioManager.dispatchMediaKeyEvent(event)
+
 //        val intent = Intent("com.android.music.musicservicecommand")
 //        intent.putExtra("command","pause")
 //        mContext?.sendBroadcast(intent)
@@ -2058,8 +2105,12 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             val bleS=BleSleep(mTime =  item["mTime"]!!, mMode =item["mMode"]!! , mSoft = item["mSoft"]!!, mStrong =item["mStrong"]!! )
             listNew.add(bleS)
           }
-          val res = BleSleep.getSleepStatusDuration(sleeps = BleSleep.analyseSleep(listNew), origin = listNew)
-          result.success(res);
+          val reversedListNew = listNew.reversed()
+          LogUtils.d("valueBle : ${reversedListNew.last().mTime} | ${reversedListNew.last().mMode} | ${reversedListNew.last().mSoft} | ${reversedListNew.last().mStrong}")
+          val res = BleSleep.getSleepStatusDuration(sleeps = BleSleep.analyseSleep(reversedListNew))
+          LogUtils.d("valueSMBLE : ${res.valueAt(0)} | ${res.valueAt(1)} | ${res.valueAt(2)}")
+          val mapSleep = mapOf("light" to res.valueAt(0), "deep" to res.valueAt(1), "awake" to res.valueAt(2) , "mStrong" to res.valueAt(3))
+          result.success(mapSleep);
         }
       }
       "customDials" -> {
@@ -2427,6 +2478,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             mBleKey=BleKey.BLOOD_OXYGEN
           }
           "HRV" -> {
+            LogUtils.d("HRV get at line 2450")
             mBleKey=BleKey.HRV
           }
           "LOG" -> {
@@ -3481,15 +3533,15 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
           BleKey.REQUEST_LOCATION -> {
             // reply location information
             val reply = BleLocationReply(
-              mSpeed = 1.11f * mLocationTimes,
-              mTotalDistance = 1.11f * mLocationTimes,
-              mAltitude = 111 * mLocationTimes
+              mSpeed = call.argument<Float>("mSpeed")!!,
+              mTotalDistance = call.argument<Float>("mTotalDistance")!!,
+              mAltitude = call.argument<Int>("mAltitude")!!
             )
             print("$bleKey $bleKeyFlag")
             BleConnector.sendObject(bleKey, bleKeyFlag, reply)
             print("$reply")
-            mLocationTimes++
-            if (mLocationTimes > 10) mLocationTimes = 1
+//            mLocationTimes++
+//            if (mLocationTimes > 10) mLocationTimes = 1
           }
           BleKey.APP_SPORT_STATE -> {
             // App-led movement, sending movement state changes
