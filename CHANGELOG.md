@@ -1,3 +1,23 @@
+## 0.6.3
+
+* Request Location
+
+## 0.6.2
+
+* Request Location
+
+## 0.6.1
+
+* music command
+
+## 0.6.0
+
+* music command
+
+## 0.5.9
+
+* app sport
+
 ## 0.5.8
 
 * custom dial digital time
