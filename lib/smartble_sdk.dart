@@ -75,6 +75,7 @@ class SmartbleSdk {
       map["mMode"] = int.parse("${element["mMode"]}");
       map["mStrong"] = int.parse("${element["mStrong"]}");
       map["mSoft"] = int.parse("${element["mSoft"]}");
+      map["mDateDur"] = dateNote.difference(epoch).inDays;
       listSleepNew.add(map);
     }
     return _channel.invokeMethod('analyzeSleep', {'listSleep': listSleepNew});
