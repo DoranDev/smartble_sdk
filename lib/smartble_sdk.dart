@@ -69,11 +69,13 @@ class SmartbleSdk {
     List<Map<String, int>> listSleepNew = [];
     for (var element in listSleep) {
       Map<String, int> map = {};
-      map["mTime"] =
-          DateTime.parse("${element["mTime"]}").millisecondsSinceEpoch;
+      DateTime epoch = DateTime(2000,1,1);
+      DateTime dateNote = DateTime.parse("${element["mTime"]}");
+      map["mTime"] = dateNote.difference(epoch).inSeconds;
       map["mMode"] = int.parse("${element["mMode"]}");
       map["mStrong"] = int.parse("${element["mStrong"]}");
       map["mSoft"] = int.parse("${element["mSoft"]}");
+      map["mDateDur"] = dateNote.difference(epoch).inDays;
       listSleepNew.add(map);
     }
     return _channel.invokeMethod('analyzeSleep', {'listSleep': listSleepNew});
