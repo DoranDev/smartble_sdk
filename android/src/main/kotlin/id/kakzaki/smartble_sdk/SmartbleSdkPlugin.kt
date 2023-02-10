@@ -2112,7 +2112,9 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
 //          LogUtils.d("valueBle : ${reversedListNew.last().mTime} | ${reversedListNew.last().mMode} | ${reversedListNew.last().mSoft} | ${reversedListNew.last().mStrong}")
           val res = BleSleep.getSleepStatusDuration(sleeps = BleSleep.analyseSleep(reversedListNew))
 //          LogUtils.d("valueSMBLE : ${res.valueAt(0)} | ${res.valueAt(1)} | ${res.valueAt(2)}")
-          val mapSleep = mapOf("light" to res.valueAt(0), "deep" to res.valueAt(1), "awake" to res.valueAt(2) , "mStrong" to res.valueAt(3))
+          val mapSleep = mapOf("light" to res.valueAt(0), "deep" to res.valueAt(1), "awake" to res.valueAt(2), "dateDur" to listSleep[0].getValue(
+            "mDateDur"
+          ))
           result.success(mapSleep);
         }
       }
