@@ -3011,7 +3011,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
 //                )
                 BleAlarm(
                   mEnabled = mEnabled!!,
-                  mRepeat = bleRepeat!!,
+                  mRepeat = mRepeat!!.toInt(),
                   mYear = mYear!!,
                   mMonth = mMonth!!,
                   mDay = mDay!!,
