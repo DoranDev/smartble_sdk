@@ -933,11 +933,9 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
       }
 
       var isPlay = false;
-      var commandFired = false;
-      val mAudioManager = mContext?.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-      var maxVolume = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
 
       override fun onReceiveMusicCommand(musicCommand: MusicCommand) {
+        val mAudioManager = mContext?.getSystemService(Context.AUDIO_SERVICE) as AudioManager
         if (BuildConfig.DEBUG) {
           Log.d("onReceiveMusicCommand","$musicCommand")
           Log.d("receivedMusics","$musicCommand")
@@ -988,11 +986,8 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             isPlay = true
             BleConnector.sendObject(BleKey.MUSIC_CONTROL, BleKeyFlag.UPDATE, musicControlPlay)
             LogUtils.d("MediaNext")
-//            Log.d("mediaNext","mediaNext")
             mAudioManager.dispatchMediaKeyEvent(eventNext)
             mAudioManager.dispatchMediaKeyEvent(eventNext2)
-//            var musicControlFastFoward = BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_PLAYBACK_INFO, "${PlaybackState.FAST_FORWARDING.mState}")
-//            BleConnector.sendObject(BleKey.MUSIC_CONTROL, BleKeyFlag.UPDATE, musicControlFastFoward)
           }
           MusicCommand.PRE -> {
             val eventPrev = KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PREVIOUS)
@@ -1002,7 +997,6 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             BleConnector.sendObject(BleKey.MUSIC_CONTROL, BleKeyFlag.UPDATE, musicControlPlay)
 
             LogUtils.d("MediaPrevious")
-//            Log.d("mediaPre","mediaPre")
             mAudioManager.dispatchMediaKeyEvent(eventPrev)
             mAudioManager.dispatchMediaKeyEvent(eventPrev2)
           }
@@ -1024,12 +1018,6 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
           }
           MusicCommand.UNKNOWN -> {}
         }
-
-//        val intent = Intent("com.android.music.musicservicecommand")
-//        intent.putExtra("command","pause")
-//        mContext?.sendBroadcast(intent)
-//        if(onReceiveMusicCommandSink!=null)
-//          onReceiveMusicCommandSink!!.success(item)
       }
 
     }
