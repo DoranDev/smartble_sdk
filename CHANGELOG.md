@@ -1,3 +1,7 @@
+## 0.6.5
+
+* Analyze Sleep
+
 ## 0.6.4
 
 * Music
