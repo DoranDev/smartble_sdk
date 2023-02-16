@@ -80,7 +80,7 @@ class SmartbleSdk {
       map["mDateDur"] = dateNote.difference(epoch).inDays;
       listSleepNew.add(map);
     }
-    return _channel.invokeMethod('analyzeSleep', {'listSleep': listSleepNew});
+    return _channel.invokeMethod('analyzeSleep', {'listSleep': "$listSleepNew"});
   }
 
   ///customDials
