@@ -1,3 +1,5 @@
+//ignore_for_file: non_constant_identifier_names
+//ignore_for_file: constant_identifier_names
 import 'dart:core';
 
 import 'package:flutter/services.dart';
@@ -69,7 +71,7 @@ class SmartbleSdk {
     List<Map<String, int>> listSleepNew = [];
     for (var element in listSleep) {
       Map<String, int> map = {};
-      DateTime epoch = DateTime(2000,1,1);
+      DateTime epoch = DateTime(2000, 1, 1);
       DateTime dateNote = DateTime.parse("${element["mTime"]}");
       map["mTime"] = dateNote.difference(epoch).inSeconds;
       map["mMode"] = int.parse("${element["mMode"]}");

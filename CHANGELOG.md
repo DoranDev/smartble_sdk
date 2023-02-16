@@ -1,3 +1,11 @@
+## 0.6.7
+
+* Sleep
+
+## 0.6.6
+
+* Alarm
+
 ## 0.6.5
 
 * Analyze Sleep
