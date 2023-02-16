@@ -38,6 +38,8 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
+import org.json.JSONArray
+import org.json.JSONObject
 import java.io.File
 import java.io.InputStream
 import java.net.URL
@@ -933,11 +935,9 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
       }
 
       var isPlay = false;
-      var commandFired = false;
-      val mAudioManager = mContext?.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-      var maxVolume = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
 
       override fun onReceiveMusicCommand(musicCommand: MusicCommand) {
+        val mAudioManager = mContext?.getSystemService(Context.AUDIO_SERVICE) as AudioManager
         if (BuildConfig.DEBUG) {
           Log.d("onReceiveMusicCommand","$musicCommand")
           Log.d("receivedMusics","$musicCommand")
@@ -988,11 +988,8 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             isPlay = true
             BleConnector.sendObject(BleKey.MUSIC_CONTROL, BleKeyFlag.UPDATE, musicControlPlay)
             LogUtils.d("MediaNext")
-//            Log.d("mediaNext","mediaNext")
             mAudioManager.dispatchMediaKeyEvent(eventNext)
             mAudioManager.dispatchMediaKeyEvent(eventNext2)
-//            var musicControlFastFoward = BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_PLAYBACK_INFO, "${PlaybackState.FAST_FORWARDING.mState}")
-//            BleConnector.sendObject(BleKey.MUSIC_CONTROL, BleKeyFlag.UPDATE, musicControlFastFoward)
           }
           MusicCommand.PRE -> {
             val eventPrev = KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PREVIOUS)
@@ -1002,7 +999,6 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             BleConnector.sendObject(BleKey.MUSIC_CONTROL, BleKeyFlag.UPDATE, musicControlPlay)
 
             LogUtils.d("MediaPrevious")
-//            Log.d("mediaPre","mediaPre")
             mAudioManager.dispatchMediaKeyEvent(eventPrev)
             mAudioManager.dispatchMediaKeyEvent(eventPrev2)
           }
@@ -1024,12 +1020,6 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
           }
           MusicCommand.UNKNOWN -> {}
         }
-
-//        val intent = Intent("com.android.music.musicservicecommand")
-//        intent.putExtra("command","pause")
-//        mContext?.sendBroadcast(intent)
-//        if(onReceiveMusicCommandSink!=null)
-//          onReceiveMusicCommandSink!!.success(item)
       }
 
     }
@@ -2101,20 +2091,26 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         BleConnector.unbind();
       }
       "analyzeSleep" -> {
-        val listSleep : List<Map<String, Int>>? = call.argument<List<Map<String, Int>>>("listSleep")
+        val listSleep  = call.argument<String>("listSleep")
         if (listSleep != null) {
+          var listsome = JSONArray(listSleep)
+
+          var listData = ArrayList<JSONObject>()
+
+          for(i in 0 until listsome.length()){
+            listData.add(JSONObject(listsome.get(i).toString()))
+          }
+
           val listNew = ArrayList<BleSleep>()
-          for (item in listSleep) {
-            val bleS=BleSleep(mTime =  item["mTime"]!!, mMode =item["mMode"]!! , mSoft = item["mSoft"]!!, mStrong =item["mStrong"]!! )
+          for (item in listData) {
+            val bleS=BleSleep(mTime =  (item["mTime"]).toString().toInt(), mMode =item["mMode"].toString().toInt() , mSoft = item["mSoft"].toString().toInt(), mStrong =item["mStrong"].toString().toInt() )
             listNew.add(bleS)
           }
           val reversedListNew = listNew.reversed()
-//          LogUtils.d("valueBle : ${reversedListNew.last().mTime} | ${reversedListNew.last().mMode} | ${reversedListNew.last().mSoft} | ${reversedListNew.last().mStrong}")
+
           val res = BleSleep.getSleepStatusDuration(sleeps = BleSleep.analyseSleep(reversedListNew))
-//          LogUtils.d("valueSMBLE : ${res.valueAt(0)} | ${res.valueAt(1)} | ${res.valueAt(2)}")
-          val mapSleep = mapOf("light" to res.valueAt(0), "deep" to res.valueAt(1), "awake" to res.valueAt(2), "dateDur" to listSleep[0].getValue(
-            "mDateDur"
-          ))
+
+          val mapSleep = mapOf("light" to res.valueAt(0), "deep" to res.valueAt(1), "awake" to res.valueAt(2), "dateDur" to listData[0].getInt("mDateDur"))
           result.success(mapSleep);
         }
       }
@@ -3023,7 +3019,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
 //                )
                 BleAlarm(
                   mEnabled = mEnabled!!,
-                  mRepeat = bleRepeat!!,
+                  mRepeat = mRepeat!!.toInt(),
                   mYear = mYear!!,
                   mMonth = mMonth!!,
                   mDay = mDay!!,
