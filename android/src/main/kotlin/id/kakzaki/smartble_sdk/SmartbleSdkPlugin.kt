@@ -38,6 +38,8 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
+import org.json.JSONArray
+import org.json.JSONObject
 import java.io.File
 import java.io.InputStream
 import java.net.URL
@@ -2089,20 +2091,26 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         BleConnector.unbind();
       }
       "analyzeSleep" -> {
-        val listSleep : List<Map<String, Int>>? = call.argument<List<Map<String, Int>>>("listSleep")
+        val listSleep  = call.argument<String>("listSleep")
         if (listSleep != null) {
+          var listsome = JSONArray(listSleep)
+
+          var listData = ArrayList<JSONObject>()
+
+          for(i in 0 until listsome.length()){
+            listData.add(JSONObject(listsome.get(i).toString()))
+          }
+
           val listNew = ArrayList<BleSleep>()
-          for (item in listSleep) {
-            val bleS=BleSleep(mTime =  item["mTime"]!!, mMode =item["mMode"]!! , mSoft = item["mSoft"]!!, mStrong =item["mStrong"]!! )
+          for (item in listData) {
+            val bleS=BleSleep(mTime =  (item["mTime"]).toString().toInt(), mMode =item["mMode"].toString().toInt() , mSoft = item["mSoft"].toString().toInt(), mStrong =item["mStrong"].toString().toInt() )
             listNew.add(bleS)
           }
           val reversedListNew = listNew.reversed()
-//          LogUtils.d("valueBle : ${reversedListNew.last().mTime} | ${reversedListNew.last().mMode} | ${reversedListNew.last().mSoft} | ${reversedListNew.last().mStrong}")
+
           val res = BleSleep.getSleepStatusDuration(sleeps = BleSleep.analyseSleep(reversedListNew))
-//          LogUtils.d("valueSMBLE : ${res.valueAt(0)} | ${res.valueAt(1)} | ${res.valueAt(2)}")
-          val mapSleep = mapOf("light" to res.valueAt(0), "deep" to res.valueAt(1), "awake" to res.valueAt(2), "dateDur" to listSleep[0].getValue(
-            "mDateDur"
-          ))
+
+          val mapSleep = mapOf("light" to res.valueAt(0), "deep" to res.valueAt(1), "awake" to res.valueAt(2), "dateDur" to listData[0].getInt("mDateDur"))
           result.success(mapSleep);
         }
       }
