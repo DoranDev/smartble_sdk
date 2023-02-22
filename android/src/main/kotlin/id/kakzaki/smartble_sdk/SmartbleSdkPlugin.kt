@@ -2761,7 +2761,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
           BleKey.SEDENTARINESS -> {
             if (bleKeyFlag == BleKeyFlag.UPDATE) {
               val mEnabled: Int? = call.argument<Int>("mEnabled")
-              val mRepeat: String? = call.argument<String>("mRepeat")
+              val mRepeat: Int? = call.argument<Int>("mRepeat")
               val mStartHour: Int? = call.argument<Int>("mStartHour")
               val mStartMinute: Int? = call.argument<Int>("mStartMinute")
               val mEndHour: Int? = call.argument<Int>("mEndHour")
@@ -2808,7 +2808,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
                   bleRepeat = bleRepeat!!.or(itemRepeat!!)
                 }
               }
-              if (mRepeat != null) {
+              /*if (mRepeat != null) {
                 when (mRepeat){
                   "MONDAY" -> {
                     bleRepeat =BleRepeat.MONDAY
@@ -2841,12 +2841,13 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
                     bleRepeat =BleRepeat.EVERYDAY
                   }
                 }
-              }
-              // 设置久坐
+              }*/
+              // 设置久坐 set sedentary
               val bleSedentariness = BleSedentarinessSettings(
                 mEnabled = mEnabled!!,
                 // Monday ~ Saturday
-                mRepeat = bleRepeat!!,
+                //mRepeat = bleRepeat!!,
+                mRepeat = mRepeat!!,
                 mStartHour = mStartHour!!,
                 mStartMinute = mStartMinute!!,
                 mEndHour = mEndHour!!,
@@ -2854,6 +2855,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
                 mInterval = mInterval!!
               )
               BleConnector.sendObject(bleKey, bleKeyFlag, bleSedentariness)
+              //LogUtils.d("bleSedentary : $bleSedentariness")
             } else if (bleKeyFlag == BleKeyFlag.READ) {
               BleConnector.sendData(bleKey, bleKeyFlag)
             }
