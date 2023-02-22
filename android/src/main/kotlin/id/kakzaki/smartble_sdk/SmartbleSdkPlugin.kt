@@ -935,11 +935,9 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
       }
 
       var isPlay = false;
-      var commandFired = false;
-      val mAudioManager = mContext?.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-      var maxVolume = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
 
       override fun onReceiveMusicCommand(musicCommand: MusicCommand) {
+        val mAudioManager = mContext?.getSystemService(Context.AUDIO_SERVICE) as AudioManager
         if (BuildConfig.DEBUG) {
           Log.d("onReceiveMusicCommand","$musicCommand")
           Log.d("receivedMusics","$musicCommand")
@@ -990,11 +988,8 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             isPlay = true
             BleConnector.sendObject(BleKey.MUSIC_CONTROL, BleKeyFlag.UPDATE, musicControlPlay)
             LogUtils.d("MediaNext")
-//            Log.d("mediaNext","mediaNext")
             mAudioManager.dispatchMediaKeyEvent(eventNext)
             mAudioManager.dispatchMediaKeyEvent(eventNext2)
-//            var musicControlFastFoward = BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_PLAYBACK_INFO, "${PlaybackState.FAST_FORWARDING.mState}")
-//            BleConnector.sendObject(BleKey.MUSIC_CONTROL, BleKeyFlag.UPDATE, musicControlFastFoward)
           }
           MusicCommand.PRE -> {
             val eventPrev = KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PREVIOUS)
@@ -1004,7 +999,6 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
             BleConnector.sendObject(BleKey.MUSIC_CONTROL, BleKeyFlag.UPDATE, musicControlPlay)
 
             LogUtils.d("MediaPrevious")
-//            Log.d("mediaPre","mediaPre")
             mAudioManager.dispatchMediaKeyEvent(eventPrev)
             mAudioManager.dispatchMediaKeyEvent(eventPrev2)
           }
@@ -1026,12 +1020,6 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
           }
           MusicCommand.UNKNOWN -> {}
         }
-
-//        val intent = Intent("com.android.music.musicservicecommand")
-//        intent.putExtra("command","pause")
-//        mContext?.sendBroadcast(intent)
-//        if(onReceiveMusicCommandSink!=null)
-//          onReceiveMusicCommandSink!!.success(item)
       }
 
     }
@@ -2773,7 +2761,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
           BleKey.SEDENTARINESS -> {
             if (bleKeyFlag == BleKeyFlag.UPDATE) {
               val mEnabled: Int? = call.argument<Int>("mEnabled")
-              val mRepeat: String? = call.argument<String>("mRepeat")
+              val mRepeat: Int? = call.argument<Int>("mRepeat")
               val mStartHour: Int? = call.argument<Int>("mStartHour")
               val mStartMinute: Int? = call.argument<Int>("mStartMinute")
               val mEndHour: Int? = call.argument<Int>("mEndHour")
@@ -2820,7 +2808,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
                   bleRepeat = bleRepeat!!.or(itemRepeat!!)
                 }
               }
-              if (mRepeat != null) {
+              /*if (mRepeat != null) {
                 when (mRepeat){
                   "MONDAY" -> {
                     bleRepeat =BleRepeat.MONDAY
@@ -2853,12 +2841,13 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
                     bleRepeat =BleRepeat.EVERYDAY
                   }
                 }
-              }
-              // 设置久坐
+              }*/
+              // 设置久坐 set sedentary
               val bleSedentariness = BleSedentarinessSettings(
                 mEnabled = mEnabled!!,
                 // Monday ~ Saturday
-                mRepeat = bleRepeat!!,
+                //mRepeat = bleRepeat!!,
+                mRepeat = mRepeat!!,
                 mStartHour = mStartHour!!,
                 mStartMinute = mStartMinute!!,
                 mEndHour = mEndHour!!,
@@ -2866,6 +2855,7 @@ class  SmartbleSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
                 mInterval = mInterval!!
               )
               BleConnector.sendObject(bleKey, bleKeyFlag, bleSedentariness)
+              //LogUtils.d("bleSedentary : $bleSedentariness")
             } else if (bleKeyFlag == BleKeyFlag.READ) {
               BleConnector.sendData(bleKey, bleKeyFlag)
             }
