@@ -86,26 +86,26 @@ class SmartbleSdk {
   ///customDials
   Future<dynamic> customDials(
       {required Uint8List bgPreviewBytes,
-      required Uint8List bgBytes,
-      required int custom,
-      required bool isDigital,
-      required bool isRound,
-      required int screenWidth,
-      required int screenHeight,
-      required int screenPreviewWidth,
-      required int screenPreviewHeight,
-      required bool controlViewStep,
-      required int controlViewStepX,
-      required int controlViewStepY,
-      required bool controlViewCa,
-      required int controlViewCaX,
-      required int controlViewCaY,
-      required bool controlViewDis,
-      required int controlViewDisX,
-      required int controlViewDisY,
-      required bool controlViewHr,
-      required int controlViewHrX,
-      required int controlViewHrY}) {
+        required Uint8List bgBytes,
+        required int custom,
+        required bool isDigital,
+        required bool isRound,
+        required int screenWidth,
+        required int screenHeight,
+        required int screenPreviewWidth,
+        required int screenPreviewHeight,
+        required bool controlViewStep,
+        required int controlViewStepX,
+        required int controlViewStepY,
+        required bool controlViewCa,
+        required int controlViewCaX,
+        required int controlViewCaY,
+        required bool controlViewDis,
+        required int controlViewDisX,
+        required int controlViewDisY,
+        required bool controlViewHr,
+        required int controlViewHrX,
+        required int controlViewHrY}) {
     return _channel.invokeMethod('customDials', {
       'bgPreviewBytes': bgPreviewBytes,
       'bgBytes': bgBytes,
@@ -150,12 +150,12 @@ class SmartbleSdk {
   Future<dynamic> kSTEP_GOAL({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('STEP_GOAL', {'flag': flag.name});
   Future<dynamic> kBACK_LIGHT(
-          {required SelectedBlekeyFlag flag, required int times}) =>
+      {required SelectedBlekeyFlag flag, required int times}) =>
       _channel.invokeMethod('BACK_LIGHT', {'flag': flag.name, 'times': times});
   Future<dynamic> kSEDENTARINESS({
     required SelectedBlekeyFlag flag,
     required int mEnabled,
-    String? mRepeat,
+    required int mRepeat,
     required int mStartHour,
     required int mStartMinute,
     required int mEndHour,
@@ -177,16 +177,16 @@ class SmartbleSdk {
   Future<dynamic> kNO_DISTURB_RANGE({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('NO_DISTURB_RANGE', {'flag': flag.name});
   Future<dynamic> kVIBRATION(
-          {required SelectedBlekeyFlag flag, required int frequency}) =>
+      {required SelectedBlekeyFlag flag, required int frequency}) =>
       _channel.invokeMethod(
           'VIBRATION', {'flag': flag.name, 'frequency': frequency});
   Future<dynamic> kGESTURE_WAKE(
-          {required SelectedBlekeyFlag flag,
-          required int mEnabled,
-          required int mStartHour,
-          required int mStartMinute,
-          required int mEndHour,
-          required int mEndMinute}) =>
+      {required SelectedBlekeyFlag flag,
+        required int mEnabled,
+        required int mStartHour,
+        required int mStartMinute,
+        required int mEndHour,
+        required int mEndMinute}) =>
       _channel.invokeMethod('GESTURE_WAKE', {
         'flag': flag.name,
         'mEnabled': mEnabled,
@@ -202,17 +202,17 @@ class SmartbleSdk {
   Future<dynamic> kLANGUAGE({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('LANGUAGE', {'flag': flag.name});
   Future<dynamic> kALARM(
-          {required SelectedBlekeyFlag flag,
-          int? index,
-          int? mEnabled,
-          String? mRepeat,
-          int? mYear,
-          int? mMonth,
-          int? mDay,
-          int? mHour,
-          int? mMinute,
-          String? mTag,
-          List? listRepeat}) =>
+      {required SelectedBlekeyFlag flag,
+        int? index,
+        int? mEnabled,
+        String? mRepeat,
+        int? mYear,
+        int? mMonth,
+        int? mDay,
+        int? mHour,
+        int? mMinute,
+        String? mTag,
+        List? listRepeat}) =>
       _channel.invokeMethod('ALARM', {
         'flag': flag.name,
         'index': index,
@@ -233,7 +233,7 @@ class SmartbleSdk {
   Future<dynamic> kNOTIFICATION_REMINDER({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('NOTIFICATION_REMINDER', {'flag': flag.name});
   Future<dynamic> kANTI_LOST(
-          {required SelectedBlekeyFlag flag, required bool isAntiLost}) =>
+      {required SelectedBlekeyFlag flag, required bool isAntiLost}) =>
       _channel.invokeMethod(
           'ANTI_LOST', {'flag': flag.name, 'isAntiLost': isAntiLost});
   Future<dynamic> kHR_MONITORING({
@@ -269,7 +269,7 @@ class SmartbleSdk {
   Future<dynamic> kTEMPERATURE_UNIT({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('TEMPERATURE_UNIT', {'flag': flag.name});
   Future<dynamic> kDATE_FORMAT(
-          {required SelectedBlekeyFlag flag, required int format}) =>
+      {required SelectedBlekeyFlag flag, required int format}) =>
       _channel
           .invokeMethod('DATE_FORMAT', {'flag': flag.name, 'format': format});
   Future<dynamic> kWATCH_FACE_SWITCH({required SelectedBlekeyFlag flag}) =>
@@ -321,7 +321,7 @@ class SmartbleSdk {
   Future<dynamic> kREAL_TIME_TEMPERATURE({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('REAL_TIME_TEMPERATURE', {'flag': flag.name});
   Future<dynamic> kREAL_TIME_BLOOD_PRESSURE(
-          {required SelectedBlekeyFlag flag}) =>
+      {required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('REAL_TIME_BLOOD_PRESSURE', {'flag': flag.name});
   Future<dynamic> kTEMPERATURE_VALUE({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('TEMPERATURE_VALUE', {'flag': flag.name});
@@ -350,7 +350,7 @@ class SmartbleSdk {
   Future<dynamic> kRAW_SLEEP({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('RAW_SLEEP', {'flag': flag.name});
   Future<dynamic> kNO_DISTURB_GLOBAL(
-          {required SelectedBlekeyFlag flag, required bool isDoNotDistrub}) =>
+      {required SelectedBlekeyFlag flag, required bool isDoNotDistrub}) =>
       _channel.invokeMethod('NO_DISTURB_GLOBAL',
           {'flag': flag.name, 'isDoNotDistrub': isDoNotDistrub});
   Future<dynamic> kIDENTITY({required SelectedBlekeyFlag flag}) =>
@@ -358,11 +358,11 @@ class SmartbleSdk {
   Future<dynamic> kSESSION({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('SESSION', {'flag': flag.name});
   Future<dynamic> kNOTIFICATION(
-          {required SelectedBlekeyFlag flag,
-          required String mTitle,
-          required String mContent,
-          required String mCategory,
-          required String mPackage}) =>
+      {required SelectedBlekeyFlag flag,
+        required String mTitle,
+        required String mContent,
+        required String mCategory,
+        required String mPackage}) =>
       _channel.invokeMethod('NOTIFICATION', {
         'flag': flag.name,
         'mTitle': mTitle,
@@ -371,12 +371,12 @@ class SmartbleSdk {
         'mPackage': mPackage
       });
   Future<dynamic> kNOTIFICATION2(
-          {required SelectedBlekeyFlag flag,
-          required String mTitle,
-          required String mContent,
-          required String mPhone,
-          required String mCategory,
-          required String mPackage}) =>
+      {required SelectedBlekeyFlag flag,
+        required String mTitle,
+        required String mContent,
+        required String mPhone,
+        required String mCategory,
+        required String mPackage}) =>
       _channel.invokeMethod('NOTIFICATION2', {
         'flag': flag.name,
         'mTitle': mTitle,
@@ -386,9 +386,9 @@ class SmartbleSdk {
         'mPackage': mPackage
       });
   Future<dynamic> kMUSIC_CONTROL(
-          {required SelectedBlekeyFlag flag,
-          required String mTitle,
-          required String mContent}) =>
+      {required SelectedBlekeyFlag flag,
+        required String mTitle,
+        required String mContent}) =>
       _channel.invokeMethod('MUSIC_CONTROL',
           {'flag': flag.name, 'mTitle': mTitle, 'mContent': mContent});
   Future<dynamic> kSCHEDULE({required SelectedBlekeyFlag flag}) =>
@@ -404,7 +404,7 @@ class SmartbleSdk {
   Future<dynamic> kSTOCK({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('STOCK', {'flag': flag.name});
   Future<dynamic> kSMS_QUICK_REPLY_CONTENT(
-          {required SelectedBlekeyFlag flag}) =>
+      {required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('SMS_QUICK_REPLY_CONTENT', {'flag': flag.name});
   Future<dynamic> kDATA_ALL({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('DATA_ALL', {'flag': flag.name});
@@ -439,14 +439,14 @@ class SmartbleSdk {
   Future<dynamic> kMATCH_RECORD({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('MATCH_RECORD', {'flag': flag.name});
   Future<dynamic> kCAMERA(
-          {required SelectedBlekeyFlag flag, required bool mCameraEntered}) =>
+      {required SelectedBlekeyFlag flag, required bool mCameraEntered}) =>
       _channel.invokeMethod(
           'CAMERA', {'flag': flag.name, 'mCameraEntered': mCameraEntered});
   Future<dynamic> kREQUEST_LOCATION(
-          {required SelectedBlekeyFlag flag,
-          required double mSpeed,
-          required double mTotalDistance,
-          required int mAltitude}) =>
+      {required SelectedBlekeyFlag flag,
+        required double mSpeed,
+        required double mTotalDistance,
+        required int mAltitude}) =>
       _channel.invokeMethod('REQUEST_LOCATION', {
         'flag': flag.name,
         'mSpeed': mSpeed,
@@ -456,21 +456,21 @@ class SmartbleSdk {
   Future<dynamic> kINCOMING_CALL({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('INCOMING_CALL', {'flag': flag.name});
   Future<dynamic> kAPP_SPORT_STATE(
-          {required SelectedBlekeyFlag flag,
-          required int sportMode,
-          required int sportState}) =>
+      {required SelectedBlekeyFlag flag,
+        required int sportMode,
+        required int sportState}) =>
       _channel.invokeMethod('APP_SPORT_STATE', {
         'flag': flag.name,
         'sportMode': sportMode,
         'sportState': sportState
       });
   Future<dynamic> kCLASSIC_BLUETOOTH_STATE(
-          {required SelectedBlekeyFlag flag}) =>
+      {required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('CLASSIC_BLUETOOTH_STATE', {'flag': flag.name});
   Future<dynamic> kDEVICE_SMS_QUICK_REPLY({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('DEVICE_SMS_QUICK_REPLY', {'flag': flag.name});
   Future<dynamic> kWATCH_FACE(
-          {required SelectedBlekeyFlag flag, String? path, String? url}) =>
+      {required SelectedBlekeyFlag flag, String? path, String? url}) =>
       _channel.invokeMethod(
           'WATCH_FACE', {'flag': flag.name, 'path': path, 'url': url});
   Future<dynamic> kAGPS_FILE({required SelectedBlekeyFlag flag}) =>
@@ -478,8 +478,8 @@ class SmartbleSdk {
   Future<dynamic> kFONT_FILE({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('FONT_FILE', {'flag': flag.name});
   Future<dynamic> kCONTACT(
-          {required SelectedBlekeyFlag flag,
-          required List<Map<String, String>> listContact}) =>
+      {required SelectedBlekeyFlag flag,
+        required List<Map<String, String>> listContact}) =>
       _channel.invokeMethod(
           'CONTACT', {'flag': flag.name, 'listContact': listContact});
   Future<dynamic> kUI_FILE({required SelectedBlekeyFlag flag}) =>
@@ -497,19 +497,19 @@ class SmartbleSdk {
   }
 
   static const EventChannel _onDeviceConnectedChannel =
-      EventChannel('onDeviceConnected');
+  EventChannel('onDeviceConnected');
   static Stream<dynamic> get onDeviceConnectedStream {
     return _onDeviceConnectedChannel.receiveBroadcastStream().cast();
   }
 
   static const EventChannel _onIdentityCreateChannel =
-      EventChannel('onIdentityCreate');
+  EventChannel('onIdentityCreate');
   static Stream<dynamic> get onIdentityCreateStream {
     return _onIdentityCreateChannel.receiveBroadcastStream().cast();
   }
 
   static const EventChannel _onCommandReplyChannel =
-      EventChannel('onCommandReply');
+  EventChannel('onCommandReply');
   static Stream<dynamic> get onCommandReplyStream {
     return _onCommandReplyChannel.receiveBroadcastStream().cast();
   }
@@ -525,25 +525,25 @@ class SmartbleSdk {
   }
 
   static const EventChannel _onReadFirmwareVersionChannel =
-      EventChannel('onReadFirmwareVersion');
+  EventChannel('onReadFirmwareVersion');
   static Stream<dynamic> get onReadFirmwareVersionStream {
     return _onReadFirmwareVersionChannel.receiveBroadcastStream().cast();
   }
 
   static const EventChannel _onReadBleAddressChannel =
-      EventChannel('onReadBleAddress');
+  EventChannel('onReadBleAddress');
   static Stream<dynamic> get onReadBleAddressStream {
     return _onReadBleAddressChannel.receiveBroadcastStream().cast();
   }
 
   static const EventChannel _onReadSedentarinessChannel =
-      EventChannel('onReadSedentariness');
+  EventChannel('onReadSedentariness');
   static Stream<dynamic> get onReadSedentarinessStream {
     return _onReadSedentarinessChannel.receiveBroadcastStream().cast();
   }
 
   static const EventChannel _onReadNoDisturbChannel =
-      EventChannel('onReadNoDisturb');
+  EventChannel('onReadNoDisturb');
   static Stream<dynamic> get onReadNoDisturbStream {
     return _onReadNoDisturbChannel.receiveBroadcastStream().cast();
   }
@@ -554,37 +554,37 @@ class SmartbleSdk {
   }
 
   static const EventChannel _onReadCoachingIdsChannel =
-      EventChannel('onReadCoachingIds');
+  EventChannel('onReadCoachingIds');
   static Stream<dynamic> get onReadCoachingIdsStream {
     return _onReadCoachingIdsChannel.receiveBroadcastStream().cast();
   }
 
   static const EventChannel _onReadUiPackVersionChannel =
-      EventChannel('onReadUiPackVersion');
+  EventChannel('onReadUiPackVersion');
   static Stream<dynamic> get onReadUiPackVersionStream {
     return _onReadUiPackVersionChannel.receiveBroadcastStream().cast();
   }
 
   static const EventChannel _onReadLanguagePackVersionChannel =
-      EventChannel('onReadLanguagePackVersion');
+  EventChannel('onReadLanguagePackVersion');
   static Stream<dynamic> get onReadLanguagePackVersionStream {
     return _onReadLanguagePackVersionChannel.receiveBroadcastStream().cast();
   }
 
   static const EventChannel _onIdentityDeleteByDeviceChannel =
-      EventChannel('onIdentityDeleteByDevice');
+  EventChannel('onIdentityDeleteByDevice');
   static Stream<dynamic> get onIdentityDeleteByDeviceStream {
     return _onIdentityDeleteByDeviceChannel.receiveBroadcastStream().cast();
   }
 
   static const EventChannel _onCameraStateChangeChannel =
-      EventChannel('onCameraStateChange');
+  EventChannel('onCameraStateChange');
   static Stream<dynamic> get onCameraStateChangeStream {
     return _onCameraStateChangeChannel.receiveBroadcastStream().cast();
   }
 
   static const EventChannel _onCameraResponseChannel =
-      EventChannel('onCameraResponse');
+  EventChannel('onCameraResponse');
   static Stream<dynamic> get onCameraResponseStream {
     return _onCameraResponseChannel.receiveBroadcastStream().cast();
   }
@@ -595,25 +595,25 @@ class SmartbleSdk {
   }
 
   static const EventChannel _onReadActivityChannel =
-      EventChannel('onReadActivity');
+  EventChannel('onReadActivity');
   static Stream<dynamic> get onReadActivityStream {
     return _onReadActivityChannel.receiveBroadcastStream().cast();
   }
 
   static const EventChannel _onReadHeartRateChannel =
-      EventChannel('onReadHeartRate');
+  EventChannel('onReadHeartRate');
   static Stream<dynamic> get onReadHeartRateStream {
     return _onReadHeartRateChannel.receiveBroadcastStream().cast();
   }
 
   static const EventChannel _onUpdateHeartRateChannel =
-      EventChannel('onUpdateHeartRate');
+  EventChannel('onUpdateHeartRate');
   static Stream<dynamic> get onUpdateHeartRateStream {
     return _onUpdateHeartRateChannel.receiveBroadcastStream().cast();
   }
 
   static const EventChannel _onReadBloodPressureChannel =
-      EventChannel('onReadBloodPressure');
+  EventChannel('onReadBloodPressure');
   static Stream<dynamic> get onReadBloodPressureStream {
     return _onReadBloodPressureChannel.receiveBroadcastStream().cast();
   }
@@ -624,37 +624,37 @@ class SmartbleSdk {
   }
 
   static const EventChannel _onReadLocationChannel =
-      EventChannel('onReadLocation');
+  EventChannel('onReadLocation');
   static Stream<dynamic> get onReadLocationStream {
     return _onReadLocationChannel.receiveBroadcastStream().cast();
   }
 
   static const EventChannel _onReadTemperatureChannel =
-      EventChannel('onReadTemperature');
+  EventChannel('onReadTemperature');
   static Stream<dynamic> get onReadTemperatureStream {
     return _onReadTemperatureChannel.receiveBroadcastStream().cast();
   }
 
   static const EventChannel _onReadWorkout2Channel =
-      EventChannel('onReadWorkout2');
+  EventChannel('onReadWorkout2');
   static Stream<dynamic> get onReadWorkout2Stream {
     return _onReadWorkout2Channel.receiveBroadcastStream().cast();
   }
 
   static const EventChannel _onStreamProgressChannel =
-      EventChannel('onStreamProgress');
+  EventChannel('onStreamProgress');
   static Stream<dynamic> get onStreamProgressStream {
     return _onStreamProgressChannel.receiveBroadcastStream().cast();
   }
 
   static const EventChannel _onUpdateAppSportStateChannel =
-      EventChannel('onUpdateAppSportState');
+  EventChannel('onUpdateAppSportState');
   static Stream<dynamic> get onUpdateAppSportStateStream {
     return _onUpdateAppSportStateChannel.receiveBroadcastStream().cast();
   }
 
   static const EventChannel _onClassicBluetoothStateChangeChannel =
-      EventChannel('onClassicBluetoothStateChange');
+  EventChannel('onClassicBluetoothStateChange');
   static Stream<dynamic> get onClassicBluetoothStateChangeStream {
     return _onClassicBluetoothStateChangeChannel
         .receiveBroadcastStream()
@@ -662,55 +662,55 @@ class SmartbleSdk {
   }
 
   static const EventChannel _onDeviceFileUpdateChannel =
-      EventChannel('onDeviceFileUpdate');
+  EventChannel('onDeviceFileUpdate');
   static Stream<dynamic> get onDeviceFileUpdateStream {
     return _onDeviceFileUpdateChannel.receiveBroadcastStream().cast();
   }
 
   static const EventChannel _onReadDeviceFileChannel =
-      EventChannel('onReadDeviceFile');
+  EventChannel('onReadDeviceFile');
   static Stream<dynamic> get onReadDeviceFileStream {
     return _onReadDeviceFileChannel.receiveBroadcastStream().cast();
   }
 
   static const EventChannel _onReadTemperatureUnitChannel =
-      EventChannel('onReadTemperatureUnit');
+  EventChannel('onReadTemperatureUnit');
   static Stream<dynamic> get onReadTemperatureUnitStream {
     return _onReadTemperatureUnitChannel.receiveBroadcastStream().cast();
   }
 
   static const EventChannel _onReadDateFormatChannel =
-      EventChannel('onReadDateFormat');
+  EventChannel('onReadDateFormat');
   static Stream<dynamic> get onReadDateFormatStream {
     return _onReadDateFormatChannel.receiveBroadcastStream().cast();
   }
 
   static const EventChannel _onReadWatchFaceSwitchChannel =
-      EventChannel('onReadWatchFaceSwitch');
+  EventChannel('onReadWatchFaceSwitch');
   static Stream<dynamic> get onReadWatchFaceSwitchStream {
     return _onReadWatchFaceSwitchChannel.receiveBroadcastStream().cast();
   }
 
   static const EventChannel _onUpdateWatchFaceSwitchChannel =
-      EventChannel('onUpdateWatchFaceSwitch');
+  EventChannel('onUpdateWatchFaceSwitch');
   static Stream<dynamic> get onUpdateWatchFaceSwitchStream {
     return _onUpdateWatchFaceSwitchChannel.receiveBroadcastStream().cast();
   }
 
   static const EventChannel _onAppSportDataResponseChannel =
-      EventChannel('onAppSportDataResponse');
+  EventChannel('onAppSportDataResponse');
   static Stream<dynamic> get onAppSportDataResponseStream {
     return _onAppSportDataResponseChannel.receiveBroadcastStream().cast();
   }
 
   static const EventChannel _onReadWatchFaceIdChannel =
-      EventChannel('onReadWatchFaceId');
+  EventChannel('onReadWatchFaceId');
   static Stream<dynamic> get onReadWatchFaceIdStream {
     return _onReadWatchFaceIdChannel.receiveBroadcastStream().cast();
   }
 
   static const EventChannel _onWatchFaceIdUpdateChannel =
-      EventChannel('onWatchFaceIdUpdate');
+  EventChannel('onWatchFaceIdUpdate');
   static Stream<dynamic> get onWatchFaceIdUpdateStream {
     return _onWatchFaceIdUpdateChannel.receiveBroadcastStream().cast();
   }
@@ -721,43 +721,43 @@ class SmartbleSdk {
   }
 
   static const EventChannel _onHIDValueChangeChannel =
-      EventChannel('onHIDValueChange');
+  EventChannel('onHIDValueChange');
   static Stream<dynamic> get onHIDValueChangeStream {
     return _onHIDValueChangeChannel.receiveBroadcastStream().cast();
   }
 
   static const EventChannel _onDeviceSMSQuickReplyChannel =
-      EventChannel('onDeviceSMSQuickReply');
+  EventChannel('onDeviceSMSQuickReply');
   static Stream<dynamic> get onDeviceSMSQuickReplyStream {
     return _onDeviceSMSQuickReplyChannel.receiveBroadcastStream().cast();
   }
 
   static const EventChannel _onReadDeviceInfoChannel =
-      EventChannel('onReadDeviceInfo');
+  EventChannel('onReadDeviceInfo');
   static Stream<dynamic> get onReadDeviceInfoStream {
     return _onReadDeviceInfoChannel.receiveBroadcastStream().cast();
   }
 
   static const EventChannel _onSessionStateChangeChannel =
-      EventChannel('onSessionStateChange');
+  EventChannel('onSessionStateChange');
   static Stream<dynamic> get onSessionStateChangeStream {
     return _onSessionStateChangeChannel.receiveBroadcastStream().cast();
   }
 
   static const EventChannel _onNoDisturbUpdateChannel =
-      EventChannel('onNoDisturbUpdate');
+  EventChannel('onNoDisturbUpdate');
   static Stream<dynamic> get onNoDisturbUpdateStream {
     return _onNoDisturbUpdateChannel.receiveBroadcastStream().cast();
   }
 
   static const EventChannel _onAlarmUpdateChannel =
-      EventChannel('onAlarmUpdate');
+  EventChannel('onAlarmUpdate');
   static Stream<dynamic> get onAlarmUpdateStream {
     return _onAlarmUpdateChannel.receiveBroadcastStream().cast();
   }
 
   static const EventChannel _onAlarmDeleteChannel =
-      EventChannel('onAlarmDelete');
+  EventChannel('onAlarmDelete');
   static Stream<dynamic> get onAlarmDeleteStream {
     return _onAlarmDeleteChannel.receiveBroadcastStream().cast();
   }
@@ -773,25 +773,25 @@ class SmartbleSdk {
   }
 
   static const EventChannel _onRequestLocationChannel =
-      EventChannel('onRequestLocation');
+  EventChannel('onRequestLocation');
   static Stream<dynamic> get onRequestLocationStream {
     return _onRequestLocationChannel.receiveBroadcastStream().cast();
   }
 
   static const EventChannel _onDeviceRequestAGpsFileChannel =
-      EventChannel('onDeviceRequestAGpsFile');
+  EventChannel('onDeviceRequestAGpsFile');
   static Stream<dynamic> get onDeviceRequestAGpsFileStream {
     return _onDeviceRequestAGpsFileChannel.receiveBroadcastStream().cast();
   }
 
   static const EventChannel _onReadWorkoutChannel =
-      EventChannel('onReadWorkout');
+  EventChannel('onReadWorkout');
   static Stream<dynamic> get onReadWorkoutStream {
     return _onReadWorkoutChannel.receiveBroadcastStream().cast();
   }
 
   static const EventChannel _onReadBloodOxygenChannel =
-      EventChannel('onReadBloodOxygen');
+  EventChannel('onReadBloodOxygen');
   static Stream<dynamic> get onReadBloodOxygenStream {
     return _onReadBloodOxygenChannel.receiveBroadcastStream().cast();
   }
@@ -802,19 +802,19 @@ class SmartbleSdk {
   }
 
   static const EventChannel _onReadPressureChannel =
-      EventChannel('onReadPressure');
+  EventChannel('onReadPressure');
   static Stream<dynamic> get onReadPressureStream {
     return _onReadPressureChannel.receiveBroadcastStream().cast();
   }
 
   static const EventChannel _onDeviceConnectingChannel =
-      EventChannel('onDeviceConnecting');
+  EventChannel('onDeviceConnecting');
   static Stream<dynamic> get onDeviceConnectingStream {
     return _onDeviceConnectingChannel.receiveBroadcastStream().cast();
   }
 
   static const EventChannel _onIncomingCallStatusChannel =
-      EventChannel('onIncomingCallStatus');
+  EventChannel('onIncomingCallStatus');
   static Stream<dynamic> get onIncomingCallStatusStream {
     return _onIncomingCallStatusChannel.receiveBroadcastStream().cast();
   }
