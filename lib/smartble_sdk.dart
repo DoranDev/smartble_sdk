@@ -80,7 +80,8 @@ class SmartbleSdk {
       map["mDateDur"] = dateNote.difference(epoch).inDays;
       listSleepNew.add(map);
     }
-    return _channel.invokeMethod('analyzeSleep', {'listSleep': listSleepNew});
+    return _channel
+        .invokeMethod('analyzeSleep', {'listSleep': "$listSleepNew"});
   }
 
   ///customDials
@@ -155,7 +156,7 @@ class SmartbleSdk {
   Future<dynamic> kSEDENTARINESS({
     required SelectedBlekeyFlag flag,
     required int mEnabled,
-    String? mRepeat,
+    required int mRepeat,
     required int mStartHour,
     required int mStartMinute,
     required int mEndHour,
@@ -391,6 +392,15 @@ class SmartbleSdk {
           required String mContent}) =>
       _channel.invokeMethod('MUSIC_CONTROL',
           {'flag': flag.name, 'mTitle': mTitle, 'mContent': mContent});
+
+  Future<dynamic> musicNext() {
+    return _channel.invokeMethod('musicNext');
+  }
+
+  Future<dynamic> musicPrev() {
+    return _channel.invokeMethod('musicPrev');
+  }
+
   Future<dynamic> kSCHEDULE({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('SCHEDULE', {'flag': flag.name});
   Future<dynamic> kWEATHER_REALTIME({required SelectedBlekeyFlag flag}) =>
@@ -817,6 +827,12 @@ class SmartbleSdk {
       EventChannel('onIncomingCallStatus');
   static Stream<dynamic> get onIncomingCallStatusStream {
     return _onIncomingCallStatusChannel.receiveBroadcastStream().cast();
+  }
+
+  static const EventChannel _onReceiveMusicCommandChannel =
+      EventChannel("onReceiveMusicCommand");
+  static Stream<dynamic> get onReceiveMusicCommandStream {
+    return _onReceiveMusicCommandChannel.receiveBroadcastStream().cast();
   }
 }
 
