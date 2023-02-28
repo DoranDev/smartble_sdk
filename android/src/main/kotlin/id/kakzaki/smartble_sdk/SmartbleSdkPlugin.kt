@@ -47,6 +47,7 @@ import java.io.InputStream
 import java.net.URL
 import java.nio.ByteBuffer
 import java.util.*
+import kotlin.collections.HashMap
 import kotlin.random.Random
 
 /** SmartbleSdkPlugin */
@@ -182,6 +183,8 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private var onReadBleHrvSink: EventSink? = null
     private var onReadPressureChannel: EventChannel? = null
     private var onReadPressureSink: EventSink? = null
+    private var onReadWorldClockChannel: EventChannel? = null
+    private var onReadWorldClockSink: EventSink? = null
     private var onDeviceConnectingChannel: EventChannel? = null
     private var onDeviceConnectingSink: EventSink? = null
     private var onIncomingCallStatusChannel: EventChannel? = null
@@ -916,6 +919,16 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     onReadPressureSink!!.success(item)
             }
 
+            override fun onReadWorldClock(clocks: List<BleWorldClock>) {
+                if(BuildConfig.DEBUG){
+                    Log.d("onReadWorldClock", "$clocks")
+                }
+                val item: MutableMap<String, Any> = HashMap()
+                item["clocks"] = gson.toJson(clocks)
+                if(onReadWorldClockSink!=null)
+                    onReadWorldClockSink!!.success(item)
+            }
+
 
             override fun onDeviceConnecting(status: Boolean) {
                 if (BuildConfig.DEBUG) {
@@ -1258,6 +1271,8 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         onReadBleHrvChannel!!.setStreamHandler(onReadBleHrvResultsHandler)
         onReadPressureChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onReadPressure")
         onReadPressureChannel!!.setStreamHandler(onReadPressureResultsHandler)
+        onReadWorldClockChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onReadWorldClock")
+        onReadWorldClockChannel!!.setStreamHandler(onReadWorldClockResultHandler)
         onDeviceConnectingChannel =
             EventChannel(flutterPluginBinding.binaryMessenger, "onDeviceConnecting")
         onDeviceConnectingChannel!!.setStreamHandler(onDeviceConnectingResultsHandler)
@@ -4636,6 +4651,17 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             }
 
             override fun onCancel(o: Any?) {
+            }
+        }
+
+    private val onReadWorldClockResultHandler: EventChannel.StreamHandler =
+        object :EventChannel.StreamHandler{
+            override fun onListen(arguments: Any?, eventSink: EventSink?) {
+                if (eventSink != null){
+                    onReadWorldClockSink = eventSink
+                }
+            }
+            override fun onCancel(arguments: Any?) {
             }
         }
 
