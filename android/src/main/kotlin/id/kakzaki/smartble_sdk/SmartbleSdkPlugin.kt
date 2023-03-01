@@ -3694,13 +3694,19 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     //世界时钟
                     BleKey.WORLD_CLOCK -> {
                         // 创建一个时钟
+                        val index: Int? = call.argument<Int>("index")
+                        var isLocal: Int? = call.argument<Int>("isLocal")
+                        val mTimeZoneOffset: Int? = call.argument<Int>("mTimeZoneOffset")
+                        val reversed: Int? = call.argument<Int>("reversed")
+                        val mCityName: String? = call.argument<String>("mCityName")
                         if (bleKeyFlag == BleKeyFlag.CREATE) {
                             BleConnector.sendObject(
                                 bleKey, bleKeyFlag,
                                 BleWorldClock(
-                                    isLocal = 0,
-                                    mTimeZoneOffset = TimeZone.getDefault().rawOffset / 1000 / 60 / 15,
-                                    mCityName = "本地时间"
+                                    isLocal = isLocal!!,
+                                    mTimeZoneOffset = mTimeZoneOffset!! /*TimeZone.getDefault().rawOffset / 1000 / 60 / 15*/,
+                                    reversed = reversed!!,
+                                    mCityName = mCityName!!
                                 )
                             )
                         } else if (bleKeyFlag == BleKeyFlag.DELETE) {
@@ -3708,13 +3714,13 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                             val clocks =
                                 BleCache.getList(BleKey.WORLD_CLOCK, BleWorldClock::class.java)
                             if (clocks.isNotEmpty()) {
-                                BleConnector.sendInt8(bleKey, bleKeyFlag, clocks[0].mId)
+                                BleConnector.sendInt8(bleKey, bleKeyFlag, clocks[index!!].mId)
                             }
                         } else if (bleKeyFlag == BleKeyFlag.UPDATE) {
                             val clocks =
                                 BleCache.getList(BleKey.WORLD_CLOCK, BleWorldClock::class.java)
                             if (clocks.isNotEmpty()) {
-                                clocks[0].let { clock ->
+                                clocks[index!!].let { clock ->
                                     clock.isLocal = if (clock.isLocal == 0) 1 else 0
                                     BleConnector.sendObject(bleKey, bleKeyFlag, clock)
                                 }
