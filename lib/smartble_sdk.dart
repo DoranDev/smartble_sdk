@@ -479,16 +479,21 @@ class SmartbleSdk {
   Future<dynamic> kHID({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('HID', {'flag': flag.name});
 
-  Future<dynamic> kWORLD_CLOCK(
-      {required SelectedBlekeyFlag flag, int? index, int? isLocal, int? mTimeZoneOffSet, int? reversed, String? mCityName}) =>
+  Future<dynamic> kWORLD_CLOCK({required SelectedBlekeyFlag flag,
+    int? index,
+    int? isLocal,
+    int? mTimeZoneOffSet,
+    int? reversed,
+    String? mCityName}) =>
       _channel.invokeMethod('WORLD_CLOCK', {
         'flag': flag.name,
         'index': index,
         'isLocal': isLocal,
         'reversed': reversed,
         'mTimeZoneOffSet': mTimeZoneOffSet,
-        'mCityName': mCityName,
+        'mCityName': mCityName
       });
+
 
   Future<dynamic> kSTOCK({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('STOCK', {'flag': flag.name});
@@ -999,8 +1004,10 @@ class SmartbleSdk {
     return _onReceiveMusicCommandChannel.receiveBroadcastStream().cast();
   }
 
-  static const EventChannel _onReadWorldClockChannel = EventChannel("onReadWorldClock");
-  static Stream<dynamic> get onReadWorldClockStream{
+  static const EventChannel _onReadWorldClockChannel = EventChannel(
+      "onReadWorldClock");
+
+  static Stream<dynamic> get onReadWorldClockStream {
     return _onReadWorldClockChannel.receiveBroadcastStream().cast();
   }
 }

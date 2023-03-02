@@ -3695,16 +3695,20 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     BleKey.WORLD_CLOCK -> {
                         // 创建一个时钟
                         val index: Int? = call.argument<Int>("index")
-                        var isLocal: Int? = call.argument<Int>("isLocal")
-                        val mTimeZoneOffset: Int? = call.argument<Int>("mTimeZoneOffset")
+                        val isLocal: Int? = call.argument<Int>("isLocal")
+                        val mTimeZoneOffset: Int? = call.argument<Int>("mTimeZoneOffSet")
                         val reversed: Int? = call.argument<Int>("reversed")
                         val mCityName: String? = call.argument<String>("mCityName")
+
+                       // Log.d("dataWClock","index: $index, isLocal: $isLocal, timeZoneOffset: $mTimeZoneOffset, reversed: $reversed, city: $mCityName")
+                       // Log.d("timeZone.getdefault.raw", "${TimeZone.getDefault().rawOffset} | ${TimeZone.getDefault().rawOffset / 1000 / 60 / 15}")
+
                         if (bleKeyFlag == BleKeyFlag.CREATE) {
                             BleConnector.sendObject(
                                 bleKey, bleKeyFlag,
                                 BleWorldClock(
                                     isLocal = isLocal!!,
-                                    mTimeZoneOffset = mTimeZoneOffset!! /*TimeZone.getDefault().rawOffset / 1000 / 60 / 15*/,
+                                    mTimeZoneOffset =  mTimeZoneOffset!! / 1000 / 60 / 15  /*TimeZone.getDefault().rawOffset / 1000 / 60 / 15 */,
                                     reversed = reversed!!,
                                     mCityName = mCityName!!
                                 )
