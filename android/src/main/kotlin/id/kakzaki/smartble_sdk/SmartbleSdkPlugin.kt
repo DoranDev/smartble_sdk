@@ -185,6 +185,8 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private var onReadPressureSink: EventSink? = null
     private var onReadWorldClockChannel: EventChannel? = null
     private var onReadWorldClockSink: EventSink? = null
+    private var onWorldClockDeleteChannel: EventChannel? = null
+    private var onWorldClockDeleteSink: EventSink? = null
     private var onDeviceConnectingChannel: EventChannel? = null
     private var onDeviceConnectingSink: EventSink? = null
     private var onIncomingCallStatusChannel: EventChannel? = null
@@ -929,6 +931,17 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     onReadWorldClockSink!!.success(item)
             }
 
+            override fun onWorldClockDelete(id: Int) {
+                if(BuildConfig.DEBUG){
+                    Log.d("onWorldClockDelete", "$id")
+                }
+                val item: MutableMap<String,Any> = HashMap()
+                item["id"] = gson.toJson(id)
+                if(onWorldClockDeleteSink!=null){
+                    onWorldClockDeleteSink!!.success(item)
+                }
+            }
+
 
             override fun onDeviceConnecting(status: Boolean) {
                 if (BuildConfig.DEBUG) {
@@ -1273,6 +1286,8 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         onReadPressureChannel!!.setStreamHandler(onReadPressureResultsHandler)
         onReadWorldClockChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onReadWorldClock")
         onReadWorldClockChannel!!.setStreamHandler(onReadWorldClockResultHandler)
+        onWorldClockDeleteChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onWorldClockDelete")
+        onWorldClockDeleteChannel!!.setStreamHandler(onWorldClockDeleteResultHandler)
         onDeviceConnectingChannel =
             EventChannel(flutterPluginBinding.binaryMessenger, "onDeviceConnecting")
         onDeviceConnectingChannel!!.setStreamHandler(onDeviceConnectingResultsHandler)
@@ -3700,8 +3715,8 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                         val reversed: Int? = call.argument<Int>("reversed")
                         val mCityName: String? = call.argument<String>("mCityName")
 
-                       // Log.d("dataWClock","index: $index, isLocal: $isLocal, timeZoneOffset: $mTimeZoneOffset, reversed: $reversed, city: $mCityName")
-                       // Log.d("timeZone.getdefault.raw", "${TimeZone.getDefault().rawOffset} | ${TimeZone.getDefault().rawOffset / 1000 / 60 / 15}")
+                        Log.d("dataWClock","index: $index, isLocal: $isLocal, timeZoneOffset: $mTimeZoneOffset, reversed: $reversed, city: $mCityName")
+                        Log.d("timeZone.getdefault.raw", "${TimeZone.getDefault().rawOffset} | ${TimeZone.getDefault().rawOffset / 1000 / 60 / 15}")
 
                         if (bleKeyFlag == BleKeyFlag.CREATE) {
                             BleConnector.sendObject(
@@ -4671,6 +4686,18 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     onReadWorldClockSink = eventSink
                 }
             }
+            override fun onCancel(arguments: Any?) {
+            }
+        }
+
+    private val onWorldClockDeleteResultHandler: EventChannel.StreamHandler =
+        object : EventChannel.StreamHandler{
+            override fun onListen(arguments: Any?, eventSink: EventSink?) {
+                if(eventSink != null){
+                    onWorldClockDeleteSink = eventSink
+                }
+            }
+
             override fun onCancel(arguments: Any?) {
             }
         }

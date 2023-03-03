@@ -1010,6 +1010,11 @@ class SmartbleSdk {
   static Stream<dynamic> get onReadWorldClockStream {
     return _onReadWorldClockChannel.receiveBroadcastStream().cast();
   }
+
+  static const EventChannel _onWorldClockDeleteChannel = EventChannel("onWorldClockDelete");
+  static Stream<dynamic> get onWorldClockDeleteStream{
+    return _onWorldClockDeleteChannel.receiveBroadcastStream().cast();
+  }
 }
 
 class BleNotificationCategory {
