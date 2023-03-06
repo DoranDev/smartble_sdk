@@ -47,6 +47,7 @@ import java.io.InputStream
 import java.net.URL
 import java.nio.ByteBuffer
 import java.util.*
+import kotlin.collections.HashMap
 import kotlin.random.Random
 
 /** SmartbleSdkPlugin */
@@ -182,6 +183,10 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private var onReadBleHrvSink: EventSink? = null
     private var onReadPressureChannel: EventChannel? = null
     private var onReadPressureSink: EventSink? = null
+    private var onReadWorldClockChannel: EventChannel? = null
+    private var onReadWorldClockSink: EventSink? = null
+    private var onWorldClockDeleteChannel: EventChannel? = null
+    private var onWorldClockDeleteSink: EventSink? = null
     private var onDeviceConnectingChannel: EventChannel? = null
     private var onDeviceConnectingSink: EventSink? = null
     private var onIncomingCallStatusChannel: EventChannel? = null
@@ -916,6 +921,27 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     onReadPressureSink!!.success(item)
             }
 
+            override fun onReadWorldClock(clocks: List<BleWorldClock>) {
+                if(BuildConfig.DEBUG){
+                    Log.d("onReadWorldClock", "$clocks")
+                }
+                val item: MutableMap<String, Any> = HashMap()
+                item["clocks"] = gson.toJson(clocks)
+                if(onReadWorldClockSink!=null)
+                    onReadWorldClockSink!!.success(item)
+            }
+
+            override fun onWorldClockDelete(id: Int) {
+                if(BuildConfig.DEBUG){
+                    Log.d("onWorldClockDelete", "$id")
+                }
+                val item: MutableMap<String,Any> = HashMap()
+                item["id"] = gson.toJson(id)
+                if(onWorldClockDeleteSink!=null){
+                    onWorldClockDeleteSink!!.success(item)
+                }
+            }
+
 
             override fun onDeviceConnecting(status: Boolean) {
                 if (BuildConfig.DEBUG) {
@@ -1258,6 +1284,10 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         onReadBleHrvChannel!!.setStreamHandler(onReadBleHrvResultsHandler)
         onReadPressureChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onReadPressure")
         onReadPressureChannel!!.setStreamHandler(onReadPressureResultsHandler)
+        onReadWorldClockChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onReadWorldClock")
+        onReadWorldClockChannel!!.setStreamHandler(onReadWorldClockResultHandler)
+        onWorldClockDeleteChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onWorldClockDelete")
+        onWorldClockDeleteChannel!!.setStreamHandler(onWorldClockDeleteResultHandler)
         onDeviceConnectingChannel =
             EventChannel(flutterPluginBinding.binaryMessenger, "onDeviceConnecting")
         onDeviceConnectingChannel!!.setStreamHandler(onDeviceConnectingResultsHandler)
@@ -3679,13 +3709,23 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     //世界时钟
                     BleKey.WORLD_CLOCK -> {
                         // 创建一个时钟
+                        val index: Int? = call.argument<Int>("index")
+                        val isLocal: Int? = call.argument<Int>("isLocal")
+                        val mTimeZoneOffset: Int? = call.argument<Int>("mTimeZoneOffSet")
+                        val reversed: Int? = call.argument<Int>("reversed")
+                        val mCityName: String? = call.argument<String>("mCityName")
+
+                        Log.d("dataWClock","index: $index, isLocal: $isLocal, timeZoneOffset: $mTimeZoneOffset, reversed: $reversed, city: $mCityName")
+                        Log.d("timeZone.getdefault.raw", "${TimeZone.getDefault().rawOffset} | ${TimeZone.getDefault().rawOffset / 1000 / 60 / 15}")
+
                         if (bleKeyFlag == BleKeyFlag.CREATE) {
                             BleConnector.sendObject(
                                 bleKey, bleKeyFlag,
                                 BleWorldClock(
-                                    isLocal = 0,
-                                    mTimeZoneOffset = TimeZone.getDefault().rawOffset / 1000 / 60 / 15,
-                                    mCityName = "本地时间"
+                                    isLocal = isLocal!!,
+                                    mTimeZoneOffset =  mTimeZoneOffset!! / 1000 / 60 / 15  /*TimeZone.getDefault().rawOffset / 1000 / 60 / 15 */,
+                                    reversed = reversed!!,
+                                    mCityName = mCityName!!
                                 )
                             )
                         } else if (bleKeyFlag == BleKeyFlag.DELETE) {
@@ -3693,13 +3733,13 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                             val clocks =
                                 BleCache.getList(BleKey.WORLD_CLOCK, BleWorldClock::class.java)
                             if (clocks.isNotEmpty()) {
-                                BleConnector.sendInt8(bleKey, bleKeyFlag, clocks[0].mId)
+                                BleConnector.sendInt8(bleKey, bleKeyFlag, clocks[index!!].mId)
                             }
                         } else if (bleKeyFlag == BleKeyFlag.UPDATE) {
                             val clocks =
                                 BleCache.getList(BleKey.WORLD_CLOCK, BleWorldClock::class.java)
                             if (clocks.isNotEmpty()) {
-                                clocks[0].let { clock ->
+                                clocks[index!!].let { clock ->
                                     clock.isLocal = if (clock.isLocal == 0) 1 else 0
                                     BleConnector.sendObject(bleKey, bleKeyFlag, clock)
                                 }
@@ -4636,6 +4676,29 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             }
 
             override fun onCancel(o: Any?) {
+            }
+        }
+
+    private val onReadWorldClockResultHandler: EventChannel.StreamHandler =
+        object :EventChannel.StreamHandler{
+            override fun onListen(arguments: Any?, eventSink: EventSink?) {
+                if (eventSink != null){
+                    onReadWorldClockSink = eventSink
+                }
+            }
+            override fun onCancel(arguments: Any?) {
+            }
+        }
+
+    private val onWorldClockDeleteResultHandler: EventChannel.StreamHandler =
+        object : EventChannel.StreamHandler{
+            override fun onListen(arguments: Any?, eventSink: EventSink?) {
+                if(eventSink != null){
+                    onWorldClockDeleteSink = eventSink
+                }
+            }
+
+            override fun onCancel(arguments: Any?) {
             }
         }
 
