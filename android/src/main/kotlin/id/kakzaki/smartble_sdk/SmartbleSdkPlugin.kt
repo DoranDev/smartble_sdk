@@ -3321,8 +3321,8 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                                     if (mEnabled != null) {
                                         alarm.mEnabled = mEnabled
                                     }
-                                    if (bleRepeat != null) {
-                                        alarm.mRepeat = bleRepeat
+                                    if (mRepeat != null) {
+                                        alarm.mRepeat = mRepeat.toInt()
                                     }
                                     if (mYear != null) {
                                         alarm.mYear = mYear
