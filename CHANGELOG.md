@@ -1,3 +1,7 @@
+## 0.7.4
+
+* Pointer second
+
 ## 0.7.3
 
 * Alarm
