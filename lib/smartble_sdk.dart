@@ -468,11 +468,25 @@ class SmartbleSdk {
   Future<dynamic> kSCHEDULE({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('SCHEDULE', {'flag': flag.name});
 
-  Future<dynamic> kWEATHER_REALTIME({required SelectedBlekeyFlag flag}) =>
-      _channel.invokeMethod('WEATHER_REALTIME', {'flag': flag.name});
+  Future<dynamic> kWEATHER_REALTIME({
+    required SelectedBlekeyFlag flag,
+    required String realTime,
+  }) =>
+      _channel.invokeMethod(
+          'WEATHER_REALTIME', {'flag': flag.name, 'realTime': realTime});
 
-  Future<dynamic> kWEATHER_FORECAST({required SelectedBlekeyFlag flag}) =>
-      _channel.invokeMethod('WEATHER_FORECAST', {'flag': flag.name});
+  Future<dynamic> kWEATHER_FORECAST({
+    required SelectedBlekeyFlag flag,
+    required String forecast1,
+    required String forecast2,
+    required String forecast3,
+  }) =>
+      _channel.invokeMethod('WEATHER_FORECAST', {
+        'flag': flag.name,
+        'forecast1': forecast1,
+        'forecast2': forecast2,
+        'forecast3': forecast3,
+      });
 
   Future<dynamic> kHID({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('HID', {'flag': flag.name});
