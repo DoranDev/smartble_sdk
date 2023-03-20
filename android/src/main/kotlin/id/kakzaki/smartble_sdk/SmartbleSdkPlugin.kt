@@ -2845,7 +2845,20 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             doBle(mContext!!) {
                 when (bleKey) {
                     // BleCommand.UPDATE
-//          BleKey.OTA -> FirmwareHelper.gotoOta(mContext)
+          BleKey.OTA -> {
+              if (bleKeyFlag == BleKeyFlag.UPDATE) {
+                  // 发送文件
+                  val url: String? = call.argument<String>("url")
+                  if (url != null) {
+                      DownloadTask(bleKey).execute(url)
+                  }
+                  val path: String? = call.argument<String>("path")
+                  if (path != null) {
+                      val inputStream: InputStream = mContext!!.assets.open(path)
+                      BleConnector.sendStream(bleKey, inputStream, 0)
+                  }
+              }
+          }
 //          BleKey.WATCH_FACE -> {
 ////                findViewById<TextView>(R.id.tv_custom1).apply {
 ////                    visibility = View.VISIBLE
@@ -3912,7 +3925,6 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                             }
                         }
                     }
-
                     // BleCommand.IO
                     BleKey.WATCH_FACE, BleKey.AGPS_FILE, BleKey.FONT_FILE, BleKey.UI_FILE, BleKey.LANGUAGE_FILE, BleKey.BRAND_INFO_FILE -> {
                         if (bleKeyFlag == BleKeyFlag.UPDATE) {
@@ -3920,16 +3932,6 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                             val url: String? = call.argument<String>("url")
                             if (url != null) {
                                 DownloadTask(bleKey).execute(url)
-//                val executor = Executors.newSingleThreadExecutor()
-//                val future = executor.submit {
-//                  val url = URL(url)
-//                  val connection = url.openConnection()
-//                  connection.getInputStream()
-//                }
-//                val inputStream = future.get()
-//                if (inputStream != null) {
-//                  BleConnector.sendStream(bleKey ,inputStream as InputStream,0)
-//                }
                             }
                             val path: String? = call.argument<String>("path")
                             if (path != null) {
@@ -3939,20 +3941,6 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                         }
 
                     }
-//          BleKey.CONTACT -> {
-//            PermissionUtils
-//              .permission(PermissionConstants.CONTACTS)
-//              .require(Manifest.permission.READ_CONTACTS) { granted ->
-//                if (granted) {
-//                  val bytes = getContactBytes()
-//                  if (bytes.isNotEmpty()) {
-//                    BleConnector.sendStream(BleKey.CONTACT, bytes)
-//                  } else {
-//                    LogUtils.d("contact is empty")
-//                  }
-//                }
-//              }
-//          }
                     BleKey.CONTACT -> {
                         val listContact: List<Map<String, String>>? =
                             call.argument<List<Map<String, String>>>("listContact")
