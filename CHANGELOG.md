@@ -1,3 +1,7 @@
+## 0.7.6
+
+* weather, ota
+
 ## 0.7.5
 
 * Pointer second
