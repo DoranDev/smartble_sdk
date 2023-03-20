@@ -3640,15 +3640,18 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     }
                     // 发送实时天气
                     BleKey.WEATHER_REALTIME -> {
+                        val weatherRealTime = call.argument<String>("realTime")
+                        val realTime = JSONObject(weatherRealTime)
+//                        LogUtils.dTag("dataREaltime",realTime)
                         if (bleKeyFlag == BleKeyFlag.UPDATE) {
                             BleConnector.sendObject(
                                 BleKey.WEATHER_REALTIME, bleKeyFlag, BleWeatherRealtime(
-                                    mTime = (Date().time / 1000L).toInt(),
+                                    mTime = (Date().time / 1000L).toInt(), /*realTime["mTime"].toString().toInt(),*/
                                     mWeather = BleWeather(
-                                        mCurrentTemperature = 1,
-                                        mMaxTemperature = 1,
-                                        mMinTemperature = 1,
-                                        mWeatherCode = BleWeather.RAINY,
+                                        mCurrentTemperature = realTime["mCurrentTemperature"].toString().toInt(),
+                                        mMaxTemperature = realTime["mMaxTemperature"].toString().toInt(),
+                                        mMinTemperature = realTime["mMinTemperature"].toString().toInt(),
+                                        mWeatherCode = realTime["mWeatherCode"].toString().toInt(),
                                         mWindSpeed = 1,
                                         mHumidity = 1,
                                         mVisibility = 1,
@@ -3661,15 +3664,24 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     }
                     // 发送天气预备
                     BleKey.WEATHER_FORECAST -> {
+                        val weatherForecast1 = call.argument<String>("forecast1")
+                        val weatherForecast2 = call.argument<String>("forecast2")
+                        val weatherForecast3 = call.argument<String>("forecast3")
+                        val forecast1 = JSONObject(weatherForecast1)
+                        val forecast2 = JSONObject(weatherForecast2)
+                        val forecast3 = JSONObject(weatherForecast3)
+//                        LogUtils.dTag("forecast1",forecast1)
+//                        LogUtils.dTag("forecast2",forecast2)
+//                        LogUtils.dTag("forecast3",forecast3)
                         if (bleKeyFlag == BleKeyFlag.UPDATE) {
                             BleConnector.sendObject(
                                 BleKey.WEATHER_FORECAST, bleKeyFlag, BleWeatherForecast(
                                     mTime = (Date().time / 1000L).toInt(),
                                     mWeather1 = BleWeather(
-                                        mCurrentTemperature = 2,
-                                        mMaxTemperature = 2,
-                                        mMinTemperature = 3,
-                                        mWeatherCode = BleWeather.CLOUDY,
+                                        mCurrentTemperature = forecast1["mCurrentTemperature"].toString().toInt(),
+                                        mMaxTemperature = forecast1["mMaxTemperature"].toString().toInt(),
+                                        mMinTemperature = forecast1["mMinTemperature"].toString().toInt(),
+                                        mWeatherCode = forecast1["mWeatherCode"].toString().toInt(),
                                         mWindSpeed = 2,
                                         mHumidity = 2,
                                         mVisibility = 2,
@@ -3677,10 +3689,10 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                                         mPrecipitation = 2
                                     ),
                                     mWeather2 = BleWeather(
-                                        mCurrentTemperature = 3,
-                                        mMaxTemperature = 3,
-                                        mMinTemperature = 3,
-                                        mWeatherCode = BleWeather.OVERCAST,
+                                        mCurrentTemperature = forecast2["mCurrentTemperature"].toString().toInt(),
+                                        mMaxTemperature = forecast2["mMaxTemperature"].toString().toInt(),
+                                        mMinTemperature = forecast2["mMinTemperature"].toString().toInt(),
+                                        mWeatherCode = forecast2["mWeatherCode"].toString().toInt(),
                                         mWindSpeed = 3,
                                         mHumidity = 3,
                                         mVisibility = 3,
@@ -3688,10 +3700,10 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                                         mPrecipitation = 3
                                     ),
                                     mWeather3 = BleWeather(
-                                        mCurrentTemperature = 4,
-                                        mMaxTemperature = 4,
-                                        mMinTemperature = 4,
-                                        mWeatherCode = BleWeather.RAINY,
+                                        mCurrentTemperature = forecast3["mCurrentTemperature"].toString().toInt(),
+                                        mMaxTemperature = forecast3["mMaxTemperature"].toString().toInt(),
+                                        mMinTemperature = forecast3["mMinTemperature"].toString().toInt(),
+                                        mWeatherCode = forecast3["mWeatherCode"].toString().toInt(),
                                         mWindSpeed = 4,
                                         mHumidity = 4,
                                         mVisibility = 4,
