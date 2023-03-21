@@ -1,3 +1,7 @@
+## 0.7.8
+
+* digiTop, digileft
+
 ## 0.7.7
 
 * dial pointer

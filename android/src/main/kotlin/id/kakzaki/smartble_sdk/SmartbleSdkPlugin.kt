@@ -1396,7 +1396,8 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     var screenHeight = 0 //The actual size of the device screen - height
     var screenPreviewWidth = 0 //The actual preview size of the device screen - width
     var screenPreviewHeight = 0 //The actual preview size of the device screen - height
-
+    var digiLeft = 0
+    var digiTop = 0
     //控件相关
     private var stepValueCenterX = 0f
     private var stepValueCenterY = 0f
@@ -1714,8 +1715,10 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         canvas: Canvas,
         isCanvasValue: Boolean
     ) {
-        val timeLeft = (screenWidth / 3.5f) * scaleWidth
-        val timeTop = (screenHeight / 3) * scaleHeight
+//        val timeLeft = (screenWidth / 3.5f) * scaleWidth
+//        val timeTop = (screenHeight / 3) * scaleHeight
+        val timeLeft = digiLeft * scaleWidth
+        val timeTop = digiTop * scaleHeight
         LogUtils.d("test timeLeft=$timeLeft,  timeTop=$timeTop, timeDigitalView.width=${timeDigitalViewWidth} ,scaleWidth =$scaleWidth")
         //获取AM原始资源.此处涉及到预览，所以强制使用PNG图片，避免透明色不显示
         val amBitmap =
@@ -2309,6 +2312,10 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 custom = call.argument<Int>("custom")!!
                 screenWidth = call.argument<Int>("screenWidth")!!
                 screenHeight = call.argument<Int>("screenHeight")!!
+
+                digiLeft = call.argument<Int>("digiLeft")!!
+                digiTop = call.argument<Int>("digiTop")!!
+
                 screenPreviewWidth = call.argument<Int>("screenPreviewWidth")!!
                 screenPreviewHeight = call.argument<Int>("screenPreviewHeight")!!
 
