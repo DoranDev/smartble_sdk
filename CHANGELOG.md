@@ -1,3 +1,7 @@
+## 0.7.7
+
+* dial pointer
+
 ## 0.7.6
 
 * weather, ota
