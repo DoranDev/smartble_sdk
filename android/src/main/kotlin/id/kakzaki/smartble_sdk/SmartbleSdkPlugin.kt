@@ -1396,7 +1396,8 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     var screenHeight = 0 //The actual size of the device screen - height
     var screenPreviewWidth = 0 //The actual preview size of the device screen - width
     var screenPreviewHeight = 0 //The actual preview size of the device screen - height
-
+    var digiLeft = 0
+    var digiTop = 0
     //控件相关
     private var stepValueCenterX = 0f
     private var stepValueCenterY = 0f
@@ -1714,8 +1715,10 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         canvas: Canvas,
         isCanvasValue: Boolean
     ) {
-        val timeLeft = (screenWidth / 3.5f) * scaleWidth
-        val timeTop = (screenHeight / 3) * scaleHeight
+//        val timeLeft = (screenWidth / 3.5f) * scaleWidth
+//        val timeTop = (screenHeight / 3) * scaleHeight
+        val timeLeft = digiLeft * scaleWidth
+        val timeTop = digiTop * scaleHeight
         LogUtils.d("test timeLeft=$timeLeft,  timeTop=$timeTop, timeDigitalView.width=${timeDigitalViewWidth} ,scaleWidth =$scaleWidth")
         //获取AM原始资源.此处涉及到预览，所以强制使用PNG图片，避免透明色不显示
         val amBitmap =
@@ -2309,6 +2312,10 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 custom = call.argument<Int>("custom")!!
                 screenWidth = call.argument<Int>("screenWidth")!!
                 screenHeight = call.argument<Int>("screenHeight")!!
+
+                digiLeft = call.argument<Int>("digiLeft")!!
+                digiTop = call.argument<Int>("digiTop")!!
+
                 screenPreviewWidth = call.argument<Int>("screenPreviewWidth")!!
                 screenPreviewHeight = call.argument<Int>("screenPreviewHeight")!!
 
@@ -2845,7 +2852,20 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             doBle(mContext!!) {
                 when (bleKey) {
                     // BleCommand.UPDATE
-//          BleKey.OTA -> FirmwareHelper.gotoOta(mContext)
+                    BleKey.OTA -> {
+                        if (bleKeyFlag == BleKeyFlag.UPDATE) {
+                            // 发送文件
+                            val url: String? = call.argument<String>("url")
+                            if (url != null) {
+                                DownloadTask(bleKey).execute(url)
+                            }
+                            val path: String? = call.argument<String>("path")
+                            if (path != null) {
+                                val inputStream: InputStream = mContext!!.assets.open(path)
+                                BleConnector.sendStream(bleKey, inputStream, 0)
+                            }
+                        }
+                    }
 //          BleKey.WATCH_FACE -> {
 ////                findViewById<TextView>(R.id.tv_custom1).apply {
 ////                    visibility = View.VISIBLE
@@ -3763,6 +3783,9 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     }
                     //股票
                     BleKey.STOCK -> {
+                        val index: Int? = call.argument<Int>("index")
+                        val dataStock: String? = call.argument<String>("stock")
+                        val convertStock = JSONObject(dataStock);
                         // 创建一个股票
                         if (bleKeyFlag == BleKeyFlag.CREATE) {
                             BleConnector.sendObject(
@@ -3924,7 +3947,6 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                             }
                         }
                     }
-
                     // BleCommand.IO
                     BleKey.WATCH_FACE, BleKey.AGPS_FILE, BleKey.FONT_FILE, BleKey.UI_FILE, BleKey.LANGUAGE_FILE, BleKey.BRAND_INFO_FILE -> {
                         if (bleKeyFlag == BleKeyFlag.UPDATE) {
@@ -3932,16 +3954,6 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                             val url: String? = call.argument<String>("url")
                             if (url != null) {
                                 DownloadTask(bleKey).execute(url)
-//                val executor = Executors.newSingleThreadExecutor()
-//                val future = executor.submit {
-//                  val url = URL(url)
-//                  val connection = url.openConnection()
-//                  connection.getInputStream()
-//                }
-//                val inputStream = future.get()
-//                if (inputStream != null) {
-//                  BleConnector.sendStream(bleKey ,inputStream as InputStream,0)
-//                }
                             }
                             val path: String? = call.argument<String>("path")
                             if (path != null) {
@@ -3951,20 +3963,6 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                         }
 
                     }
-//          BleKey.CONTACT -> {
-//            PermissionUtils
-//              .permission(PermissionConstants.CONTACTS)
-//              .require(Manifest.permission.READ_CONTACTS) { granted ->
-//                if (granted) {
-//                  val bytes = getContactBytes()
-//                  if (bytes.isNotEmpty()) {
-//                    BleConnector.sendStream(BleKey.CONTACT, bytes)
-//                  } else {
-//                    LogUtils.d("contact is empty")
-//                  }
-//                }
-//              }
-//          }
                     BleKey.CONTACT -> {
                         val listContact: List<Map<String, String>>? =
                             call.argument<List<Map<String, String>>>("listContact")
