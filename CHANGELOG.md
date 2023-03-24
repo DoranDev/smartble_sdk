@@ -1,3 +1,55 @@
+## 0.7.8
+
+* digiTop, digileft
+
+## 0.7.7
+
+* dial pointer
+
+## 0.7.6
+
+* weather, ota
+
+## 0.7.5
+
+* Pointer second
+
+## 0.7.4
+
+* Pointer second
+
+## 0.7.3
+
+* Alarm
+
+## 0.7.2
+
+* Alarm
+
+## 0.7.1
+
+* Alarm
+
+## 0.7.0
+
+* music
+
+## 0.6.9
+
+* Sedentary
+
+## 0.6.8
+
+* Sleep
+
+## 0.6.7
+
+* Sleep
+
+## 0.6.6
+
+* Alarm
+
 ## 0.6.5
 
 * Analyze Sleep
