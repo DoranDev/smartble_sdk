@@ -1,3 +1,7 @@
+## 0.7.9
+
+* stock market
+
 ## 0.7.8
 
 * digiTop, digileft
