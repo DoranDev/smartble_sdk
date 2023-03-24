@@ -193,6 +193,12 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private var onIncomingCallStatusSink: EventSink? = null
     private var onReceiveMusicCommandChannel: EventChannel? = null
     private var onReceiveMusicCommandSink: EventSink? = null
+    private var onStockReadChannel: EventChannel? = null
+    private var onStockReadSink: EventSink? = null
+    private var onStockDeleteChannel: EventChannel? = null
+    private var onStockDeleteSink: EventSink? = null
+
+
 
     private var mResult: Result? = null
     private val mDevices = mutableListOf<Any>()
@@ -354,6 +360,16 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 if (onReadAlarmSink != null)
                     onReadAlarmSink!!.success(item)
             }
+
+            /* override fun onStockRead(stocks: List<BleStock>) {
+                 if (BuildConfig.DEBUG) {
+                     Log.d("onStockRead", "$stocks")
+                 }
+                 val item: MutableMap<String, Any> = HashMap()
+                 item["stocks"] = gson.toJson(stocks)
+                 if (onStockReadSink != null)
+                     onStockReadSink!!.success(item)
+             }*/
 
             override fun onReadCoachingIds(bleCoachingIds: BleCoachingIds) {
                 if (BuildConfig.DEBUG) {
@@ -1297,6 +1313,10 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         onReceiveMusicCommandChannel =
             EventChannel(flutterPluginBinding.binaryMessenger, "onReceiveMusicCommand")
         onReceiveMusicCommandChannel!!.setStreamHandler(onReceiveMusicCommandResultsHandler)
+        onStockReadChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onStockRead")
+        onStockReadChannel!!.setStreamHandler(onStockReadResultHandler)
+        onStockDeleteChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onStockDelete")
+        onStockDeleteChannel!!.setStreamHandler(onStockDeleteResultHandler)
 
 
         val connector = BleConnector.Builder(flutterPluginBinding.applicationContext)
@@ -3694,6 +3714,10 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 //                        LogUtils.dTag("forecast2",forecast2)
 //                        LogUtils.dTag("forecast3",forecast3)
                         if (bleKeyFlag == BleKeyFlag.UPDATE) {
+                            val currentTime = Date().time // current time
+                            val oneDayInMillis = 24 * 60 * 60 * 1000 // milliseconds in a day
+                            val tomorrowTime = currentTime + oneDayInMillis
+                            val tomorrowDate = Date(tomorrowTime)
                             BleConnector.sendObject(
                                 BleKey.WEATHER_FORECAST, bleKeyFlag, BleWeatherForecast(
                                     mTime = (Date().time / 1000L).toInt(),
@@ -3786,29 +3810,41 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                         val index: Int? = call.argument<Int>("index")
                         val dataStock: String? = call.argument<String>("stock")
                         val convertStock = JSONObject(dataStock);
+                        LogUtils.dTag("dataStockSM", "$index -> $convertStock")
+                        var open = convertStock["open"].toString().toFloat()
+                        var close = convertStock["close"].toString().toFloat()
+                        var volume = convertStock["volume"].toString().toFloat()
+                        var byPoint = close -open
+                        var byPercent = ((close-open)/open)*100
+                        var marketCap = close*volume
                         // 创建一个股票
                         if (bleKeyFlag == BleKeyFlag.CREATE) {
                             BleConnector.sendObject(
                                 bleKey, bleKeyFlag,
                                 BleStock(
-                                    mStockCode = "AAPL",
-                                    mSharePrice = 148.470f,
-                                    mNetChangePoint = 2.980f,
-                                    mNetChangePercent = 2.05f,
-                                    mMarketCapitalization = 2.40f
+                                    mColorType = 1,
+                                    mStockCode = convertStock["symbol"].toString(),
+                                    mSharePrice = close,
+                                    mNetChangePoint = byPoint,
+                                    mNetChangePercent = byPercent,
+                                    mMarketCapitalization = marketCap,
                                 )
                             )
                         } else if (bleKeyFlag == BleKeyFlag.DELETE) {
                             // 如果缓存中有股票的话，删除第一个
                             val stocks = BleCache.getList(BleKey.STOCK, BleStock::class.java)
+                            val stockIndex = stocks.indexOfFirst { it.mStockCode == convertStock["symbol"].toString()}
                             if (stocks.isNotEmpty()) {
-                                BleConnector.sendInt8(bleKey, bleKeyFlag, stocks[0].mId)
+                                BleConnector.sendInt8(bleKey, bleKeyFlag, stocks[stockIndex].mId)
                             }
                         } else if (bleKeyFlag == BleKeyFlag.UPDATE) {
                             val stocks = BleCache.getList(BleKey.STOCK, BleStock::class.java)
                             if (stocks.isNotEmpty()) {
-                                stocks[0].let { stock ->
-                                    stock.mSharePrice = stock.mSharePrice + 1
+                                stocks[index!!].let { stock ->
+                                    stock.mSharePrice = close
+                                    stock.mNetChangePoint = byPoint
+                                    stock.mNetChangePercent = byPercent
+                                    stock.mMarketCapitalization = marketCap
                                     BleConnector.sendObject(bleKey, bleKeyFlag, stock)
                                 }
                             }
@@ -4740,6 +4776,30 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             override fun onListen(o: Any?, eventSink: EventSink?) {
                 if (eventSink != null) {
                     onReceiveMusicCommandSink = eventSink
+                }
+            }
+
+            override fun onCancel(o: Any?) {
+            }
+        }
+
+    private val onStockReadResultHandler: EventChannel.StreamHandler =
+        object : EventChannel.StreamHandler {
+            override fun onListen(o: Any?, eventSink: EventSink?) {
+                if (eventSink != null) {
+                    onStockReadSink = eventSink
+                }
+            }
+
+            override fun onCancel(o: Any?) {
+            }
+        }
+
+    private val onStockDeleteResultHandler: EventChannel.StreamHandler =
+        object : EventChannel.StreamHandler {
+            override fun onListen(o: Any?, eventSink: EventSink?) {
+                if (eventSink != null) {
+                    onStockDeleteSink = eventSink
                 }
             }
 
