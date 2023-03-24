@@ -512,8 +512,12 @@ class SmartbleSdk {
         'mCityName': mCityName
       });
 
-  Future<dynamic> kSTOCK({required SelectedBlekeyFlag flag}) =>
-      _channel.invokeMethod('STOCK', {'flag': flag.name});
+  Future<dynamic> kSTOCK(
+          {required SelectedBlekeyFlag flag,
+          required int index,
+          required String stock}) =>
+      _channel.invokeMethod(
+          'STOCK', {'flag': flag.name, 'index': index, 'stock': stock});
 
   Future<dynamic> kSMS_QUICK_REPLY_CONTENT(
           {required SelectedBlekeyFlag flag}) =>
@@ -1035,6 +1039,17 @@ class SmartbleSdk {
       EventChannel("onWorldClockDelete");
   static Stream<dynamic> get onWorldClockDeleteStream {
     return _onWorldClockDeleteChannel.receiveBroadcastStream().cast();
+  }
+
+  static const EventChannel _onStockReadChannel = EventChannel("onStockRead");
+  static Stream<dynamic> get onStockReadStream {
+    return _onStockReadChannel.receiveBroadcastStream().cast();
+  }
+
+  static const EventChannel _onStockDeleteChannel =
+      EventChannel("onStockDelete");
+  static Stream<dynamic> get onStockDeleteStream {
+    return _onStockDeleteChannel.receiveBroadcastStream().cast();
   }
 }
 
