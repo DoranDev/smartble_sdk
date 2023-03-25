@@ -60,7 +60,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private var mActivity: Activity? = null
     private var pluginBinding: FlutterPluginBinding? = null
     private var activityBinding: ActivityPluginBinding? = null
-
+    private var statusState=false;
     private val ID_ALL = 0xff
     private lateinit var mBleKey: BleKey
     private lateinit var mBleKeyFlag: BleKeyFlag
@@ -1149,6 +1149,8 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     }
 
 
+
+
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPluginBinding) {
         pluginBinding = flutterPluginBinding
         mContext = flutterPluginBinding.applicationContext
@@ -1328,18 +1330,21 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         //MyNotificationListenerService.toEnable(flutterPluginBinding.applicationContext)
         connector.addHandleCallback(object : BleHandleCallback {
             override fun onSessionStateChange(status: Boolean) {
-
                 if (status) {
-                    connector.sendObject(BleKey.TIME_ZONE, BleKeyFlag.UPDATE, BleTimeZone())
-                    connector.sendObject(BleKey.TIME, BleKeyFlag.UPDATE, BleTime.local())
-                    connector.sendInt8(
-                        BleKey.HOUR_SYSTEM, BleKeyFlag.UPDATE,
-                        if (DateFormat.is24HourFormat(Utils.getApp())) 0 else 1
-                    )
-                    connector.sendData(BleKey.POWER, BleKeyFlag.READ)
+                    if(statusState==false){
+                        connector.sendObject(BleKey.TIME_ZONE, BleKeyFlag.UPDATE, BleTimeZone())
+                        connector.sendObject(BleKey.TIME, BleKeyFlag.UPDATE, BleTime.local())
+//                        connector.sendInt8(
+//                            BleKey.HOUR_SYSTEM, BleKeyFlag.UPDATE,
+//                            if (DateFormat.is24HourFormat(Utils.getApp())) 0 else 1
+//
+//                        )
+                        statusState=true
+//                    connector.sendData(BleKey.POWER, BleKeyFlag.READ)
 //          connector.sendData(BleKey.FIRMWARE_VERSION, BleKeyFlag.READ)
 //          connector.sendInt8(BleKey.LANGUAGE, BleKeyFlag.UPDATE, Languages.languageToCode())
-                    connector.sendData(BleKey.MUSIC_CONTROL, BleKeyFlag.READ)
+//                    connector.sendData(BleKey.MUSIC_CONTROL, BleKeyFlag.READ)
+                    }
 
                 }
             }

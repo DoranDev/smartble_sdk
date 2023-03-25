@@ -1,3 +1,7 @@
+## 0.8.1
+
+* Reconnect
+
 ## 0.8.0
 
 * Location
