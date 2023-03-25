@@ -1,3 +1,7 @@
+## 0.8.0
+
+* Location
+
 ## 0.7.9
 
 * stock market

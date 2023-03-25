@@ -583,8 +583,8 @@ class SmartbleSdk {
           required int mAltitude}) =>
       _channel.invokeMethod('REQUEST_LOCATION', {
         'flag': flag.name,
-        'mSpeed': mSpeed,
-        'mTotalDistance': mTotalDistance,
+        'mSpeed': mSpeed.toStringAsFixed(2),
+        'mTotalDistance': mTotalDistance.toStringAsFixed(2),
         'mAltitude': mAltitude
       });
 

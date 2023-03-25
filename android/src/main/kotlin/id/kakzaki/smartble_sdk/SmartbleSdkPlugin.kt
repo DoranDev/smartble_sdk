@@ -3927,11 +3927,14 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                         }
                     }
                     BleKey.REQUEST_LOCATION -> {
+                        val speed: String = call.argument<String>("mSpeed")!!
+                        val totalDistance: String = call.argument<String>("mTotalDistance")!!
+                        val altitude :Int = call.argument<Int>("mAltitude")!!
                         // reply location information
                         val reply = BleLocationReply(
-                            mSpeed = call.argument<Float>("mSpeed")!!,
-                            mTotalDistance = call.argument<Float>("mTotalDistance")!!,
-                            mAltitude = call.argument<Int>("mAltitude")!!
+                            mSpeed = speed.toFloat(),
+                            mTotalDistance = totalDistance.toFloat(),
+                            mAltitude = altitude
                         )
 //            print("$bleKey $bleKeyFlag")
                         BleConnector.sendObject(bleKey, bleKeyFlag, reply)
