@@ -3176,9 +3176,11 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     }
                     BleKey.NO_DISTURB_RANGE -> {
                         if (bleKeyFlag == BleKeyFlag.UPDATE) {
+                            val enable: Int? = call.argument<Int>("disturbSetting")
+//                            val enableJson = JSONObject(enable).toString().toInt()
                             // 设置勿扰
                             val noDisturb = BleNoDisturbSettings().apply {
-                                mBleTimeRange1 = BleTimeRange(1, 2, 0, 18, 0)
+                                mBleTimeRange1 = BleTimeRange(enable!!, 0, 0, 24, 0)
                             }
                             BleConnector.sendObject(bleKey, bleKeyFlag, noDisturb)
                         } else if (bleKeyFlag == BleKeyFlag.READ) {

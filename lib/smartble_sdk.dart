@@ -193,8 +193,10 @@ class SmartbleSdk {
         'listRepeat': listRepeat,
       });
 
-  Future<dynamic> kNO_DISTURB_RANGE({required SelectedBlekeyFlag flag}) =>
-      _channel.invokeMethod('NO_DISTURB_RANGE', {'flag': flag.name});
+  Future<dynamic> kNO_DISTURB_RANGE(
+          {required SelectedBlekeyFlag flag, required int disturbsetting}) =>
+      _channel.invokeMethod('NO_DISTURB_RANGE',
+          {'flag': flag.name, 'disturbSetting': disturbsetting});
 
   Future<dynamic> kVIBRATION(
           {required SelectedBlekeyFlag flag, required int frequency}) =>
