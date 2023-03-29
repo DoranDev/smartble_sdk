@@ -1,3 +1,15 @@
+## 0.8.3
+
+* OTA
+
+## 0.8.2
+
+* Do not Disturb
+
+## 0.8.1
+
+* Reconnect
+
 ## 0.8.0
 
 * Location

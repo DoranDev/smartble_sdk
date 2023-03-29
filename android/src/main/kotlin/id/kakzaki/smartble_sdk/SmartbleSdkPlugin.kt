@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.Activity
 import android.bluetooth.BluetoothDevice
 import android.content.Context
+import android.content.Intent
 import android.graphics.*
 import android.media.AudioManager
 import android.os.*
@@ -19,6 +20,10 @@ import com.bestmafen.baseble.scanner.ScannerFactory
 import com.blankj.utilcode.constant.PermissionConstants
 import com.blankj.utilcode.util.*
 import com.google.gson.Gson
+import com.jieli.jl_bt_ota.interfaces.IUpgradeCallback
+import com.jieli.jl_bt_ota.model.base.BaseError
+import com.jieli.watchtesttool.tool.bluetooth.BluetoothHelper
+import com.jieli.watchtesttool.tool.upgrade.OTAManager
 import com.szabh.smable3.BleKey
 import com.szabh.smable3.BleKeyFlag
 import com.szabh.smable3.component.*
@@ -49,6 +54,11 @@ import java.nio.ByteBuffer
 import java.util.*
 import kotlin.collections.HashMap
 import kotlin.random.Random
+import com.jieli.bluetooth_connect.bean.ble.BleScanMessage
+import com.jieli.jl_bt_ota.constant.StateCode
+import com.jieli.jl_bt_ota.interfaces.BtEventCallback
+import java.io.BufferedInputStream
+import java.io.FileOutputStream
 
 /** SmartbleSdkPlugin */
 class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
@@ -60,7 +70,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private var mActivity: Activity? = null
     private var pluginBinding: FlutterPluginBinding? = null
     private var activityBinding: ActivityPluginBinding? = null
-
+    private var statusState=false;
     private val ID_ALL = 0xff
     private lateinit var mBleKey: BleKey
     private lateinit var mBleKeyFlag: BleKeyFlag
@@ -198,7 +208,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private var onStockDeleteChannel: EventChannel? = null
     private var onStockDeleteSink: EventSink? = null
 
-
+    private var blueDevice: BluetoothDevice? = null
 
     private var mResult: Result? = null
     private val mDevices = mutableListOf<Any>()
@@ -247,6 +257,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         object : BleHandleCallback {
 
             override fun onDeviceConnected(device: BluetoothDevice) {
+                blueDevice=device
                 if (BuildConfig.DEBUG) {
                     Log.d("onDeviceConnected", "$device")
                 }
@@ -1149,6 +1160,8 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     }
 
 
+
+
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPluginBinding) {
         pluginBinding = flutterPluginBinding
         mContext = flutterPluginBinding.applicationContext
@@ -1328,18 +1341,21 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         //MyNotificationListenerService.toEnable(flutterPluginBinding.applicationContext)
         connector.addHandleCallback(object : BleHandleCallback {
             override fun onSessionStateChange(status: Boolean) {
-
                 if (status) {
-                    connector.sendObject(BleKey.TIME_ZONE, BleKeyFlag.UPDATE, BleTimeZone())
-                    connector.sendObject(BleKey.TIME, BleKeyFlag.UPDATE, BleTime.local())
-                    connector.sendInt8(
-                        BleKey.HOUR_SYSTEM, BleKeyFlag.UPDATE,
-                        if (DateFormat.is24HourFormat(Utils.getApp())) 0 else 1
-                    )
-                    connector.sendData(BleKey.POWER, BleKeyFlag.READ)
+                    if(statusState==false){
+                        connector.sendObject(BleKey.TIME_ZONE, BleKeyFlag.UPDATE, BleTimeZone())
+                        connector.sendObject(BleKey.TIME, BleKeyFlag.UPDATE, BleTime.local())
+//                        connector.sendInt8(
+//                            BleKey.HOUR_SYSTEM, BleKeyFlag.UPDATE,
+//                            if (DateFormat.is24HourFormat(Utils.getApp())) 0 else 1
+//
+//                        )
+                        statusState=true
+//                    connector.sendData(BleKey.POWER, BleKeyFlag.READ)
 //          connector.sendData(BleKey.FIRMWARE_VERSION, BleKeyFlag.READ)
 //          connector.sendInt8(BleKey.LANGUAGE, BleKeyFlag.UPDATE, Languages.languageToCode())
-                    connector.sendData(BleKey.MUSIC_CONTROL, BleKeyFlag.READ)
+//                    connector.sendData(BleKey.MUSIC_CONTROL, BleKeyFlag.READ)
+                    }
 
                 }
             }
@@ -2877,12 +2893,8 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                             // 发送文件
                             val url: String? = call.argument<String>("url")
                             if (url != null) {
-                                DownloadTask(bleKey).execute(url)
-                            }
-                            val path: String? = call.argument<String>("path")
-                            if (path != null) {
-                                val inputStream: InputStream = mContext!!.assets.open(path)
-                                BleConnector.sendStream(bleKey, inputStream, 0)
+                                DownloadOTA(mContext!!,bleKey, blueDevice!!).execute(url)
+                               // DownloadTaskOTA(bleKey).execute(url)
                             }
                         }
                     }
@@ -3171,9 +3183,11 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     }
                     BleKey.NO_DISTURB_RANGE -> {
                         if (bleKeyFlag == BleKeyFlag.UPDATE) {
+                            val enable: Int? = call.argument<Int>("disturbSetting")
+//                            val enableJson = JSONObject(enable).toString().toInt()
                             // 设置勿扰
                             val noDisturb = BleNoDisturbSettings().apply {
-                                mBleTimeRange1 = BleTimeRange(1, 2, 0, 18, 0)
+                                mBleTimeRange1 = BleTimeRange(enable!!, 0, 0, 24, 0)
                             }
                             BleConnector.sendObject(bleKey, bleKeyFlag, noDisturb)
                         } else if (bleKeyFlag == BleKeyFlag.READ) {
@@ -4823,5 +4837,177 @@ class DownloadTask(val bleKey: BleKey) : AsyncTask<String, Int, ByteArray>() {
 
     override fun onPostExecute(result: ByteArray) {
         BleConnector.sendStream(bleKey, result)
+    }
+}
+
+
+class DownloadOTA(val context: Context,val bleKey: BleKey, val device: BluetoothDevice) : AsyncTask<String, Int, ByteArray>() {
+    private var mOTAManager: OTAManager? = null
+    private var mJLUpgradeStatus = JLUpgradeStatus.NONE
+    private var mBluetoothHelper = BluetoothHelper.getInstance(Utils.getApp())
+    private val REQUEST_CODE_UPGRADE_J = 0x01
+    private var resultByte: ByteArray?=null
+    private fun updateUpgradeStatus(status: JLUpgradeStatus) {
+        LogUtils.d("updateUpgradeStatus status = $status")
+        mJLUpgradeStatus = status
+    }
+    private fun canOTA(status: JLUpgradeStatus): Boolean {
+        return !isOTAError(status) && status != JLUpgradeStatus.UPGRADE_STOP
+    }
+
+    private fun isOTAError(status: JLUpgradeStatus): Boolean {
+        return when(status){
+            JLUpgradeStatus.UPGRADE_SCANNING_TIMEOUT, JLUpgradeStatus.UPGRADE_FAILED, JLUpgradeStatus.UPGRADE_PREPARE_FAILED-> true
+            else -> false
+        }
+    }
+
+    private val mOTAEventCallback: BtEventCallback = object : BtEventCallback() {
+        override fun onConnection(device: BluetoothDevice, status: Int) {
+            LogUtils.d("ota onConnection -> mJLUpgradeStatus = $mJLUpgradeStatus, $device ,status = $status ,isOTA = ${mOTAManager!!.isOTA}")
+            //ota过程中可能会断连重连
+            if (!mOTAManager!!.isOTA) {//非ota状态
+                if (status == StateCode.CONNECTION_OK) {
+                    //避免升级完成后这里还执行一次
+                    if(canOTA(mJLUpgradeStatus)) {
+                        if(resultByte!=null) {
+                            BleConnector.sendStream(BleKey.of(REQUEST_CODE_UPGRADE_J), resultByte!!)
+                        }
+                    }
+                } else if (status == StateCode.CONNECTION_DISCONNECT) {
+                    LogUtils.d("ota onConnection -> device disconnected")
+                    if(mJLUpgradeStatus == JLUpgradeStatus.UPGRADE_PREPARE) {
+                        updateUpgradeStatus(JLUpgradeStatus.UPGRADE_PREPARE_FAILED)
+                    }
+                }
+            }
+        }
+    }
+    private enum class JLUpgradeStatus {
+        NONE, //未升级未开始
+        UPGRADE_SCANNING_START,//扫描开始
+        UPGRADE_SCANNING_TIMEOUT,//扫描超时
+        UPGRADE_SCANNING_STOP,//扫描停止
+        UPGRADE_PREPARE,//升级前准备工作
+        UPGRADE_PREPARE_FAILED,//升级前准备工作失败
+        UPGRADE_START,//升级开始
+        UPGRADE_CHECKING,//文件校验中
+        UPGRADEING,//升级中
+        UPGRADE_STOP,//升级完成
+        UPGRADE_FAILED, //升级失败
+    }
+    override fun onPreExecute() {
+        mBluetoothHelper = BluetoothHelper.getInstance(Utils.getApp())
+        mOTAManager= null
+        mJLUpgradeStatus = JLUpgradeStatus.NONE
+        mBluetoothHelper.connectDevice(device)
+        mOTAManager = OTAManager(context)
+        mOTAManager?.registerBluetoothCallback(mOTAEventCallback)
+    }
+
+    override fun doInBackground(vararg urls: String): ByteArray {
+        val url = URL(urls[0])
+        val connection = url.openConnection()
+        return connection.getInputStream().readBytes()
+    }
+
+//    override fun doInBackground(vararg urls: String): String {
+//        val fileName = "ota"
+//        val directory = context.getExternalFilesDir(null)
+//        val file = File(directory, fileName)
+//        val connection = URL(urls[0]).openConnection()
+//        connection.connect()
+//        val fileLength = connection.contentLength
+//        val inputStream = BufferedInputStream(connection.getInputStream())
+//        val outputStream = FileOutputStream(file)
+//        val data = ByteArray(1024)
+//        var total: Long = 0
+//        var count: Int
+//        while (inputStream.read(data).also { count = it } != -1) {
+//            total += count.toLong()
+//            outputStream.write(data, 0, count)
+//        }
+//        outputStream.flush()
+//        outputStream.close()
+//        inputStream.close()
+//        return file.absolutePath
+//    }
+
+    override fun onPostExecute(result: ByteArray) {
+        resultByte=result
+        when (BleCache.mPlatform) {
+            BleDeviceInfo.PLATFORM_NORDIC ->
+                Log.d("PLATFORM", "PLATFORM_NORDIC")
+            BleDeviceInfo.PLATFORM_REALTEK ->
+                Log.d("PLATFORM", "PLATFORM_REALTEK")
+            BleDeviceInfo.PLATFORM_MTK ->
+                Log.d("PLATFORM", "PLATFORM_MTK")
+            BleDeviceInfo.PLATFORM_GOODIX ->
+                Log.d("PLATFORM", "PLATFORM_GOODIX")
+            BleDeviceInfo.PLATFORM_JL ->{
+                Log.d("PLATFORM", "PLATFORM_JL")
+                startOTA(result)
+            }
+        }
+    }
+
+    private fun startOTA(result: ByteArray) {
+        LogUtils.d("startOTA ::")
+        mOTAManager?.bluetoothOption?.firmwareFileData= result
+        mOTAManager?.startOTA(object : IUpgradeCallback {
+            override fun onError(p0: BaseError?) {
+                LogUtils.d("onError -> $p0")
+                updateUpgradeStatus(JLUpgradeStatus.UPGRADE_FAILED)
+            }
+
+            override fun onNeedReconnect(p0: String?, p1: Boolean) {
+                LogUtils.d("onNeedReconnect : $p0, $p1")
+            }
+
+            override fun onStopOTA() {
+                LogUtils.d("onStopOTA() upgrade ok")
+                updateUpgradeStatus(JLUpgradeStatus.UPGRADE_STOP)
+
+                //循环升级
+//                upgrade(textView)
+            }
+
+            override fun onProgress(type: Int, progress: Float) {
+                LogUtils.d("onProgress -> $type $progress")
+                if (type == 0) {//type 0: verification file 1: upgrading
+                    updateUpgradeStatus(JLUpgradeStatus.UPGRADE_CHECKING)
+                } else {
+                    updateUpgradeStatus(JLUpgradeStatus.UPGRADEING)
+                }
+//                runOnUiThread {
+//                    textView.text = "$type ${Math.round(progress)}"
+//                }
+            }
+
+            override fun onStartOTA() {
+                LogUtils.d("onStartOTA")
+                updateUpgradeStatus(JLUpgradeStatus.UPGRADE_START)
+            }
+
+            override fun onCancelOTA() {
+                LogUtils.d("onCancelOTA")
+                updateUpgradeStatus(JLUpgradeStatus.UPGRADE_FAILED)
+            }
+        })
+    }
+
+}
+
+
+class DownloadTaskOTA(val bleKey: BleKey) : AsyncTask<String, Int, ByteArray>() {
+    private val REQUEST_CODE_UPGRADE_J = 0x01
+    override fun doInBackground(vararg urls: String): ByteArray {
+        val url = URL(urls[0])
+        val connection = url.openConnection()
+        return connection.getInputStream().readBytes()
+    }
+
+    override fun onPostExecute(result: ByteArray) {
+        BleConnector.sendStream(BleKey.of(REQUEST_CODE_UPGRADE_J), result)
     }
 }
