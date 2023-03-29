@@ -54,6 +54,9 @@ class SmartbleSdk {
   ///isNeedBind(BluetoothDevice device)
   Future<dynamic> isNeedBind() => _channel.invokeMethod('isNeedBind');
 
+  ///isBound(BluetoothDevice device)
+  Future<dynamic> isBound() => _channel.invokeMethod('isBound');
+
   ///connectHID(BluetoothDevice device)
   Future<dynamic> connectHID() => _channel.invokeMethod('connectHID');
 

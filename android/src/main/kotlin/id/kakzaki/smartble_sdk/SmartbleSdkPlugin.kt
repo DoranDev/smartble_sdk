@@ -2292,6 +2292,9 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             "isNeedBind" -> {
                 result.success(BleConnector.isNeedBind)
             }
+            "isBound" -> {
+                result.success(BleConnector.isBound())
+            }
             "connectHID" -> {
                 BleConnector.connectHID();
             }
