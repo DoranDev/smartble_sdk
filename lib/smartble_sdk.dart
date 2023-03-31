@@ -54,6 +54,9 @@ class SmartbleSdk {
   ///isNeedBind(BluetoothDevice device)
   Future<dynamic> isNeedBind() => _channel.invokeMethod('isNeedBind');
 
+  ///isBound(BluetoothDevice device)
+  Future<dynamic> isBound() => _channel.invokeMethod('isBound');
+
   ///connectHID(BluetoothDevice device)
   Future<dynamic> connectHID() => _channel.invokeMethod('connectHID');
 
@@ -464,6 +467,7 @@ class SmartbleSdk {
       _channel.invokeMethod('MUSIC_CONTROL',
           {'flag': flag.name, 'mTitle': mTitle, 'mContent': mContent});
 
+  ///musicNext()
   Future<dynamic> musicNext() {
     return _channel.invokeMethod('musicNext');
   }
