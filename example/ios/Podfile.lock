@@ -1,0 +1,37 @@
+PODS:
+  - Flutter (1.0.0)
+  - iOSDFULibrary (4.13.0):
+    - ZIPFoundation (= 0.9.11)
+  - smartble_sdk (0.0.1):
+    - Flutter
+    - iOSDFULibrary
+    - SnapKit
+  - SnapKit (5.6.0)
+  - ZIPFoundation (0.9.11)
+
+DEPENDENCIES:
+  - Flutter (from `Flutter`)
+  - smartble_sdk (from `.symlinks/plugins/smartble_sdk/ios`)
+
+SPEC REPOS:
+  trunk:
+    - iOSDFULibrary
+    - SnapKit
+    - ZIPFoundation
+
+EXTERNAL SOURCES:
+  Flutter:
+    :path: Flutter
+  smartble_sdk:
+    :path: ".symlinks/plugins/smartble_sdk/ios"
+
+SPEC CHECKSUMS:
+  Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
+  iOSDFULibrary: 3b9de67ed4bfb901b5f09c2fea843f65e152612d
+  smartble_sdk: 6798de7a73be493b4cd392f8211e3ecb25b02351
+  SnapKit: e01d52ebb8ddbc333eefe2132acf85c8227d9c25
+  ZIPFoundation: b1f0de4eed33e74a676f76e12559ab6b75990197
+
+PODFILE CHECKSUM: ef19549a9bc3046e7bb7d2fab4d021637c0c58a3
+
+COCOAPODS: 1.11.3

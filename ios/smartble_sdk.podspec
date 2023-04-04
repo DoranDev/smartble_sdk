@@ -13,8 +13,18 @@ A new Flutter project.
   s.license          = { :file => '../LICENSE' }
   s.author           = { 'Your Company' => 'email@example.com' }
   s.source           = { :path => '.' }
-  s.source_files = 'Classes/**/*'
+  s.source_files = 'Classes/**/*', 'iOSBaseBle/**/*','iOSSmaBle/**/*','iOSDfuLib/**/*','Resource/**/*','Tools/**/*'
   s.dependency 'Flutter'
+  s.dependency 'iOSDFULibrary'
+  s.dependency 'SnapKit'
+  s.vendored_frameworks='FR/BeaconMonitor.framework'
+  s.vendored_frameworks='FR/GRDFUSDK.framework'
+  s.vendored_frameworks='FR/JL_BLEKIT.framework'
+  s.vendored_frameworks='FR/JLDialUnit.framework'
+  s.vendored_frameworks='FR/RTKAudioConnectSDK.framework'
+  s.vendored_frameworks='FR/RTKLEFoundation.framework'
+  s.vendored_frameworks='FR/RTKKOTASDK.framework'
+  s.vendored_frameworks='FR/ZipZap.framework'
   s.platform = :ios, '9.0'
 
   # Flutter.framework does not contain a i386 slice.
