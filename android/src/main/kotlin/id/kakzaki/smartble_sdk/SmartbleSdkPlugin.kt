@@ -2296,7 +2296,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 result.success(BleConnector.isBound())
             }
             "connectHID" -> {
-                BleConnector.connectHID();
+                result.success(BleConnector.connectHID())
             }
             "connectClassic" -> {
                 BleConnector.connectClassic();
@@ -3840,7 +3840,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                                 bleKey, bleKeyFlag,
                                 BleStock(
                                     mColorType = 1,
-                                    mStockCode = convertStock["symbol"].toString(),
+                                    mStockCode = convertStock["ticker"].toString(),
                                     mSharePrice = close,
                                     mNetChangePoint = byPoint,
                                     mNetChangePercent = byPercent,
@@ -3850,7 +3850,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                         } else if (bleKeyFlag == BleKeyFlag.DELETE) {
                             // 如果缓存中有股票的话，删除第一个
                             val stocks = BleCache.getList(BleKey.STOCK, BleStock::class.java)
-                            val stockIndex = stocks.indexOfFirst { it.mStockCode == convertStock["symbol"].toString()}
+                            val stockIndex = stocks.indexOfFirst { it.mStockCode == convertStock["ticker"].toString()}
                             if (stocks.isNotEmpty()) {
                                 BleConnector.sendInt8(bleKey, bleKeyFlag, stocks[stockIndex].mId)
                             }

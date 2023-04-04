@@ -626,9 +626,10 @@ object BleConnector : AbsBleConnector() {
         BleLog.v("connectClassic -> $isStartBond")
     }
 
-    fun connectHID() {
+    fun connectHID() : Boolean? {
         val isStartBond = createBond(BleCache.mBleAddress)
         BleLog.v("connectHID -> $isStartBond")
+        return isStartBond
     }
 
     private fun createBond(address: String): Boolean? {
