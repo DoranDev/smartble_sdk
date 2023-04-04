@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.Activity
 import android.bluetooth.BluetoothDevice
 import android.content.Context
+import android.content.Intent
 import android.graphics.*
 import android.media.AudioManager
 import android.os.*
@@ -19,6 +20,10 @@ import com.bestmafen.baseble.scanner.ScannerFactory
 import com.blankj.utilcode.constant.PermissionConstants
 import com.blankj.utilcode.util.*
 import com.google.gson.Gson
+import com.jieli.jl_bt_ota.interfaces.IUpgradeCallback
+import com.jieli.jl_bt_ota.model.base.BaseError
+import com.jieli.watchtesttool.tool.bluetooth.BluetoothHelper
+import com.jieli.watchtesttool.tool.upgrade.OTAManager
 import com.szabh.smable3.BleKey
 import com.szabh.smable3.BleKeyFlag
 import com.szabh.smable3.component.*
@@ -49,6 +54,11 @@ import java.nio.ByteBuffer
 import java.util.*
 import kotlin.collections.HashMap
 import kotlin.random.Random
+import com.jieli.bluetooth_connect.bean.ble.BleScanMessage
+import com.jieli.jl_bt_ota.constant.StateCode
+import com.jieli.jl_bt_ota.interfaces.BtEventCallback
+import java.io.BufferedInputStream
+import java.io.FileOutputStream
 
 /** SmartbleSdkPlugin */
 class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
@@ -60,7 +70,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private var mActivity: Activity? = null
     private var pluginBinding: FlutterPluginBinding? = null
     private var activityBinding: ActivityPluginBinding? = null
-
+    private var statusState=false;
     private val ID_ALL = 0xff
     private lateinit var mBleKey: BleKey
     private lateinit var mBleKeyFlag: BleKeyFlag
@@ -193,6 +203,12 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private var onIncomingCallStatusSink: EventSink? = null
     private var onReceiveMusicCommandChannel: EventChannel? = null
     private var onReceiveMusicCommandSink: EventSink? = null
+    private var onStockReadChannel: EventChannel? = null
+    private var onStockReadSink: EventSink? = null
+    private var onStockDeleteChannel: EventChannel? = null
+    private var onStockDeleteSink: EventSink? = null
+
+    private var blueDevice: BluetoothDevice? = null
 
     private var mResult: Result? = null
     private val mDevices = mutableListOf<Any>()
@@ -241,6 +257,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         object : BleHandleCallback {
 
             override fun onDeviceConnected(device: BluetoothDevice) {
+                blueDevice=device
                 if (BuildConfig.DEBUG) {
                     Log.d("onDeviceConnected", "$device")
                 }
@@ -354,6 +371,16 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 if (onReadAlarmSink != null)
                     onReadAlarmSink!!.success(item)
             }
+
+            /* override fun onStockRead(stocks: List<BleStock>) {
+                 if (BuildConfig.DEBUG) {
+                     Log.d("onStockRead", "$stocks")
+                 }
+                 val item: MutableMap<String, Any> = HashMap()
+                 item["stocks"] = gson.toJson(stocks)
+                 if (onStockReadSink != null)
+                     onStockReadSink!!.success(item)
+             }*/
 
             override fun onReadCoachingIds(bleCoachingIds: BleCoachingIds) {
                 if (BuildConfig.DEBUG) {
@@ -1133,6 +1160,8 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     }
 
 
+
+
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPluginBinding) {
         pluginBinding = flutterPluginBinding
         mContext = flutterPluginBinding.applicationContext
@@ -1297,6 +1326,10 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         onReceiveMusicCommandChannel =
             EventChannel(flutterPluginBinding.binaryMessenger, "onReceiveMusicCommand")
         onReceiveMusicCommandChannel!!.setStreamHandler(onReceiveMusicCommandResultsHandler)
+        onStockReadChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onStockRead")
+        onStockReadChannel!!.setStreamHandler(onStockReadResultHandler)
+        onStockDeleteChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onStockDelete")
+        onStockDeleteChannel!!.setStreamHandler(onStockDeleteResultHandler)
 
 
         val connector = BleConnector.Builder(flutterPluginBinding.applicationContext)
@@ -1308,18 +1341,21 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         //MyNotificationListenerService.toEnable(flutterPluginBinding.applicationContext)
         connector.addHandleCallback(object : BleHandleCallback {
             override fun onSessionStateChange(status: Boolean) {
-
                 if (status) {
-                    connector.sendObject(BleKey.TIME_ZONE, BleKeyFlag.UPDATE, BleTimeZone())
-                    connector.sendObject(BleKey.TIME, BleKeyFlag.UPDATE, BleTime.local())
-                    connector.sendInt8(
-                        BleKey.HOUR_SYSTEM, BleKeyFlag.UPDATE,
-                        if (DateFormat.is24HourFormat(Utils.getApp())) 0 else 1
-                    )
-                    connector.sendData(BleKey.POWER, BleKeyFlag.READ)
+                    if(statusState==false){
+                        connector.sendObject(BleKey.TIME_ZONE, BleKeyFlag.UPDATE, BleTimeZone())
+                        connector.sendObject(BleKey.TIME, BleKeyFlag.UPDATE, BleTime.local())
+//                        connector.sendInt8(
+//                            BleKey.HOUR_SYSTEM, BleKeyFlag.UPDATE,
+//                            if (DateFormat.is24HourFormat(Utils.getApp())) 0 else 1
+//
+//                        )
+                        statusState=true
+//                    connector.sendData(BleKey.POWER, BleKeyFlag.READ)
 //          connector.sendData(BleKey.FIRMWARE_VERSION, BleKeyFlag.READ)
 //          connector.sendInt8(BleKey.LANGUAGE, BleKeyFlag.UPDATE, Languages.languageToCode())
-                    connector.sendData(BleKey.MUSIC_CONTROL, BleKeyFlag.READ)
+//                    connector.sendData(BleKey.MUSIC_CONTROL, BleKeyFlag.READ)
+                    }
 
                 }
             }
@@ -1396,7 +1432,8 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     var screenHeight = 0 //The actual size of the device screen - height
     var screenPreviewWidth = 0 //The actual preview size of the device screen - width
     var screenPreviewHeight = 0 //The actual preview size of the device screen - height
-
+    var digiLeft = 0
+    var digiTop = 0
     //控件相关
     private var stepValueCenterX = 0f
     private var stepValueCenterY = 0f
@@ -1714,8 +1751,10 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         canvas: Canvas,
         isCanvasValue: Boolean
     ) {
-        val timeLeft = (screenWidth / 3.5f) * scaleWidth
-        val timeTop = (screenHeight / 3) * scaleHeight
+//        val timeLeft = (screenWidth / 3.5f) * scaleWidth
+//        val timeTop = (screenHeight / 3) * scaleHeight
+        val timeLeft = digiLeft * scaleWidth
+        val timeTop = digiTop * scaleHeight
         LogUtils.d("test timeLeft=$timeLeft,  timeTop=$timeTop, timeDigitalView.width=${timeDigitalViewWidth} ,scaleWidth =$scaleWidth")
         //获取AM原始资源.此处涉及到预览，所以强制使用PNG图片，避免透明色不显示
         val amBitmap =
@@ -2253,8 +2292,11 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             "isNeedBind" -> {
                 result.success(BleConnector.isNeedBind)
             }
+            "isBound" -> {
+                result.success(BleConnector.isBound())
+            }
             "connectHID" -> {
-                BleConnector.connectHID();
+                result.success(BleConnector.connectHID())
             }
             "connectClassic" -> {
                 BleConnector.connectClassic();
@@ -2309,6 +2351,10 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 custom = call.argument<Int>("custom")!!
                 screenWidth = call.argument<Int>("screenWidth")!!
                 screenHeight = call.argument<Int>("screenHeight")!!
+
+                digiLeft = call.argument<Int>("digiLeft")!!
+                digiTop = call.argument<Int>("digiTop")!!
+
                 screenPreviewWidth = call.argument<Int>("screenPreviewWidth")!!
                 screenPreviewHeight = call.argument<Int>("screenPreviewHeight")!!
 
@@ -2845,7 +2891,16 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             doBle(mContext!!) {
                 when (bleKey) {
                     // BleCommand.UPDATE
-//          BleKey.OTA -> FirmwareHelper.gotoOta(mContext)
+                    BleKey.OTA -> {
+                        if (bleKeyFlag == BleKeyFlag.UPDATE) {
+                            // 发送文件
+                            val url: String? = call.argument<String>("url")
+                            if (url != null) {
+                                DownloadOTA(mContext!!,bleKey, blueDevice!!).execute(url)
+                               // DownloadTaskOTA(bleKey).execute(url)
+                            }
+                        }
+                    }
 //          BleKey.WATCH_FACE -> {
 ////                findViewById<TextView>(R.id.tv_custom1).apply {
 ////                    visibility = View.VISIBLE
@@ -3131,9 +3186,11 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     }
                     BleKey.NO_DISTURB_RANGE -> {
                         if (bleKeyFlag == BleKeyFlag.UPDATE) {
+                            val enable: Int? = call.argument<Int>("disturbSetting")
+//                            val enableJson = JSONObject(enable).toString().toInt()
                             // 设置勿扰
                             val noDisturb = BleNoDisturbSettings().apply {
-                                mBleTimeRange1 = BleTimeRange(1, 2, 0, 18, 0)
+                                mBleTimeRange1 = BleTimeRange(enable!!, 0, 0, 24, 0)
                             }
                             BleConnector.sendObject(bleKey, bleKeyFlag, noDisturb)
                         } else if (bleKeyFlag == BleKeyFlag.READ) {
@@ -3640,15 +3697,18 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     }
                     // 发送实时天气
                     BleKey.WEATHER_REALTIME -> {
+                        val weatherRealTime = call.argument<String>("realTime")
+                        val realTime = JSONObject(weatherRealTime)
+//                        LogUtils.dTag("dataREaltime",realTime)
                         if (bleKeyFlag == BleKeyFlag.UPDATE) {
                             BleConnector.sendObject(
                                 BleKey.WEATHER_REALTIME, bleKeyFlag, BleWeatherRealtime(
-                                    mTime = (Date().time / 1000L).toInt(),
+                                    mTime = (Date().time / 1000L).toInt(), /*realTime["mTime"].toString().toInt(),*/
                                     mWeather = BleWeather(
-                                        mCurrentTemperature = 1,
-                                        mMaxTemperature = 1,
-                                        mMinTemperature = 1,
-                                        mWeatherCode = BleWeather.RAINY,
+                                        mCurrentTemperature = realTime["mCurrentTemperature"].toString().toInt(),
+                                        mMaxTemperature = realTime["mMaxTemperature"].toString().toInt(),
+                                        mMinTemperature = realTime["mMinTemperature"].toString().toInt(),
+                                        mWeatherCode = realTime["mWeatherCode"].toString().toInt(),
                                         mWindSpeed = 1,
                                         mHumidity = 1,
                                         mVisibility = 1,
@@ -3661,15 +3721,28 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     }
                     // 发送天气预备
                     BleKey.WEATHER_FORECAST -> {
+                        val weatherForecast1 = call.argument<String>("forecast1")
+                        val weatherForecast2 = call.argument<String>("forecast2")
+                        val weatherForecast3 = call.argument<String>("forecast3")
+                        val forecast1 = JSONObject(weatherForecast1)
+                        val forecast2 = JSONObject(weatherForecast2)
+                        val forecast3 = JSONObject(weatherForecast3)
+//                        LogUtils.dTag("forecast1",forecast1)
+//                        LogUtils.dTag("forecast2",forecast2)
+//                        LogUtils.dTag("forecast3",forecast3)
                         if (bleKeyFlag == BleKeyFlag.UPDATE) {
+                            val currentTime = Date().time // current time
+                            val oneDayInMillis = 24 * 60 * 60 * 1000 // milliseconds in a day
+                            val tomorrowTime = currentTime + oneDayInMillis
+                            val tomorrowDate = Date(tomorrowTime)
                             BleConnector.sendObject(
                                 BleKey.WEATHER_FORECAST, bleKeyFlag, BleWeatherForecast(
                                     mTime = (Date().time / 1000L).toInt(),
                                     mWeather1 = BleWeather(
-                                        mCurrentTemperature = 2,
-                                        mMaxTemperature = 2,
-                                        mMinTemperature = 3,
-                                        mWeatherCode = BleWeather.CLOUDY,
+                                        mCurrentTemperature = forecast1["mCurrentTemperature"].toString().toInt(),
+                                        mMaxTemperature = forecast1["mMaxTemperature"].toString().toInt(),
+                                        mMinTemperature = forecast1["mMinTemperature"].toString().toInt(),
+                                        mWeatherCode = forecast1["mWeatherCode"].toString().toInt(),
                                         mWindSpeed = 2,
                                         mHumidity = 2,
                                         mVisibility = 2,
@@ -3677,10 +3750,10 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                                         mPrecipitation = 2
                                     ),
                                     mWeather2 = BleWeather(
-                                        mCurrentTemperature = 3,
-                                        mMaxTemperature = 3,
-                                        mMinTemperature = 3,
-                                        mWeatherCode = BleWeather.OVERCAST,
+                                        mCurrentTemperature = forecast2["mCurrentTemperature"].toString().toInt(),
+                                        mMaxTemperature = forecast2["mMaxTemperature"].toString().toInt(),
+                                        mMinTemperature = forecast2["mMinTemperature"].toString().toInt(),
+                                        mWeatherCode = forecast2["mWeatherCode"].toString().toInt(),
                                         mWindSpeed = 3,
                                         mHumidity = 3,
                                         mVisibility = 3,
@@ -3688,10 +3761,10 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                                         mPrecipitation = 3
                                     ),
                                     mWeather3 = BleWeather(
-                                        mCurrentTemperature = 4,
-                                        mMaxTemperature = 4,
-                                        mMinTemperature = 4,
-                                        mWeatherCode = BleWeather.RAINY,
+                                        mCurrentTemperature = forecast3["mCurrentTemperature"].toString().toInt(),
+                                        mMaxTemperature = forecast3["mMaxTemperature"].toString().toInt(),
+                                        mMinTemperature = forecast3["mMinTemperature"].toString().toInt(),
+                                        mWeatherCode = forecast3["mWeatherCode"].toString().toInt(),
                                         mWindSpeed = 4,
                                         mHumidity = 4,
                                         mVisibility = 4,
@@ -3751,29 +3824,44 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     }
                     //股票
                     BleKey.STOCK -> {
+                        val index: Int? = call.argument<Int>("index")
+                        val dataStock: String? = call.argument<String>("stock")
+                        val convertStock = JSONObject(dataStock);
+                        LogUtils.dTag("dataStockSM", "$index -> $convertStock")
+                        var open = convertStock["open"].toString().toFloat()
+                        var close = convertStock["close"].toString().toFloat()
+                        var volume = convertStock["volume"].toString().toFloat()
+                        var byPoint = close -open
+                        var byPercent = ((close-open)/open)*100
+                        var marketCap = close*volume
                         // 创建一个股票
                         if (bleKeyFlag == BleKeyFlag.CREATE) {
                             BleConnector.sendObject(
                                 bleKey, bleKeyFlag,
                                 BleStock(
-                                    mStockCode = "AAPL",
-                                    mSharePrice = 148.470f,
-                                    mNetChangePoint = 2.980f,
-                                    mNetChangePercent = 2.05f,
-                                    mMarketCapitalization = 2.40f
+                                    mColorType = 1,
+                                    mStockCode = convertStock["ticker"].toString(),
+                                    mSharePrice = close,
+                                    mNetChangePoint = byPoint,
+                                    mNetChangePercent = byPercent,
+                                    mMarketCapitalization = marketCap,
                                 )
                             )
                         } else if (bleKeyFlag == BleKeyFlag.DELETE) {
                             // 如果缓存中有股票的话，删除第一个
                             val stocks = BleCache.getList(BleKey.STOCK, BleStock::class.java)
+                            val stockIndex = stocks.indexOfFirst { it.mStockCode == convertStock["ticker"].toString()}
                             if (stocks.isNotEmpty()) {
-                                BleConnector.sendInt8(bleKey, bleKeyFlag, stocks[0].mId)
+                                BleConnector.sendInt8(bleKey, bleKeyFlag, stocks[stockIndex].mId)
                             }
                         } else if (bleKeyFlag == BleKeyFlag.UPDATE) {
                             val stocks = BleCache.getList(BleKey.STOCK, BleStock::class.java)
                             if (stocks.isNotEmpty()) {
-                                stocks[0].let { stock ->
-                                    stock.mSharePrice = stock.mSharePrice + 1
+                                stocks[index!!].let { stock ->
+                                    stock.mSharePrice = close
+                                    stock.mNetChangePoint = byPoint
+                                    stock.mNetChangePercent = byPercent
+                                    stock.mMarketCapitalization = marketCap
                                     BleConnector.sendObject(bleKey, bleKeyFlag, stock)
                                 }
                             }
@@ -3856,11 +3944,14 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                         }
                     }
                     BleKey.REQUEST_LOCATION -> {
+                        val speed: String = call.argument<String>("mSpeed")!!
+                        val totalDistance: String = call.argument<String>("mTotalDistance")!!
+                        val altitude :Int = call.argument<Int>("mAltitude")!!
                         // reply location information
                         val reply = BleLocationReply(
-                            mSpeed = call.argument<Float>("mSpeed")!!,
-                            mTotalDistance = call.argument<Float>("mTotalDistance")!!,
-                            mAltitude = call.argument<Int>("mAltitude")!!
+                            mSpeed = speed.toFloat(),
+                            mTotalDistance = totalDistance.toFloat(),
+                            mAltitude = altitude
                         )
 //            print("$bleKey $bleKeyFlag")
                         BleConnector.sendObject(bleKey, bleKeyFlag, reply)
@@ -3912,7 +4003,6 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                             }
                         }
                     }
-
                     // BleCommand.IO
                     BleKey.WATCH_FACE, BleKey.AGPS_FILE, BleKey.FONT_FILE, BleKey.UI_FILE, BleKey.LANGUAGE_FILE, BleKey.BRAND_INFO_FILE -> {
                         if (bleKeyFlag == BleKeyFlag.UPDATE) {
@@ -3920,16 +4010,6 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                             val url: String? = call.argument<String>("url")
                             if (url != null) {
                                 DownloadTask(bleKey).execute(url)
-//                val executor = Executors.newSingleThreadExecutor()
-//                val future = executor.submit {
-//                  val url = URL(url)
-//                  val connection = url.openConnection()
-//                  connection.getInputStream()
-//                }
-//                val inputStream = future.get()
-//                if (inputStream != null) {
-//                  BleConnector.sendStream(bleKey ,inputStream as InputStream,0)
-//                }
                             }
                             val path: String? = call.argument<String>("path")
                             if (path != null) {
@@ -3939,20 +4019,6 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                         }
 
                     }
-//          BleKey.CONTACT -> {
-//            PermissionUtils
-//              .permission(PermissionConstants.CONTACTS)
-//              .require(Manifest.permission.READ_CONTACTS) { granted ->
-//                if (granted) {
-//                  val bytes = getContactBytes()
-//                  if (bytes.isNotEmpty()) {
-//                    BleConnector.sendStream(BleKey.CONTACT, bytes)
-//                  } else {
-//                    LogUtils.d("contact is empty")
-//                  }
-//                }
-//              }
-//          }
                     BleKey.CONTACT -> {
                         val listContact: List<Map<String, String>>? =
                             call.argument<List<Map<String, String>>>("listContact")
@@ -4737,6 +4803,30 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             }
         }
 
+    private val onStockReadResultHandler: EventChannel.StreamHandler =
+        object : EventChannel.StreamHandler {
+            override fun onListen(o: Any?, eventSink: EventSink?) {
+                if (eventSink != null) {
+                    onStockReadSink = eventSink
+                }
+            }
+
+            override fun onCancel(o: Any?) {
+            }
+        }
+
+    private val onStockDeleteResultHandler: EventChannel.StreamHandler =
+        object : EventChannel.StreamHandler {
+            override fun onListen(o: Any?, eventSink: EventSink?) {
+                if (eventSink != null) {
+                    onStockDeleteSink = eventSink
+                }
+            }
+
+            override fun onCancel(o: Any?) {
+            }
+        }
+
 }
 
 
@@ -4750,5 +4840,177 @@ class DownloadTask(val bleKey: BleKey) : AsyncTask<String, Int, ByteArray>() {
 
     override fun onPostExecute(result: ByteArray) {
         BleConnector.sendStream(bleKey, result)
+    }
+}
+
+
+class DownloadOTA(val context: Context,val bleKey: BleKey, val device: BluetoothDevice) : AsyncTask<String, Int, ByteArray>() {
+    private var mOTAManager: OTAManager? = null
+    private var mJLUpgradeStatus = JLUpgradeStatus.NONE
+    private var mBluetoothHelper = BluetoothHelper.getInstance(Utils.getApp())
+    private val REQUEST_CODE_UPGRADE_J = 0x01
+    private var resultByte: ByteArray?=null
+    private fun updateUpgradeStatus(status: JLUpgradeStatus) {
+        LogUtils.d("updateUpgradeStatus status = $status")
+        mJLUpgradeStatus = status
+    }
+    private fun canOTA(status: JLUpgradeStatus): Boolean {
+        return !isOTAError(status) && status != JLUpgradeStatus.UPGRADE_STOP
+    }
+
+    private fun isOTAError(status: JLUpgradeStatus): Boolean {
+        return when(status){
+            JLUpgradeStatus.UPGRADE_SCANNING_TIMEOUT, JLUpgradeStatus.UPGRADE_FAILED, JLUpgradeStatus.UPGRADE_PREPARE_FAILED-> true
+            else -> false
+        }
+    }
+
+    private val mOTAEventCallback: BtEventCallback = object : BtEventCallback() {
+        override fun onConnection(device: BluetoothDevice, status: Int) {
+            LogUtils.d("ota onConnection -> mJLUpgradeStatus = $mJLUpgradeStatus, $device ,status = $status ,isOTA = ${mOTAManager!!.isOTA}")
+            //ota过程中可能会断连重连
+            if (!mOTAManager!!.isOTA) {//非ota状态
+                if (status == StateCode.CONNECTION_OK) {
+                    //避免升级完成后这里还执行一次
+                    if(canOTA(mJLUpgradeStatus)) {
+                        if(resultByte!=null) {
+                            BleConnector.sendStream(BleKey.of(REQUEST_CODE_UPGRADE_J), resultByte!!)
+                        }
+                    }
+                } else if (status == StateCode.CONNECTION_DISCONNECT) {
+                    LogUtils.d("ota onConnection -> device disconnected")
+                    if(mJLUpgradeStatus == JLUpgradeStatus.UPGRADE_PREPARE) {
+                        updateUpgradeStatus(JLUpgradeStatus.UPGRADE_PREPARE_FAILED)
+                    }
+                }
+            }
+        }
+    }
+    private enum class JLUpgradeStatus {
+        NONE, //未升级未开始
+        UPGRADE_SCANNING_START,//扫描开始
+        UPGRADE_SCANNING_TIMEOUT,//扫描超时
+        UPGRADE_SCANNING_STOP,//扫描停止
+        UPGRADE_PREPARE,//升级前准备工作
+        UPGRADE_PREPARE_FAILED,//升级前准备工作失败
+        UPGRADE_START,//升级开始
+        UPGRADE_CHECKING,//文件校验中
+        UPGRADEING,//升级中
+        UPGRADE_STOP,//升级完成
+        UPGRADE_FAILED, //升级失败
+    }
+    override fun onPreExecute() {
+        mBluetoothHelper = BluetoothHelper.getInstance(Utils.getApp())
+        mOTAManager= null
+        mJLUpgradeStatus = JLUpgradeStatus.NONE
+        mBluetoothHelper.connectDevice(device)
+        mOTAManager = OTAManager(context)
+        mOTAManager?.registerBluetoothCallback(mOTAEventCallback)
+    }
+
+    override fun doInBackground(vararg urls: String): ByteArray {
+        val url = URL(urls[0])
+        val connection = url.openConnection()
+        return connection.getInputStream().readBytes()
+    }
+
+//    override fun doInBackground(vararg urls: String): String {
+//        val fileName = "ota"
+//        val directory = context.getExternalFilesDir(null)
+//        val file = File(directory, fileName)
+//        val connection = URL(urls[0]).openConnection()
+//        connection.connect()
+//        val fileLength = connection.contentLength
+//        val inputStream = BufferedInputStream(connection.getInputStream())
+//        val outputStream = FileOutputStream(file)
+//        val data = ByteArray(1024)
+//        var total: Long = 0
+//        var count: Int
+//        while (inputStream.read(data).also { count = it } != -1) {
+//            total += count.toLong()
+//            outputStream.write(data, 0, count)
+//        }
+//        outputStream.flush()
+//        outputStream.close()
+//        inputStream.close()
+//        return file.absolutePath
+//    }
+
+    override fun onPostExecute(result: ByteArray) {
+        resultByte=result
+        when (BleCache.mPlatform) {
+            BleDeviceInfo.PLATFORM_NORDIC ->
+                Log.d("PLATFORM", "PLATFORM_NORDIC")
+            BleDeviceInfo.PLATFORM_REALTEK ->
+                Log.d("PLATFORM", "PLATFORM_REALTEK")
+            BleDeviceInfo.PLATFORM_MTK ->
+                Log.d("PLATFORM", "PLATFORM_MTK")
+            BleDeviceInfo.PLATFORM_GOODIX ->
+                Log.d("PLATFORM", "PLATFORM_GOODIX")
+            BleDeviceInfo.PLATFORM_JL ->{
+                Log.d("PLATFORM", "PLATFORM_JL")
+                startOTA(result)
+            }
+        }
+    }
+
+    private fun startOTA(result: ByteArray) {
+        LogUtils.d("startOTA ::")
+        mOTAManager?.bluetoothOption?.firmwareFileData= result
+        mOTAManager?.startOTA(object : IUpgradeCallback {
+            override fun onError(p0: BaseError?) {
+                LogUtils.d("onError -> $p0")
+                updateUpgradeStatus(JLUpgradeStatus.UPGRADE_FAILED)
+            }
+
+            override fun onNeedReconnect(p0: String?, p1: Boolean) {
+                LogUtils.d("onNeedReconnect : $p0, $p1")
+            }
+
+            override fun onStopOTA() {
+                LogUtils.d("onStopOTA() upgrade ok")
+                updateUpgradeStatus(JLUpgradeStatus.UPGRADE_STOP)
+
+                //循环升级
+//                upgrade(textView)
+            }
+
+            override fun onProgress(type: Int, progress: Float) {
+                LogUtils.d("onProgress -> $type $progress")
+                if (type == 0) {//type 0: verification file 1: upgrading
+                    updateUpgradeStatus(JLUpgradeStatus.UPGRADE_CHECKING)
+                } else {
+                    updateUpgradeStatus(JLUpgradeStatus.UPGRADEING)
+                }
+//                runOnUiThread {
+//                    textView.text = "$type ${Math.round(progress)}"
+//                }
+            }
+
+            override fun onStartOTA() {
+                LogUtils.d("onStartOTA")
+                updateUpgradeStatus(JLUpgradeStatus.UPGRADE_START)
+            }
+
+            override fun onCancelOTA() {
+                LogUtils.d("onCancelOTA")
+                updateUpgradeStatus(JLUpgradeStatus.UPGRADE_FAILED)
+            }
+        })
+    }
+
+}
+
+
+class DownloadTaskOTA(val bleKey: BleKey) : AsyncTask<String, Int, ByteArray>() {
+    private val REQUEST_CODE_UPGRADE_J = 0x01
+    override fun doInBackground(vararg urls: String): ByteArray {
+        val url = URL(urls[0])
+        val connection = url.openConnection()
+        return connection.getInputStream().readBytes()
+    }
+
+    override fun onPostExecute(result: ByteArray) {
+        BleConnector.sendStream(BleKey.of(REQUEST_CODE_UPGRADE_J), result)
     }
 }
