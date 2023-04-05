@@ -69,6 +69,15 @@ class SmartbleSdk {
   ///unbind(BluetoothDevice device)
   Future<dynamic> unbind() => _channel.invokeMethod('unbind');
 
+  ///isAvailable(BluetoothDevice device)
+  Future<dynamic> isAvailable() => _channel.invokeMethod('isAvailable');
+
+  ///disconnect(BluetoothDevice device)
+  Future<dynamic> disconnect() => _channel.invokeMethod('disconnect');
+
+  ///launch(BluetoothDevice device)
+  Future<dynamic> launch() => _channel.invokeMethod('launch');
+
   ///analyzeSleep
   Future<dynamic> analyzeSleep({required List listSleep}) {
     List<Map<String, int>> listSleepNew = [];
@@ -1056,6 +1065,11 @@ class SmartbleSdk {
       EventChannel("onStockDelete");
   static Stream<dynamic> get onStockDeleteStream {
     return _onStockDeleteChannel.receiveBroadcastStream().cast();
+  }
+
+  static const EventChannel _onBleErrorChannel = EventChannel("onBleError");
+  static Stream<dynamic> get onBleErrorStream {
+    return _onBleErrorChannel.receiveBroadcastStream().cast();
   }
 }
 

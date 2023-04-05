@@ -32,7 +32,6 @@ import com.szabh.smable3.entity.BleAlarm
 import com.szabh.smable3.watchface.Element
 import com.szabh.smable3.watchface.WatchFaceBuilder
 import id.kakzaki.smartble_sdk.tools.PermissionStatus
-import id.kakzaki.smartble_sdk.tools.doBle
 import id.kakzaki.smartble_sdk.tools.request2
 import id.kakzaki.smartble_sdk.tools.require
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -207,6 +206,8 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private var onStockReadSink: EventSink? = null
     private var onStockDeleteChannel: EventChannel? = null
     private var onStockDeleteSink: EventSink? = null
+    private var onBleErrorChannel: EventChannel? = null
+    private var onBleErrorSink: EventSink? = null
 
     private var blueDevice: BluetoothDevice? = null
 
@@ -1330,7 +1331,8 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         onStockReadChannel!!.setStreamHandler(onStockReadResultHandler)
         onStockDeleteChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onStockDelete")
         onStockDeleteChannel!!.setStreamHandler(onStockDeleteResultHandler)
-
+        onBleErrorChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onBleError")
+        onBleErrorChannel!!.setStreamHandler(onBleErrorResultHandler)
 
         val connector = BleConnector.Builder(flutterPluginBinding.applicationContext)
             .supportRealtekDfu(false) // Whether to support Realtek device Dfu, pass false if no support is required.
@@ -2298,6 +2300,15 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             "connectHID" -> {
                 result.success(BleConnector.connectHID())
             }
+            "isAvailable" -> {
+                result.success(BleConnector.isAvailable())
+            }
+            "disconnect" -> {
+                BleConnector.connect(false)
+            }
+            "launch" -> {
+                BleConnector.launch();
+            }
             "connectClassic" -> {
                 BleConnector.connectClassic();
             }
@@ -2888,7 +2899,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         }
 
         if (mContext != null) {
-            doBle(mContext!!) {
+            if(BleConnector.isAvailable()){
                 when (bleKey) {
                     // BleCommand.UPDATE
                     BleKey.OTA -> {
@@ -2897,7 +2908,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                             val url: String? = call.argument<String>("url")
                             if (url != null) {
                                 DownloadOTA(mContext!!,bleKey, blueDevice!!).execute(url)
-                               // DownloadTaskOTA(bleKey).execute(url)
+                                // DownloadTaskOTA(bleKey).execute(url)
                             }
                         }
                     }
@@ -4060,6 +4071,9 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                         print("$bleKey")
                     }
                 }
+            }else{
+                if (onBleErrorSink != null)
+                    onBleErrorSink!!.success(true)
             }
         }
     }
@@ -4820,6 +4834,18 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             override fun onListen(o: Any?, eventSink: EventSink?) {
                 if (eventSink != null) {
                     onStockDeleteSink = eventSink
+                }
+            }
+
+            override fun onCancel(o: Any?) {
+            }
+        }
+
+    private val onBleErrorResultHandler: EventChannel.StreamHandler =
+        object : EventChannel.StreamHandler {
+            override fun onListen(o: Any?, eventSink: EventSink?) {
+                if (eventSink != null) {
+                    onBleErrorSink = eventSink
                 }
             }
 

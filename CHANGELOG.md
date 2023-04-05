@@ -1,3 +1,7 @@
+## 0.8.6
+
+* Ble Error Stream, isAvailable, disconnect, launch
+
 ## 0.8.5
 
 * Bound
