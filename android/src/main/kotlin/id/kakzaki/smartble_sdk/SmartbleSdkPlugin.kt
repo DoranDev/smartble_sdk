@@ -1344,20 +1344,20 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         connector.addHandleCallback(object : BleHandleCallback {
             override fun onSessionStateChange(status: Boolean) {
                 if (status) {
-                    if(statusState==false){
+//                    if(statusState==false){
                         connector.sendObject(BleKey.TIME_ZONE, BleKeyFlag.UPDATE, BleTimeZone())
                         connector.sendObject(BleKey.TIME, BleKeyFlag.UPDATE, BleTime.local())
-//                        connector.sendInt8(
-//                            BleKey.HOUR_SYSTEM, BleKeyFlag.UPDATE,
-//                            if (DateFormat.is24HourFormat(Utils.getApp())) 0 else 1
-//
-//                        )
-                        statusState=true
-//                    connector.sendData(BleKey.POWER, BleKeyFlag.READ)
+                        connector.sendInt8(
+                            BleKey.HOUR_SYSTEM, BleKeyFlag.UPDATE,
+                            if (DateFormat.is24HourFormat(Utils.getApp())) 0 else 1
+
+                        )
+//                        statusState=true
+                    connector.sendData(BleKey.POWER, BleKeyFlag.READ)
 //          connector.sendData(BleKey.FIRMWARE_VERSION, BleKeyFlag.READ)
-//          connector.sendInt8(BleKey.LANGUAGE, BleKeyFlag.UPDATE, Languages.languageToCode())
+          connector.sendInt8(BleKey.LANGUAGE, BleKeyFlag.UPDATE, Languages.languageToCode())
 //                    connector.sendData(BleKey.MUSIC_CONTROL, BleKeyFlag.READ)
-                    }
+//                    }
 
                 }
             }

@@ -1,3 +1,7 @@
+## 0.8.7
+
+* clock sync
+
 ## 0.8.6
 
 * Ble Error Stream, isAvailable, disconnect, launch
