@@ -1,13 +1,9 @@
 PODS:
   - Flutter (1.0.0)
-  - iOSDFULibrary (4.13.0):
-    - ZIPFoundation (= 0.9.11)
   - smartble_sdk (0.0.1):
     - Flutter
-    - iOSDFULibrary
     - SnapKit
   - SnapKit (5.6.0)
-  - ZIPFoundation (0.9.11)
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
@@ -15,9 +11,7 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
-    - iOSDFULibrary
     - SnapKit
-    - ZIPFoundation
 
 EXTERNAL SOURCES:
   Flutter:
@@ -27,10 +21,8 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
-  iOSDFULibrary: 3b9de67ed4bfb901b5f09c2fea843f65e152612d
-  smartble_sdk: 6798de7a73be493b4cd392f8211e3ecb25b02351
+  smartble_sdk: 3b45aef1fdafd633756c52f7564505796224f21b
   SnapKit: e01d52ebb8ddbc333eefe2132acf85c8227d9c25
-  ZIPFoundation: b1f0de4eed33e74a676f76e12559ab6b75990197
 
 PODFILE CHECKSUM: 7368163408c647b7eb699d0d788ba6718e18fb8d
 

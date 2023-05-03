@@ -19,9 +19,9 @@ class KeyFlagsController: UITableViewController {
     var proDuration = 0
     var phoneWorkOut = 0
     let mode = BlePhoneWorkOut()
-    let mJLOTA = JLOTA.shared()
+//    let mJLOTA = JLOTA.shared()
     var watchFaceIdNum = 0
-    var selectView = ABHSelectWatchFaceId()
+   // var selectView = ABHSelectWatchFaceId()
     var bleWatchFaceID : BleWatchFaceId?
     var watchFileURL = ""
 
@@ -61,531 +61,12 @@ class KeyFlagsController: UITableViewController {
 
     // MARK: - UITableViewDelegate
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        handleCommand(mBleKey, mBleKeyFlags[indexPath.row])
+      //  handleCommand(mBleKey, mBleKeyFlags[indexPath.row])
     }
 
-    func handleCommand(_ bleKey: BleKey, _ bleKeyFlag: BleKeyFlag) {
-        if bleKey == .IDENTITY {
-            if bleKeyFlag == .DELETE {
-                if BleConnector.shared.isAvailable() {
-                    _ = BleConnector.shared.sendData(bleKey, bleKeyFlag)
-                }
-                BleConnector.shared.unbind()
-                unbindCompleted()
-                return
-            }
-        }
-        if !BleConnector.shared.isAvailable() {
-            bleLog("device not connected")
-            return
-        }
-        doBle { bleConnector in
-            switch bleKey {
-                // BleCommand.UPDATE
-            case .OTA:
-                gotoOta()
-            case .XMODEM:
-                _ = bleConnector.sendData(bleKey, bleKeyFlag)
-
-                // BleCommand.SET
-            case .TIME:
-                if bleKeyFlag == .UPDATE {
-                    //设置设备时间
-                    _ = bleConnector.sendObject(bleKey, bleKeyFlag, BleTime.local())
-                } else if bleKeyFlag == .READ {
-                    //READ
-                    _ = bleConnector.sendData(bleKey, bleKeyFlag)
-                }
-            case .TIME_ZONE:
-                if bleKeyFlag == .UPDATE {
-                    //设置设备时区
-                    _ = bleConnector.sendObject(bleKey, bleKeyFlag, BleTimeZone())
-                } else if bleKeyFlag == .READ {
-                    //READ
-                    _ = bleConnector.sendData(bleKey, bleKeyFlag)
-                }
-            case .POWER:
-                //bleKeyFlag = .READ 获取设备电量
-                _ = bleConnector.sendData(bleKey, bleKeyFlag)
-            case .FIRMWARE_VERSION:
-                //bleKeyFlag = .READ 获取设备固件版本号
-                _ = bleConnector.sendData(bleKey, bleKeyFlag)
-            case .BLE_ADDRESS:
-                //bleKeyFlag = .READ 获取设备Mac地址
-                _ = bleConnector.sendData(bleKey, bleKeyFlag)
-            case .USER_PROFILE:
-                if bleKeyFlag == .UPDATE {
-                    //更新设备上的用户个人信息
-                    let bleUserProfile = BleUserProfile(0, 0, 20, 170.0, 60.0)
-                    _ = bleConnector.sendObject(bleKey, bleKeyFlag, bleUserProfile)
-                } else if bleKeyFlag == .READ {
-                    //READ
-                    _ = bleConnector.sendData(bleKey, bleKeyFlag)
-                }
-            case .STEP_GOAL:
-                if bleKeyFlag == .UPDATE {
-                    //更新设备上的运动目标
-                    _ = bleConnector.sendInt32(bleKey, bleKeyFlag, 0x1234)
-                } else if bleKeyFlag == .READ {
-                    //READ
-                    _ = bleConnector.sendData(bleKey, bleKeyFlag)
-                }
-            case .BACK_LIGHT:
-                if bleKeyFlag == .UPDATE {
-                    //背光设置
-                    _ = bleConnector.sendInt8(bleKey, bleKeyFlag, 4) // 0～20, 0 is off
-                } else if bleKeyFlag == .READ {
-                    //READ
-                    _ = bleConnector.sendData(bleKey, bleKeyFlag)
-                }
-            case .SEDENTARINESS:
-                //久坐提醒
-                if bleKeyFlag == .UPDATE {
-                    let bleSedentariness = BleSedentarinessSettings()
-                    bleSedentariness.mEnabled = 1
-                    bleSedentariness.mRepeat = 63 // Monday ~ Saturday
-                    bleSedentariness.mStartHour = 1
-                    bleSedentariness.mEndHour = 22
-                    bleSedentariness.mInterval = 60
-                    _ = bleConnector.sendObject(bleKey, .UPDATE, bleSedentariness)
-                } else if bleKeyFlag == .READ {
-                    //READ
-                    _ = bleConnector.sendData(bleKey, bleKeyFlag)
-                }
-            case .NOTIFICATION_REMINDER:
-                //消息提醒CALL
-                if bleKeyFlag == .UPDATE {
-                    let bleNotificationSettings = BleNotificationSettings()
-                    bleNotificationSettings.enable(BleNotificationSettings.MIRROR_PHONE)
-                    bleNotificationSettings.enable(BleNotificationSettings.WE_CHAT)
-                    print(bleNotificationSettings)
-                    _ = bleConnector.sendObject(bleKey, .UPDATE, bleNotificationSettings)
-                }
-            case .NO_DISTURB_RANGE:
-                //设置勿扰
-                if bleKeyFlag == .UPDATE {
-                    let noDisturb = BleNoDisturbSettings()
-                    noDisturb.mBleTimeRange1 = BleTimeRange(1, 2, 0, 18, 0)
-                    _ = bleConnector.sendObject(bleKey, bleKeyFlag, noDisturb)
-                } else {
-                    _ = bleConnector.sendData(bleKey, bleKeyFlag)
-                }
-            case .NO_DISTURB_GLOBAL:
-                // on
-                _ = bleConnector.sendBool(bleKey, bleKeyFlag, true)
-            case .WATCHFACE_ID:
-                if bleKeyFlag == BleKeyFlag.READ {
-                    //READ
-                    _ = bleConnector.sendData(bleKey, bleKeyFlag)
-                }else if  bleKeyFlag == BleKeyFlag.UPDATE{
-                    let watchFaceId : Int32 = 111 //ID >= 100
-                    _ = bleConnector.sendInt32(bleKey, bleKeyFlag, Int(watchFaceId))
-                }
-                break
-            case .IBEACON_SET:               
-                if bleKeyFlag == .UPDATE{
-                    _ = bleConnector.sendInt8(bleKey, bleKeyFlag, 1)
-                }
-                break
-            case .WATCH_FACE_SWITCH:
-                //设置默认表盘
-                if bleKeyFlag == .UPDATE {
-                    let value = 4 //watch face number
-                    _ = BleConnector.shared.sendInt8(.WATCH_FACE_SWITCH, .UPDATE, value)
-                } else if bleKeyFlag == BleKeyFlag.READ {
-                    //READ
-                    _ = bleConnector.sendData(bleKey, bleKeyFlag)
-                }
-                break
-            case .GESTURE_WAKE:
-                //抬手亮
-                if bleKeyFlag == .UPDATE {
-                    _ = bleConnector.sendObject(bleKey, bleKeyFlag,
-                        BleGestureWake(BleTimeRange(1, 8, 0, 22, 0)))
-                } else if bleKeyFlag == BleKeyFlag.READ {
-                    //READ
-                    _ = bleConnector.sendData(bleKey, bleKeyFlag)
-                }
-            case .VIBRATION:
-                //震动设置
-                if bleKeyFlag == .UPDATE {
-                    _ = bleConnector.sendInt8(bleKey, bleKeyFlag, 3) // 0~10, 0 is off
-                } else if bleKeyFlag == .READ {
-                    //READ
-                    _ = bleConnector.sendData(bleKey, bleKeyFlag)
-                }
-            case .HR_ASSIST_SLEEP:
-                // on 睡眠辅助设备
-                _ = bleConnector.sendBool(bleKey, bleKeyFlag, true)
-            case .HOUR_SYSTEM:
-                // 0: 24-hourly; 1: 12-hourly 小时制
-                _ = bleConnector.sendInt8(bleKey, bleKeyFlag, 1)
-            case .LANGUAGE:
-                //设备语言设置
-                _ = bleConnector.sendInt8(bleKey, bleKeyFlag, Languages.languageToCode())
-            case .ALARM:
-                if bleKeyFlag == .CREATE {
-                    // 创建一个一分钟后的闹钟
-                    let calendar = Calendar.current
-                    var date = Date()
-                    date.addTimeInterval(60.0)
-                    _ = bleConnector.sendObject(bleKey, bleKeyFlag, BleAlarm(
-                        1, // mEnabled
-                        BleRepeat.EVERYDAY, // mRepeat
-                        calendar.component(.year, from: date), // mYear
-                        calendar.component(.month, from: date), // mMonth
-                        calendar.component(.day, from: date), // mDay
-                        calendar.component(.hour, from: date), // mHour
-                        calendar.component(.minute, from: date), // mMinute
-                        "tag" // mTag
-                    ))
-                } else if bleKeyFlag == .DELETE {
-                    // 如果缓存中有闹钟的话，删除第一个
-                    let alarms: [BleAlarm] = BleCache.shared.getArray(.ALARM)
-                    if !alarms.isEmpty {
-                        _ = bleConnector.sendInt8(bleKey, bleKeyFlag, alarms[0].mId)
-                    }
-                } else if bleKeyFlag == .UPDATE {
-                    // 如果缓存中有闹钟的话，切换第一个闹钟的开启状态
-                    let alarms: [BleAlarm] = BleCache.shared.getArray(.ALARM)
-                    if !alarms.isEmpty {
-                        let alarm = alarms[0]
-                        alarm.mEnabled ^= 1
-                        _ = bleConnector.sendObject(bleKey, bleKeyFlag, alarm)
-                    }
-                } else if bleKeyFlag == .READ {
-                    // 读取设备上所有的闹钟
-                    _ = bleConnector.sendInt8(bleKey, bleKeyFlag, ID_ALL)
-                } else if bleKeyFlag == .RESET {
-                    // 重置设备上的闹钟
-                    let calendar = Calendar.current
-                    let date = Date()
-                    var alarms = [BleAlarm]()
-                    for i in 0..<8 {
-                        alarms.append(BleAlarm(
-                            i % 2, // mEnabled
-                            i, // mRepeat
-                            calendar.component(.year, from: date), // mYear
-                            calendar.component(.month, from: date), // mMonth
-                            calendar.component(.day, from: date), // mDay
-                            calendar.component(.hour, from: date), // mHour
-                            i, // mMinute
-                            "\(i)" // mTag
-                        ))
-                    }
-                    _ = bleConnector.sendArray(bleKey, bleKeyFlag, alarms)
-                }
-            case .COACHING:
-                //锻炼模式设置
-                if bleKeyFlag == .CREATE {
-                    _ = bleConnector.sendObject(bleKey, bleKeyFlag, BleCoaching(
-                        "My title", // title
-                        "My description", // description
-                        3, // repeat
-                        [BleCoachingSegment(
-                            CompletionCondition.DURATION.rawValue, // completion condition
-                            "My name", // name
-                            0, // activity
-                            Stage.WARM_UP.rawValue, // stage
-                            10, // completion value
-                            0 // hr zone
-                        )]
-                    ))
-                } else if bleKeyFlag == .UPDATE {
-                    // 如果缓存中有Coaching的话，修改第一个Coaching的标题
-                    let coachings: [BleCoaching] = BleCache.shared.getArray(.COACHING)
-                    if !coachings.isEmpty {
-                        let coaching = coachings[0]
-                        coaching.mTitle += " nice"
-                        _ = bleConnector.sendObject(bleKey, bleKeyFlag, coaching)
-                    }
-                } else if bleKeyFlag == .READ {
-                    // 读取所有Coaching
-                    _ = bleConnector.sendInt8(bleKey, bleKeyFlag, ID_ALL)
-                }
-            case .ANTI_LOST:
-                // on 防丢提醒设备
-                _ = bleConnector.sendBool(bleKey, bleKeyFlag, true)
-            case .HR_MONITORING:
-                //定时心率检查设置
-                if bleKeyFlag == .UPDATE {
-                    let hrMonitoring = BleHrMonitoringSettings()
-                    hrMonitoring.mBleTimeRange = BleTimeRange(1, 8, 0, 22, 0)
-                    hrMonitoring.mInterval = 60 // an hour
-                    _ = bleConnector.sendObject(bleKey, bleKeyFlag, hrMonitoring)
-                } else if bleKeyFlag == .READ {
-                    _ = bleConnector.sendData(bleKey, bleKeyFlag)
-                }
-            case .DRINKWATER:
-                if bleKeyFlag == .UPDATE {
-                    let drinkWater = BleDrinkWaterSettings()
-                    drinkWater.mEnabled = 1
-                    drinkWater.mInterval = 1
-                    drinkWater.mRepeat = 63 // Monday ~ Saturday
-                    drinkWater.mStartHour = 7
-                    drinkWater.mEndHour = 22
-                    _ = bleConnector.sendObject(.DRINKWATER, .UPDATE, drinkWater)
-                }
-                break
-            case .UI_PACK_VERSION:
-                //Realtek UI包 版本
-                _ = bleConnector.sendData(bleKey, bleKeyFlag)
-            case .LANGUAGE_PACK_VERSION:
-                //Realtek 语言包 版本
-                _ = bleConnector.sendData(bleKey, bleKeyFlag)
-            case .SLEEP_QUALITY:
-                //睡眠总结设置
-                _ = bleConnector.sendObject(bleKey, bleKeyFlag,
-                    BleSleepQuality(202, 201, 481))
-            case .HEALTH_CARE:
-                //生理期设置
-                _ = bleConnector.sendObject(bleKey, bleKeyFlag, BleHealthCare(
-                    9, 0, // 提醒时间
-                    2, // 生理期提醒提前天数
-                    2, // 排卵期提醒提前天数
-                    2020, // 上次生理期日期
-                    1,
-                    1,
-                    30, // 生理期周期，天
-                    1,
-                    7 // 生理期持续时间，天
-                ))
-            case .TEMPERATURE_DETECTING:
-                //定时体温监测
-                let detecting = BleTemperatureDetecting()
-                detecting.mBleTimeRange = BleTimeRange(1, 8, 0, 22, 0)
-                detecting.mInterval = 60 // an hour
-                _ = bleConnector.sendObject(bleKey, bleKeyFlag, detecting)
-
-                // BleCommand.CONNECT
-            case .IDENTITY:
-                //绑定设备
-                if bleKeyFlag == .CREATE {
-                    _ = bleConnector.sendInt32(bleKey, bleKeyFlag, Int.random(in: 1..<0xffffffff))
-                } else if bleKeyFlag == .READ {
-                    _ = bleConnector.sendData(bleKey, bleKeyFlag)
-                }
-            case .PAIR:
-                //蓝牙配对
-                _ = bleConnector.sendData(bleKey, bleKeyFlag)
-
-                // BleCommand.PUSH
-            case .SCHEDULE:
-                if bleKeyFlag == .CREATE {
-                    // 创建一个1分钟后的日程
-                    let calendar = Calendar.current
-                    var date = Date()
-                    date.addTimeInterval(60.0)
-                    _ = bleConnector.sendObject(bleKey, bleKeyFlag, BleSchedule(
-                        calendar.component(.year, from: date), // mYear
-                        calendar.component(.month, from: date), // mMonth
-                        calendar.component(.day, from: date), // mDay
-                        calendar.component(.hour, from: date), // mHour
-                        calendar.component(.minute, from: date), // mMinute
-                        0, // mAdvance
-                        "Title8", // mTitle
-                        "Content9" // mContent
-                    ))
-                } else if bleKeyFlag == .DELETE {
-                    // 如果缓存中有日程的话，删除第一个
-                    let schedules: [BleSchedule] = BleCache.shared.getArray(.SCHEDULE)
-                    if !schedules.isEmpty {
-                        _ = bleConnector.sendInt8(bleKey, bleKeyFlag, schedules[0].mId)
-                    }
-                } else if bleKeyFlag == .UPDATE {
-                    // 如果缓存中有日程的话，修改第一个日程的时间
-                    //mContent -> count<50
-                    let schedules: [BleSchedule] = BleCache.shared.getArray(.SCHEDULE)
-                    if !schedules.isEmpty {
-                        let schedule = schedules[0]
-                        schedule.mHour = Int.random(in: 1..<24)
-                        _ = bleConnector.sendObject(bleKey, bleKeyFlag, schedule)
-                    }
-                }
-            case .WEATHER_REALTIME:
-                //实时天气
-                if bleKeyFlag == .UPDATE {
-                    // let weatherRealtime: BleWeatherRealtime? = BleCache.shared.getObject(.WEATHER_REALTIME)
-                    _ = bleConnector.sendObject(BleKey.WEATHER_REALTIME, bleKeyFlag, BleWeatherRealtime(
-                        time: Int(Date().timeIntervalSince1970),
-                        weather: BleWeather(
-                            currentTemperature: 1,
-                            maxTemperature: 1,
-                            minTemperature: 1,
-                            weatherType: BleWeather.SUNNY,
-                            windSpeed: 1,
-                            humidity: 1,
-                            visibility: 1,
-                            ultraVioletIntensity: 1,
-                            precipitation: 1
-                        )
-                    ))
-                }
-            case .WEATHER_FORECAST:
-                //天气预报
-                if bleKeyFlag == .UPDATE {
-                    // let weatherForecast: BleWeatherForecast? = BleCache.shared.getObject(.WEATHER_FORECAST)
-                    _ = bleConnector.sendObject(BleKey.WEATHER_FORECAST, bleKeyFlag, BleWeatherForecast(
-                        time: Int(Date().timeIntervalSince1970),
-                        weather1: BleWeather(
-                            currentTemperature: 2,
-                            maxTemperature: 2,
-                            minTemperature: 2,
-                            weatherType: BleWeather.CLOUDY,
-                            windSpeed: 2,
-                            humidity: 2,
-                            visibility: 2,
-                            ultraVioletIntensity: 2,
-                            precipitation: 2),
-                        weather2: BleWeather(
-                            currentTemperature: 3,
-                            maxTemperature: 3,
-                            minTemperature: 3,
-                            weatherType: BleWeather.OVERCAST,
-                            windSpeed: 3,
-                            humidity: 3,
-                            visibility: 3,
-                            ultraVioletIntensity: 3,
-                            precipitation: 3),
-                        weather3: BleWeather(
-                            currentTemperature: 4,
-                            maxTemperature: 4,
-                            minTemperature: 4,
-                            weatherType: BleWeather.RAINY,
-                            windSpeed: 4,
-                            humidity: 4,
-                            visibility: 4,
-                            ultraVioletIntensity: 4,
-                            precipitation: 4)
-                    ))
-                }
-            case .APP_SPORT_DATA:
-                bleLog("-- PHONEWORKOUT --")
-                break
-            case .REAL_TIME_HEART_RATE:
-                bleLog("-- REALTIMEHR --")
-                break
-                // BleCommand.DATA
-            case .DATA_ALL, .ACTIVITY, .HEART_RATE, .BLOOD_PRESSURE, .SLEEP, .WORKOUT, .LOCATION, .TEMPERATURE,
-                    .BLOODOXYGEN, .HRV, .WORKOUT2, .MATCH_RECORD:
-                //Exercise data
-                _ = bleConnector.sendData(bleKey, bleKeyFlag)
-
-                // BleCommand.CONTROL
-            case BleKey.CAMERA:
-                //camera 相机拍照、或者退出拍照
-                if mCameraEntered {
-                    _ = bleConnector.sendInt8(bleKey, bleKeyFlag, CameraState.EXIT)
-                } else {
-                    _ = bleConnector.sendInt8(bleKey, bleKeyFlag, CameraState.ENTER)
-                }
-            case .APP_SPORT_STATE:
-                bleLog("PHONE_WORKOUT_SWITCH - \(phoneWorkOut)")
-                let mode = BlePhoneWorkOutStatus()
-                mode.mMode = PhoneWorkOutStatus.Treadmill
-                switch phoneWorkOut {
-                case 0:
-                    phoneWorkOut = 2
-                    mode.mStatus = PhoneWorkOutStatus.modeStart
-                    DispatchQueue.main.asyncAfter(deadline: .now()+0.5) {
-                        self.senderPhoneWorkOut()
-                    }
-                    break
-                case 1:
-                    phoneWorkOut = 3
-                    mode.mStatus = PhoneWorkOutStatus.modeContinues
-                    break
-                case 2:
-                    phoneWorkOut = 3
-                    mode.mStatus = PhoneWorkOutStatus.modePause
-                    break
-                case 3:
-                    phoneWorkOut = 0
-                    mode.mStatus = PhoneWorkOutStatus.modeEnd
-                    break
-                default:
-                    break
-                }
-                _ = bleConnector.sendObject(bleKey, bleKeyFlag, mode)
-                break
-            case .IBEACON_CONTROL:
-                if bleKeyFlag == .UPDATE {
-                    _ = BleConnector.shared.sendInt8(bleKey, bleKeyFlag, 0)
-                }
-                break
-                // BleCommand.IO
-            case .WATCH_FACE:
-                if bleKeyFlag == .DELETE {
-                    _ = BleConnector.shared.sendData(bleKey, bleKeyFlag)
-                    return
-                }
-                selectWatchType()
-                break
-            case .AGPS_FILE, .FONT_FILE, .UI_FILE, .LANGUAGE_FILE:
-                if bleKeyFlag == .DELETE {
-                    _ = BleConnector.shared.sendData(bleKey, bleKeyFlag)
-                    return
-                }
-                let selectVC = selectOTAFileController()
-                selectVC.reloadBlock = { (fileURL) in
-                    bleLog("\(bleKey) - \(String(describing: fileURL))")
-                    _ = bleConnector.sendStream(bleKey, URL.init(fileURLWithPath: fileURL))
-                    self.proDuration = Int(Date().timeIntervalSince1970)
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [self] in
-                        progressLab.frame = CGRect(x: 50, y: 60, width: 230, height: 100)
-                        progressLab.numberOfLines = 0
-                        progressLab.backgroundColor = .black
-                        progressLab.textColor = .white
-                        progressLab.textAlignment = .center
-                        self.tableView.addSubview(progressLab)
-                        UIApplication.shared.isIdleTimerDisabled = true
-                    }
-                }
-                self.navigationController?.pushViewController(selectVC, animated: true)
-            case .CONTACT:
-                //address book 同步通讯录到设备
-                if addressBookAuthorization() {
-                    selectAddressBook()
-                }
-            case .AEROBIC_EXERCISE:
-                if bleKeyFlag == .UPDATE {
-                    let aerobic = BleAerobicSettings()
-                    aerobic.mHour = 1
-                    aerobic.mMin = 30
-                    aerobic.mHRMin = 80
-                    aerobic.mHRMax = 110
-                    aerobic.mHRMinTime = 30
-                    aerobic.mHRMinVibration = 4
-                    aerobic.mHRMaxTime = 20
-                    aerobic.mHRMaxVibration = 4
-                    aerobic.mHRIntermediate = 30
-                    _ = bleConnector.sendObject(bleKey, bleKeyFlag, aerobic)
-                } else if bleKeyFlag == .READ {
-                    _ = bleConnector.sendData(bleKey, bleKeyFlag)
-                }
-            case .TEMPERATURE_UNIT:
-                if bleKeyFlag == .UPDATE {
-                    //0 - Celsius ℃ 1 - Fahrenheit ℉
-                    _ = bleConnector.sendInt8(bleKey, bleKeyFlag, 1)
-                } else if bleKeyFlag == .READ {
-                    _ = bleConnector.sendData(bleKey, bleKeyFlag)
-                }
-            case .DATE_FORMAT:
-                if bleKeyFlag == .UPDATE {
-                    /**
-                      0 ->YYYY/MM/dd
-                      1 ->dd/MM/YYYY
-                      2 ->MM/dd/YYYY
-                      */
-                    _ = bleConnector.sendInt8(bleKey, bleKeyFlag, 2)
-                } else if bleKeyFlag == .READ {
-                    _ = bleConnector.sendData(bleKey, bleKeyFlag)
-                }
-            default:
-                print("NO CASE -\(bleKey.mDisplayName)")
-            }
-        }
-    }
+//    func handleCommand(_ bleKey: BleKey, _ bleKeyFlag: BleKeyFlag) {
+//       
+//    }
     // MARK: - Phone WorkOut
     func senderPhoneWorkOut(){        
         mode.mStep += 10
@@ -751,27 +232,27 @@ class KeyFlagsController: UITableViewController {
         proDuration = 0
         let selectVC = selectOTAFileController()
         selectVC.reloadBlock = { (fileURL) in
-            bleLog("senderDefaultWatchFace - \(String(describing: fileURL))")
-            if BleCache.shared.mPlatform == BleDeviceInfo.PLATFORM_JL {//&&
-//                BleCache.shared.mSupportJLWatchFace == 1
-                self.senderJLWatchFace(fileURL)
-            }else if BleCache.shared.mSupportWatchFaceId == 1{
-                self.watchFileURL = fileURL
-                self.isShowSelectWatchFaceId()
-            }else{
-                _ = BleConnector.shared.sendStream(.WATCH_FACE, URL.init(fileURLWithPath: fileURL))
-                self.proDuration = Int(Date().timeIntervalSince1970)
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [self] in
-                    progressLab.frame = CGRect(x: 20, y: 70, width: MaxWidth-40, height: 100)
-                    progressLab.numberOfLines = 0
-                    progressLab.font = .systemFont(ofSize: 15)
-                    progressLab.backgroundColor = .black
-                    progressLab.textColor = .white
-                    progressLab.textAlignment = .center
-                    self.tableView.addSubview(progressLab)
-                    UIApplication.shared.isIdleTimerDisabled = true
-                }
-            }
+//            bleLog("senderDefaultWatchFace - \(String(describing: fileURL))")
+//            if BleCache.shared.mPlatform == BleDeviceInfo.PLATFORM_JL {//&&
+////                BleCache.shared.mSupportJLWatchFace == 1
+//                self.senderJLWatchFace(fileURL)
+//            }else if BleCache.shared.mSupportWatchFaceId == 1{
+//                self.watchFileURL = fileURL
+//                self.isShowSelectWatchFaceId()
+//            }else{
+//                _ = BleConnector.shared.sendStream(.WATCH_FACE, URL.init(fileURLWithPath: fileURL))
+//                self.proDuration = Int(Date().timeIntervalSince1970)
+//                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [self] in
+//                    progressLab.frame = CGRect(x: 20, y: 70, width: MaxWidth-40, height: 100)
+//                    progressLab.numberOfLines = 0
+//                    progressLab.font = .systemFont(ofSize: 15)
+//                    progressLab.backgroundColor = .black
+//                    progressLab.textColor = .white
+//                    progressLab.textAlignment = .center
+//                    self.tableView.addSubview(progressLab)
+//                    UIApplication.shared.isIdleTimerDisabled = true
+//                }
+//            }
         }
         self.navigationController?.pushViewController(selectVC, animated: true)
     }
@@ -781,42 +262,42 @@ class KeyFlagsController: UITableViewController {
         self.navigationController?.pushViewController(cusVC, animated: true)
     }
     
-    func senderJLWatchFace(_ filePath:String){
-        mJLOTA.watchFaceName = "WATCH1"
-        mJLOTA.watchFacePath = filePath
-        mJLOTA.isWatchFace = true
-        if mJLOTA.isConnect == true{
-            mJLOTA.openWatchFace()
-        }else{
-            mJLOTA.connectPeripheral(withUUID: (BleConnector.shared.mPeripheral?.identifier.uuidString)!)
-        }
-        
-    }
+//    func senderJLWatchFace(_ filePath:String){
+//        mJLOTA.watchFaceName = "WATCH1"
+//        mJLOTA.watchFacePath = filePath
+//        mJLOTA.isWatchFace = true
+//        if mJLOTA.isConnect == true{
+//            mJLOTA.openWatchFace()
+//        }else{
+//            mJLOTA.connectPeripheral(withUUID: (BleConnector.shared.mPeripheral?.identifier.uuidString)!)
+//        }
+//
+//    }
 }
 // MARK: - mSupportWatchFaceId == 1
 extension KeyFlagsController {
     func isShowSelectWatchFaceId(){
 
-        selectView = ABHSelectWatchFaceId()
+//        selectView = ABHSelectWatchFaceId()
         let bkBtn = UIButton()
         bkBtn.backgroundColor = UIColor.init(red: 0.0, green: 0.0, blue: 0.0, alpha: 0.5)
         bkBtn.addTarget(self, action: #selector(selectRemoveFromSuperview(_ :)), for: .touchUpInside)
         bkBtn.frame = CGRect(x: 0, y: 0, width: MaxWidth, height: MaxHeight)
         self.view.addSubview(bkBtn)
     
-        selectView.frame = CGRect(x: 0, y: MaxHeight-400, width: MaxWidth, height: 300)
-        self.view.addSubview(selectView)
-        if bleWatchFaceID != nil{
-            selectView.watchFaceId = bleWatchFaceID
-        }
-        selectView.makeView()
-        selectView.selectItem = ({ (num:Int) in
-            bleLog("selectItem - \(num)")
-            self.watchFaceIdNum = num
-            self.saveSelectImage(num)
-            self.senderWatchFaceID(num)
-            bkBtn.sendActions(for: .touchUpInside)
-        })
+//        selectView.frame = CGRect(x: 0, y: MaxHeight-400, width: MaxWidth, height: 300)
+//        self.view.addSubview(selectView)
+//        if bleWatchFaceID != nil{
+//            selectView.watchFaceId = bleWatchFaceID
+//        }
+ //       selectView.makeView()
+//        selectView.selectItem = ({ (num:Int) in
+//            bleLog("selectItem - \(num)")
+//            self.watchFaceIdNum = num
+//            self.saveSelectImage(num)
+//            self.senderWatchFaceID(num)
+//            bkBtn.sendActions(for: .touchUpInside)
+//        })
         
         
     }
@@ -825,7 +306,7 @@ extension KeyFlagsController {
         self.navigationItem.leftBarButtonItem?.isEnabled = true
         self.navigationItem.rightBarButtonItem?.isEnabled = true
         sender.removeFromSuperview()
-        self.selectView.removeFromSuperview()
+       // self.selectView.removeFromSuperview()
     }
     
     func saveSelectImage(_ selectNum:Int){
@@ -900,7 +381,7 @@ extension KeyFlagsController :CNContactPickerDelegate{
 
 extension KeyFlagsController: BleHandleDelegate {
 
-    func onDeviceConnected(_ peripheral: CBPeripheral){
+    func onDeviceConnected(){
         DispatchQueue.main.asyncAfter(deadline: .now()+2.0) {
             if BleCache.shared.miBeacon == 1{
                 //manually open the iBeacon protocol

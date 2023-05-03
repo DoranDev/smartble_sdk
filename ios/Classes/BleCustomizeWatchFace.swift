@@ -95,7 +95,7 @@ class BleCustomizeWatchFace: UITableViewController {
     
     
     var watchFaceIdNum = 0
-    var selectView = ABHSelectWatchFaceId()
+    //var selectView = ABHSelectWatchFaceId()
     var bleWatchFaceID : BleWatchFaceId?
     
     override func viewDidLoad() {
@@ -238,28 +238,27 @@ class BleCustomizeWatchFace: UITableViewController {
 extension BleCustomizeWatchFace {
     func isShowSelectWatchFaceId(){
 
-        selectView = ABHSelectWatchFaceId()
+      //  selectView = ABHSelectWatchFaceId()
         let bkBtn = UIButton()
         bkBtn.backgroundColor = UIColor.init(red: 0.0, green: 0.0, blue: 0.0, alpha: 0.5)
         bkBtn.addTarget(self, action: #selector(selectRemoveFromSuperview(_ :)), for: .touchUpInside)
         bkBtn.frame = CGRect(x: 0, y: 0, width: MaxWidth, height: MaxHeight)
         self.view.addSubview(bkBtn)
     
-        selectView.frame = CGRect(x: 0, y: MaxHeight-400, width: MaxWidth, height: 300)
-        self.view.addSubview(selectView)
-
-        if bleWatchFaceID != nil{
-            selectView.watchFaceId = bleWatchFaceID
-        }
-        selectView.makeView()
-        selectView.selectItem = ({ (num:Int) in
-            bleLog("selectItem - \(num)")
-            self.watchFaceIdNum = num
-            self.saveSelectImage(num)
-            self.senderWatchFaceID(num)
-            bkBtn.sendActions(for: .touchUpInside)
-        })
-        
+//        selectView.frame = CGRect(x: 0, y: MaxHeight-400, width: MaxWidth, height: 300)
+//        self.view.addSubview(selectView)
+//
+//        if bleWatchFaceID != nil{
+//            selectView.watchFaceId = bleWatchFaceID
+//        }
+//        selectView.makeView()
+//        selectView.selectItem = ({ (num:Int) in
+//            bleLog("selectItem - \(num)")
+//            self.watchFaceIdNum = num
+//            self.saveSelectImage(num)
+//            self.senderWatchFaceID(num)
+//            bkBtn.sendActions(for: .touchUpInside)
+//        })
         
     }
     
@@ -267,7 +266,7 @@ extension BleCustomizeWatchFace {
         self.navigationItem.leftBarButtonItem?.isEnabled = true
         self.navigationItem.rightBarButtonItem?.isEnabled = true
         sender.removeFromSuperview()
-        self.selectView.removeFromSuperview()
+       // self.selectView.removeFromSuperview()
     }
     
     func saveSelectImage(_ selectNum:Int){

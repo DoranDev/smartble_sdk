@@ -15,7 +15,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         BleConnector.shared.launch()
         BleConnector.shared.addBleHandleDelegate(String(obj: self), self)
-        ABHBackgroundMonitoring.share.startListening()
+       // ABHBackgroundMonitoring.share.startListening()
         return true
     }
 
