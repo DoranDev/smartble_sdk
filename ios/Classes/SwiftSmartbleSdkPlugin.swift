@@ -69,143 +69,143 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
             result(mBleConnector.isAvailable())
              break;
         case "OTA":
-            bleKey = .OTA
+            bleKey = BleKey.OTA
             break;
         case "XMODEM":
-            bleKey = .XMODEM
+            bleKey = BleKey.XMODEM
             break;
         case "TIME":
-            bleKey = .TIME
+            bleKey = BleKey.TIME
             break;
         case "TIME_ZONE":
-            bleKey = .TIME_ZONE
+            bleKey = BleKey.TIME_ZONE
             break;
         case "POWER":
-            bleKey = .POWER
+            bleKey = BleKey.POWER
             break;
         case "FIRMWARE_VERSION":
-            bleKey = .FIRMWARE_VERSION
+            bleKey = BleKey.FIRMWARE_VERSION
             break;
         case "BLE_ADDRESS":
-            bleKey = .BLE_ADDRESS
+            bleKey = BleKey.BLE_ADDRESS
             break;
         case "USER_PROFILE":
-            bleKey = .USER_PROFILE
+            bleKey = BleKey.USER_PROFILE
             break;
         case "STEP_GOAL":
-            bleKey = .STEP_GOAL
+            bleKey = BleKey.STEP_GOAL
             break;
         case "BACK_LIGHT":
-            bleKey = .BACK_LIGHT
+            bleKey = BleKey.BACK_LIGHT
             break;
         case "SEDENTARINESS":
-            bleKey = .SEDENTARINESS
+            bleKey = BleKey.SEDENTARINESS
             break;
         case "NO_DISTURB_RANGE":
-            bleKey = .NO_DISTURB_RANGE
+            bleKey = BleKey.NO_DISTURB_RANGE
             break;
         case "VIBRATION":
-            bleKey = .VIBRATION
+            bleKey = BleKey.VIBRATION
             break;
         case "GESTURE_WAKE":
-            bleKey = .GESTURE_WAKE
+            bleKey = BleKey.GESTURE_WAKE
             break;
         case "HR_ASSIST_SLEEP":
-            bleKey = .HR_ASSIST_SLEEP
+            bleKey = BleKey.HR_ASSIST_SLEEP
             break;
         case "HOUR_SYSTEM":
-            bleKey = .HOUR_SYSTEM
+            bleKey = BleKey.HOUR_SYSTEM
             break;
         case "LANGUAGE":
-            bleKey = .LANGUAGE
+            bleKey = BleKey.LANGUAGE
             break;
         case "ALARM":
-            bleKey = .ALARM
+            bleKey = BleKey.ALARM
             break;
         case "COACHING":
-            bleKey = .COACHING
+            bleKey = BleKey.COACHING
             break;
         case "FIND_PHONE":
-            bleKey = .FIND_PHONE
+            bleKey = BleKey.FIND_PHONE
             break;
         case "NOTIFICATION_REMINDER":
-            bleKey = .NOTIFICATION_REMINDER
+            bleKey = BleKey.NOTIFICATION_REMINDER
             break;
         case "ANTI_LOST":
-            bleKey = .ANTI_LOST
+            bleKey = BleKey.ANTI_LOST
             break;
         case "HR_MONITORING":
-            bleKey = .HR_MONITORING
+            bleKey = BleKey.HR_MONITORING
             break;
         case "UI_PACK_VERSION":
-            bleKey = .UI_PACK_VERSION
+            bleKey = BleKey.UI_PACK_VERSION
             break;
         case "LANGUAGE_PACK_VERSION":
-            bleKey = .LANGUAGE_PACK_VERSION
+            bleKey = BleKey.LANGUAGE_PACK_VERSION
             break;
         case "SLEEP_QUALITY":
-            bleKey = .SLEEP_QUALITY
+            bleKey = BleKey.SLEEP_QUALITY
             break;
 //        case "GIRL_CARE":
-//            bleKey = .GIRLCARE
+//            bleKey = BleKey.GIRLCARE
         case "TEMPERATURE_DETECTING":
-            bleKey = .TEMPERATURE_DETECTING
+            bleKey = BleKey.TEMPERATURE_DETECTING
             break;
         case "AEROBIC_EXERCISE":
-            bleKey = .AEROBIC_EXERCISE
+            bleKey = BleKey.AEROBIC_EXERCISE
             break;
         case "TEMPERATURE_UNIT":
-            bleKey = .TEMPERATURE_UNIT
+            bleKey = BleKey.TEMPERATURE_UNIT
             break;
         case "DATE_FORMAT":
-            bleKey = .DATE_FORMAT
+            bleKey = BleKey.DATE_FORMAT
             break;
         case "WATCH_FACE_SWITCH":
-            bleKey = .WATCH_FACE_SWITCH
+            bleKey = BleKey.WATCH_FACE_SWITCH
             break;
         case "AGPS_PREREQUISITE":
-            bleKey = .AGPS_PREREQUISITE
+            bleKey = BleKey.AGPS_PREREQUISITE
             break;
         case "DRINK_WATER":
-            bleKey = .DRINKWATER
+            bleKey = BleKey.DRINKWATER
             break;
 //        case "SHUTDOWN":
-//            bleKey = .SHUTDOWN
+//            bleKey = BleKey.SHUTDOWN
         case "APP_SPORT_DATA":
-            bleKey = .APP_SPORT_DATA
+            bleKey = BleKey.APP_SPORT_DATA
             break;
         case "REAL_TIME_HEART_RATE":
-            bleKey = .REAL_TIME_HEART_RATE
+            bleKey = BleKey.REAL_TIME_HEART_RATE
             break;
         case "BLOOD_OXYGEN_SET":
-            bleKey = .BLOOD_OXYGEN_SET
+            bleKey = BleKey.BLOOD_OXYGEN_SET
             break;
         case "WASH_SET":
-            bleKey = .WASH_SET
+            bleKey = BleKey.WASH_SET
             break;
         case "WATCHFACE_ID":
-            bleKey = .WATCHFACE_ID
+            bleKey = BleKey.WATCHFACE_ID
             break;
         case "IBEACON_SET":
-            bleKey = .IBEACON_SET
+            bleKey = BleKey.IBEACON_SET
             break;
         case "MAC_QRCODE":
-            bleKey = .MAC_QRCODE
+            bleKey = BleKey.MAC_QRCODE
             break;
         case "REAL_TIME_TEMPERATURE":
-            bleKey = .REAL_TIME_TEMPERATURE
+            bleKey = BleKey.REAL_TIME_TEMPERATURE
             break;
         case "REAL_TIME_BLOOD_PRESSURE":
-            bleKey = .REAL_TIME_BLOOD_PRESSURE
+            bleKey = BleKey.REAL_TIME_BLOOD_PRESSURE
             break;
         case "TEMPERATURE_VALUE":
-            bleKey = .TEMPERATURE
+            bleKey = BleKey.TEMPERATURE
             break;
         case "GAME_SET":
-            bleKey = .GAME_SET
+            bleKey = BleKey.GAME_SET
             break;
         case "FIND_WATCH":
-            bleKey = .FIND_WATCH
+            bleKey = BleKey.FIND_WATCH
             break;
         case "SET_WATCH_PASSWORD":
             bleKey = BleKey.SET_WATCH_PASSWORD
@@ -373,8 +373,8 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
             default:
                 bleKeyFlag=BleKeyFlag.NONE
         }
-      if bleKey == .IDENTITY {
-          if bleKeyFlag == .DELETE {
+      if bleKey == BleKey.IDENTITY {
+          if bleKeyFlag == BleKeyFlag.DELETE {
               if BleConnector.shared.isAvailable() {
                   _ = BleConnector.shared.sendData(bleKey, bleKeyFlag)
               }
@@ -390,99 +390,99 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
       doBle { bleConnector in
           switch bleKey {
               // BleCommand.UPDATE
-          case .OTA:
+          case BleKey.OTA:
              // gotoOta()
               print("OTA")
-          case .XMODEM:
+          case BleKey.XMODEM:
               _ = bleConnector.sendData(bleKey, bleKeyFlag)
 
               // BleCommand.SET
-          case .TIME:
-              if bleKeyFlag == .UPDATE {
+          case BleKey.TIME:
+              if bleKeyFlag == BleKeyFlag.UPDATE {
                   //设置设备时间
                   _ = bleConnector.sendObject(bleKey, bleKeyFlag, BleTime.local())
-              } else if bleKeyFlag == .READ {
+              } else if bleKeyFlag == BleKeyFlag.READ {
                   //READ
                   _ = bleConnector.sendData(bleKey, bleKeyFlag)
               }
-          case .TIME_ZONE:
-              if bleKeyFlag == .UPDATE {
+          case BleKey.TIME_ZONE:
+              if bleKeyFlag == BleKeyFlag.UPDATE {
                   //设置设备时区
                   _ = bleConnector.sendObject(bleKey, bleKeyFlag, BleTimeZone())
-              } else if bleKeyFlag == .READ {
+              } else if bleKeyFlag == BleKeyFlag.READ {
                   //READ
                   _ = bleConnector.sendData(bleKey, bleKeyFlag)
               }
-          case .POWER:
-              //bleKeyFlag = .READ 获取设备电量
+          case BleKey.POWER:
+              //bleKeyFlag =  BleKeyFlag.READ 获取设备电量
               _ = bleConnector.sendData(bleKey, bleKeyFlag)
-          case .FIRMWARE_VERSION:
-              //bleKeyFlag = .READ 获取设备固件版本号
+          case BleKey.FIRMWARE_VERSION:
+              //bleKeyFlag =  BleKeyFlag.READ 获取设备固件版本号
               _ = bleConnector.sendData(bleKey, bleKeyFlag)
-          case .BLE_ADDRESS:
-              //bleKeyFlag = .READ 获取设备Mac地址
+          case BleKey.BLE_ADDRESS:
+              //bleKeyFlag =  BleKeyFlag.READ 获取设备Mac地址
               _ = bleConnector.sendData(bleKey, bleKeyFlag)
-          case .USER_PROFILE:
-              if bleKeyFlag == .UPDATE {
+          case BleKey.USER_PROFILE:
+              if bleKeyFlag == BleKeyFlag.UPDATE {
                   //更新设备上的用户个人信息
                   let bleUserProfile = BleUserProfile(0, 0, 20, 170.0, 60.0)
                   _ = bleConnector.sendObject(bleKey, bleKeyFlag, bleUserProfile)
-              } else if bleKeyFlag == .READ {
+              } else if bleKeyFlag ==  BleKeyFlag.READ {
                   //READ
                   _ = bleConnector.sendData(bleKey, bleKeyFlag)
               }
-          case .STEP_GOAL:
-              if bleKeyFlag == .UPDATE {
+          case BleKey.STEP_GOAL:
+              if bleKeyFlag == BleKeyFlag.UPDATE {
                   //更新设备上的运动目标
                   _ = bleConnector.sendInt32(bleKey, bleKeyFlag, 0x1234)
-              } else if bleKeyFlag == .READ {
+              } else if bleKeyFlag ==  BleKeyFlag.READ {
                   //READ
                   _ = bleConnector.sendData(bleKey, bleKeyFlag)
               }
-          case .BACK_LIGHT:
-              if bleKeyFlag == .UPDATE {
+          case BleKey.BACK_LIGHT:
+              if bleKeyFlag ==  BleKeyFlag.UPDATE {
                   //背光设置
                   _ = bleConnector.sendInt8(bleKey, bleKeyFlag, 4) // 0～20, 0 is off
-              } else if bleKeyFlag == .READ {
+              } else if bleKeyFlag ==  BleKeyFlag.READ {
                   //READ
                   _ = bleConnector.sendData(bleKey, bleKeyFlag)
               }
-          case .SEDENTARINESS:
+          case BleKey.SEDENTARINESS:
               //久坐提醒
-              if bleKeyFlag == .UPDATE {
+              if bleKeyFlag ==  BleKeyFlag.UPDATE {
                   let bleSedentariness = BleSedentarinessSettings()
                   bleSedentariness.mEnabled = 1
                   bleSedentariness.mRepeat = 63 // Monday ~ Saturday
                   bleSedentariness.mStartHour = 1
                   bleSedentariness.mEndHour = 22
                   bleSedentariness.mInterval = 60
-                  _ = bleConnector.sendObject(bleKey, .UPDATE, bleSedentariness)
-              } else if bleKeyFlag == .READ {
+                  _ = bleConnector.sendObject(bleKey,  BleKeyFlag.UPDATE, bleSedentariness)
+              } else if bleKeyFlag ==  BleKeyFlag.READ {
                   //READ
                   _ = bleConnector.sendData(bleKey, bleKeyFlag)
               }
-          case .NOTIFICATION_REMINDER:
+          case BleKey.NOTIFICATION_REMINDER:
               //消息提醒CALL
-              if bleKeyFlag == .UPDATE {
+              if bleKeyFlag ==  BleKeyFlag.UPDATE {
                   let bleNotificationSettings = BleNotificationSettings()
                   bleNotificationSettings.enable(BleNotificationSettings.MIRROR_PHONE)
                   bleNotificationSettings.enable(BleNotificationSettings.WE_CHAT)
                   print(bleNotificationSettings)
-                  _ = bleConnector.sendObject(bleKey, .UPDATE, bleNotificationSettings)
+                  _ = bleConnector.sendObject(bleKey,  BleKeyFlag.UPDATE, bleNotificationSettings)
               }
-          case .NO_DISTURB_RANGE:
+          case BleKey.NO_DISTURB_RANGE:
               //设置勿扰
-              if bleKeyFlag == .UPDATE {
+              if bleKeyFlag ==  BleKeyFlag.UPDATE {
                   let noDisturb = BleNoDisturbSettings()
                   noDisturb.mBleTimeRange1 = BleTimeRange(1, 2, 0, 18, 0)
                   _ = bleConnector.sendObject(bleKey, bleKeyFlag, noDisturb)
               } else {
                   _ = bleConnector.sendData(bleKey, bleKeyFlag)
               }
-          case .NO_DISTURB_GLOBAL:
+          case BleKey.NO_DISTURB_GLOBAL:
               // on
               _ = bleConnector.sendBool(bleKey, bleKeyFlag, true)
-          case .WATCHFACE_ID:
+          case BleKey.WATCHFACE_ID:
               if bleKeyFlag == BleKeyFlag.READ {
                   //READ
                   _ = bleConnector.sendData(bleKey, bleKeyFlag)
@@ -491,49 +491,49 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                   _ = bleConnector.sendInt32(bleKey, bleKeyFlag, Int(watchFaceId))
               }
               break
-          case .IBEACON_SET:
-              if bleKeyFlag == .UPDATE{
+          case BleKey.IBEACON_SET:
+              if bleKeyFlag ==  BleKeyFlag.UPDATE{
                   _ = bleConnector.sendInt8(bleKey, bleKeyFlag, 1)
               }
               break
-          case .WATCH_FACE_SWITCH:
+          case BleKey.WATCH_FACE_SWITCH:
               //设置默认表盘
-              if bleKeyFlag == .UPDATE {
+              if bleKeyFlag ==  BleKeyFlag.UPDATE {
                   let value = 4 //watch face number
-                  _ = BleConnector.shared.sendInt8(.WATCH_FACE_SWITCH, .UPDATE, value)
+                  _ = BleConnector.shared.sendInt8(.WATCH_FACE_SWITCH,  BleKeyFlag.UPDATE, value)
               } else if bleKeyFlag == BleKeyFlag.READ {
                   //READ
                   _ = bleConnector.sendData(bleKey, bleKeyFlag)
               }
               break
-          case .GESTURE_WAKE:
+          case BleKey.GESTURE_WAKE:
               //抬手亮
-              if bleKeyFlag == .UPDATE {
+              if bleKeyFlag ==  BleKeyFlag.UPDATE {
                   _ = bleConnector.sendObject(bleKey, bleKeyFlag,
                       BleGestureWake(BleTimeRange(1, 8, 0, 22, 0)))
               } else if bleKeyFlag == BleKeyFlag.READ {
                   //READ
                   _ = bleConnector.sendData(bleKey, bleKeyFlag)
               }
-          case .VIBRATION:
+          case BleKey.VIBRATION:
               //震动设置
-              if bleKeyFlag == .UPDATE {
+              if bleKeyFlag ==  BleKeyFlag.UPDATE {
                   _ = bleConnector.sendInt8(bleKey, bleKeyFlag, 3) // 0~10, 0 is off
-              } else if bleKeyFlag == .READ {
+              } else if bleKeyFlag ==  BleKeyFlag.READ {
                   //READ
                   _ = bleConnector.sendData(bleKey, bleKeyFlag)
               }
-          case .HR_ASSIST_SLEEP:
+          case BleKey.HR_ASSIST_SLEEP:
               // on 睡眠辅助设备
               _ = bleConnector.sendBool(bleKey, bleKeyFlag, true)
-          case .HOUR_SYSTEM:
+          case BleKey.HOUR_SYSTEM:
               // 0: 24-hourly; 1: 12-hourly 小时制
               _ = bleConnector.sendInt8(bleKey, bleKeyFlag, 1)
-          case .LANGUAGE:
+          case BleKey.LANGUAGE:
               //设备语言设置
               _ = bleConnector.sendInt8(bleKey, bleKeyFlag, Languages.languageToCode())
-          case .ALARM:
-              if bleKeyFlag == .CREATE {
+          case BleKey.ALARM:
+              if bleKeyFlag ==  BleKeyFlag.CREATE {
                   // 创建一个一分钟后的闹钟
                   let calendar = Calendar.current
                   var date = Date()
@@ -548,13 +548,13 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                       calendar.component(.minute, from: date), // mMinute
                       "tag" // mTag
                   ))
-              } else if bleKeyFlag == .DELETE {
+              } else if bleKeyFlag ==  BleKeyFlag.DELETE {
                   // 如果缓存中有闹钟的话，删除第一个
                   let alarms: [BleAlarm] = BleCache.shared.getArray(.ALARM)
                   if !alarms.isEmpty {
                       _ = bleConnector.sendInt8(bleKey, bleKeyFlag, alarms[0].mId)
                   }
-              } else if bleKeyFlag == .UPDATE {
+              } else if bleKeyFlag ==  BleKeyFlag.UPDATE {
                   // 如果缓存中有闹钟的话，切换第一个闹钟的开启状态
                   let alarms: [BleAlarm] = BleCache.shared.getArray(.ALARM)
                   if !alarms.isEmpty {
@@ -562,10 +562,10 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                       alarm.mEnabled ^= 1
                       _ = bleConnector.sendObject(bleKey, bleKeyFlag, alarm)
                   }
-              } else if bleKeyFlag == .READ {
+              } else if bleKeyFlag ==  BleKeyFlag.READ {
                   // 读取设备上所有的闹钟
                   _ = bleConnector.sendInt8(bleKey, bleKeyFlag, ID_ALL)
-              } else if bleKeyFlag == .RESET {
+              } else if bleKeyFlag ==  BleKeyFlag.RESET {
                   // 重置设备上的闹钟
                   let calendar = Calendar.current
                   let date = Date()
@@ -584,9 +584,9 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                   }
                   _ = bleConnector.sendArray(bleKey, bleKeyFlag, alarms)
               }
-          case .COACHING:
+          case BleKey.COACHING:
               //锻炼模式设置
-              if bleKeyFlag == .CREATE {
+              if bleKeyFlag ==  BleKeyFlag.CREATE {
                   _ = bleConnector.sendObject(bleKey, bleKeyFlag, BleCoaching(
                       "My title", // title
                       "My description", // description
@@ -600,7 +600,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                           0 // hr zone
                       )]
                   ))
-              } else if bleKeyFlag == .UPDATE {
+              } else if bleKeyFlag ==  BleKeyFlag.UPDATE {
                   // 如果缓存中有Coaching的话，修改第一个Coaching的标题
                   let coachings: [BleCoaching] = BleCache.shared.getArray(.COACHING)
                   if !coachings.isEmpty {
@@ -608,45 +608,45 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                       coaching.mTitle += " nice"
                       _ = bleConnector.sendObject(bleKey, bleKeyFlag, coaching)
                   }
-              } else if bleKeyFlag == .READ {
+              } else if bleKeyFlag ==  BleKeyFlag.READ {
                   // 读取所有Coaching
                   _ = bleConnector.sendInt8(bleKey, bleKeyFlag, ID_ALL)
               }
-          case .ANTI_LOST:
+          case BleKey.ANTI_LOST:
               // on 防丢提醒设备
               _ = bleConnector.sendBool(bleKey, bleKeyFlag, true)
-          case .HR_MONITORING:
+          case BleKey.HR_MONITORING:
               //定时心率检查设置
-              if bleKeyFlag == .UPDATE {
+              if bleKeyFlag ==  BleKeyFlag.UPDATE {
                   let hrMonitoring = BleHrMonitoringSettings()
                   hrMonitoring.mBleTimeRange = BleTimeRange(1, 8, 0, 22, 0)
                   hrMonitoring.mInterval = 60 // an hour
                   _ = bleConnector.sendObject(bleKey, bleKeyFlag, hrMonitoring)
-              } else if bleKeyFlag == .READ {
+              } else if bleKeyFlag ==  BleKeyFlag.READ {
                   _ = bleConnector.sendData(bleKey, bleKeyFlag)
               }
-          case .DRINKWATER:
-              if bleKeyFlag == .UPDATE {
+          case BleKey.DRINKWATER:
+              if bleKeyFlag ==  BleKeyFlag.UPDATE {
                   let drinkWater = BleDrinkWaterSettings()
                   drinkWater.mEnabled = 1
                   drinkWater.mInterval = 1
                   drinkWater.mRepeat = 63 // Monday ~ Saturday
                   drinkWater.mStartHour = 7
                   drinkWater.mEndHour = 22
-                  _ = bleConnector.sendObject(.DRINKWATER, .UPDATE, drinkWater)
+                  _ = bleConnector.sendObject(.DRINKWATER,  BleKeyFlag.UPDATE, drinkWater)
               }
               break
-          case .UI_PACK_VERSION:
+          case BleKey.UI_PACK_VERSION:
               //Realtek UI包 版本
               _ = bleConnector.sendData(bleKey, bleKeyFlag)
-          case .LANGUAGE_PACK_VERSION:
+          case BleKey.LANGUAGE_PACK_VERSION:
               //Realtek 语言包 版本
               _ = bleConnector.sendData(bleKey, bleKeyFlag)
-          case .SLEEP_QUALITY:
+          case BleKey.SLEEP_QUALITY:
               //睡眠总结设置
               _ = bleConnector.sendObject(bleKey, bleKeyFlag,
                   BleSleepQuality(202, 201, 481))
-          case .HEALTH_CARE:
+          case BleKey.HEALTH_CARE:
               //生理期设置
               _ = bleConnector.sendObject(bleKey, bleKeyFlag, BleHealthCare(
                   9, 0, // 提醒时间
@@ -659,7 +659,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                   1,
                   7 // 生理期持续时间，天
               ))
-          case .TEMPERATURE_DETECTING:
+          case BleKey.TEMPERATURE_DETECTING:
               //定时体温监测
               let detecting = BleTemperatureDetecting()
               detecting.mBleTimeRange = BleTimeRange(1, 8, 0, 22, 0)
@@ -667,20 +667,20 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
               _ = bleConnector.sendObject(bleKey, bleKeyFlag, detecting)
 
               // BleCommand.CONNECT
-          case .IDENTITY:
+          case BleKey.IDENTITY:
               //绑定设备
-              if bleKeyFlag == .CREATE {
+              if bleKeyFlag ==  BleKeyFlag.CREATE {
                   _ = bleConnector.sendInt32(bleKey, bleKeyFlag, Int.random(in: 1..<0xffffffff))
-              } else if bleKeyFlag == .READ {
+              } else if bleKeyFlag ==  BleKeyFlag.READ {
                   _ = bleConnector.sendData(bleKey, bleKeyFlag)
               }
-          case .PAIR:
+          case BleKey.PAIR:
               //蓝牙配对
               _ = bleConnector.sendData(bleKey, bleKeyFlag)
 
               // BleCommand.PUSH
-          case .SCHEDULE:
-              if bleKeyFlag == .CREATE {
+          case BleKey.SCHEDULE:
+              if bleKeyFlag ==  BleKeyFlag.CREATE {
                   // 创建一个1分钟后的日程
                   let calendar = Calendar.current
                   var date = Date()
@@ -695,13 +695,13 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                       "Title8", // mTitle
                       "Content9" // mContent
                   ))
-              } else if bleKeyFlag == .DELETE {
+              } else if bleKeyFlag ==  BleKeyFlag.DELETE {
                   // 如果缓存中有日程的话，删除第一个
                   let schedules: [BleSchedule] = BleCache.shared.getArray(.SCHEDULE)
                   if !schedules.isEmpty {
                       _ = bleConnector.sendInt8(bleKey, bleKeyFlag, schedules[0].mId)
                   }
-              } else if bleKeyFlag == .UPDATE {
+              } else if bleKeyFlag ==  BleKeyFlag.UPDATE {
                   // 如果缓存中有日程的话，修改第一个日程的时间
                   //mContent -> count<50
                   let schedules: [BleSchedule] = BleCache.shared.getArray(.SCHEDULE)
@@ -711,9 +711,9 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                       _ = bleConnector.sendObject(bleKey, bleKeyFlag, schedule)
                   }
               }
-          case .WEATHER_REALTIME:
+          case BleKey.WEATHER_REALTIME:
               //实时天气
-              if bleKeyFlag == .UPDATE {
+              if bleKeyFlag ==  BleKeyFlag.UPDATE {
                   // let weatherRealtime: BleWeatherRealtime? = BleCache.shared.getObject(.WEATHER_REALTIME)
                   _ = bleConnector.sendObject(BleKey.WEATHER_REALTIME, bleKeyFlag, BleWeatherRealtime(
                       time: Int(Date().timeIntervalSince1970),
@@ -730,9 +730,9 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                       )
                   ))
               }
-          case .WEATHER_FORECAST:
+          case BleKey.WEATHER_FORECAST:
               //天气预报
-              if bleKeyFlag == .UPDATE {
+              if bleKeyFlag ==  BleKeyFlag.UPDATE {
                   // let weatherForecast: BleWeatherForecast? = BleCache.shared.getObject(.WEATHER_FORECAST)
                   _ = bleConnector.sendObject(BleKey.WEATHER_FORECAST, bleKeyFlag, BleWeatherForecast(
                       time: Int(Date().timeIntervalSince1970),
@@ -768,15 +768,15 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                           precipitation: 4)
                   ))
               }
-          case .APP_SPORT_DATA:
+          case BleKey.APP_SPORT_DATA:
               bleLog("-- PHONEWORKOUT --")
               break
-          case .REAL_TIME_HEART_RATE:
+          case BleKey.REAL_TIME_HEART_RATE:
               bleLog("-- REALTIMEHR --")
               break
               // BleCommand.DATA
-          case .DATA_ALL, .ACTIVITY, .HEART_RATE, .BLOOD_PRESSURE, .SLEEP, .WORKOUT, .LOCATION, .TEMPERATURE,
-                  .BLOODOXYGEN, .HRV, .WORKOUT2, .MATCH_RECORD:
+          case BleKey.DATA_ALL, BleKey.ACTIVITY, BleKey.HEART_RATE, BleKey.BLOOD_PRESSURE, BleKey.SLEEP, BleKey.WORKOUT, BleKey.LOCATION, BleKey.TEMPERATURE,
+                  BleKey.BLOODOXYGEN, BleKey.HRV, BleKey.WORKOUT2, BleKey.MATCH_RECORD:
               //Exercise data
               _ = bleConnector.sendData(bleKey, bleKeyFlag)
 
@@ -789,7 +789,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
               } else {
                   _ = bleConnector.sendInt8(bleKey, bleKeyFlag, CameraState.ENTER)
               }
-          case .APP_SPORT_STATE:
+          case BleKey.APP_SPORT_STATE:
               bleLog("PHONE_WORKOUT_SWITCH")
               let mode = BlePhoneWorkOutStatus()
               mode.mMode = PhoneWorkOutStatus.Treadmill
@@ -824,21 +824,21 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         
               _ = bleConnector.sendObject(bleKey, bleKeyFlag, mode)
               break
-          case .IBEACON_CONTROL:
-              if bleKeyFlag == .UPDATE {
+          case BleKey.IBEACON_CONTROL:
+              if bleKeyFlag ==  BleKeyFlag.UPDATE {
                   _ = BleConnector.shared.sendInt8(bleKey, bleKeyFlag, 0)
               }
               break
               // BleCommand.IO
-          case .WATCH_FACE:
-              if bleKeyFlag == .DELETE {
+          case BleKey.WATCH_FACE:
+              if bleKeyFlag ==  BleKeyFlag.DELETE {
                   _ = BleConnector.shared.sendData(bleKey, bleKeyFlag)
                   return
               }
              // selectWatchType()
               break
-//          case .AGPS_FILE, .FONT_FILE, .UI_FILE, .LANGUAGE_FILE:
-//              if bleKeyFlag == .DELETE {
+//          case BleKey.AGPS_FILE, BleKey.FONT_FILE, BleKey.UI_FILE, BleKey.LANGUAGE_FILE:
+//              if bleKeyFlag ==  BleKeyFlag.DELETE {
 //                  _ = BleConnector.shared.sendData(bleKey, bleKeyFlag)
 //                  return
 //              }
@@ -847,24 +847,24 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
 //                  bleLog("\(bleKey) - \(String(describing: fileURL))")
 //                  _ = bleConnector.sendStream(bleKey, URL.init(fileURLWithPath: fileURL))
 //                  self.proDuration = Int(Date().timeIntervalSince1970)
-//                  DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [self] in
+//                  DispatchQueue.main.asyncAfter(deadline: BleKey.now() + 0.1) { [self] in
 //                      progressLab.frame = CGRect(x: 50, y: 60, width: 230, height: 100)
 //                      progressLab.numberOfLines = 0
-//                      progressLab.backgroundColor = .black
-//                      progressLab.textColor = .white
-//                      progressLab.textAlignment = .center
+//                      progressLab.backgroundColor = BleKey.black
+//                      progressLab.textColor = BleKey.white
+//                      progressLab.textAlignment = BleKey.center
 //                      self.tableView.addSubview(progressLab)
 //                      UIApplication.shared.isIdleTimerDisabled = true
 //                  }
 //              }
 //              self.navigationController?.pushViewController(selectVC, animated: true)
-//          case .CONTACT:
+//          case BleKey.CONTACT:
 //              //address book 同步通讯录到设备
 //             if addressBookAuthorization() {
 //               selectAddressBook()
 //            }
-          case .AEROBIC_EXERCISE:
-              if bleKeyFlag == .UPDATE {
+          case BleKey.AEROBIC_EXERCISE:
+              if bleKeyFlag ==  BleKeyFlag.UPDATE {
                   let aerobic = BleAerobicSettings()
                   aerobic.mHour = 1
                   aerobic.mMin = 30
@@ -876,25 +876,25 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                   aerobic.mHRMaxVibration = 4
                   aerobic.mHRIntermediate = 30
                   _ = bleConnector.sendObject(bleKey, bleKeyFlag, aerobic)
-              } else if bleKeyFlag == .READ {
+              } else if bleKeyFlag ==  BleKeyFlag.READ {
                   _ = bleConnector.sendData(bleKey, bleKeyFlag)
               }
-          case .TEMPERATURE_UNIT:
-              if bleKeyFlag == .UPDATE {
+          case BleKey.TEMPERATURE_UNIT:
+              if bleKeyFlag ==  BleKeyFlag.UPDATE {
                   //0 - Celsius ℃ 1 - Fahrenheit ℉
                   _ = bleConnector.sendInt8(bleKey, bleKeyFlag, 1)
-              } else if bleKeyFlag == .READ {
+              } else if bleKeyFlag ==  BleKeyFlag.READ {
                   _ = bleConnector.sendData(bleKey, bleKeyFlag)
               }
-          case .DATE_FORMAT:
-              if bleKeyFlag == .UPDATE {
+          case BleKey.DATE_FORMAT:
+              if bleKeyFlag ==  BleKeyFlag.UPDATE {
                   /**
                     0 ->YYYY/MM/dd
                     1 ->dd/MM/YYYY
                     2 ->MM/dd/YYYY
                     */
                   _ = bleConnector.sendInt8(bleKey, bleKeyFlag, 2)
-              } else if bleKeyFlag == .READ {
+              } else if bleKeyFlag ==  BleKeyFlag.READ {
                   _ = bleConnector.sendData(bleKey, bleKeyFlag)
               }
           default:
@@ -908,20 +908,20 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
 extension SwiftSmartbleSdkPlugin: BleScanDelegate, BleScanFilter {
 
     func onBluetoothDisabled() {
-        //btnScan.setTitle("Please enable the Bluetooth", for: .normal)
+        //btnScan.setTitle("Please enable the Bluetooth", for: BleKey.normal)
     }
 
     func onBluetoothEnabled() {
-       // btnScan.setTitle("Scan", for: .normal)
+       // btnScan.setTitle("Scan", for: BleKey.normal)
     }
 
     func onScan(_ scan: Bool) {
         if scan {
-           // btnScan.setTitle("Scanning", for: .normal)
+           // btnScan.setTitle("Scanning", for: BleKey.normal)
             mDevices.removeAll()
            // tableView.reloadData()
         } else {
-           // btnScan.setTitle("Scan", for: .normal)
+           // btnScan.setTitle("Scan", for: BleKey.normal)
         }
     }
 
@@ -932,7 +932,7 @@ extension SwiftSmartbleSdkPlugin: BleScanDelegate, BleScanFilter {
         if !mDevices.contains(item) {
             mDevices.append(item)
 //            let newIndexPath = IndexPath(row: mDevices.count - 1, section: 0)
-//            tableView.insertRows(at: [newIndexPath], with: .automatic)
+//            tableView.insertRows(at: [newIndexPath], with: BleKey.automatic)
         }
         if let sink = scanSink {
             // Use the unwrapped value of `sink` here
@@ -962,7 +962,7 @@ extension SwiftSmartbleSdkPlugin: BleHandleDelegate {
 
     func onIdentityCreate(_ status: Bool) {
         if status {
-            _ = mBleConnector.sendData(.PAIR, .UPDATE)
+            _ = mBleConnector.sendData(.PAIR,  BleKeyFlag.UPDATE)
 //            dismiss(animated: true)
 //            present(storyboard!.instantiateViewController(withIdentifier: "nav"), animated: true)
         }
