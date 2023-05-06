@@ -22,7 +22,7 @@ A new Flutter project.
   'FR/JLDialUnit.framework',
   'FR/RTKAudioConnectSDK.framework',
   'FR/RTKLEFoundation.framework',
-  'FR/RTKKOTASDK.framework',
+  'FR/RTKOTASDK.framework',
   'FR/ZipZap.framework'
   s.platform = :ios, '9.0'
 
