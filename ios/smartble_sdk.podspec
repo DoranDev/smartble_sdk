@@ -16,14 +16,14 @@ A new Flutter project.
   s.source_files = 'Classes/**/*','Resource/**/*','Tools/**/*'
   s.dependency 'Flutter'
   s.dependency 'SnapKit'
-  s.vendored_frameworks='FR/BeaconMonitor.framework'
-  s.vendored_frameworks='FR/GRDFUSDK.framework'
-  s.vendored_frameworks='FR/JL_BLEKIT.framework'
-  s.vendored_frameworks='FR/JLDialUnit.framework'
-  s.vendored_frameworks='FR/RTKAudioConnectSDK.framework'
-  s.vendored_frameworks='FR/RTKLEFoundation.framework'
-  s.vendored_frameworks='FR/RTKKOTASDK.framework'
-  s.vendored_frameworks='FR/ZipZap.framework'
+  s.vendored_frameworks='FR/BeaconMonitor.framework',
+  'FR/GRDFUSDK.framework',
+  'FR/JL_BLEKIT.framework',
+  'FR/JLDialUnit.framework',
+  'FR/RTKAudioConnectSDK.framework',
+  'FR/RTKLEFoundation.framework',
+  'FR/RTKKOTASDK.framework',
+  'FR/ZipZap.framework'
   s.platform = :ios, '9.0'
 
   # Flutter.framework does not contain a i386 slice.
