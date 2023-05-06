@@ -15,9 +15,9 @@ func bleLog(_ message: String) {
     print("\(Thread.current) - \(dateFormat1.string(from: Date()))-\(Date().milliStamp)  \(message)")
     #elseif !DEBUG
 //    write log (.text) 没有请注释
-    if UserDefaults.standard.bool(forKey: kRuntimeBleLog) {
-        ABHBleLog.share.startWriteMessage(message)
-    }
+//    if UserDefaults.standard.bool(forKey: kRuntimeBleLog) {
+//        ABHBleLog.share.startWriteMessage(message)
+//    }
     #endif
 }
 
