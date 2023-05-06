@@ -13,7 +13,7 @@ A new Flutter project.
   s.license          = { :file => '../LICENSE' }
   s.author           = { 'Your Company' => 'email@example.com' }
   s.source           = { :path => '.' }
-  s.source_files = 'Classes/**/*', 'iOSBaseBle/**/*','iOSSmaBle/**/*','Resource/**/*','Tools/**/*'
+  s.source_files = 'Classes/**/*','Resource/**/*','Tools/**/*'
   s.dependency 'Flutter'
   s.dependency 'SnapKit'
   s.vendored_frameworks='FR/BeaconMonitor.framework'
