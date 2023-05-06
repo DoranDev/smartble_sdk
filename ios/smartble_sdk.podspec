@@ -8,6 +8,7 @@ Pod::Spec.new do |s|
   s.summary          = 'A new Flutter project.'
   s.description      = <<-DESC
 A new Flutter project.
+
                        DESC
   s.homepage         = 'http://example.com'
   s.license          = { :file => '../LICENSE' }
