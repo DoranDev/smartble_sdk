@@ -20,9 +20,6 @@ A new Flutter project.
   'FR/GRDFUSDK.framework',
   'FR/JL_BLEKIT.framework',
   'FR/JLDialUnit.framework',
-  'FR/RTKAudioConnectSDK.framework',
-  'FR/RTKLEFoundation.framework',
-  'FR/RTKOTASDK.framework',
   'FR/ZipZap.framework'
   s.platform = :ios, '9.0'
 
