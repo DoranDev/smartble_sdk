@@ -4,8 +4,131 @@ import CoreBluetooth
 
 public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
     static let eventChannelNameScan = "smartble_sdk/scan";
-      
+    static let eventChannelNameOnDeviceConnected = "onDeviceConnected";
+    static let eventChannelNameOnIdentityCreate = "onIdentityCreate";
+    static let eventChannelNameOnCommandReply = "onCommandReply";
+    static let eventChannelNameOnOTA = "onOTA";
+    static let eventChannelNameOnReadPower = "onReadPower";
+    static let eventChannelNameOnReadFirmwareVersion  = "onReadFirmwareVersion";
+    static let eventChannelNameOnReadBleAddress  = "onReadBleAddress";
+    static let eventChannelNameOnReadSedentariness  = "onReadSedentariness";
+    static let eventChannelNameOnReadNoDistrub  = "onReadNoDistrub";
+    static let eventChannelNameOnReadAlarm  = "onReadAlarm";
+    static let eventChannelNameOnReadCoachingIds  = "onReadCoachingIds";
+    static let eventChannelNameOnReadUiPackVersion  = "onReadUiPackVersion";
+    static let eventChannelNameOnReadLanguagePackVersion  = "onReadLanguagePackVersion";
+    static let eventChannelNameOnIdentityDeleteByDevice  = "onIdentityDeleteByDevice";
+    static let eventChannelNameOnCameraStateChange  = "onCameraStateChange";
+    static let eventChannelNameOnCameraResponse  = "onCameraResponse";
+    static let eventChannelNameOnSyncData  = "onSyncData";
+    static let eventChannelNameOnReadActivity  = "onReadActivity";
+    static let eventChannelNameOnReadHeartRate  = "onReadHeartRate";
+    static let eventChannelNameOnUpdateHeartRate  = "onUpdateHeartRate";
+    static let eventChannelNameOnReadBloodPressure  = "onReadBloodPressure";
+    static let eventChannelNameOnReadSleep  = "onReadSleep";
+    static let eventChannelNameOnReadLocation  = "onReadLocation";
+    static let eventChannelNameOnReadTemperature  = "onReadTemperature";
+    static let eventChannelNameOnReadWorkout2  = "onReadWorkout2";
+    static let eventChannelNameOnStreamProgress  = "onStreamProgress";
+    static let eventChannelNameOnUpdateAppSportState  = "onUpdateAppSportState";
+    static let eventChannelNameOnClassicBluetoothStateChange  = "onClassicBluetoothStateChange";
+    static let eventChannelNameOnDeviceFileUpdate  = "onDeviceFileUpdate";
+    static let eventChannelNameOnReadDeviceFile  = "onReadDeviceFile";
+    static let eventChannelNameOnReadTemperatureUnit  = "onReadTemperatureUnit";
+    static let eventChannelNameOnReadDateFormat  = "onReadDateFormat";
+    static let eventChannelNameOnReadWatchFaceSwitch  = "onReadWatchFaceSwitch";
+    static let eventChannelNameOnUpdateWatchFaceSwitch  = "onUpdateWatchFaceSwitch";
+    static let eventChannelNameOnAppSportDataResponse = "onAppSportDataResponse";
+    static let eventChannelNameOnReadWatchFaceId = "onReadWatchFaceId";
+    static let eventChannelNameOnWatchFaceIdUpdate = "onWatchFaceIdUpdate";
+    static let eventChannelNameOnHIDState = "onHIDState";
+    static let eventChannelNameOnHIDValueChange = "onHIDValueChange";
+    static let eventChannelNameOnDeviceSMSQuickReply = "onDeviceSMSQuickReply";
+    static let eventChannelNameOnReadDeviceInfo = "onReadDeviceInfo";
+    static let eventChannelNameOnSessionStateChange = "onSessionStateChange";
+    static let eventChannelNameOnNoDistrubUpdate = "onNoDistrubUpdate";
+    static let eventChannelNameOnAlarmUpdate = "onAlarmUpdate";
+    static let eventChannelNameOnAlarmDelete = "onAlarmDelete";
+    static let eventChannelNameOnAlarmAdd = "onAlarmAdd";
+    static let eventChannelNameOnFindPhone = "onFindPhone";
+    static let eventChannelNameOnRequestLocation = "onRequestLocation";
+    static let eventChannelNameOnDeviceRequestAGpsFile = "onDeviceRequestAGpsFile";
+    static let eventChannelNameOnReadBloodOxygen = "onReadBloodOxygen";
+    static let eventChannelNameOnReadWorkout = "onReadWorkout";
+    static let eventChannelNameOnReadBleHrv = "onReadBleHrv";
+    static let eventChannelNameOnReadPressure = "onReadPressure";
+    static let eventChannelNameOnReadWorldClock = "onReadWorldClock";
+    static let eventChannelNameOnWorldClockDelete = "onWorldClockDelete";
+    static let eventChannelNameOnDeviceConnecting = "onDeviceConnecting";
+    static let eventChannelNameOnIncomingCallStatus = "onIncomingCallStatus";
+    static let eventChannelNameOnReceiveMusicCommand = "onReceiveMusicCommand";
+    static let eventChannelNameOnStockRead = "onStockRead";
+    static let eventChannelNameOnStockDelete = "onStockDelete";
+    static let eventChannelNameOnBleError = "onBleError";
+
     var scanSink: FlutterEventSink?
+    var onDeviceConnectedSink: FlutterEventSink?
+    var onIdentityCreateSink: FlutterEventSink?
+    var onCommandReplySink: FlutterEventSink?
+    var onOTASink: FlutterEventSink?
+    var onReadPowerSink: FlutterEventSink?
+    var onReadFirmwareVersionSink: FlutterEventSink?
+    var onReadBleAddressSink: FlutterEventSink?
+    var onReadSedentarinessSink: FlutterEventSink?
+    var onReadNoDistrubSink: FlutterEventSink?
+    var onReadAlarmSink: FlutterEventSink?
+    var onReadCoachingIdsSink: FlutterEventSink?
+    var onReadUiPackVersionSink: FlutterEventSink?
+    var onReadLanguagePackVersionSink: FlutterEventSink?
+    var onIdentityDeleteByDeviceSink: FlutterEventSink?
+    var onCameraStateChangeSink: FlutterEventSink?
+    var onCameraResponseSink: FlutterEventSink?
+    var onSyncDataSink: FlutterEventSink?
+    var onReadActivitySink: FlutterEventSink?
+    var onReadHeartRateSink: FlutterEventSink?
+    var onUpdateHeartRateSink: FlutterEventSink?
+    var onReadBloodPressureSink: FlutterEventSink?
+    var onReadSleepSink: FlutterEventSink?
+    var onReadLocationSink: FlutterEventSink?
+    var onReadTemperatureSink: FlutterEventSink?
+    var onReadWorkout2Sink: FlutterEventSink?
+    var onStreamProgressSink: FlutterEventSink?
+    var onUpdateAppSportStateSink: FlutterEventSink?
+    var onClassicBluetoothStateChangeSink: FlutterEventSink?
+    var onDeviceFileUpdateSink: FlutterEventSink?
+    var onReadDeviceFileSink: FlutterEventSink?
+    var onReadTemperatureUnitSink: FlutterEventSink?
+    var onReadDateFormatSink: FlutterEventSink?
+    var onReadWatchFaceSwitchSink: FlutterEventSink?
+    var onUpdateWatchFaceSwitchSink: FlutterEventSink?
+    var onAppSportDataResponseSink: FlutterEventSink?
+    var onReadWatchFaceIdSink: FlutterEventSink?
+    var onWatchFaceIdUpdateSink: FlutterEventSink?
+    var onHIDStateSink: FlutterEventSink?
+    var onHIDValueChangeSink: FlutterEventSink?
+    var onDeviceSMSQuickReplySink: FlutterEventSink?
+    var onReadDeviceInfoSink: FlutterEventSink?
+    var onSessionStateChangeSink: FlutterEventSink?
+    var onNoDistrubUpdateSink: FlutterEventSink?
+    var onAlarmUpdateSink: FlutterEventSink?
+    var onAlarmDeleteSink: FlutterEventSink?
+    var onAlarmAddSink: FlutterEventSink?
+    var onFindPhoneSink: FlutterEventSink?
+    var onRequestLocationSink: FlutterEventSink?
+    var onDeviceRequestAGpsFileSink: FlutterEventSink?
+    var onReadBloodOxygenSink: FlutterEventSink?
+    var onReadWorkoutSink: FlutterEventSink?
+    var onReadBleHrvSink: FlutterEventSink?
+    var onReadPressureSink: FlutterEventSink?
+    var onReadWorldClockSink: FlutterEventSink?
+    var onWorldClockDeleteSink: FlutterEventSink?
+    var onDeviceConnectingSink: FlutterEventSink?
+    var onIncomingCallStatusSink: FlutterEventSink?
+    var onReceiveMusicCommandSink: FlutterEventSink?
+    var onStockReadSink: FlutterEventSink?
+    var onStockDeleteSink: FlutterEventSink?
+    var onBleErrorSink: FlutterEventSink?
+  
     
     public func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
         switch arguments as? String {
@@ -31,6 +154,126 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
       
     let scanChannel = FlutterEventChannel(name: eventChannelNameScan, binaryMessenger:registrar.messenger())
     scanChannel.setStreamHandler(instance)
+      let onDeviceConnectedChannel = FlutterEventChannel(name: eventChannelNameOnDeviceConnected, binaryMessenger:registrar.messenger())
+      onDeviceConnectedChannel.setStreamHandler(instance)
+      let onIdentityCreateChannel = FlutterEventChannel(name: eventChannelNameOnIdentityCreate, binaryMessenger:registrar.messenger())
+      onIdentityCreateChannel.setStreamHandler(instance)
+      let onCommandReplyChannel = FlutterEventChannel(name: eventChannelNameOnCommandReply, binaryMessenger:registrar.messenger())
+      onCommandReplyChannel.setStreamHandler(instance)
+      let onOTAChannel = FlutterEventChannel(name: eventChannelNameOnOTA, binaryMessenger:registrar.messenger())
+      onOTAChannel.setStreamHandler(instance)
+      let onReadPowerChannel = FlutterEventChannel(name: eventChannelNameOnReadPower, binaryMessenger:registrar.messenger())
+      onReadPowerChannel.setStreamHandler(instance)
+      let onReadFirmwareVersionChannel = FlutterEventChannel(name: eventChannelNameOnReadFirmwareVersion, binaryMessenger:registrar.messenger())
+      onReadFirmwareVersionChannel.setStreamHandler(instance)
+      let onReadBleAddressChannel = FlutterEventChannel(name: eventChannelNameOnReadBleAddress, binaryMessenger:registrar.messenger())
+      onReadBleAddressChannel.setStreamHandler(instance)
+      let onReadSedentarinessChannel = FlutterEventChannel(name: eventChannelNameOnReadSedentariness, binaryMessenger:registrar.messenger())
+      onReadSedentarinessChannel.setStreamHandler(instance)
+      let onReadNoDistrubChannel = FlutterEventChannel(name: eventChannelNameOnReadNoDistrub, binaryMessenger:registrar.messenger())
+      onReadNoDistrubChannel.setStreamHandler(instance)
+      let onReadAlarmChannel = FlutterEventChannel(name: eventChannelNameOnReadAlarm, binaryMessenger:registrar.messenger())
+      onReadAlarmChannel.setStreamHandler(instance)
+      let onReadCoachingIdsChannel = FlutterEventChannel(name: eventChannelNameOnReadCoachingIds, binaryMessenger:registrar.messenger())
+      onReadCoachingIdsChannel.setStreamHandler(instance)
+      let onReadUiPackVersionChannel = FlutterEventChannel(name: eventChannelNameOnReadUiPackVersion, binaryMessenger:registrar.messenger())
+      onReadUiPackVersionChannel.setStreamHandler(instance)
+      let onReadLanguagePackVersionChannel = FlutterEventChannel(name: eventChannelNameOnReadLanguagePackVersion, binaryMessenger:registrar.messenger())
+      onReadLanguagePackVersionChannel.setStreamHandler(instance)
+      let onIdentityDeleteByDeviceChannel = FlutterEventChannel(name: eventChannelNameOnIdentityDeleteByDevice, binaryMessenger:registrar.messenger())
+      onIdentityDeleteByDeviceChannel.setStreamHandler(instance)
+      let onCameraStateChangeChannel = FlutterEventChannel(name: eventChannelNameOnCameraStateChange, binaryMessenger:registrar.messenger())
+      onCameraStateChangeChannel.setStreamHandler(instance)
+      let onCameraResponseChannel = FlutterEventChannel(name: eventChannelNameOnCameraResponse, binaryMessenger:registrar.messenger())
+      onCameraResponseChannel.setStreamHandler(instance)
+      let onSyncDataChannel = FlutterEventChannel(name: eventChannelNameOnSyncData, binaryMessenger:registrar.messenger())
+      onSyncDataChannel.setStreamHandler(instance)
+      let onReadActivityChannel = FlutterEventChannel(name: eventChannelNameOnReadActivity, binaryMessenger:registrar.messenger())
+      onReadActivityChannel.setStreamHandler(instance)
+      let onReadHeartRateChannel = FlutterEventChannel(name: eventChannelNameOnReadHeartRate, binaryMessenger:registrar.messenger())
+      onReadHeartRateChannel.setStreamHandler(instance)
+      let onUpdateHeartRateChannel = FlutterEventChannel(name: eventChannelNameOnUpdateHeartRate, binaryMessenger:registrar.messenger())
+      onUpdateHeartRateChannel.setStreamHandler(instance)
+      let onReadBloodPressureChannel = FlutterEventChannel(name: eventChannelNameOnReadBloodPressure, binaryMessenger:registrar.messenger())
+      onReadBloodPressureChannel.setStreamHandler(instance)
+      let onReadSleepChannel = FlutterEventChannel(name: eventChannelNameOnReadSleep, binaryMessenger:registrar.messenger())
+      onReadSleepChannel.setStreamHandler(instance)
+      let onReadLocationChannel = FlutterEventChannel(name: eventChannelNameOnReadLocation, binaryMessenger:registrar.messenger())
+      onReadLocationChannel.setStreamHandler(instance)
+      let onReadTemperatureChannel = FlutterEventChannel(name: eventChannelNameOnReadTemperature, binaryMessenger:registrar.messenger())
+      onReadTemperatureChannel.setStreamHandler(instance)
+      let onReadWorkout2Channel = FlutterEventChannel(name: eventChannelNameOnReadWorkout2, binaryMessenger:registrar.messenger())
+      onReadWorkout2Channel.setStreamHandler(instance)
+      let onStreamProgressChannel = FlutterEventChannel(name: eventChannelNameOnStreamProgress, binaryMessenger:registrar.messenger())
+      onStreamProgressChannel.setStreamHandler(instance)
+      let onUpdateAppSportStateChannel = FlutterEventChannel(name: eventChannelNameOnUpdateAppSportState, binaryMessenger:registrar.messenger())
+      onUpdateAppSportStateChannel.setStreamHandler(instance)
+      let onClassicBluetoothStateChangeChannel = FlutterEventChannel(name: eventChannelNameOnClassicBluetoothStateChange, binaryMessenger:registrar.messenger())
+      onClassicBluetoothStateChangeChannel.setStreamHandler(instance)
+      let onDeviceFileUpdateChannel = FlutterEventChannel(name: eventChannelNameOnDeviceFileUpdate, binaryMessenger:registrar.messenger())
+      onDeviceFileUpdateChannel.setStreamHandler(instance)
+      let onReadDeviceFileChannel = FlutterEventChannel(name: eventChannelNameOnReadDeviceFile, binaryMessenger:registrar.messenger())
+      onReadDeviceFileChannel.setStreamHandler(instance)
+      let onReadTemperatureUnitChannel = FlutterEventChannel(name: eventChannelNameOnReadTemperatureUnit, binaryMessenger:registrar.messenger())
+      onReadTemperatureUnitChannel.setStreamHandler(instance)
+      let onReadDateFormatChannel = FlutterEventChannel(name: eventChannelNameOnReadDateFormat, binaryMessenger:registrar.messenger())
+      onReadDateFormatChannel.setStreamHandler(instance)
+      let onUpdateWatchFaceSwitchChannel = FlutterEventChannel(name: eventChannelNameOnUpdateWatchFaceSwitch, binaryMessenger:registrar.messenger())
+      onUpdateWatchFaceSwitchChannel.setStreamHandler(instance)
+      let onAppSportDataResponseChannel = FlutterEventChannel(name: eventChannelNameOnAppSportDataResponse, binaryMessenger:registrar.messenger())
+      onAppSportDataResponseChannel.setStreamHandler(instance)
+      let onReadWatchFaceIdChannel = FlutterEventChannel(name: eventChannelNameOnReadWatchFaceId, binaryMessenger:registrar.messenger())
+      onReadWatchFaceIdChannel.setStreamHandler(instance)
+      let onWatchFaceIdUpdateChannel = FlutterEventChannel(name: eventChannelNameOnWatchFaceIdUpdate, binaryMessenger:registrar.messenger())
+      onWatchFaceIdUpdateChannel.setStreamHandler(instance)
+      let onHIDStateChannel = FlutterEventChannel(name: eventChannelNameOnHIDState, binaryMessenger:registrar.messenger())
+      onHIDStateChannel.setStreamHandler(instance)
+      let onHIDValueChangeChannel = FlutterEventChannel(name: eventChannelNameOnHIDValueChange, binaryMessenger:registrar.messenger())
+      onHIDValueChangeChannel.setStreamHandler(instance)
+      let onDeviceSMSQuickReplyChannel = FlutterEventChannel(name: eventChannelNameOnDeviceSMSQuickReply, binaryMessenger:registrar.messenger())
+      onDeviceSMSQuickReplyChannel.setStreamHandler(instance)
+      let onReadDeviceInfoChannel = FlutterEventChannel(name: eventChannelNameOnReadDeviceInfo, binaryMessenger:registrar.messenger())
+      onReadDeviceInfoChannel.setStreamHandler(instance)
+      let onSessionStateChangeChannel = FlutterEventChannel(name: eventChannelNameOnSessionStateChange, binaryMessenger:registrar.messenger())
+      onSessionStateChangeChannel.setStreamHandler(instance)
+      let onNoDistrubUpdateChannel = FlutterEventChannel(name: eventChannelNameOnNoDistrubUpdate, binaryMessenger:registrar.messenger())
+      onNoDistrubUpdateChannel.setStreamHandler(instance)
+      let onAlarmUpdateChannel = FlutterEventChannel(name: eventChannelNameOnAlarmUpdate, binaryMessenger:registrar.messenger())
+      onAlarmUpdateChannel.setStreamHandler(instance)
+      let onAlarmDeleteChannel = FlutterEventChannel(name: eventChannelNameOnAlarmDelete, binaryMessenger:registrar.messenger())
+      onAlarmDeleteChannel.setStreamHandler(instance)
+      let onAlarmAddChannel = FlutterEventChannel(name: eventChannelNameOnAlarmAdd, binaryMessenger:registrar.messenger())
+      onAlarmAddChannel.setStreamHandler(instance)
+      let onFindPhoneChannel = FlutterEventChannel(name: eventChannelNameOnFindPhone, binaryMessenger:registrar.messenger())
+      onFindPhoneChannel.setStreamHandler(instance)
+      let onRequestLocationChannel = FlutterEventChannel(name: eventChannelNameOnRequestLocation, binaryMessenger:registrar.messenger())
+      onRequestLocationChannel.setStreamHandler(instance)
+      let onDeviceRequestAGpsFileChannel = FlutterEventChannel(name: eventChannelNameOnDeviceRequestAGpsFile, binaryMessenger:registrar.messenger())
+      onDeviceRequestAGpsFileChannel.setStreamHandler(instance)
+      let onReadBloodOxygenChannel = FlutterEventChannel(name: eventChannelNameOnReadBloodOxygen, binaryMessenger:registrar.messenger())
+      onReadBloodOxygenChannel.setStreamHandler(instance)
+      let onReadWorkoutChannel = FlutterEventChannel(name: eventChannelNameOnReadWorkout, binaryMessenger:registrar.messenger())
+      onReadWorkoutChannel.setStreamHandler(instance)
+      let onReadBleHrvChannel = FlutterEventChannel(name: eventChannelNameOnReadBleHrv, binaryMessenger:registrar.messenger())
+      onReadBleHrvChannel.setStreamHandler(instance)
+      let onReadPressureChannel = FlutterEventChannel(name: eventChannelNameOnReadPressure, binaryMessenger:registrar.messenger())
+      onReadPressureChannel.setStreamHandler(instance)
+      let onReadWorldClockChannel = FlutterEventChannel(name: eventChannelNameOnReadWorldClock, binaryMessenger:registrar.messenger())
+      onReadWorldClockChannel.setStreamHandler(instance)
+      let onWorldClockDeleteChannel = FlutterEventChannel(name: eventChannelNameOnWorldClockDelete, binaryMessenger:registrar.messenger())
+      onWorldClockDeleteChannel.setStreamHandler(instance)
+      let onDeviceConnectingChannel = FlutterEventChannel(name: eventChannelNameOnDeviceConnecting, binaryMessenger:registrar.messenger())
+      onDeviceConnectingChannel.setStreamHandler(instance)
+      let onIncomingCallStatusChannel = FlutterEventChannel(name: eventChannelNameOnIncomingCallStatus, binaryMessenger:registrar.messenger())
+      onIncomingCallStatusChannel.setStreamHandler(instance)
+      let onReceiveMusicCommandChannel = FlutterEventChannel(name: eventChannelNameOnReceiveMusicCommand, binaryMessenger:registrar.messenger())
+      onReceiveMusicCommandChannel.setStreamHandler(instance)
+      let onStockReadChannel = FlutterEventChannel(name: eventChannelNameOnStockRead, binaryMessenger:registrar.messenger())
+      onStockReadChannel.setStreamHandler(instance)
+      let onStockDeleteChannel = FlutterEventChannel(name: eventChannelNameOnStockDelete, binaryMessenger:registrar.messenger())
+      onStockDeleteChannel.setStreamHandler(instance)
+      let onBleErrorChannel = FlutterEventChannel(name: eventChannelNameOnBleError, binaryMessenger:registrar.messenger())
+      onBleErrorChannel.setStreamHandler(instance)
   }
     
     
@@ -59,14 +302,29 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
             mBleScanner.scan(isScan)
             break;
         case "setAddress":
-            var bmac = (args?["bmac"] as? String)!
+            let bmac = (args?["bmac"] as? String)!
             mBleConnector.setTargetIdentifier(bmac)
             break;
        case "connect":
             mBleConnector.connect(true)
             break;
+        case "isConnecting":
+            result(mBleConnector.isConnecting)
+             break;
+        case "isBound":
+            result(mBleConnector.isBound())
+             break;
+        case "disconnect":
+            mBleConnector.connect(false)
+            break;
         case "isAvailable":
             result(mBleConnector.isAvailable())
+             break;
+        case "closeConnection":
+            mBleConnector.closeConnection(true)
+             break;
+        case "unbind":
+            mBleConnector.unbind()
              break;
         case "OTA":
             bleKey = BleKey.OTA
