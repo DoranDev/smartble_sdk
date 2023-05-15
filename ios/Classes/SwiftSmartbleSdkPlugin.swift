@@ -135,6 +135,190 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         case SwiftSmartbleSdkPlugin.eventChannelNameScan:
             scanSink = events
             break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnDeviceConnected:
+            onDeviceConnectedSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnIdentityCreate:
+            onIdentityCreateSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnCommandReply:
+            onCommandReplySink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnOTA:
+            onOTASink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnReadPower:
+            onReadPowerSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnReadFirmwareVersion:
+            onReadFirmwareVersionSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnReadBleAddress:
+            onReadBleAddressSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnReadSedentariness:
+            onReadSedentarinessSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnReadNoDistrub:
+            onReadNoDistrubSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnReadAlarm:
+            onReadAlarmSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnReadCoachingIds:
+            onReadCoachingIdsSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnReadUiPackVersion:
+            onReadUiPackVersionSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnReadLanguagePackVersion:
+            onReadLanguagePackVersionSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnIdentityDeleteByDevice:
+            onIdentityDeleteByDeviceSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnCameraStateChange:
+            onCameraStateChangeSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnCameraResponse:
+            onCameraResponseSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnSyncData:
+            onSyncDataSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnReadActivity:
+            onReadActivitySink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnReadHeartRate:
+            onReadHeartRateSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnUpdateHeartRate:
+            onUpdateHeartRateSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnReadBloodPressure:
+            onReadBloodPressureSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnReadSleep:
+            onReadSleepSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnReadLocation:
+            onReadLocationSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnReadTemperature:
+            onReadTemperatureSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnReadWorkout2:
+            onReadWorkout2Sink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnStreamProgress:
+            onStreamProgressSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnUpdateAppSportState:
+            onUpdateAppSportStateSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnClassicBluetoothStateChange:
+            onClassicBluetoothStateChangeSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnDeviceFileUpdate:
+            onDeviceFileUpdateSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnReadDeviceFile:
+            onReadDeviceFileSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnReadTemperatureUnit:
+            onReadTemperatureUnitSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnReadDateFormat:
+            onReadDateFormatSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnReadWatchFaceSwitch:
+            onReadWatchFaceSwitchSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnUpdateWatchFaceSwitch:
+            onUpdateWatchFaceSwitchSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnAppSportDataResponse:
+            onAppSportDataResponseSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnReadWatchFaceId:
+            onReadWatchFaceIdSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnWatchFaceIdUpdate:
+            onWatchFaceIdUpdateSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnHIDState:
+            onHIDStateSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnHIDValueChange:
+            onHIDValueChangeSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnDeviceSMSQuickReply:
+            onDeviceSMSQuickReplySink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnReadDeviceInfo:
+            onReadDeviceInfoSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnSessionStateChange:
+            onSessionStateChangeSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnNoDistrubUpdate:
+            onNoDistrubUpdateSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnAlarmUpdate:
+            onAlarmUpdateSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnAlarmDelete:
+            onAlarmDeleteSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnAlarmAdd:
+            onAlarmAddSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnFindPhone:
+            onFindPhoneSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnRequestLocation:
+            onRequestLocationSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnDeviceRequestAGpsFile:
+            onDeviceRequestAGpsFileSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnReadBloodOxygen:
+            onReadBloodOxygenSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnReadWorkout:
+            onReadWorkoutSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnReadBleHrv:
+            onReadBleHrvSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnReadPressure:
+            onReadPressureSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnReadWorldClock:
+            onReadWorldClockSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnWorldClockDelete:
+            onWorldClockDeleteSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnDeviceConnecting:
+            onDeviceConnectingSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnIncomingCallStatus:
+            onIncomingCallStatusSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnReceiveMusicCommand:
+            onReceiveMusicCommandSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnStockRead:
+            onStockReadSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnStockDelete:
+            onStockDeleteSink = events
+            break;
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnBleError:
+            onBleErrorSink = events
+            break;
+   
         default:
             break
         }
