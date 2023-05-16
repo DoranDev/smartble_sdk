@@ -1409,8 +1409,178 @@ extension SwiftSmartbleSdkPlugin: BleHandleDelegate {
 //            present(storyboard!.instantiateViewController(withIdentifier: "nav"), animated: true)
         }
     }
-    
-    
+
+    func onOTA(_ status: Bool) {
+        print("onOTA \(status)")
+    }
+
+    func onReadPower(_ power: Int) {
+        print("onReadPower \(power)")
+    }
+
+    func onReadFirmwareVersion(_ version: String) {
+        print("onReadFirmwareVersion \(version)")
+    }
+
+    func onReadBleAddress(_ address: String) {
+        print("onReadBleAddress \(address)")
+    }
+
+    func onReadSedentariness(_ sedentarinessSettings: BleSedentarinessSettings) {
+        print("onReadSedentariness \(sedentarinessSettings)")
+    }
+
+    func onReadNoDisturb(_ noDisturbSettings: BleNoDisturbSettings) {
+        print("onReadNoDisturb \(noDisturbSettings)")
+    }
+
+    func onReadAlarm(_ alarms: Array<BleAlarm>) {
+        print("onReadAlarm \(alarms)")
+    }
+
+    func onIdentityDelete(_ status: Bool) {
+        print("onIdentityDelete \(status)")
+        if status {
+            unbindCompleted()
+        }
+    }
+
+    func onSyncData(_ syncState: Int, _ bleKey: Int) {
+        print("onSyncData \(syncState) \(bleKey)")
+    }
+
+    func onReadActivity(_ activities: [BleActivity]) {
+        print("onReadActivity \(activities)")
+    }
+
+    func onReadHeartRate(_ heartRates: [BleHeartRate]) {
+        print("onReadHeartRate \(heartRates)")
+    }
+
+    func onReadBloodPressure(_ bloodPressures: [BleBloodPressure]) {
+        print("onReadBloodPressure \(bloodPressures)")
+    }
+
+    func onReadSleep(_ sleeps: [BleSleep]) {
+        if BleCache.shared.mSleepAlgorithmType == 1 {
+            for item in sleeps {
+                if item.mMode == 4 {
+                    let time = item.mSoft << 8 + item.mStrong
+                    print("sleep time total length - \(time)min")
+                } else if item.mMode == 5 {
+                    let time = item.mSoft << 8 + item.mStrong
+                    print("deep sleep time length - \(time)min")
+                } else if item.mMode == 6 {
+                    let time = item.mSoft << 8 + item.mStrong
+                    print("light sleep time length - \(time)min")
+                } else if item.mMode == 7 {
+                    let time = item.mSoft << 8 + item.mStrong
+                    print("awake time length - \(time)min")
+                }
+            }
+        } else {
+            print("onReadSleep \(sleeps)")
+        }
+    }
+
+    func onReadSleepRaw(_ sleepRawData: Data) {
+        /**
+         this is the original firmware data, which can be saved to a text file for the firmware technician to
+         analyze the problem
+         固件原始数据,app端无需处理,如需固件端分析问题可以保存到text文件提供给我们固件技术员
+         */
+        print("onReadSleepRaw - \(sleepRawData.mHexString)")
+    }
+
+    func onReadLocation(_ locations: [BleLocation]) {
+        print("onReadLocation \(locations)")
+    }
+
+    func onReadTemperature(_ temperatures: [BleTemperature]) {
+        print("onReadTemperature \(temperatures)")
+    }
+
+    func onCameraStateChange(_ cameraState: Int) {
+        print("onCameraStateChange \(CameraState.getState(cameraState))")
+        if cameraState == CameraState.ENTER {
+            mCameraEntered = true
+        } else if cameraState == CameraState.EXIT {
+            mCameraEntered = false
+        }
+    }
+
+    func onCameraResponse(_ status: Bool, _ cameraState: Int) {
+        print("onCameraResponse \(status) \(CameraState.getState(cameraState))")
+        if status {
+            if cameraState == CameraState.ENTER {
+                mCameraEntered = true
+            } else if cameraState == CameraState.EXIT {
+                mCameraEntered = false
+            }
+        }
+    }
+
+    func onStreamProgress(_ status: Bool, _ errorCode: Int, _ total: Int, _ completed: Int) {
+
+        let progressValue = CGFloat(completed) / CGFloat(total)
+        var mSpeed :Double = 0.0
+        let nowTime = Int(Date().timeIntervalSince1970)
+        let sTime = nowTime-proDuration
+        if errorCode == 0 && total == completed {
+            mSpeed = Double(total/1024)/Double(sTime)
+            progressLab.text = "speed:\(String.init(format: "%.3f",mSpeed)) kb/s \n time:"+String.init(format: "%02d:%02d:%02d", sTime/3600,(sTime%3600)/60,sTime%60)+" MTU:\(BleConnector.shared.mBaseBleMessenger.mPacketSize)"
+//            self.navigationController?.popToRootViewController(animated: true)
+        }else{
+
+            if completed>0{
+                mSpeed = Double(completed/1024)/Double(sTime)
+            }
+            progressLab.text = "progress:\(String(format: "%.f", progressValue * 100.0))% - \(String.init(format: "%.3f",mSpeed)) kb/s"+"\n"+String.init(format: "%02d:%02d:%02d", sTime/3600,(sTime%3600)/60,sTime%60)
+        }
+
+//        print("onStreamProgress \(status) \(errorCode) \(total) \(completed) - \(String.init(format: "%.3f",mSpeed))")
+    }
+
+    func onReadAerobicSettings(_ AerobicSettings: BleAerobicSettings) {
+        print("onReadAerobicSettings - \(AerobicSettings)")
+    }
+
+    func onReadTemperatureUnitSettings(_ state: Int) {
+        print("onReadTemperatureUnitSettings - \(state)")
+    }
+
+    func onReadDateFormatSettings(_ status: Int) {
+        print("onReadDateFormatSettings - \(status)")
+    }
+
+    func onReadWatchFaceSwitch(_ value: Int){
+        print("onReadWatchFaceSwitch - \(value)")
+
+    }
+
+    func onUpdateWatchFaceSwitch(_ status: Bool) {
+        if status{
+            print("set the default watch face success")
+        }
+    }
+
+    func onUpdateSettings(_ bleKey: BleKey.RawValue) {
+        switch bleKey {
+        case BleKey.NO_DISTURB_RANGE.rawValue:
+            bleLog("NO_DISTURB_RANGE is success")
+            break
+        default:
+            break
+        }
+    }
+
+    func onReadWatchFaceId(_ watchFaceId: BleWatchFaceId) {
+        bleWatchFaceID = watchFaceId
+    }
+
+    func onWatchFaceIdUpdate(_ status: Bool) {
+        senderBinFile()
+    }
 }
 
 
