@@ -12,7 +12,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
     static let eventChannelNameOnReadFirmwareVersion  = "onReadFirmwareVersion";
     static let eventChannelNameOnReadBleAddress  = "onReadBleAddress";
     static let eventChannelNameOnReadSedentariness  = "onReadSedentariness";
-    static let eventChannelNameOnReadNoDistrub  = "onReadNoDistrub";
+    static let eventChannelNameOnReadNoDisturb  = "onReadNoDisturb";
     static let eventChannelNameOnReadAlarm  = "onReadAlarm";
     static let eventChannelNameOnReadCoachingIds  = "onReadCoachingIds";
     static let eventChannelNameOnReadUiPackVersion  = "onReadUiPackVersion";
@@ -46,7 +46,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
     static let eventChannelNameOnDeviceSMSQuickReply = "onDeviceSMSQuickReply";
     static let eventChannelNameOnReadDeviceInfo = "onReadDeviceInfo";
     static let eventChannelNameOnSessionStateChange = "onSessionStateChange";
-    static let eventChannelNameOnNoDistrubUpdate = "onNoDistrubUpdate";
+    static let eventChannelNameOnNoDisturbUpdate = "onNoDisturbUpdate";
     static let eventChannelNameOnAlarmUpdate = "onAlarmUpdate";
     static let eventChannelNameOnAlarmDelete = "onAlarmDelete";
     static let eventChannelNameOnAlarmAdd = "onAlarmAdd";
@@ -75,7 +75,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
     var onReadFirmwareVersionSink: FlutterEventSink?
     var onReadBleAddressSink: FlutterEventSink?
     var onReadSedentarinessSink: FlutterEventSink?
-    var onReadNoDistrubSink: FlutterEventSink?
+    var onReadNoDisturbSink: FlutterEventSink?
     var onReadAlarmSink: FlutterEventSink?
     var onReadCoachingIdsSink: FlutterEventSink?
     var onReadUiPackVersionSink: FlutterEventSink?
@@ -109,7 +109,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
     var onDeviceSMSQuickReplySink: FlutterEventSink?
     var onReadDeviceInfoSink: FlutterEventSink?
     var onSessionStateChangeSink: FlutterEventSink?
-    var onNoDistrubUpdateSink: FlutterEventSink?
+    var onNoDisturbUpdateSink: FlutterEventSink?
     var onAlarmUpdateSink: FlutterEventSink?
     var onAlarmDeleteSink: FlutterEventSink?
     var onAlarmAddSink: FlutterEventSink?
@@ -159,8 +159,8 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         case SwiftSmartbleSdkPlugin.eventChannelNameOnReadSedentariness:
             onReadSedentarinessSink = events
             break;
-        case SwiftSmartbleSdkPlugin.eventChannelNameOnReadNoDistrub:
-            onReadNoDistrubSink = events
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnReadNoDisturb:
+            onReadNoDisturbSink = events
             break;
         case SwiftSmartbleSdkPlugin.eventChannelNameOnReadAlarm:
             onReadAlarmSink = events
@@ -261,8 +261,8 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         case SwiftSmartbleSdkPlugin.eventChannelNameOnSessionStateChange:
             onSessionStateChangeSink = events
             break;
-        case SwiftSmartbleSdkPlugin.eventChannelNameOnNoDistrubUpdate:
-            onNoDistrubUpdateSink = events
+        case SwiftSmartbleSdkPlugin.eventChannelNameOnNoDisturbUpdate:
+            onNoDisturbUpdateSink = events
             break;
         case SwiftSmartbleSdkPlugin.eventChannelNameOnAlarmUpdate:
             onAlarmUpdateSink = events
@@ -354,8 +354,8 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
       onReadBleAddressChannel.setStreamHandler(instance)
       let onReadSedentarinessChannel = FlutterEventChannel(name: eventChannelNameOnReadSedentariness, binaryMessenger:registrar.messenger())
       onReadSedentarinessChannel.setStreamHandler(instance)
-      let onReadNoDistrubChannel = FlutterEventChannel(name: eventChannelNameOnReadNoDistrub, binaryMessenger:registrar.messenger())
-      onReadNoDistrubChannel.setStreamHandler(instance)
+      let onReadNoDisturbChannel = FlutterEventChannel(name: eventChannelNameOnReadNoDisturb, binaryMessenger:registrar.messenger())
+      onReadNoDisturbChannel.setStreamHandler(instance)
       let onReadAlarmChannel = FlutterEventChannel(name: eventChannelNameOnReadAlarm, binaryMessenger:registrar.messenger())
       onReadAlarmChannel.setStreamHandler(instance)
       let onReadCoachingIdsChannel = FlutterEventChannel(name: eventChannelNameOnReadCoachingIds, binaryMessenger:registrar.messenger())
@@ -420,8 +420,8 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
       onReadDeviceInfoChannel.setStreamHandler(instance)
       let onSessionStateChangeChannel = FlutterEventChannel(name: eventChannelNameOnSessionStateChange, binaryMessenger:registrar.messenger())
       onSessionStateChangeChannel.setStreamHandler(instance)
-      let onNoDistrubUpdateChannel = FlutterEventChannel(name: eventChannelNameOnNoDistrubUpdate, binaryMessenger:registrar.messenger())
-      onNoDistrubUpdateChannel.setStreamHandler(instance)
+      let onNoDisturbUpdateChannel = FlutterEventChannel(name: eventChannelNameOnNoDisturbUpdate, binaryMessenger:registrar.messenger())
+      onNoDisturbUpdateChannel.setStreamHandler(instance)
       let onAlarmUpdateChannel = FlutterEventChannel(name: eventChannelNameOnAlarmUpdate, binaryMessenger:registrar.messenger())
       onAlarmUpdateChannel.setStreamHandler(instance)
       let onAlarmDeleteChannel = FlutterEventChannel(name: eventChannelNameOnAlarmDelete, binaryMessenger:registrar.messenger())
@@ -1392,10 +1392,23 @@ extension SwiftSmartbleSdkPlugin: BleScanDelegate, BleScanFilter {
     }
 }
 
+func toJSON<T>(_ value: T) throws -> Data where T: Encodable {
+    let encoder = JSONEncoder()
+    encoder.outputFormatting = .prettyPrinted
+    return try encoder.encode(value)
+}
+
 extension SwiftSmartbleSdkPlugin: BleHandleDelegate {
 
     func onDeviceConnected(_ peripheral: CBPeripheral) {
         print("onDeviceConnected - \(peripheral)")
+        var item = [String: Any]()
+        item["deviceName"] = peripheral.name
+        item["deviceMacAddress"] = peripheral.identifier
+
+        if let onDeviceConnectedSink = onDeviceConnectedSink {
+            onDeviceConnectedSink(item)
+        }
     }
     
     func onDeviceConnecting(_ status: Bool) {
@@ -1408,6 +1421,14 @@ extension SwiftSmartbleSdkPlugin: BleHandleDelegate {
 //            dismiss(animated: true)
 //            present(storyboard!.instantiateViewController(withIdentifier: "nav"), animated: true)
         }
+        var item = [String: Any]()
+        item["status"] = status
+       // item["deviceInfo"] = gson.toJson(deviceInfo)
+
+        if let onIdentityCreateSink = onIdentityCreateSink {
+            onIdentityCreateSink(item)
+        }
+
     }
 
     func onOTA(_ status: Bool) {
@@ -1416,14 +1437,35 @@ extension SwiftSmartbleSdkPlugin: BleHandleDelegate {
 
     func onReadPower(_ power: Int) {
         print("onReadPower \(power)")
+        var item = [String: Any]()
+        item["power"] = power
+
+        if let onReadPowerSink = onReadPowerSink {
+            onReadPowerSink(item)
+        }
+
     }
 
     func onReadFirmwareVersion(_ version: String) {
         print("onReadFirmwareVersion \(version)")
+        var item = [String: Any]()
+        item["version"] = version
+
+        if let onReadFirmwareVersionSink = onReadFirmwareVersionSink {
+            onReadFirmwareVersionSink(item)
+        }
+
     }
 
     func onReadBleAddress(_ address: String) {
         print("onReadBleAddress \(address)")
+        var item = [String: Any]()
+        item["address"] = address
+
+        if let onReadBleAddressSink = onReadBleAddressSink {
+            onReadBleAddressSink(item)
+        }
+
     }
 
     func onReadSedentariness(_ sedentarinessSettings: BleSedentarinessSettings) {
@@ -1432,17 +1474,30 @@ extension SwiftSmartbleSdkPlugin: BleHandleDelegate {
 
     func onReadNoDisturb(_ noDisturbSettings: BleNoDisturbSettings) {
         print("onReadNoDisturb \(noDisturbSettings)")
+        var item = [String: Any]()
+        item["noDisturbSettings"] = noDisturbSettings.toDictionary()
+
+        if let onReadNoDisturbSink = onReadNoDisturbSink {
+            onReadNoDisturbSink(item)
+        }
     }
 
     func onReadAlarm(_ alarms: Array<BleAlarm>) {
         print("onReadAlarm \(alarms)")
+        var item = [String: Any]()
+        item["alarms"] = try!toJSON(alarms)
+
+        if let onReadAlarmSink = onReadAlarmSink {
+            onReadAlarmSink(item)
+        }
+
     }
 
     func onIdentityDelete(_ status: Bool) {
         print("onIdentityDelete \(status)")
-        if status {
-            unbindCompleted()
-        }
+//        if status {
+//            unbindCompleted()
+//        }
     }
 
     func onSyncData(_ syncState: Int, _ bleKey: Int) {
@@ -1451,36 +1506,66 @@ extension SwiftSmartbleSdkPlugin: BleHandleDelegate {
 
     func onReadActivity(_ activities: [BleActivity]) {
         print("onReadActivity \(activities)")
+        var item = [String: Any]()
+
+        item["activities"] = try!toJSON(activities)
+
+        if let onReadActivitySink = onReadActivitySink {
+            onReadActivitySink(item)
+        }
     }
 
     func onReadHeartRate(_ heartRates: [BleHeartRate]) {
         print("onReadHeartRate \(heartRates)")
+        var item = [String: Any]()
+
+        item["heartRates"] = try!toJSON(heartRates)
+
+        if let onReadHeartRateSink = onReadHeartRateSink {
+            onReadHeartRateSink(item)
+        }
     }
 
     func onReadBloodPressure(_ bloodPressures: [BleBloodPressure]) {
         print("onReadBloodPressure \(bloodPressures)")
+        var item = [String: Any]()
+
+        item["bloodPressures"] = try!toJSON(bloodPressures)
+
+        if let onReadBloodPressureSink = onReadBloodPressureSink {
+            onReadBloodPressureSink(item)
+        }
+
     }
 
     func onReadSleep(_ sleeps: [BleSleep]) {
-        if BleCache.shared.mSleepAlgorithmType == 1 {
-            for item in sleeps {
-                if item.mMode == 4 {
-                    let time = item.mSoft << 8 + item.mStrong
-                    print("sleep time total length - \(time)min")
-                } else if item.mMode == 5 {
-                    let time = item.mSoft << 8 + item.mStrong
-                    print("deep sleep time length - \(time)min")
-                } else if item.mMode == 6 {
-                    let time = item.mSoft << 8 + item.mStrong
-                    print("light sleep time length - \(time)min")
-                } else if item.mMode == 7 {
-                    let time = item.mSoft << 8 + item.mStrong
-                    print("awake time length - \(time)min")
-                }
-            }
-        } else {
-            print("onReadSleep \(sleeps)")
+//        if BleCache.shared.mSleepAlgorithmType == 1 {
+//            for item in sleeps {
+//                if item.mMode == 4 {
+//                    let time = item.mSoft << 8 + item.mStrong
+//                    print("sleep time total length - \(time)min")
+//                } else if item.mMode == 5 {
+//                    let time = item.mSoft << 8 + item.mStrong
+//                    print("deep sleep time length - \(time)min")
+//                } else if item.mMode == 6 {
+//                    let time = item.mSoft << 8 + item.mStrong
+//                    print("light sleep time length - \(time)min")
+//                } else if item.mMode == 7 {
+//                    let time = item.mSoft << 8 + item.mStrong
+//                    print("awake time length - \(time)min")
+//                }
+//            }
+//        } else {
+//            print("onReadSleep \(sleeps)")
+//        }
+        var item = [String: Any]()
+
+        item["sleeps"] = try!toJSON(sleeps)
+
+        if let onReadSleepSink = onReadSleepSink {
+            onReadSleepSink(item)
         }
+
     }
 
     func onReadSleepRaw(_ sleepRawData: Data) {
@@ -1494,51 +1579,91 @@ extension SwiftSmartbleSdkPlugin: BleHandleDelegate {
 
     func onReadLocation(_ locations: [BleLocation]) {
         print("onReadLocation \(locations)")
+        var item = [String: Any]()
+
+        item["locations"] = try!toJSON(locations)
+
+        if let onReadLocationSink = onReadLocationSink {
+            onReadLocationSink(item)
+        }
+
     }
 
     func onReadTemperature(_ temperatures: [BleTemperature]) {
         print("onReadTemperature \(temperatures)")
+        var item = [String: Any]()
+
+        item["temperatures"] = try!toJSON(temperatures)
+
+        if let onReadTemperatureSink = onReadTemperatureSink {
+            onReadTemperatureSink(item)
+        }
     }
 
     func onCameraStateChange(_ cameraState: Int) {
         print("onCameraStateChange \(CameraState.getState(cameraState))")
-        if cameraState == CameraState.ENTER {
-            mCameraEntered = true
-        } else if cameraState == CameraState.EXIT {
-            mCameraEntered = false
+//        if cameraState == CameraState.ENTER {
+//            mCameraEntered = true
+//        } else if cameraState == CameraState.EXIT {
+//            mCameraEntered = false
+//        }
+        var item = [String: Any]()
+        item["cameraState"] = cameraState
+        item["cameraStateName"] = CameraState.getState(cameraState)
+        if let onCameraStateChangeSink = onCameraStateChangeSink {
+            onCameraStateChangeSink(item)
         }
     }
 
     func onCameraResponse(_ status: Bool, _ cameraState: Int) {
         print("onCameraResponse \(status) \(CameraState.getState(cameraState))")
-        if status {
-            if cameraState == CameraState.ENTER {
-                mCameraEntered = true
-            } else if cameraState == CameraState.EXIT {
-                mCameraEntered = false
-            }
+//        if status {
+//            if cameraState == CameraState.ENTER {
+//                mCameraEntered = true
+//            } else if cameraState == CameraState.EXIT {
+//                mCameraEntered = false
+//            }
+//        }
+        var item = [String: Any]()
+        item["status"] = status
+        item["cameraState"] = cameraState
+        item["cameraStateName"] = CameraState.getState(cameraState)
+
+        if let onCameraResponseSink = onCameraResponseSink {
+            onCameraResponseSink(item)
         }
     }
 
     func onStreamProgress(_ status: Bool, _ errorCode: Int, _ total: Int, _ completed: Int) {
 
-        let progressValue = CGFloat(completed) / CGFloat(total)
-        var mSpeed :Double = 0.0
-        let nowTime = Int(Date().timeIntervalSince1970)
-        let sTime = nowTime-proDuration
-        if errorCode == 0 && total == completed {
-            mSpeed = Double(total/1024)/Double(sTime)
-            progressLab.text = "speed:\(String.init(format: "%.3f",mSpeed)) kb/s \n time:"+String.init(format: "%02d:%02d:%02d", sTime/3600,(sTime%3600)/60,sTime%60)+" MTU:\(BleConnector.shared.mBaseBleMessenger.mPacketSize)"
-//            self.navigationController?.popToRootViewController(animated: true)
-        }else{
-
-            if completed>0{
-                mSpeed = Double(completed/1024)/Double(sTime)
-            }
-            progressLab.text = "progress:\(String(format: "%.f", progressValue * 100.0))% - \(String.init(format: "%.3f",mSpeed)) kb/s"+"\n"+String.init(format: "%02d:%02d:%02d", sTime/3600,(sTime%3600)/60,sTime%60)
-        }
+//        let progressValue = CGFloat(completed) / CGFloat(total)
+//        var mSpeed :Double = 0.0
+//        let nowTime = Int(Date().timeIntervalSince1970)
+//        let sTime = nowTime-proDuration
+//        if errorCode == 0 && total == completed {
+//            mSpeed = Double(total/1024)/Double(sTime)
+//            progressLab.text = "speed:\(String.init(format: "%.3f",mSpeed)) kb/s \n time:"+String.init(format: "%02d:%02d:%02d", sTime/3600,(sTime%3600)/60,sTime%60)+" MTU:\(BleConnector.shared.mBaseBleMessenger.mPacketSize)"
+////            self.navigationController?.popToRootViewController(animated: true)
+//        }else{
+//
+//            if completed>0{
+//                mSpeed = Double(completed/1024)/Double(sTime)
+//            }
+//            progressLab.text = "progress:\(String(format: "%.f", progressValue * 100.0))% - \(String.init(format: "%.3f",mSpeed)) kb/s"+"\n"+String.init(format: "%02d:%02d:%02d", sTime/3600,(sTime%3600)/60,sTime%60)
+//        }
 
 //        print("onStreamProgress \(status) \(errorCode) \(total) \(completed) - \(String.init(format: "%.3f",mSpeed))")
+        var item = [String: Any]()
+
+        item["status"] = status
+        item["errorCode"] = errorCode
+        item["total"] = total
+        item["completed"] = completed
+
+        if let onStreamProgressSink = onStreamProgressSink {
+            onStreamProgressSink(item)
+        }
+
     }
 
     func onReadAerobicSettings(_ AerobicSettings: BleAerobicSettings) {
@@ -1547,10 +1672,23 @@ extension SwiftSmartbleSdkPlugin: BleHandleDelegate {
 
     func onReadTemperatureUnitSettings(_ state: Int) {
         print("onReadTemperatureUnitSettings - \(state)")
+        var item = [String: Any]()
+
+        item["value"] = state
+        if let onReadTemperatureUnitSink = onReadTemperatureUnitSink {
+            onReadTemperatureUnitSink(item)
+        }
     }
 
     func onReadDateFormatSettings(_ status: Int) {
         print("onReadDateFormatSettings - \(status)")
+        
+        var item = [String: Any]()
+
+        item["value"] = status
+        if let onReadDateFormatSink = onReadDateFormatSink {
+            onReadDateFormatSink(item)
+        }
     }
 
     func onReadWatchFaceSwitch(_ value: Int){
@@ -1575,12 +1713,66 @@ extension SwiftSmartbleSdkPlugin: BleHandleDelegate {
     }
 
     func onReadWatchFaceId(_ watchFaceId: BleWatchFaceId) {
-        bleWatchFaceID = watchFaceId
+        //bleWatchFaceID = watchFaceId
     }
 
     func onWatchFaceIdUpdate(_ status: Bool) {
-        senderBinFile()
+       // senderBinFile()
     }
+        func onSessionStateChange(_ status: Bool) {
+            print("onSessionStateChange \(status)")
+            var item = [String: Any]()
+
+            item["status"] = status
+            if let onSessionStateChangeSink = onSessionStateChangeSink {
+                onSessionStateChangeSink(item)
+            }
+        }
+    
+        func onNoDisturbUpdate(_ noDisturbSettings: BleNoDisturbSettings) {
+            print("onNoDisturbUpdate \(noDisturbSettings)")
+            var item = [String: Any]()
+
+            item["noDisturbSettings"] = try!toJSON(noDisturbSettings)
+            if let onNoDisturbUpdateSink = onNoDisturbUpdateSink {
+                onNoDisturbUpdateSink(item)
+            }
+        }
+    
+        func onAlarmUpdate(_ alarm: BleAlarm) {
+            print("onAlarmUpdate \(alarm)")
+        }
+    
+        func onAlarmDelete(_ id: Int) {
+            print("onAlarmDelete \(id)")
+        }
+    
+        func onAlarmAdd(_ alarm: BleAlarm) {
+            print("onAlarmAdd \(alarm)")
+        }
+    
+        func onFindPhone(_ start: Bool) {
+            print("onFindPhone \(start ? "started" : "stopped")")
+        }
+    
+        func onPhoneGPSSport(_ workoutState: Int) {
+            print("onPhoneGPSSport \(WorkoutState.getState(workoutState))")
+        }
+    
+        func onDeviceRequestAGpsFile(_ url: String) {
+            print("onDeviceRequestAGpsFile \(url)")
+            // 以下是示例代码，sdk中的文件会过期，只是用于演示
+            if BleCache.shared.mAGpsType == 1 {
+                _ = BleConnector.shared.sendStream(.AGPS_FILE, forResource: "type1_epo_gr_3_1", ofType: "dat")
+            } else if BleCache.shared.mAGpsType == 2 {
+                _ = BleConnector.shared.sendStream(.AGPS_FILE, forResource: "type2_current_1d", ofType: "alp")
+            } else if BleCache.shared.mAGpsType == 6 {
+                _ = BleConnector.shared.sendStream(.AGPS_FILE, forResource: "type6_ble_epo_offline", ofType: "bin")
+            }
+            // 实际工程要从url下载aGps文件，然后发送该aGps文件
+            // let path = download(url)
+            // _ = BleConnector.shared.sendStream(.AGPS_FILE, path)
+        }
 }
 
 
