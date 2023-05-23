@@ -884,7 +884,10 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
           case BleKey.BACK_LIGHT:
               if bleKeyFlag ==  BleKeyFlag.UPDATE {
                   //背光设置
-                  _ = bleConnector.sendInt8(bleKey, bleKeyFlag, 4) // 0～20, 0 is off
+                  let times = (args?["times"] as? Int)
+                  if times != nil {
+                      _ = bleConnector.sendInt8(bleKey, bleKeyFlag, times!)
+                  } // 0 is off, or 5 ~ 20
               } else if bleKeyFlag ==  BleKeyFlag.READ {
                   //READ
                   _ = bleConnector.sendData(bleKey, bleKeyFlag)
@@ -892,6 +895,51 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
           case BleKey.SEDENTARINESS:
               //久坐提醒
               if bleKeyFlag ==  BleKeyFlag.UPDATE {
+                  let mEnabled = args?["mEnabled"] as? Int ?? 0
+                  let mRepeat = args?["mRepeat"] as? Int ?? 0
+                  let mStartHour = args?["mStartHour"] as? Int ?? 0
+                  let mStartMinute = args?["mStartMinute"] as? Int ?? 0
+                  let mEndHour = args?["mEndHour"] as? Int ?? 0
+                  let mEndMinute = args?["mEndMinute"] as? Int ?? 0
+                  let mInterval = args?["mInterval"] as? Int ?? 0
+                  let listRepeat = args?["listRepeat"] as? [String]
+                  var bleRepeat: Int? = nil
+                  if let listRepeat = listRepeat {
+                      bleRepeat = 0
+                      for item in listRepeat {
+                          var itemRepeat: Int? = nil
+                          switch item {
+                          case "MONDAY":
+                              itemRepeat = BleRepeat.MONDAY
+                          case "TUESDAY":
+                              itemRepeat = BleRepeat.TUESDAY
+                          case "THURSDAY":
+                              itemRepeat = BleRepeat.THURSDAY
+                          case "FRIDAY":
+                              itemRepeat = BleRepeat.FRIDAY
+                          case "SATURDAY":
+                              itemRepeat = BleRepeat.SATURDAY
+                          case "SUNDAY":
+                              itemRepeat = BleRepeat.SUNDAY
+                          case "ONCE":
+                              itemRepeat = BleRepeat.ONCE
+                          case "WORKDAY":
+                              itemRepeat = BleRepeat.WORKDAY
+                          case "WEEKEND":
+                              itemRepeat = BleRepeat.WEEKEND
+                          case "EVERYDAY":
+                              itemRepeat = BleRepeat.EVERYDAY
+                          default:
+                              break
+                          }
+                          if var bleRepeat = bleRepeat {
+                              bleRepeat = bleRepeat
+                          } else {
+                              bleRepeat = itemRepeat
+                          }
+                       
+                      }
+                  }
                   let bleSedentariness = BleSedentarinessSettings()
                   bleSedentariness.mEnabled = 1
                   bleSedentariness.mRepeat = 63 // Monday ~ Saturday
