@@ -131,9 +131,11 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
   
     
     public func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
+        print("onListen")
         switch arguments as? String {
         case SwiftSmartbleSdkPlugin.eventChannelNameScan:
             scanSink = events
+            print("scanSink onListen")
             break;
         case SwiftSmartbleSdkPlugin.eventChannelNameOnDeviceConnected:
             onDeviceConnectedSink = events
@@ -458,6 +460,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
       onStockDeleteChannel.setStreamHandler(instance)
       let onBleErrorChannel = FlutterEventChannel(name: eventChannelNameOnBleError, binaryMessenger:registrar.messenger())
       onBleErrorChannel.setStreamHandler(instance)
+      BleConnector.shared.launch()
   }
     
     
@@ -1413,6 +1416,7 @@ extension SwiftSmartbleSdkPlugin: BleHandleDelegate , BleScanDelegate , BleScanF
     }
 
     func onScan(_ scan: Bool) {
+        print("onScan")
         if scan {
            // btnScan.setTitle("Scanning", for: BleKey.normal)
             mDevices.removeAll()
@@ -1426,7 +1430,7 @@ extension SwiftSmartbleSdkPlugin: BleHandleDelegate , BleScanDelegate , BleScanF
         var item = [String : String]();
         item["deviceName"] = device.name
         item["deviceMacAddress"] = device.identifier
-        print("onDeviceConnected - \(item)")
+        print("onDeviceFound benar - \(item)")
         if !mDevices.contains(item) {
             mDevices.append(item)
 //            let newIndexPath = IndexPath(row: mDevices.count - 1, section: 0)
