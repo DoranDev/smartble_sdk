@@ -1395,7 +1395,14 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
 }
 
 
-extension SwiftSmartbleSdkPlugin: BleScanDelegate, BleScanFilter {
+
+func toJSON<T>(_ value: T) throws -> Data where T: Encodable {
+    let encoder = JSONEncoder()
+    encoder.outputFormatting = .prettyPrinted
+    return try encoder.encode(value)
+}
+
+extension SwiftSmartbleSdkPlugin: BleHandleDelegate , BleScanDelegate , BleScanFilter{
 
     func onBluetoothDisabled() {
         //btnScan.setTitle("Please enable the Bluetooth", for: BleKey.normal)
@@ -1419,16 +1426,15 @@ extension SwiftSmartbleSdkPlugin: BleScanDelegate, BleScanFilter {
         var item = [String : String]();
         item["deviceName"] = device.name
         item["deviceMacAddress"] = device.identifier
+        print("onDeviceConnected - \(item)")
         if !mDevices.contains(item) {
             mDevices.append(item)
 //            let newIndexPath = IndexPath(row: mDevices.count - 1, section: 0)
 //            tableView.insertRows(at: [newIndexPath], with: BleKey.automatic)
         }
-        if let sink = scanSink {
+        if let scanSink = scanSink {
             // Use the unwrapped value of `sink` here
-            sink(mDevices)
-        } else {
-            // Handle the case where `flutterEventSink` is nil
+            scanSink(mDevices)
         }
        
         
@@ -1438,16 +1444,7 @@ extension SwiftSmartbleSdkPlugin: BleScanDelegate, BleScanFilter {
     func match(_ device: BleDevice) -> Bool {
         device.mRssi > -82
     }
-}
-
-func toJSON<T>(_ value: T) throws -> Data where T: Encodable {
-    let encoder = JSONEncoder()
-    encoder.outputFormatting = .prettyPrinted
-    return try encoder.encode(value)
-}
-
-extension SwiftSmartbleSdkPlugin: BleHandleDelegate {
-
+    
     func onDeviceConnected(_ peripheral: CBPeripheral) {
         print("onDeviceConnected - \(peripheral)")
         var item = [String: Any]()
