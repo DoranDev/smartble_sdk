@@ -2,7 +2,7 @@ import Flutter
 import UIKit
 import CoreBluetooth
 
-public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
+public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandler, BleHandleDelegate , BleScanDelegate , BleScanFilter {
     static let eventChannelNameScan = "smartble_sdk/scan";
     static let eventChannelNameOnDeviceConnected = "onDeviceConnected";
     static let eventChannelNameOnIdentityCreate = "onIdentityCreate";
@@ -460,7 +460,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
       onStockDeleteChannel.setStreamHandler(instance)
       let onBleErrorChannel = FlutterEventChannel(name: eventChannelNameOnBleError, binaryMessenger:registrar.messenger())
       onBleErrorChannel.setStreamHandler(instance)
-      BleConnector.shared.launch()
+    
   }
     
     
@@ -1395,18 +1395,9 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
           }
       }
       }
-}
-
-
-
-func toJSON<T>(_ value: T) throws -> Data where T: Encodable {
-    let encoder = JSONEncoder()
-    encoder.outputFormatting = .prettyPrinted
-    return try encoder.encode(value)
-}
-
-extension SwiftSmartbleSdkPlugin: BleHandleDelegate , BleScanDelegate , BleScanFilter{
-
+    
+    
+    
     func onBluetoothDisabled() {
         //btnScan.setTitle("Please enable the Bluetooth", for: BleKey.normal)
     }
@@ -1822,6 +1813,15 @@ extension SwiftSmartbleSdkPlugin: BleHandleDelegate , BleScanDelegate , BleScanF
             // let path = download(url)
             // _ = BleConnector.shared.sendStream(.AGPS_FILE, path)
         }
+    
+}
+
+
+
+func toJSON<T>(_ value: T) throws -> Data where T: Encodable {
+    let encoder = JSONEncoder()
+    encoder.outputFormatting = .prettyPrinted
+    return try encoder.encode(value)
 }
 
 
