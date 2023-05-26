@@ -331,11 +331,13 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         return nil
     }
 
-    
+    let mBleConnector = BleConnector.shared
+    let mBleScanner = BleScanner(/*[CBUUID(string: BleConnector.BLE_SERVICE)]*/)
+    var mDevices = [[String:String]()]
     
   public static func register(with registrar: FlutterPluginRegistrar) {
     let channel = FlutterMethodChannel(name: "smartble_sdk", binaryMessenger: registrar.messenger())
-    let instance = SwiftSmartbleSdkPlugin()
+      let instance = SwiftSmartbleSdkPlugin()
     registrar.addMethodCallDelegate(instance, channel: channel)
       
     let scanChannel = FlutterEventChannel(name: eventChannelNameScan, binaryMessenger:registrar.messenger())
@@ -459,14 +461,10 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
       let onStockDeleteChannel = FlutterEventChannel(name: eventChannelNameOnStockDelete, binaryMessenger:registrar.messenger())
       onStockDeleteChannel.setStreamHandler(instance)
       let onBleErrorChannel = FlutterEventChannel(name: eventChannelNameOnBleError, binaryMessenger:registrar.messenger())
-      onBleErrorChannel.setStreamHandler(instance)
-    
+      BleConnector.shared.launch()
+
   }
     
-    
-    let mBleConnector = BleConnector.shared
-    let mBleScanner = BleScanner(/*[CBUUID(string: BleConnector.BLE_SERVICE)]*/)
-    var mDevices = [[String:String]()]
  var bleKey: BleKey = BleKey.NONE
  var bleKeyFlag: BleKeyFlag=BleKeyFlag.NONE
     private func doBle(_ action: (BleConnector) -> Void) {
