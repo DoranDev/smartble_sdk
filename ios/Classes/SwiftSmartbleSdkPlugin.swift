@@ -1435,7 +1435,8 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
 
     
     func match(_ device: BleDevice) -> Bool {
-        device.mRssi > -82
+       // device.mRssi > -82
+        return true
     }
     
     func onDeviceConnected(_ peripheral: CBPeripheral) {
