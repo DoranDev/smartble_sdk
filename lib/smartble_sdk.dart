@@ -655,7 +655,7 @@ class SmartbleSdk {
   static const EventChannel _scanChannel = EventChannel('smartble_sdk/scan');
 
   static Stream<dynamic> get getDeviceListStream {
-    return _scanChannel.receiveBroadcastStream().cast();
+    return _scanChannel.receiveBroadcastStream(_scanChannel.name).cast();
   }
 
   static const EventChannel _onDeviceConnectedChannel =

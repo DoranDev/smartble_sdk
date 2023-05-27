@@ -131,7 +131,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
   
     
     public func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
-        print("onListen")
+        print("onListen \(String(describing: arguments))")
         switch arguments as? String {
         case SwiftSmartbleSdkPlugin.eventChannelNameScan:
             scanSink = events
@@ -340,7 +340,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
       let instance = SwiftSmartbleSdkPlugin(channel)
     registrar.addMethodCallDelegate(instance, channel: channel)
     let scanChannel = FlutterEventChannel(name: eventChannelNameScan, binaryMessenger:registrar.messenger())
-    scanChannel.setStreamHandler(instance)
+      scanChannel.setStreamHandler(instance)
       let onDeviceConnectedChannel = FlutterEventChannel(name: eventChannelNameOnDeviceConnected, binaryMessenger:registrar.messenger())
       onDeviceConnectedChannel.setStreamHandler(instance)
       let onIdentityCreateChannel = FlutterEventChannel(name: eventChannelNameOnIdentityCreate, binaryMessenger:registrar.messenger())
