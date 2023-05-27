@@ -337,9 +337,8 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
     
   public static func register(with registrar: FlutterPluginRegistrar) {
     let channel = FlutterMethodChannel(name: "smartble_sdk", binaryMessenger: registrar.messenger())
-      let instance = SwiftSmartbleSdkPlugin()
+      let instance = SwiftSmartbleSdkPlugin(channel)
     registrar.addMethodCallDelegate(instance, channel: channel)
-      
     let scanChannel = FlutterEventChannel(name: eventChannelNameScan, binaryMessenger:registrar.messenger())
     scanChannel.setStreamHandler(instance)
       let onDeviceConnectedChannel = FlutterEventChannel(name: eventChannelNameOnDeviceConnected, binaryMessenger:registrar.messenger())
@@ -461,8 +460,14 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
       let onStockDeleteChannel = FlutterEventChannel(name: eventChannelNameOnStockDelete, binaryMessenger:registrar.messenger())
       onStockDeleteChannel.setStreamHandler(instance)
       let onBleErrorChannel = FlutterEventChannel(name: eventChannelNameOnBleError, binaryMessenger:registrar.messenger())
-      BleConnector.shared.launch()
-
+  }
+    
+   init (_ channel: FlutterMethodChannel) {
+       super.init()
+        mBleScanner.mBleScanDelegate = self
+        mBleScanner.mBleScanFilter = self
+        mBleConnector.launch()
+        mBleConnector.addBleHandleDelegate(String(obj: self), self)
   }
     
  var bleKey: BleKey = BleKey.NONE
@@ -1436,7 +1441,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
     
     func match(_ device: BleDevice) -> Bool {
        // device.mRssi > -82
-        return true
+        true
     }
     
     func onDeviceConnected(_ peripheral: CBPeripheral) {
