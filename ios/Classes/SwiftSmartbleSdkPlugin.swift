@@ -131,11 +131,9 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
   
     
     public func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
-        print("onListen \(String(describing: arguments))")
         switch arguments as? String {
         case SwiftSmartbleSdkPlugin.eventChannelNameScan:
             scanSink = events
-            print("scanSink onListen")
             break;
         case SwiftSmartbleSdkPlugin.eventChannelNameOnDeviceConnected:
             onDeviceConnectedSink = events
@@ -320,13 +318,13 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         case SwiftSmartbleSdkPlugin.eventChannelNameOnBleError:
             onBleErrorSink = events
             break;
-   
+
         default:
             break
         }
         return nil
     }
-    
+
     public func onCancel(withArguments arguments: Any?) -> FlutterError? {
         return nil
     }
@@ -334,7 +332,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
     let mBleConnector = BleConnector.shared
     let mBleScanner = BleScanner(/*[CBUUID(string: BleConnector.BLE_SERVICE)]*/)
     var mDevices = [[String:String]()]
-    
+
   public static func register(with registrar: FlutterPluginRegistrar) {
     let channel = FlutterMethodChannel(name: "smartble_sdk", binaryMessenger: registrar.messenger())
       let instance = SwiftSmartbleSdkPlugin(channel)
@@ -460,8 +458,9 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
       let onStockDeleteChannel = FlutterEventChannel(name: eventChannelNameOnStockDelete, binaryMessenger:registrar.messenger())
       onStockDeleteChannel.setStreamHandler(instance)
       let onBleErrorChannel = FlutterEventChannel(name: eventChannelNameOnBleError, binaryMessenger:registrar.messenger())
+      onBleErrorChannel.setStreamHandler(instance)
   }
-    
+
    init (_ channel: FlutterMethodChannel) {
        super.init()
         mBleScanner.mBleScanDelegate = self
@@ -469,7 +468,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         mBleConnector.launch()
         mBleConnector.addBleHandleDelegate(String(obj: self), self)
   }
-    
+
  var bleKey: BleKey = BleKey.NONE
  var bleKeyFlag: BleKeyFlag=BleKeyFlag.NONE
     private func doBle(_ action: (BleConnector) -> Void) {
@@ -480,7 +479,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
             print("BleConnector is not available!")
         }
     }
-    
+
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         result("iOS " + UIDevice.current.systemVersion)
         let args = call.arguments as? Dictionary<String, Any>
@@ -496,6 +495,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
             mBleConnector.setTargetIdentifier(bmac)
             break;
        case "connect":
+            mBleScanner.scan(false)
             mBleConnector.connect(true)
             break;
         case "isConnecting":
@@ -943,7 +943,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                           } else {
                               bleRepeat = itemRepeat
                           }
-                       
+
                       }
                   }
                   let bleSedentariness = BleSedentarinessSettings()
@@ -1317,7 +1317,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                   default:
                       mode.mStatus = PhoneWorkOutStatus.Treadmill
                   }
-        
+
               _ = bleConnector.sendObject(bleKey, bleKeyFlag, mode)
               break
           case BleKey.IBEACON_CONTROL:
@@ -1398,9 +1398,9 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
           }
       }
       }
-    
-    
-    
+
+
+
     func onBluetoothDisabled() {
         //btnScan.setTitle("Please enable the Bluetooth", for: BleKey.normal)
     }
@@ -1423,8 +1423,8 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
     func onDeviceFound(_ device: BleDevice) {
         var item = [String : String]();
         item["deviceName"] = device.name
-        item["deviceMacAddress"] = device.identifier
-        print("onDeviceFound benar - \(item)")
+        item["deviceMacAddress"] = device.address
+        item["deviceIdentifier"] = device.identifier
         if !mDevices.contains(item) {
             mDevices.append(item)
 //            let newIndexPath = IndexPath(row: mDevices.count - 1, section: 0)
@@ -1434,37 +1434,36 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
             // Use the unwrapped value of `sink` here
             scanSink(mDevices)
         }
-       
-        
+
+
     }
 
-    
+
     func match(_ device: BleDevice) -> Bool {
-       // device.mRssi > -82
-        true
+        device.mRssi > -82
     }
-    
+
     func onDeviceConnected(_ peripheral: CBPeripheral) {
         print("onDeviceConnected - \(peripheral)")
         var item = [String: Any]()
-        item["deviceName"] = peripheral.name
-        item["deviceMacAddress"] = peripheral.identifier
+//        item["deviceName"] = peripheral.name
+//        item["deviceMacAddress"] = peripheral.
 
         if let onDeviceConnectedSink = onDeviceConnectedSink {
             onDeviceConnectedSink(item)
         }
     }
-    
+
     func onDeviceConnecting(_ status: Bool) {
         print("onDeviceConnecting - \(status)")
     }
 
     func onIdentityCreate(_ status: Bool) {
-        if status {
-            _ = mBleConnector.sendData(.PAIR,  BleKeyFlag.UPDATE)
-//            dismiss(animated: true)
-//            present(storyboard!.instantiateViewController(withIdentifier: "nav"), animated: true)
-        }
+//        if status {
+//            _ = mBleConnector.sendData(.PAIR,  BleKeyFlag.UPDATE)
+////            dismiss(animated: true)
+////            present(storyboard!.instantiateViewController(withIdentifier: "nav"), animated: true)
+//        }
         var item = [String: Any]()
         item["status"] = status
        // item["deviceInfo"] = gson.toJson(deviceInfo)

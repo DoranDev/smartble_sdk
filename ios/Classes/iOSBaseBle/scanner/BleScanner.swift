@@ -51,7 +51,7 @@ class BleScanner: NSObject, CBCentralManagerDelegate {
 //        bleLog("BleScanner(\(mIdentifier)) didDiscover -> \(peripheral)")
         let bleDevice = BleDevice(peripheral, advertisementData, RSSI)
         if RSSI != 127 && (mBleScanFilter == nil || mBleScanFilter!.match(bleDevice)) {
-            bleLog("BleScanner(\(mIdentifier)) onDeviceFound -> \(bleDevice))")
+           // bleLog("BleScanner(\(mIdentifier)) onDeviceFound -> \(bleDevice))")
             mBleScanDelegate?.onDeviceFound(bleDevice)
         }
         mCentralManagerDelegate?.centralManager?(central, didDiscover: peripheral, advertisementData: advertisementData,
