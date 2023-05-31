@@ -332,6 +332,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
     let mBleConnector = BleConnector.shared
     let mBleScanner = BleScanner(/*[CBUUID(string: BleConnector.BLE_SERVICE)]*/)
     var mDevices = [[String:String]()]
+    let mBleCache = BleCache.shared
 
   public static func register(with registrar: FlutterPluginRegistrar) {
     let channel = FlutterMethodChannel(name: "smartble_sdk", binaryMessenger: registrar.messenger())
@@ -1169,6 +1170,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                   _ = bleConnector.sendInt32(bleKey, bleKeyFlag, Int.random(in: 1..<0xffffffff))
               } else if bleKeyFlag ==  BleKeyFlag.READ {
                   _ = bleConnector.sendData(bleKey, bleKeyFlag)
+                  onReadDeviceInfo()
               }
           case BleKey.PAIR:
               //蓝牙配对
@@ -1466,13 +1468,22 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
 //        }
         var item = [String: Any]()
         item["status"] = status
-       // item["deviceInfo"] = gson.toJson(deviceInfo)
+        item["deviceInfo"] =    toJSON(mBleCache.mDeviceInfo)
 
         if let onIdentityCreateSink = onIdentityCreateSink {
             onIdentityCreateSink(item)
         }
-
     }
+
+    func onReadDeviceInfo() {
+        var item = [String: Any]()
+        item["deviceInfo"] =   toJSON(mBleCache.mDeviceInfo)
+
+        if let onReadDeviceInfoSink = onReadDeviceInfoSink {
+            onReadDeviceInfoSink(item)
+        }
+    }
+
 
     func onOTA(_ status: Bool) {
         print("onOTA \(status)")
@@ -1518,7 +1529,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
     func onReadNoDisturb(_ noDisturbSettings: BleNoDisturbSettings) {
         print("onReadNoDisturb \(noDisturbSettings)")
         var item = [String: Any]()
-        item["noDisturbSettings"] = noDisturbSettings.toDictionary()
+        item["noDisturbSettings"] =   toJSON(noDisturbSettings)
 
         if let onReadNoDisturbSink = onReadNoDisturbSink {
             onReadNoDisturbSink(item)
@@ -1528,7 +1539,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
     func onReadAlarm(_ alarms: Array<BleAlarm>) {
         print("onReadAlarm \(alarms)")
         var item = [String: Any]()
-        item["alarms"] = try!toJSON(alarms)
+        item["alarms"] =   toJSON(alarms)
 
         if let onReadAlarmSink = onReadAlarmSink {
             onReadAlarmSink(item)
@@ -1551,7 +1562,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         print("onReadActivity \(activities)")
         var item = [String: Any]()
 
-        item["activities"] = try!toJSON(activities)
+        item["activities"] =   toJSON(activities)
 
         if let onReadActivitySink = onReadActivitySink {
             onReadActivitySink(item)
@@ -1562,7 +1573,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         print("onReadHeartRate \(heartRates)")
         var item = [String: Any]()
 
-        item["heartRates"] = try!toJSON(heartRates)
+        item["heartRates"] =   toJSON(heartRates)
 
         if let onReadHeartRateSink = onReadHeartRateSink {
             onReadHeartRateSink(item)
@@ -1573,7 +1584,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         print("onReadBloodPressure \(bloodPressures)")
         var item = [String: Any]()
 
-        item["bloodPressures"] = try!toJSON(bloodPressures)
+        item["bloodPressures"] =   toJSON(bloodPressures)
 
         if let onReadBloodPressureSink = onReadBloodPressureSink {
             onReadBloodPressureSink(item)
@@ -1603,7 +1614,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
 //        }
         var item = [String: Any]()
 
-        item["sleeps"] = try!toJSON(sleeps)
+        item["sleeps"] =   toJSON(sleeps)
 
         if let onReadSleepSink = onReadSleepSink {
             onReadSleepSink(item)
@@ -1624,7 +1635,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         print("onReadLocation \(locations)")
         var item = [String: Any]()
 
-        item["locations"] = try!toJSON(locations)
+        item["locations"] =   toJSON(locations)
 
         if let onReadLocationSink = onReadLocationSink {
             onReadLocationSink(item)
@@ -1636,7 +1647,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         print("onReadTemperature \(temperatures)")
         var item = [String: Any]()
 
-        item["temperatures"] = try!toJSON(temperatures)
+        item["temperatures"] =   toJSON(temperatures)
 
         if let onReadTemperatureSink = onReadTemperatureSink {
             onReadTemperatureSink(item)
@@ -1725,7 +1736,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
 
     func onReadDateFormatSettings(_ status: Int) {
         print("onReadDateFormatSettings - \(status)")
-        
+
         var item = [String: Any]()
 
         item["value"] = status
@@ -1771,37 +1782,37 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                 onSessionStateChangeSink(item)
             }
         }
-    
+
         func onNoDisturbUpdate(_ noDisturbSettings: BleNoDisturbSettings) {
             print("onNoDisturbUpdate \(noDisturbSettings)")
             var item = [String: Any]()
 
-            item["noDisturbSettings"] = try!toJSON(noDisturbSettings)
+            item["noDisturbSettings"] = toJSON(noDisturbSettings)
             if let onNoDisturbUpdateSink = onNoDisturbUpdateSink {
                 onNoDisturbUpdateSink(item)
             }
         }
-    
+
         func onAlarmUpdate(_ alarm: BleAlarm) {
             print("onAlarmUpdate \(alarm)")
         }
-    
+
         func onAlarmDelete(_ id: Int) {
             print("onAlarmDelete \(id)")
         }
-    
+
         func onAlarmAdd(_ alarm: BleAlarm) {
             print("onAlarmAdd \(alarm)")
         }
-    
+
         func onFindPhone(_ start: Bool) {
             print("onFindPhone \(start ? "started" : "stopped")")
         }
-    
+
         func onPhoneGPSSport(_ workoutState: Int) {
             print("onPhoneGPSSport \(WorkoutState.getState(workoutState))")
         }
-    
+
         func onDeviceRequestAGpsFile(_ url: String) {
             print("onDeviceRequestAGpsFile \(url)")
             // 以下是示例代码，sdk中的文件会过期，只是用于演示
@@ -1816,17 +1827,23 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
             // let path = download(url)
             // _ = BleConnector.shared.sendStream(.AGPS_FILE, path)
         }
-    
+
 }
 
 
 
-func toJSON<T>(_ value: T) throws -> Data where T: Encodable {
+func toJSON<T: Encodable>(_ value: T) -> String? {
     let encoder = JSONEncoder()
-    encoder.outputFormatting = .prettyPrinted
-    return try encoder.encode(value)
-}
 
+    do {
+        let jsonData = try encoder.encode(value)
+        let jsonString = String(data: jsonData, encoding: .utf8)
+        return jsonString
+    } catch {
+        print("Error encoding value to JSON: \(error)")
+        return nil
+    }
+}
 
 
 
