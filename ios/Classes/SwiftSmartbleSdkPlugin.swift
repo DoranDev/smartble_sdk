@@ -3,6 +3,8 @@ import UIKit
 import CoreBluetooth
 
 public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandler, BleHandleDelegate , BleScanDelegate , BleScanFilter {
+
+
     static let eventChannelNameScan = "smartble_sdk/scan";
     static let eventChannelNameOnDeviceConnected = "onDeviceConnected";
     static let eventChannelNameOnIdentityCreate = "onIdentityCreate";
@@ -128,8 +130,8 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
     var onStockReadSink: FlutterEventSink?
     var onStockDeleteSink: FlutterEventSink?
     var onBleErrorSink: FlutterEventSink?
-  
-    
+
+
     public func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
         switch arguments as? String {
         case SwiftSmartbleSdkPlugin.eventChannelNameScan:
@@ -1524,6 +1526,13 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
 
     func onReadSedentariness(_ sedentarinessSettings: BleSedentarinessSettings) {
         print("onReadSedentariness \(sedentarinessSettings)")
+        var item = [String: Any]()
+
+        item["sedentarinessSettings"] =   toJSON(sedentarinessSettings)
+
+        if let onReadSedentarinessSink = onReadSedentarinessSink {
+            onReadSedentarinessSink(item)
+        }
     }
 
     func onReadNoDisturb(_ noDisturbSettings: BleNoDisturbSettings) {
@@ -1539,7 +1548,10 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
     func onReadAlarm(_ alarms: Array<BleAlarm>) {
         print("onReadAlarm \(alarms)")
         var item = [String: Any]()
-        item["alarms"] =   toJSON(alarms)
+        let i = alarms.map { data -> [String: Any] in
+            return data.toDictionary()
+        }
+        item["alarms"] =   i
 
         if let onReadAlarmSink = onReadAlarmSink {
             onReadAlarmSink(item)
@@ -1562,7 +1574,11 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         print("onReadActivity \(activities)")
         var item = [String: Any]()
 
-        item["activities"] =   toJSON(activities)
+        let i = activities.map { data -> [String: Any] in
+            return data.toDictionary()
+        }
+
+        item["activities"] = i
 
         if let onReadActivitySink = onReadActivitySink {
             onReadActivitySink(item)
@@ -1572,8 +1588,10 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
     func onReadHeartRate(_ heartRates: [BleHeartRate]) {
         print("onReadHeartRate \(heartRates)")
         var item = [String: Any]()
-
-        item["heartRates"] =   toJSON(heartRates)
+        let i = heartRates.map { data -> [String: Any] in
+            return data.toDictionary()
+        }
+        item["heartRates"] =  i
 
         if let onReadHeartRateSink = onReadHeartRateSink {
             onReadHeartRateSink(item)
@@ -1584,7 +1602,11 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         print("onReadBloodPressure \(bloodPressures)")
         var item = [String: Any]()
 
-        item["bloodPressures"] =   toJSON(bloodPressures)
+        let i = bloodPressures.map { data -> [String: Any] in
+            return data.toDictionary()
+        }
+
+        item["bloodPressures"] =   i
 
         if let onReadBloodPressureSink = onReadBloodPressureSink {
             onReadBloodPressureSink(item)
@@ -1614,7 +1636,11 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
 //        }
         var item = [String: Any]()
 
-        item["sleeps"] =   toJSON(sleeps)
+        let i = sleeps.map { data -> [String: Any] in
+            return data.toDictionary()
+        }
+
+        item["sleeps"] =   i
 
         if let onReadSleepSink = onReadSleepSink {
             onReadSleepSink(item)
@@ -1635,7 +1661,11 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         print("onReadLocation \(locations)")
         var item = [String: Any]()
 
-        item["locations"] =   toJSON(locations)
+        let i = locations.map { data -> [String: Any] in
+            return data.toDictionary()
+        }
+
+        item["locations"] =  i
 
         if let onReadLocationSink = onReadLocationSink {
             onReadLocationSink(item)
@@ -1647,7 +1677,11 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         print("onReadTemperature \(temperatures)")
         var item = [String: Any]()
 
-        item["temperatures"] =   toJSON(temperatures)
+        let i = temperatures.map { data -> [String: Any] in
+            return data.toDictionary()
+        }
+
+        item["temperatures"] =  i
 
         if let onReadTemperatureSink = onReadTemperatureSink {
             onReadTemperatureSink(item)
@@ -1775,6 +1809,12 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
     }
         func onSessionStateChange(_ status: Bool) {
             print("onSessionStateChange \(status)")
+            if status {
+                _ = BleConnector.shared.sendObject(BleKey.TIME_ZONE, BleKeyFlag.UPDATE, BleTimeZone())
+                _ = BleConnector.shared.sendObject(BleKey.TIME, BleKeyFlag.UPDATE, BleTime.local())
+//                _ = BleConnector.shared.sendData(BleKey.POWER, BleKeyFlag.READ)
+//                _ = BleConnector.shared.sendData(BleKey.FIRMWARE_VERSION, BleKeyFlag.READ)
+            }
             var item = [String: Any]()
 
             item["status"] = status
@@ -1795,6 +1835,13 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
 
         func onAlarmUpdate(_ alarm: BleAlarm) {
             print("onAlarmUpdate \(alarm)")
+            var item = [String: Any]()
+
+            item["alarm"] =  toJSON(alarm)
+
+            if let onAlarmUpdateSink = onAlarmUpdateSink {
+                onAlarmUpdateSink(item)
+            }
         }
 
         func onAlarmDelete(_ id: Int) {
@@ -1803,14 +1850,35 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
 
         func onAlarmAdd(_ alarm: BleAlarm) {
             print("onAlarmAdd \(alarm)")
+            var item = [String: Any]()
+
+            item["alarm"] =   toJSON(alarm)
+
+            if let onAlarmAddSink = onAlarmAddSink {
+                onAlarmAddSink(item)
+            }
         }
 
         func onFindPhone(_ start: Bool) {
             print("onFindPhone \(start ? "started" : "stopped")")
+            var item = [String: Any]()
+
+            item["start"] =   start
+
+            if let onFindPhoneSink = onFindPhoneSink {
+                onFindPhoneSink(item)
+            }
         }
 
         func onPhoneGPSSport(_ workoutState: Int) {
             print("onPhoneGPSSport \(WorkoutState.getState(workoutState))")
+            var item = [String: Any]()
+
+            item["workoutState"] =  workoutState
+
+            if let onRequestLocationSink = onRequestLocationSink {
+                onRequestLocationSink(item)
+            }
         }
 
         func onDeviceRequestAGpsFile(_ url: String) {
@@ -1828,6 +1896,238 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
             // _ = BleConnector.shared.sendStream(.AGPS_FILE, path)
         }
 
+
+
+    func onIdentityDeleteByDevice(_ status: Bool) {
+        <#code#>
+    }
+
+    func onCommandReply(_ bleKey: Int, _ keyFlag: Int, _ status: Bool) {
+        <#code#>
+    }
+
+    func onReadMtkOtaMeta() {
+        <#code#>
+    }
+
+    func onXModem(_ status: UInt8) {
+        <#code#>
+    }
+
+    func onReadCoachingIds(_ coachingIds: BleCoachingIds) {
+        <#code#>
+    }
+
+    func onReadUiPackVersion(_ version: String) {
+        <#code#>
+    }
+
+    func onReadLanguagePackVersion(_ version: BleLanguagePackVersion) {
+        <#code#>
+    }
+
+    func onReadWorkOut(_ WorkOut: [BleWorkOut]) {
+        print("onReadWorkOut \(WorkOut)")
+        var item = [String: Any]()
+
+        let i = WorkOut.map { data -> [String: Any] in
+            return data.toDictionary()
+        }
+
+        item["workouts"] =  i
+
+        if let onReadWorkoutSink = onReadWorkoutSink {
+            onReadWorkoutSink(item)
+        }
+    }
+
+    func onReadWorkOut2(_ WorkOut: [BleWorkOut2]) {
+        print("onReadWorkOut2 \(WorkOut)")
+        var item = [String: Any]()
+
+        let i = WorkOut.map { data -> [String: Any] in
+            return data.toDictionary()
+        }
+
+        item["workouts"] =  i
+
+        if let onReadWorkout2Sink = onReadWorkout2Sink {
+            onReadWorkout2Sink(item)
+        }
+    }
+
+    func onReadMatchRecord(_ matchRecord: [BleMatchRecord]) {
+        print("onReadMatchRecord \(matchRecord)")
+//        var item = [String: Any]()
+//
+//        let i = matchRecord.map { data -> [String: Any] in
+//            return data.toDictionary()
+//        }
+//
+//        item["matchRecord"] =  i
+//
+//        if let oonReadMatchRecordSink = onReadMatchRecordSink {
+//            oonReadMatchRecordSink(item)
+//        }
+    }
+
+    func onReadBloodOxygen(_ BloodOxygen: [BleBloodOxygen]) {
+        print("onReadBloodOxygen \(BloodOxygen)")
+        var item = [String: Any]()
+
+        let i = BloodOxygen.map { data -> [String: Any] in
+            return data.toDictionary()
+        }
+
+        item["bloodOxygen"] =  i
+
+        if let onReadBloodOxygenSink = onReadBloodOxygenSink {
+            onReadBloodOxygenSink(item)
+        }
+    }
+
+    func onReadHeartRateVariability(_ HeartRateVariability: [BleHeartRateVariability]) {
+        print("onReadHeartRateVariability \(HeartRateVariability)")
+//        var item = [String: Any]()
+//
+//        let i = HeartRateVariability.map { data -> [String: Any] in
+//            return data.toDictionary()
+//        }
+//
+//        item["hrv"] =  i
+//
+//        if let onReadHRVSink = onReadHRVSink {
+//            onReadHRVSink(item)
+//        }
+    }
+
+    func onReadPressures(_ pressures: [BlePressure]) {
+        print("onReadPressures \(pressures)")
+        var item = [String: Any]()
+
+        let i = pressures.map { data -> [String: Any] in
+            return data.toDictionary()
+        }
+
+        item["pressures"] =  i
+
+        if let onReadPressureSink = onReadPressureSink {
+            onReadPressureSink(item)
+        }
+    }
+
+    func onReadMediaFile(_ media: BleFileTransmission) {
+        <#code#>
+    }
+
+    func onFollowSystemLanguage(_ systemLanguage: Bool) {
+        <#code#>
+    }
+
+    func onReadWeatherRealtime(_ update: Bool) {
+        <#code#>
+    }
+
+    func onReadDataLog(_ logs: [BleLogText]) {
+        <#code#>
+    }
+
+    func onRequestAgpsPrerequisite() {
+        <#code#>
+    }
+
+    func onReadDrinkWaterSettings(_ drinkWater: BleDrinkWaterSettings) {
+        <#code#>
+    }
+
+    func onReadBloodOxyGenSettings(_ bloodOxyGenSet: BleBloodOxyGenSettings) {
+        <#code#>
+    }
+
+    func onReadWashSettings(_ washSet: BleWashSettings) {
+        <#code#>
+    }
+
+    func onUpdateRealTimeHR(_ itemHR: ABHRealTimeHR) {
+        <#code#>
+    }
+
+    func onUpdateRealTimeTemperature(_ temperature: BleTemperature) {
+        <#code#>
+    }
+
+    func onUpdateRealTimeBloodPressure(_ bloodPressures: BleBloodPressure) {
+        <#code#>
+    }
+
+    func onUpdatePhoneWorkOutStatus(_ status: BlePhoneWorkOutStatus) {
+        <#code#>
+    }
+
+    func onVibrationUpdate(_ value: Int) {
+        <#code#>
+    }
+
+    func onReadiBeaconStatus(_ value: Int) {
+        <#code#>
+    }
+
+    func onCommandSendTimeout(_ bleKey: Int, _ bleKeyFlag: Int) {
+        <#code#>
+    }
+
+    func onReadWorldClock(_ worldClocks: [BleWorldClock]) {
+       // print("onReadWorldClock \(worldClocks)")
+        var item = [String: Any]()
+
+        let i = worldClocks.map { data -> [String: Any] in
+            return data.toDictionary()
+        }
+
+        item["clocks"] =  i
+
+        if let onReadWorldClockSink = onReadWorldClockSink {
+            onReadWorldClockSink(item)
+        }
+    }
+
+    func onWorldClockDelete(_ clockID: Int) {
+        var item = [String: Any]()
+
+        item["id"] =  toJSON(clockID)
+
+        if let onWorldClockDeleteSink = onWorldClockDeleteSink {
+            onWorldClockDeleteSink(item)
+        }
+    }
+
+    func onReadStock(_ stocks: [BleStock]) {
+        //print("onReadStock \(stocks)")
+//        var item = [String: Any]()
+//
+//        let i = stocks.map { data -> [String: Any] in
+//            return data.toDictionary()
+//        }
+//
+//        item["stocks"] =  i
+//
+//        if let onReadStockSink = onReadStockSink {
+//            onReadStockSink(item)
+//        }
+    }
+
+    func onStockDelete(_ stockID: Int) {
+        <#code#>
+    }
+
+    func onDeviceReadStock(_ status: Bool) {
+        <#code#>
+    }
+
+    func onRealTimeMeasurement(_ measurement: BleRealTimeMeasurement) {
+        <#code#>
+    }
+
 }
 
 
@@ -1844,6 +2144,4 @@ func toJSON<T: Encodable>(_ value: T) -> String? {
         return nil
     }
 }
-
-
 
