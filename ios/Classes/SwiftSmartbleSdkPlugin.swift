@@ -1899,31 +1899,31 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
 
 
     func onIdentityDeleteByDevice(_ status: Bool) {
-        <#code#>
+        
     }
 
     func onCommandReply(_ bleKey: Int, _ keyFlag: Int, _ status: Bool) {
-        <#code#>
+        
     }
 
     func onReadMtkOtaMeta() {
-        <#code#>
+        
     }
 
     func onXModem(_ status: UInt8) {
-        <#code#>
+        
     }
 
     func onReadCoachingIds(_ coachingIds: BleCoachingIds) {
-        <#code#>
+        
     }
 
     func onReadUiPackVersion(_ version: String) {
-        <#code#>
+        
     }
 
     func onReadLanguagePackVersion(_ version: BleLanguagePackVersion) {
-        <#code#>
+        
     }
 
     func onReadWorkOut(_ WorkOut: [BleWorkOut]) {
@@ -2017,63 +2017,63 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
     }
 
     func onReadMediaFile(_ media: BleFileTransmission) {
-        <#code#>
+        
     }
 
     func onFollowSystemLanguage(_ systemLanguage: Bool) {
-        <#code#>
+        
     }
 
     func onReadWeatherRealtime(_ update: Bool) {
-        <#code#>
+        
     }
 
     func onReadDataLog(_ logs: [BleLogText]) {
-        <#code#>
+        
     }
 
     func onRequestAgpsPrerequisite() {
-        <#code#>
+        
     }
 
     func onReadDrinkWaterSettings(_ drinkWater: BleDrinkWaterSettings) {
-        <#code#>
+        
     }
 
     func onReadBloodOxyGenSettings(_ bloodOxyGenSet: BleBloodOxyGenSettings) {
-        <#code#>
+        
     }
 
     func onReadWashSettings(_ washSet: BleWashSettings) {
-        <#code#>
+        
     }
 
     func onUpdateRealTimeHR(_ itemHR: ABHRealTimeHR) {
-        <#code#>
+        
     }
 
     func onUpdateRealTimeTemperature(_ temperature: BleTemperature) {
-        <#code#>
+        
     }
 
     func onUpdateRealTimeBloodPressure(_ bloodPressures: BleBloodPressure) {
-        <#code#>
+        
     }
 
     func onUpdatePhoneWorkOutStatus(_ status: BlePhoneWorkOutStatus) {
-        <#code#>
+        
     }
 
     func onVibrationUpdate(_ value: Int) {
-        <#code#>
+        
     }
 
     func onReadiBeaconStatus(_ value: Int) {
-        <#code#>
+        
     }
 
     func onCommandSendTimeout(_ bleKey: Int, _ bleKeyFlag: Int) {
-        <#code#>
+        
     }
 
     func onReadWorldClock(_ worldClocks: [BleWorldClock]) {
@@ -2117,15 +2117,15 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
     }
 
     func onStockDelete(_ stockID: Int) {
-        <#code#>
+        
     }
 
     func onDeviceReadStock(_ status: Bool) {
-        <#code#>
+        
     }
 
     func onRealTimeMeasurement(_ measurement: BleRealTimeMeasurement) {
-        <#code#>
+        
     }
 
 }
