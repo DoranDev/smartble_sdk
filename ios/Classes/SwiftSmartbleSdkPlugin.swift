@@ -1324,6 +1324,19 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
 
               _ = bleConnector.sendObject(bleKey, bleKeyFlag, mode)
               break
+          case BleKey.PHONE_GPSSPORT:
+              bleLog("PHONE_GPSSPORT")
+              let speed = args?["mSpeed"] as? NSString
+              let totalDistance = args?["mTotalDistance"] as? NSString
+              let altitude = args?["mAltitude"] as? Int
+
+              let mode = BlePhoneGPSSport()
+              mode.locationHeight = altitude!
+              mode.locationSpeed = speed!.floatValue
+              mode.locationDistance = totalDistance!.floatValue
+
+              _ = bleConnector.sendObject(bleKey, bleKeyFlag, mode)
+              break
           case BleKey.IBEACON_CONTROL:
               if bleKeyFlag ==  BleKeyFlag.UPDATE {
                   _ = BleConnector.shared.sendInt8(bleKey, bleKeyFlag, 0)
@@ -1936,11 +1949,11 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                     "mDuration":data.mDuration,
                     "mAltitude":data.mAltitude,
                     "mAirPressure":data.mAirPressure,
-                    "mSmp":data.mSmp,
+                    "mSpm":data.mSmp,
                     "mMode":data.mModeSport,
                     "mStep":data.mStep,
                     "mDistance":data.mDistance,
-                    "mCalories":data.mCalories,
+                    "mCalorie":data.mCalories,
                     "mSpeed":data.mSpeed,
                     "mPace":data.mPace,
                     "mAvgBpm":data.mAvgBpm,

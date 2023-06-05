@@ -1148,7 +1148,7 @@ class BleConnector: BaseBleConnector {
                 notifyHandlers({ $0.onCameraStateChange?(cameraState) })
             }
         case .PHONE_GPSSPORT:
-            if !isReply && bleKeyFlag == .UPDATE {
+            if !isReply{
                 if data.count < MessageFactory.LENGTH_BEFORE_DATA + 1 {
                     return
                 }
