@@ -1899,31 +1899,31 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
 
 
     func onIdentityDeleteByDevice(_ status: Bool) {
-        
+
     }
 
     func onCommandReply(_ bleKey: Int, _ keyFlag: Int, _ status: Bool) {
-        
+
     }
 
     func onReadMtkOtaMeta() {
-        
+
     }
 
     func onXModem(_ status: UInt8) {
-        
+
     }
 
     func onReadCoachingIds(_ coachingIds: BleCoachingIds) {
-        
+
     }
 
     func onReadUiPackVersion(_ version: String) {
-        
+
     }
 
     func onReadLanguagePackVersion(_ version: BleLanguagePackVersion) {
-        
+
     }
 
     func onReadWorkOut(_ WorkOut: [BleWorkOut]) {
@@ -1931,7 +1931,20 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         var item = [String: Any]()
 
         let i = WorkOut.map { data -> [String: Any] in
-            return data.toDictionary()
+            return ["mStart":data.startTime,
+                    "mEnd":data.endTime,
+                    "mDuration":data.mDuration,
+                    "mAltitude":data.mAltitude,
+                    "mAirPressure":data.mAirPressure,
+                    "mSmp":data.mSmp,
+                    "mMode":data.mModeSport,
+                    "mStep":data.mStep,
+                    "mDistance":data.mDistance,
+                    "mCalories":data.mCalories,
+                    "mSpeed":data.mSpeed,
+                    "mPace":data.mPace,
+                    "mAvgBpm":data.mAvgBpm,
+                    "mMaxBpm":data.mMaxBpm]
         }
 
         item["workouts"] =  i
@@ -1946,7 +1959,26 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         var item = [String: Any]()
 
         let i = WorkOut.map { data -> [String: Any] in
-            return data.toDictionary()
+            return ["mStart":data.startTime,
+                    "mEnd":data.endTime,
+                    "mDuration":data.mDuration,
+                    "mAltitude":data.mAltitude,
+                    "mAirPressure":data.mAirPressure,
+                    "mSmp":data.mSmp,
+                    "mMode":data.mModeSport,
+                    "mStep":data.mStep,
+                    "mDistance":data.mDistance,
+                    "mCalories":data.mCalories,
+                    "mSpeed":data.mSpeed,
+                    "mPace":data.mPace,
+                    "mAvgBpm":data.mAvgBpm,
+                    "mMaxBpm":data.mMaxBpm,
+                    "mMinBpm":data.mMinBpm,
+                    "mUndefined":data.mUndefined,
+                    "mMaxSpm":data.mMaxSpm,
+                    "mMinSpm":data.mMinSpm,
+                    "mMaxPace":data.mMaxPace,
+                    "mMinPace":data.mMinPace]
         }
 
         item["workouts"] =  i
@@ -1976,7 +2008,9 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         var item = [String: Any]()
 
         let i = BloodOxygen.map { data -> [String: Any] in
-            return data.toDictionary()
+            //return data.toDictionary()
+            return ["mTime":data.mTime,
+                    "mValue":data.mBloodOxygenValue]
         }
 
         item["bloodOxygen"] =  i
@@ -2006,7 +2040,9 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         var item = [String: Any]()
 
         let i = pressures.map { data -> [String: Any] in
-            return data.toDictionary()
+            //return data.toDictionary()
+            return ["mTime":data.mTime,
+                    "mValue":data.mPressure]
         }
 
         item["pressures"] =  i
@@ -2017,63 +2053,63 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
     }
 
     func onReadMediaFile(_ media: BleFileTransmission) {
-        
+
     }
 
     func onFollowSystemLanguage(_ systemLanguage: Bool) {
-        
+
     }
 
     func onReadWeatherRealtime(_ update: Bool) {
-        
+
     }
 
     func onReadDataLog(_ logs: [BleLogText]) {
-        
+
     }
 
     func onRequestAgpsPrerequisite() {
-        
+
     }
 
     func onReadDrinkWaterSettings(_ drinkWater: BleDrinkWaterSettings) {
-        
+
     }
 
     func onReadBloodOxyGenSettings(_ bloodOxyGenSet: BleBloodOxyGenSettings) {
-        
+
     }
 
     func onReadWashSettings(_ washSet: BleWashSettings) {
-        
+
     }
 
     func onUpdateRealTimeHR(_ itemHR: ABHRealTimeHR) {
-        
+
     }
 
     func onUpdateRealTimeTemperature(_ temperature: BleTemperature) {
-        
+
     }
 
     func onUpdateRealTimeBloodPressure(_ bloodPressures: BleBloodPressure) {
-        
+
     }
 
     func onUpdatePhoneWorkOutStatus(_ status: BlePhoneWorkOutStatus) {
-        
+
     }
 
     func onVibrationUpdate(_ value: Int) {
-        
+
     }
 
     func onReadiBeaconStatus(_ value: Int) {
-        
+
     }
 
     func onCommandSendTimeout(_ bleKey: Int, _ bleKeyFlag: Int) {
-        
+
     }
 
     func onReadWorldClock(_ worldClocks: [BleWorldClock]) {
@@ -2117,15 +2153,15 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
     }
 
     func onStockDelete(_ stockID: Int) {
-        
+
     }
 
     func onDeviceReadStock(_ status: Bool) {
-        
+
     }
 
     func onRealTimeMeasurement(_ measurement: BleRealTimeMeasurement) {
-        
+
     }
 
 }
