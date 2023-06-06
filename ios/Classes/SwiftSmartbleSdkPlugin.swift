@@ -898,7 +898,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                       _ = bleConnector.sendInt8(bleKey, bleKeyFlag, times!)
                   } // 0 is off, or 5 ~ 20
               } else if bleKeyFlag ==  BleKeyFlag.READ {
-                  //READ
+                  //READf
                   _ = bleConnector.sendData(bleKey, bleKeyFlag)
               }
           case BleKey.SEDENTARINESS:
@@ -950,11 +950,11 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                       }
                   }
                   let bleSedentariness = BleSedentarinessSettings()
-                  bleSedentariness.mEnabled = 1
-                  bleSedentariness.mRepeat = 63 // Monday ~ Saturday
-                  bleSedentariness.mStartHour = 1
-                  bleSedentariness.mEndHour = 22
-                  bleSedentariness.mInterval = 60
+                  bleSedentariness.mEnabled = mEnabled
+                  bleSedentariness.mRepeat = mRepeat // Monday ~ Saturday
+                  bleSedentariness.mStartHour = mStartHour
+                  bleSedentariness.mEndHour = mEndHour
+                  bleSedentariness.mInterval = mInterval
                   _ = bleConnector.sendObject(bleKey,  BleKeyFlag.UPDATE, bleSedentariness)
               } else if bleKeyFlag ==  BleKeyFlag.READ {
                   //READ
@@ -980,7 +980,8 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
               }
           case BleKey.NO_DISTURB_GLOBAL:
               // on
-              _ = bleConnector.sendBool(bleKey, bleKeyFlag, true)
+              let isDoNotDisturb = args?["isDoNotDistrub"] as? Bool
+              _ = bleConnector.sendBool(bleKey, bleKeyFlag, isDoNotDisturb ?? false)
           case BleKey.WATCHFACE_ID:
               if bleKeyFlag == BleKeyFlag.READ {
                   //READ
@@ -1007,17 +1008,23 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
               break
           case BleKey.GESTURE_WAKE:
               //抬手亮
+              let mEnabled = args?["mEnabled"] as? Int
+              let mStartHour = args?["mStartHour"] as? Int
+              let mStartMinute = args?["mStartMinute"] as? Int
+              let mEndHour = args?["mEndHour"] as? Int
+              let mEndMinute = args?["mEndMinute"] as? Int
               if bleKeyFlag ==  BleKeyFlag.UPDATE {
                   _ = bleConnector.sendObject(bleKey, bleKeyFlag,
-                      BleGestureWake(BleTimeRange(1, 8, 0, 22, 0)))
+                      BleGestureWake(BleTimeRange(mEnabled!, mStartHour!, mStartMinute!, mEndHour!, mEndMinute!)))
               } else if bleKeyFlag == BleKeyFlag.READ {
                   //READ
                   _ = bleConnector.sendData(bleKey, bleKeyFlag)
               }
           case BleKey.VIBRATION:
               //震动设置
+              let frequency = args?["frequency"] as? Int
               if bleKeyFlag ==  BleKeyFlag.UPDATE {
-                  _ = bleConnector.sendInt8(bleKey, bleKeyFlag, 3) // 0~10, 0 is off
+                  _ = bleConnector.sendInt8(bleKey, bleKeyFlag, frequency ?? 0) // 0~10, 0 is off
               } else if bleKeyFlag ==  BleKeyFlag.READ {
                   //READ
                   _ = bleConnector.sendData(bleKey, bleKeyFlag)
@@ -1032,33 +1039,115 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
               //设备语言设置
               _ = bleConnector.sendInt8(bleKey, bleKeyFlag, Languages.languageToCode())
           case BleKey.ALARM:
+              let index = args?["index"] as? Int ?? 0
+              let mEnabled = args?["mEnabled"] as? Int ?? 0
+              let mRepeat = args?["mRepeat"] as? String
+              let mYear = args?["mYear"] as? Int ?? 0
+              let mMonth = args?["mMonth"] as? Int ?? 0
+              let mDay = args?["mDay"] as? Int ?? 0
+              let mHour = args?["mHour"] as? Int ?? 0
+              let mMinute = args?["mMinute"] as? Int ?? 0
+              let mTag = args?["mTag"] as? String ?? ""
+              let listRepeat = args?["listRepeat"] as? [String]
+              var bleRepeat: Int? = nil
+//              if let listRepeat = listRepeat {
+//                  bleRepeat = 0
+//                  for item in listRepeat {
+//                      var itemRepeat: Int? = nil
+//                      switch item {
+//                      case "MONDAY":
+//                          itemRepeat = BleRepeat.MONDAY
+//                      case "TUESDAY":
+//                          itemRepeat = BleRepeat.TUESDAY
+//                      case "THURSDAY":
+//                          itemRepeat = BleRepeat.THURSDAY
+//                      case "FRIDAY":
+//                          itemRepeat = BleRepeat.FRIDAY
+//                      case "SATURDAY":
+//                          itemRepeat = BleRepeat.SATURDAY
+//                      case "SUNDAY":
+//                          itemRepeat = BleRepeat.SUNDAY
+//                      case "ONCE":
+//                          itemRepeat = BleRepeat.ONCE
+//                      case "WORKDAY":
+//                          itemRepeat = BleRepeat.WORKDAY
+//                      case "WEEKEND":
+//                          itemRepeat = BleRepeat.WEEKEND
+//                      case "EVERYDAY":
+//                          itemRepeat = BleRepeat.EVERYDAY
+//                      default:
+//                          break
+//                      }
+//                      if var bleRepeat = bleRepeat {
+//                          bleRepeat = bleRepeat
+//                      } else {
+//                          bleRepeat = itemRepeat
+//                      }
+//
+//                  }
+//
+//              }
+//
+//              if(mRepeat != nil){
+//                  switch mRepeat {
+//                  case "MONDAY":
+//                      bleRepeat = BleRepeat.MONDAY
+//                  case "TUESDAY":
+//                      bleRepeat = BleRepeat.TUESDAY
+//                  case "THURSDAY":
+//                      bleRepeat = BleRepeat.THURSDAY
+//                  case "FRIDAY":
+//                      bleRepeat = BleRepeat.FRIDAY
+//                  case "SATURDAY":
+//                      bleRepeat = BleRepeat.SATURDAY
+//                  case "SUNDAY":
+//                      bleRepeat = BleRepeat.SUNDAY
+//                  case "ONCE":
+//                      bleRepeat = BleRepeat.ONCE
+//                  case "WORKDAY":
+//                      bleRepeat = BleRepeat.WORKDAY
+//                  case "WEEKEND":
+//                      bleRepeat = BleRepeat.WEEKEND
+//                  case "EVERYDAY":
+//                      bleRepeat = BleRepeat.EVERYDAY
+//                  default:
+//                      break
+//                  }
+//              }
               if bleKeyFlag ==  BleKeyFlag.CREATE {
                   // 创建一个一分钟后的闹钟
-                  let calendar = Calendar.current
-                  var date = Date()
-                  date.addTimeInterval(60.0)
+
                   _ = bleConnector.sendObject(bleKey, bleKeyFlag, BleAlarm(
-                      1, // mEnabled
-                      BleRepeat.EVERYDAY, // mRepeat
-                      calendar.component(.year, from: date), // mYear
-                      calendar.component(.month, from: date), // mMonth
-                      calendar.component(.day, from: date), // mDay
-                      calendar.component(.hour, from: date), // mHour
-                      calendar.component(.minute, from: date), // mMinute
-                      "tag" // mTag
+                      mEnabled, // mEnabled
+                      (mRepeat! as NSString).integerValue, // mRepeat
+                      mYear, // mYear
+                      mMonth, // mMonth
+                      mDay, // mDay
+                      mHour, // mHour
+                      mMinute, // mMinute
+                      mTag // mTag
                   ))
               } else if bleKeyFlag ==  BleKeyFlag.DELETE {
                   // 如果缓存中有闹钟的话，删除第一个
                   let alarms: [BleAlarm] = BleCache.shared.getArray(.ALARM)
                   if !alarms.isEmpty {
-                      _ = bleConnector.sendInt8(bleKey, bleKeyFlag, alarms[0].mId)
+                      _ = bleConnector.sendInt8(bleKey, bleKeyFlag, alarms[index].mId)
                   }
               } else if bleKeyFlag ==  BleKeyFlag.UPDATE {
                   // 如果缓存中有闹钟的话，切换第一个闹钟的开启状态
                   let alarms: [BleAlarm] = BleCache.shared.getArray(.ALARM)
                   if !alarms.isEmpty {
-                      let alarm = alarms[0]
-                      alarm.mEnabled ^= 1
+                      let alarm = alarms[index]
+                      alarm.mEnabled = mEnabled
+                      if mRepeat != nil {
+                          alarm.mRepeat =  (mRepeat! as NSString).integerValue
+                      }
+                      alarm.mYear = mYear
+                      alarm.mMonth = mMonth
+                      alarm.mDay = mDay
+                      alarm.mHour = mHour
+                      alarm.mMinute = mMinute
+                      alarm.mTag = mTag
                       _ = bleConnector.sendObject(bleKey, bleKeyFlag, alarm)
                   }
               } else if bleKeyFlag ==  BleKeyFlag.READ {
@@ -1113,13 +1202,21 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
               }
           case BleKey.ANTI_LOST:
               // on 防丢提醒设备
-              _ = bleConnector.sendBool(bleKey, bleKeyFlag, true)
+              let isAntiLost = args?["isAntiLost"] as? Bool
+              _ = bleConnector.sendBool(bleKey, bleKeyFlag, isAntiLost ?? false)
           case BleKey.HR_MONITORING:
               //定时心率检查设置
+              let mEnabled = args?["mEnabled"] as? Int
+              let mStartHour = args?["mStartHour"] as? Int
+              let mStartMinute = args?["mStartMinute"] as? Int
+              let mEndHour = args?["mEndHour"] as? Int
+              let mEndMinute = args?["mEndMinute"] as? Int
+              let mInterval = args?["mInterval"] as? Int
+
               if bleKeyFlag ==  BleKeyFlag.UPDATE {
                   let hrMonitoring = BleHrMonitoringSettings()
-                  hrMonitoring.mBleTimeRange = BleTimeRange(1, 8, 0, 22, 0)
-                  hrMonitoring.mInterval = 60 // an hour
+                  hrMonitoring.mBleTimeRange = BleTimeRange(mEnabled!, mStartHour!, mStartMinute!, mEndHour!, mEndMinute!)
+                  hrMonitoring.mInterval = mInterval! // an hour
                   _ = bleConnector.sendObject(bleKey, bleKeyFlag, hrMonitoring)
               } else if bleKeyFlag ==  BleKeyFlag.READ {
                   _ = bleConnector.sendData(bleKey, bleKeyFlag)
@@ -1285,9 +1382,9 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
               //camera 相机拍照、或者退出拍照
               let mCameraEntered = args?["mCameraEntered"] as? Bool
               if mCameraEntered==true {
-                  _ = bleConnector.sendInt8(bleKey, bleKeyFlag, CameraState.EXIT)
-              } else {
                   _ = bleConnector.sendInt8(bleKey, bleKeyFlag, CameraState.ENTER)
+              } else {
+                  _ = bleConnector.sendInt8(bleKey, bleKeyFlag, CameraState.EXIT)
               }
           case BleKey.APP_SPORT_STATE:
               bleLog("PHONE_WORKOUT_SWITCH")
@@ -1400,13 +1497,14 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                   _ = bleConnector.sendData(bleKey, bleKeyFlag)
               }
           case BleKey.DATE_FORMAT:
+              let format = args?["format"] as? Int
               if bleKeyFlag ==  BleKeyFlag.UPDATE {
-                  /**
+                  /**1
                     0 ->YYYY/MM/dd
                     1 ->dd/MM/YYYY
                     2 ->MM/dd/YYYY
                     */
-                  _ = bleConnector.sendInt8(bleKey, bleKeyFlag, 2)
+                  _ = bleConnector.sendInt8(bleKey, bleKeyFlag, format ?? 0)
               } else if bleKeyFlag ==  BleKeyFlag.READ {
                   _ = bleConnector.sendData(bleKey, bleKeyFlag)
               }
