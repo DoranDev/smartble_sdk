@@ -1,4 +1,5 @@
 import Flutter
+import Contacts
 import UIKit
 import CoreBluetooth
 
@@ -130,6 +131,16 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
     var onStockReadSink: FlutterEventSink?
     var onStockDeleteSink: FlutterEventSink?
     var onBleErrorSink: FlutterEventSink?
+
+    //replace special characters
+    func stringReplacingOccurrencesOfString(_ str:String) ->String {
+        let str1: NSString = str as NSString
+        let charactersInString = "[]{}（#%-*=_）\\|//~(＜＞$%^&*)_€£¥:;!@.`,"
+        let doNotWant = CharacterSet.init(charactersIn: charactersInString)
+        let componentsArrays = str1.components(separatedBy: doNotWant)
+        let hmutStr = componentsArrays.joined(separator: "")
+        return hmutStr
+    }
 
 
     public func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
@@ -1468,11 +1479,45 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
 //                  }
 //              }
 //              self.navigationController?.pushViewController(selectVC, animated: true)
-//          case BleKey.CONTACT:
-//              //address book 同步通讯录到设备
-//             if addressBookAuthorization() {
-//               selectAddressBook()
-//            }
+          case BleKey.CONTACT:
+              bleLog("Address Book")
+
+              let listContact = args?["listContact"] as? [[String: Any]]
+
+              var sendArray: [BleContactPerson] = []
+
+              do {
+                  listContact?.forEach { contact in
+                      var userName = contact["displayName"] as! String
+
+                      let phoneString = contact["phone"] as! String
+
+      //                let phone = phoneString.replacingOccurrences(of: " ", with: "")
+                      let phone = self.stringReplacingOccurrencesOfString(phoneString)
+                      //Name
+                      var bytes: [UInt8] = []
+                      var index = 0
+                      for items in userName.utf8 {
+                          if index < 24 {
+                              index += 1
+                              bytes.append(items.advanced(by: 0))
+                          }
+                      }
+
+                      let newDate = Data(bytes: bytes, count: bytes.count)
+                      userName = String.init(data: newDate, encoding: .utf8) ?? ""
+
+                      if phone.count > 2 {
+                          sendArray.append(BleContactPerson.init(username: userName, userphone: phone))
+                      }
+                  }
+              } catch {
+              }
+
+              let send: BleAddressBook = BleAddressBook.init(array: sendArray)
+              if BleConnector.shared.sendStream(.CONTACT, send.toData()) {
+                  bleLog("sendStream - AddressBook")
+              }
           case BleKey.AEROBIC_EXERCISE:
               if bleKeyFlag ==  BleKeyFlag.UPDATE {
                   let aerobic = BleAerobicSettings()
