@@ -913,6 +913,209 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                   //READf
                   _ = bleConnector.sendData(bleKey, bleKeyFlag)
               }
+          case BleKey.WORLD_CLOCK:
+              // Create a clock
+              let index = (args?["index"] as? Int)
+              let isLocal = (args?["isLocal"] as? Int)
+              let mTimeZoneOffset = (args?["mTimeZoneOffSet"] as? Int)
+              let reversed = (args?["reversed"] as? Int)
+              let mCityName = (args?["mCityName"] as? String)
+
+               if bleKeyFlag == .CREATE {
+                   let worldClock = BleWorldClock()
+                   worldClock.mLocal = isLocal ?? 0
+                   worldClock.mTimeZoneOffset = mTimeZoneOffset ?? 0 / 1000 / 60 / 15
+                   worldClock.mReversed = reversed ?? 0
+                   worldClock.mCityName = mCityName ?? ""
+                   _ = mBleConnector.sendObject(
+                       bleKey,
+                       bleKeyFlag,
+                       worldClock
+                   )
+               } else if bleKeyFlag == .DELETE {
+                   // If there are clocks in the cache, delete the first one
+                   let clocks: [BleWorldClock] = BleCache.shared.getArray(.WORLD_CLOCK)
+                   if !clocks.isEmpty {
+                       _ =  bleConnector.sendInt8(bleKey, bleKeyFlag, clocks[index ?? 0].mId)
+                   }
+               } else if bleKeyFlag == .UPDATE {
+                   let clocks: [BleWorldClock] = BleCache.shared.getArray(.WORLD_CLOCK)
+                   if !clocks.isEmpty {
+                       let clock = clocks[index ?? 0]
+                           clock.mLocal = clock.mLocal == 0 ? 1 : 0
+                           _ =  mBleConnector.sendObject(bleKey, bleKeyFlag, clock)
+                   }
+               } else if bleKeyFlag == .READ {
+                   // Read all clocks from the device
+                   _ = mBleConnector.sendInt8(bleKey, bleKeyFlag, ID_ALL)
+               }
+              break
+          case BleKey.WEATHER_REALTIME:
+                  let weatherRealTime = args?["realTime"] as? String
+                  if let realTimeData = weatherRealTime?.data(using: .utf8),
+                     let realTime = try? JSONSerialization.jsonObject(with: realTimeData, options: []) as? [String: Any] {
+                      if bleKeyFlag == .UPDATE {
+                          let bleWeather = BleWeather()
+                          bleWeather.mCurrentTemperature = realTime["mCurrentTemperature"] as? Int ?? 0
+                          bleWeather.mMaxTemperature = realTime["mMaxTemperature"] as? Int ?? 0
+                          bleWeather.mMinTemperature = realTime["mMinTemperature"] as? Int ?? 0
+                          bleWeather.mWeatherCode = realTime["mWeatherCode"] as? Int ?? 0
+                          bleWeather.mWindSpeed = 1
+                          bleWeather.mHumidity = 1
+                          bleWeather.mVisibility = 1
+                          bleWeather.mUltraVioletIntensity = 1
+                          bleWeather.mPrecipitation = 1
+                         let bleWeatherRealtime = BleWeatherRealtime()
+                          bleWeatherRealtime.mTime = Int(Date().timeIntervalSince1970)
+                          bleWeatherRealtime.mWeather = bleWeather
+                          _ = mBleConnector.sendObject(
+                              BleKey.WEATHER_REALTIME,
+                              bleKeyFlag,
+                              bleWeatherRealtime
+                          )
+                      }
+                  }
+
+              break
+          case BleKey.WEATHER_FORECAST:
+
+                  let weatherForecast1 = args?["forecast1"] as? String
+                  let weatherForecast2 = args?["forecast2"] as? String
+                  let weatherForecast3 = args?["forecast3"] as? String
+                  if let forecastData1 = weatherForecast1?.data(using: .utf8),
+                     let forecastData2 = weatherForecast2?.data(using: .utf8),
+                     let forecastData3 = weatherForecast3?.data(using: .utf8),
+                     let forecast1 = try? JSONSerialization.jsonObject(with: forecastData1, options: []) as? [String: Any],
+                     let forecast2 = try? JSONSerialization.jsonObject(with: forecastData2, options: []) as? [String: Any],
+                     let forecast3 = try? JSONSerialization.jsonObject(with: forecastData3, options: []) as? [String: Any] {
+                      if bleKeyFlag == .UPDATE {
+                          let currentTime = Date().timeIntervalSince1970
+                          let oneDayInSeconds: TimeInterval = 24 * 60 * 60
+                          let tomorrowTime = currentTime + oneDayInSeconds
+                          let tomorrowDate = Date(timeIntervalSince1970: tomorrowTime)
+
+                          let bleWeather = BleWeather()
+                          bleWeather.mCurrentTemperature = forecast1["mCurrentTemperature"] as? Int ?? 0
+                          bleWeather.mMaxTemperature = forecast1["mMaxTemperature"] as? Int ?? 0
+                          bleWeather.mMinTemperature = forecast1["mMinTemperature"] as? Int ?? 0
+                          bleWeather.mWeatherCode = forecast1["mWeatherCode"] as? Int ?? 0
+                          bleWeather.mWindSpeed = 2
+                          bleWeather.mHumidity = 2
+                          bleWeather.mVisibility = 2
+                          bleWeather.mUltraVioletIntensity = 2
+                          bleWeather.mPrecipitation = 2
+
+                          let bleWeather2 = BleWeather()
+                          bleWeather2.mCurrentTemperature = forecast2["mCurrentTemperature"] as? Int ?? 0
+                          bleWeather2.mMaxTemperature = forecast2["mMaxTemperature"] as? Int ?? 0
+                          bleWeather2.mMinTemperature = forecast2["mMinTemperature"] as? Int ?? 0
+                          bleWeather2.mWeatherCode = forecast2["mWeatherCode"] as? Int ?? 0
+                          bleWeather2.mWindSpeed = 3
+                          bleWeather2.mHumidity = 3
+                          bleWeather2.mVisibility = 3
+                          bleWeather2.mUltraVioletIntensity = 3
+                          bleWeather2.mPrecipitation = 3
+
+                          let bleWeather3 = BleWeather()
+                          bleWeather3.mCurrentTemperature = forecast3["mCurrentTemperature"] as? Int ?? 0
+                          bleWeather3.mMaxTemperature = forecast3["mMaxTemperature"] as? Int ?? 0
+                          bleWeather3.mMinTemperature = forecast3["mMinTemperature"] as? Int ?? 0
+                          bleWeather3.mWeatherCode = forecast3["mWeatherCode"] as? Int ?? 0
+                          bleWeather3.mWindSpeed = 4
+                          bleWeather3.mHumidity = 4
+                          bleWeather3.mVisibility = 4
+                          bleWeather3.mUltraVioletIntensity = 4
+                          bleWeather3.mPrecipitation = 4
+
+                         let bleWeatherForecast = BleWeatherForecast()
+                          bleWeatherForecast.mTime = Int(Date().timeIntervalSince1970)
+                          bleWeatherForecast.mWeather1 = bleWeather
+                          bleWeatherForecast.mWeather2 = bleWeather2
+                          bleWeatherForecast.mWeather3 = bleWeather3
+
+                          _ = mBleConnector.sendObject(
+                              BleKey.WEATHER_FORECAST,
+                              bleKeyFlag,
+                              bleWeatherForecast
+                          )
+                      }
+                  }
+
+
+              break
+          case BleKey.STOCK:
+              let index = args?["index"] as? Int
+              let dataStock = args?["stock"] as? String
+              if let convertStock = try? JSONSerialization.jsonObject(with: dataStock?.data(using: .utf8) ?? Data(), options: []) as? [String: Any] {
+                  print("dataStockSM - \(index ?? 0) -> \(convertStock)")
+                  var open : Float = 0.0
+                  if let stringValue = convertStock["open"] as? String,
+                      let numericValue = Float(stringValue) {
+                      open = Float(numericValue)
+                      // Use the converted value here
+                  } else {
+                       open = 0.0
+                      // Handle the case where the conversion fails
+                  }
+                  var close : Float = 0.0
+                  if let stringValue = convertStock["close"] as? String,
+                      let numericValue = Float(stringValue) {
+                      close = Float(numericValue)
+                      // Use the converted value here
+                  } else {
+                      close = 0.0
+                      // Handle the case where the conversion fails
+                  }
+                  var volume : Float = 0.0
+                  if let stringValue = convertStock["volume"] as? String,
+                      let numericValue = Float(stringValue) {
+                      volume = Float(numericValue)
+                      // Use the converted value here
+                  } else {
+                      volume = 0.0
+                      // Handle the case where the conversion fails
+                  }
+                  let byPoint = close - open
+                  let byPercent = ((close - open) / open) * 100
+                  let marketCap = close * volume
+                  print("convertStock \(convertStock)")
+                  if bleKeyFlag == .CREATE {
+                      let stock = BleStock()
+                      stock.mColorType = 1
+                      stock.mStockCode = convertStock["ticker"] as? String ?? ""
+                      stock.mSharePrice = close
+                      stock.mNetChangePoint = byPoint
+                      stock.mNetChangePercent = byPercent
+                      stock.mMarketCapitalization = marketCap
+                      _ = mBleConnector.sendObject(
+                          bleKey,
+                          bleKeyFlag,
+                          stock
+                      )
+                  } else if bleKeyFlag == .DELETE {
+                      let stocks : [BleStock] = BleCache.shared.getArray(.STOCK)
+                      if let stockIndex = stocks.firstIndex(where: { $0.mStockCode == convertStock["ticker"] as? String }) {
+                          if !stocks.isEmpty {
+                              _ = mBleConnector.sendInt8(bleKey, bleKeyFlag, stocks[stockIndex].mId)
+                          }
+                      }
+                  } else if bleKeyFlag == .UPDATE {
+                      let stocks : [BleStock] = BleCache.shared.getArray(.STOCK)
+                      if !stocks.isEmpty {
+                         let stock = stocks[index ?? 0]
+                              stock.mSharePrice = close
+                              stock.mNetChangePoint = byPoint
+                              stock.mNetChangePercent = byPercent
+                              stock.mMarketCapitalization = marketCap
+                          _ = mBleConnector.sendObject(bleKey, bleKeyFlag, stock)
+
+                      }
+                  } else if bleKeyFlag == .READ {
+                      _ = mBleConnector.sendInt8(bleKey, bleKeyFlag, ID_ALL)
+                  }
+              }
+
+              break
           case BleKey.SEDENTARINESS:
               //久坐提醒
               if bleKeyFlag ==  BleKeyFlag.UPDATE {
@@ -2020,7 +2223,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
             print("onFindPhone \(start ? "started" : "stopped")")
             var item = [String: Any]()
 
-            item["start"] =   start
+            item["start"] =  start
 
             if let onFindPhoneSink = onFindPhoneSink {
                 onFindPhoneSink(item)
