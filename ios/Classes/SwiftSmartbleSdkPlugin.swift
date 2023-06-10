@@ -1174,7 +1174,9 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
               }
           case BleKey.NOTIFICATION_REMINDER:
               //消息提醒CALL
-              if bleKeyFlag ==  BleKeyFlag.UPDATE {
+              let listApp = args?["listApp"] as? [[String: Any]]
+              print("listApp \(String(describing: listApp))")
+               if bleKeyFlag ==  BleKeyFlag.UPDATE {
                   let bleNotificationSettings = BleNotificationSettings()
                   bleNotificationSettings.enable(BleNotificationSettings.MIRROR_PHONE)
                   bleNotificationSettings.enable(BleNotificationSettings.WHATS_APP)
@@ -1261,7 +1263,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
               let mMinute = args?["mMinute"] as? Int ?? 0
               let mTag = args?["mTag"] as? String ?? ""
               let listRepeat = args?["listRepeat"] as? [String]
-              var bleRepeat: Int? = nil
+    //          var bleRepeat: Int? = nil
 //              if let listRepeat = listRepeat {
 //                  bleRepeat = 0
 //                  for item in listRepeat {
