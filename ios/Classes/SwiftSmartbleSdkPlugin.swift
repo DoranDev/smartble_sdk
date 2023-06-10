@@ -951,15 +951,17 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                }
               break
           case BleKey.WEATHER_REALTIME:
+
                   let weatherRealTime = args?["realTime"] as? String
-                  if let realTimeData = weatherRealTime?.data(using: .utf8),
-                     let realTime = try? JSONSerialization.jsonObject(with: realTimeData, options: []) as? [String: Any] {
+              print("weatherRealTime \(String(describing: weatherRealTime))")
+              let realTime = try? JSONSerialization.jsonObject(with: weatherRealTime?.data(using: .utf8) ?? Data(), options: []) as? [String:Any]
                       if bleKeyFlag == .UPDATE {
+                          print("WEATHER_REALTIME \(String(describing: realTime!["mCurrentTemperature"]) )")
                           let bleWeather = BleWeather()
-                          bleWeather.mCurrentTemperature = realTime["mCurrentTemperature"] as? Int ?? 0
-                          bleWeather.mMaxTemperature = realTime["mMaxTemperature"] as? Int ?? 0
-                          bleWeather.mMinTemperature = realTime["mMinTemperature"] as? Int ?? 0
-                          bleWeather.mWeatherCode = realTime["mWeatherCode"] as? Int ?? 0
+                          bleWeather.mCurrentTemperature = ("\(realTime!["mCurrentTemperature"] ?? 0)" as NSString).integerValue
+                          bleWeather.mMaxTemperature =  ("\(realTime!["mMaxTemperature"] ?? 0)" as NSString).integerValue
+                          bleWeather.mMinTemperature = ("\(realTime!["mMinTemperature"] ?? 0)" as NSString).integerValue
+                          bleWeather.mWeatherCode = ("\(realTime!["mWeatherCode"] ?? 0)" as NSString).integerValue
                           bleWeather.mWindSpeed = 1
                           bleWeather.mHumidity = 1
                           bleWeather.mVisibility = 1
@@ -974,7 +976,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                               bleWeatherRealtime
                           )
                       }
-                  }
+
 
               break
           case BleKey.WEATHER_FORECAST:
@@ -982,23 +984,20 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                   let weatherForecast1 = args?["forecast1"] as? String
                   let weatherForecast2 = args?["forecast2"] as? String
                   let weatherForecast3 = args?["forecast3"] as? String
-                  if let forecastData1 = weatherForecast1?.data(using: .utf8),
-                     let forecastData2 = weatherForecast2?.data(using: .utf8),
-                     let forecastData3 = weatherForecast3?.data(using: .utf8),
-                     let forecast1 = try? JSONSerialization.jsonObject(with: forecastData1, options: []) as? [String: Any],
-                     let forecast2 = try? JSONSerialization.jsonObject(with: forecastData2, options: []) as? [String: Any],
-                     let forecast3 = try? JSONSerialization.jsonObject(with: forecastData3, options: []) as? [String: Any] {
+              let forecast1 = try? JSONSerialization.jsonObject(with: weatherForecast1?.data(using: .utf8) ?? Data(), options: []) as? [String:Any]
+              let forecast2 = try? JSONSerialization.jsonObject(with: weatherForecast2?.data(using: .utf8) ?? Data(), options: []) as? [String:Any]
+              let forecast3 = try? JSONSerialization.jsonObject(with: weatherForecast3?.data(using: .utf8) ?? Data(), options: []) as? [String:Any]
                       if bleKeyFlag == .UPDATE {
                           let currentTime = Date().timeIntervalSince1970
                           let oneDayInSeconds: TimeInterval = 24 * 60 * 60
                           let tomorrowTime = currentTime + oneDayInSeconds
                           let tomorrowDate = Date(timeIntervalSince1970: tomorrowTime)
-
+                          print("mCurrentTemperature \(String(describing: forecast1!["mCurrentTemperature"]) )")
                           let bleWeather = BleWeather()
-                          bleWeather.mCurrentTemperature = forecast1["mCurrentTemperature"] as? Int ?? 0
-                          bleWeather.mMaxTemperature = forecast1["mMaxTemperature"] as? Int ?? 0
-                          bleWeather.mMinTemperature = forecast1["mMinTemperature"] as? Int ?? 0
-                          bleWeather.mWeatherCode = forecast1["mWeatherCode"] as? Int ?? 0
+                          bleWeather.mCurrentTemperature = ("\(forecast1!["mCurrentTemperature"] ?? 0)" as NSString).integerValue
+                          bleWeather.mMaxTemperature =  ("\(forecast1!["mMaxTemperature"] ?? 0)" as NSString).integerValue
+                          bleWeather.mMinTemperature = ("\(forecast1!["mMinTemperature"] ?? 0)" as NSString).integerValue
+                          bleWeather.mWeatherCode = ("\(forecast1!["mWeatherCode"] ?? 0)" as NSString).integerValue
                           bleWeather.mWindSpeed = 2
                           bleWeather.mHumidity = 2
                           bleWeather.mVisibility = 2
@@ -1006,10 +1005,10 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                           bleWeather.mPrecipitation = 2
 
                           let bleWeather2 = BleWeather()
-                          bleWeather2.mCurrentTemperature = forecast2["mCurrentTemperature"] as? Int ?? 0
-                          bleWeather2.mMaxTemperature = forecast2["mMaxTemperature"] as? Int ?? 0
-                          bleWeather2.mMinTemperature = forecast2["mMinTemperature"] as? Int ?? 0
-                          bleWeather2.mWeatherCode = forecast2["mWeatherCode"] as? Int ?? 0
+                          bleWeather.mCurrentTemperature = ("\(forecast2!["mCurrentTemperature"] ?? 0)" as NSString).integerValue
+                          bleWeather.mMaxTemperature =  ("\(forecast2!["mMaxTemperature"] ?? 0)" as NSString).integerValue
+                          bleWeather.mMinTemperature = ("\(forecast2!["mMinTemperature"] ?? 0)" as NSString).integerValue
+                          bleWeather.mWeatherCode = ("\(forecast2!["mWeatherCode"] ?? 0)" as NSString).integerValue
                           bleWeather2.mWindSpeed = 3
                           bleWeather2.mHumidity = 3
                           bleWeather2.mVisibility = 3
@@ -1017,10 +1016,10 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                           bleWeather2.mPrecipitation = 3
 
                           let bleWeather3 = BleWeather()
-                          bleWeather3.mCurrentTemperature = forecast3["mCurrentTemperature"] as? Int ?? 0
-                          bleWeather3.mMaxTemperature = forecast3["mMaxTemperature"] as? Int ?? 0
-                          bleWeather3.mMinTemperature = forecast3["mMinTemperature"] as? Int ?? 0
-                          bleWeather3.mWeatherCode = forecast3["mWeatherCode"] as? Int ?? 0
+                          bleWeather.mCurrentTemperature = ("\(forecast3!["mCurrentTemperature"] ?? 0)" as NSString).integerValue
+                          bleWeather.mMaxTemperature =  ("\(forecast3!["mMaxTemperature"] ?? 0)" as NSString).integerValue
+                          bleWeather.mMinTemperature = ("\(forecast3!["mMinTemperature"] ?? 0)" as NSString).integerValue
+                          bleWeather.mWeatherCode = ("\(forecast3!["mWeatherCode"] ?? 0)" as NSString).integerValue
                           bleWeather3.mWindSpeed = 4
                           bleWeather3.mHumidity = 4
                           bleWeather3.mVisibility = 4
@@ -1039,8 +1038,6 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                               bleWeatherForecast
                           )
                       }
-                  }
-
 
               break
           case BleKey.STOCK:
@@ -1180,7 +1177,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
               if bleKeyFlag ==  BleKeyFlag.UPDATE {
                   let bleNotificationSettings = BleNotificationSettings()
                   bleNotificationSettings.enable(BleNotificationSettings.MIRROR_PHONE)
-                  bleNotificationSettings.enable(BleNotificationSettings.WE_CHAT)
+                  bleNotificationSettings.enable(BleNotificationSettings.WHATS_APP)
                   print(bleNotificationSettings)
                   _ = bleConnector.sendObject(bleKey,  BleKeyFlag.UPDATE, bleNotificationSettings)
               }
@@ -1523,63 +1520,6 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                       _ = bleConnector.sendObject(bleKey, bleKeyFlag, schedule)
                   }
               }
-          case BleKey.WEATHER_REALTIME:
-              //实时天气
-              if bleKeyFlag ==  BleKeyFlag.UPDATE {
-                  // let weatherRealtime: BleWeatherRealtime? = BleCache.shared.getObject(.WEATHER_REALTIME)
-                  _ = bleConnector.sendObject(BleKey.WEATHER_REALTIME, bleKeyFlag, BleWeatherRealtime(
-                      time: Int(Date().timeIntervalSince1970),
-                      weather: BleWeather(
-                          currentTemperature: 1,
-                          maxTemperature: 1,
-                          minTemperature: 1,
-                          weatherType: BleWeather.SUNNY,
-                          windSpeed: 1,
-                          humidity: 1,
-                          visibility: 1,
-                          ultraVioletIntensity: 1,
-                          precipitation: 1
-                      )
-                  ))
-              }
-          case BleKey.WEATHER_FORECAST:
-              //天气预报
-              if bleKeyFlag ==  BleKeyFlag.UPDATE {
-                  // let weatherForecast: BleWeatherForecast? = BleCache.shared.getObject(.WEATHER_FORECAST)
-                  _ = bleConnector.sendObject(BleKey.WEATHER_FORECAST, bleKeyFlag, BleWeatherForecast(
-                      time: Int(Date().timeIntervalSince1970),
-                      weather1: BleWeather(
-                          currentTemperature: 2,
-                          maxTemperature: 2,
-                          minTemperature: 2,
-                          weatherType: BleWeather.CLOUDY,
-                          windSpeed: 2,
-                          humidity: 2,
-                          visibility: 2,
-                          ultraVioletIntensity: 2,
-                          precipitation: 2),
-                      weather2: BleWeather(
-                          currentTemperature: 3,
-                          maxTemperature: 3,
-                          minTemperature: 3,
-                          weatherType: BleWeather.OVERCAST,
-                          windSpeed: 3,
-                          humidity: 3,
-                          visibility: 3,
-                          ultraVioletIntensity: 3,
-                          precipitation: 3),
-                      weather3: BleWeather(
-                          currentTemperature: 4,
-                          maxTemperature: 4,
-                          minTemperature: 4,
-                          weatherType: BleWeather.RAINY,
-                          windSpeed: 4,
-                          humidity: 4,
-                          visibility: 4,
-                          ultraVioletIntensity: 4,
-                          precipitation: 4)
-                  ))
-              }
           case BleKey.APP_SPORT_DATA:
               bleLog("-- PHONEWORKOUT --")
               break
@@ -1660,7 +1600,25 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                   _ = BleConnector.shared.sendData(bleKey, bleKeyFlag)
                   return
               }
-             // selectWatchType()
+              let fileURL = args?["url"] as! String
+
+              if let url = URL(string: fileURL) {
+                print("Valid URL: \(url)")
+
+                let task = URLSession.shared.dataTask(with: url) { (data, response, error) in
+                  if let error = error {
+                    print("Error: \(error)")
+                  } else if let data = data {
+                    print("Received data: \(data)")
+                    _ = bleConnector.sendStream(self.bleKey, data)
+                  }
+                }
+                task.resume()
+              } else {
+                print("Invalid URL: \(String(describing: fileURL))")
+              }
+ //              _ = bleConnector.sendStream(bleKey, URL.init(fileURLWithPath: fileURL))
+//
               break
 //          case BleKey.AGPS_FILE, BleKey.FONT_FILE, BleKey.UI_FILE, BleKey.LANGUAGE_FILE:
 //              if bleKeyFlag ==  BleKeyFlag.DELETE {
@@ -2540,4 +2498,5 @@ func toJSON<T: Encodable>(_ value: T) -> String? {
         return nil
     }
 }
+
 

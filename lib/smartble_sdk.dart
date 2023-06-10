@@ -272,8 +272,8 @@ class SmartbleSdk {
   Future<dynamic> kFIND_PHONE({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('FIND_PHONE', {'flag': flag.name});
 
-  Future<dynamic> kNOTIFICATION_REMINDER({required SelectedBlekeyFlag flag}) =>
-      _channel.invokeMethod('NOTIFICATION_REMINDER', {'flag': flag.name});
+  Future<dynamic> kNOTIFICATION_REMINDER({required SelectedBlekeyFlag flag, required String listApp}) =>
+      _channel.invokeMethod('NOTIFICATION_REMINDER', {'flag': flag.name,'listApp': listApp});
 
   Future<dynamic> kANTI_LOST(
           {required SelectedBlekeyFlag flag, required bool isAntiLost}) =>
