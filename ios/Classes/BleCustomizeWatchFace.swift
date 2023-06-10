@@ -95,13 +95,12 @@ class BleCustomizeWatchFace: UITableViewController {
     
     
     var watchFaceIdNum = 0
-    var selectView = ABHSelectWatchFaceId()
     var bleWatchFaceID : BleWatchFaceId?
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         title = "Customize Watch Face"
-        
+
         let otaButton = UIButton(type: .custom)
         otaButton.titleLabel?.font = .systemFont(ofSize: 13)
         otaButton.backgroundColor = .clear
@@ -112,9 +111,9 @@ class BleCustomizeWatchFace: UITableViewController {
         let rightBarItem = UIBarButtonItem(customView: otaButton)
         self.navigationItem.rightBarButtonItem = rightBarItem
     }
-    
+
     func createUI(){
-        
+
         btn240.setTitleColor(.black, for: .normal)
         btn240.frame = CGRect(x: 20, y: 10, width: 80, height: 40)
         btn240.setTitle("240*240", for: .normal)
@@ -135,7 +134,7 @@ class BleCustomizeWatchFace: UITableViewController {
         }else{
             btn240.backgroundColor = .lightGray
         }
-        
+
         progressLab.textColor = .red
         progressLab.text = "progress:0"
         progressLab.frame = CGRect(x: 200, y: 10, width: 150, height: 40)
@@ -147,7 +146,7 @@ class BleCustomizeWatchFace: UITableViewController {
         digitalBtn.addTarget(self, action: #selector(showDigitalTime(_:)), for: .touchUpInside)
         digitalBtn.frame = CGRect(x: 20, y: 55, width: 100, height: 30)
         self.view.addSubview(digitalBtn)
-        
+
         let bgX = (Int(MaxWidth)/2)-(bgWidth/2)
         let bgY = (Int(MaxHeight)/2)-(bgHeight/2)
         bgView.frame = CGRect(x: bgX , y: bgY, width: bgWidth, height: bgHeight)
@@ -156,37 +155,37 @@ class BleCustomizeWatchFace: UITableViewController {
         bgimage.image = UIImage.init(named: "bg_1")
         bgimage.frame = CGRect(x: 0, y: 0, width: bgWidth, height: bgWidth)
         bgView.addSubview(bgimage)
-        
+
         clock_pointer.image = UIImage.init(named: "pointer_1")
         clock_pointer.frame = CGRect(x: 0, y: 0, width: bgWidth, height: bgWidth)
         bgView.addSubview(clock_pointer)
-        
+
         clock_scale.image = UIImage.init(named: "scale_1")
         clock_scale.frame = CGRect(x: 0, y: 0, width: bgWidth, height: bgWidth)
         bgView.addSubview(clock_scale)
-        
+
         digitalTime.image = UIImage.init(named: "digital_time")
         digitalTime.isHidden = true
         bgView.addSubview(digitalTime)
         digitalTime.frame = CGRect(x: bgWidth/2-83, y: bgHeight/2-70, width: 165, height: 100)
-        
+
         bg_step.image = UIImage.init(named: "watchface_step")
         bg_step.frame = CGRect(x: bgWidth/2-18, y: 30, width: 37, height: 37)
         bgView.addSubview(bg_step)
-        
+
         bg_cal.image = UIImage.init(named: "watchface_cal")
         bg_cal.frame = CGRect(x: 25, y: bgHeight/2-18, width: 37, height: 37)
         bgView.addSubview(bg_cal)
-        
+
         bg_hr.image = UIImage.init(named: "watchface_hr")
         bg_hr.frame = CGRect(x: bgWidth - 70, y: bgHeight/2-18, width: 37, height: 37)
         bgView.addSubview(bg_hr)
-        
+
         bg_dis.image = UIImage.init(named: "watchface_dis")
         bg_dis.frame = CGRect(x: bgWidth/2-18, y: bgHeight-100, width: 37, height: 37)
         bgView.addSubview(bg_dis)
     }
-    
+
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         BleConnector.shared.addBleHandleDelegate(String(obj: self), self)
@@ -198,7 +197,7 @@ class BleCustomizeWatchFace: UITableViewController {
         BleConnector.shared.removeBleHandleDelegate(String(obj: self))
 
     }
-    
+
     @objc func selectWatchSize(_ sender:UIButton){
         if sender.tag == 100{
             btn240.backgroundColor = .lightGray
@@ -207,9 +206,9 @@ class BleCustomizeWatchFace: UITableViewController {
             btn240.backgroundColor = .white
             btn454.backgroundColor = .lightGray
         }
-        
+
     }
-    
+
     @objc func showDigitalTime(_ sender:UIButton){
         if sender.isSelected == true{
             sender.isSelected = false
@@ -226,48 +225,17 @@ class BleCustomizeWatchFace: UITableViewController {
     // MARK: - sender data
     @objc func senderCustomizeWathcFace(_ sender:UIButton){
         sender.isUserInteractionEnabled = false
-        if BleCache.shared.mSupportWatchFaceId == 1{            
-            self.isShowSelectWatchFaceId()
-        }else{
-            self.startCreateBinFile()
-        }
+        self.startCreateBinFile()
     }
 }
 
 // MARK: - mSupportWatchFaceId == 1
 extension BleCustomizeWatchFace {
-    func isShowSelectWatchFaceId(){
 
-        selectView = ABHSelectWatchFaceId()
-        let bkBtn = UIButton()
-        bkBtn.backgroundColor = UIColor.init(red: 0.0, green: 0.0, blue: 0.0, alpha: 0.5)
-        bkBtn.addTarget(self, action: #selector(selectRemoveFromSuperview(_ :)), for: .touchUpInside)
-        bkBtn.frame = CGRect(x: 0, y: 0, width: MaxWidth, height: MaxHeight)
-        self.view.addSubview(bkBtn)
-    
-        selectView.frame = CGRect(x: 0, y: MaxHeight-400, width: MaxWidth, height: 300)
-        self.view.addSubview(selectView)
-
-        if bleWatchFaceID != nil{
-            selectView.watchFaceId = bleWatchFaceID
-        }
-        selectView.makeView()
-        selectView.selectItem = ({ (num:Int) in
-            bleLog("selectItem - \(num)")
-            self.watchFaceIdNum = num
-            self.saveSelectImage(num)
-            self.senderWatchFaceID(num)
-            bkBtn.sendActions(for: .touchUpInside)
-        })
-        
-        
-    }
-    
     @objc func selectRemoveFromSuperview(_ sender:UIButton) {
         self.navigationItem.leftBarButtonItem?.isEnabled = true
         self.navigationItem.rightBarButtonItem?.isEnabled = true
         sender.removeFromSuperview()
-        self.selectView.removeFromSuperview()
     }
     
     func saveSelectImage(_ selectNum:Int){
