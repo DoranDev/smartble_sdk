@@ -1177,9 +1177,42 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
               let listApp = args?["listApp"] as? [[String: Any]]
               print("listApp \(String(describing: listApp))")
                if bleKeyFlag ==  BleKeyFlag.UPDATE {
-                  let bleNotificationSettings = BleNotificationSettings()
-                  bleNotificationSettings.enable(BleNotificationSettings.MIRROR_PHONE)
-                  bleNotificationSettings.enable(BleNotificationSettings.WHATS_APP)
+                   let bleNotificationSettings = BleNotificationSettings()
+                   listApp?.forEach { app in
+                       switch app["app_name"] {
+                       case "phone":
+                           bleNotificationSettings.enable(BleNotificationSettings.MIRROR_PHONE)
+                           bleNotificationSettings.enable(BleNotificationSettings.CALL)
+                           break
+                       case "Whatsapp":
+                           bleNotificationSettings.enable(BleNotificationSettings.WHATS_APP)
+                           break
+                       case "SMS":
+                           bleNotificationSettings.enable(BleNotificationSettings.SMS)
+                           break
+                       case "WeChat":
+                           bleNotificationSettings.enable(BleNotificationSettings.WE_CHAT)
+                           break
+                       case "Facebook Messenger":
+                           bleNotificationSettings.enable(BleNotificationSettings.FACEBOOK_MESSENGER)
+                           break
+                       case "Twitter":
+                           bleNotificationSettings.enable(BleNotificationSettings.TWITTER)
+                           break
+                       case "Facebook":
+                           bleNotificationSettings.enable(BleNotificationSettings.FACEBOOK_MESSENGER)
+                           break
+                       case "LINE":
+                           bleNotificationSettings.enable(BleNotificationSettings.LINE)
+                           break
+                       case "Instagram":
+                           bleNotificationSettings.enable(BleNotificationSettings.INSTAGRAM)
+                           break
+                       case "LinkedIn":
+                           bleNotificationSettings.enable(BleNotificationSettings.LINKED_IN)
+                           break
+                       }
+                   }
                   print(bleNotificationSettings)
                   _ = bleConnector.sendObject(bleKey,  BleKeyFlag.UPDATE, bleNotificationSettings)
               }
