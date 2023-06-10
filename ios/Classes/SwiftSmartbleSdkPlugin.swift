@@ -1179,7 +1179,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                if bleKeyFlag ==  BleKeyFlag.UPDATE {
                    let bleNotificationSettings = BleNotificationSettings()
                    listApp?.forEach { app in
-                       switch app["app_name"] {
+                       switch "\(app["app_name"])" {
                        case "phone":
                            bleNotificationSettings.enable(BleNotificationSettings.MIRROR_PHONE)
                            bleNotificationSettings.enable(BleNotificationSettings.CALL)
@@ -1211,6 +1211,8 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                        case "LinkedIn":
                            bleNotificationSettings.enable(BleNotificationSettings.LINKED_IN)
                            break
+                       default:
+                           print("Nothing")
                        }
                    }
                   print(bleNotificationSettings)
