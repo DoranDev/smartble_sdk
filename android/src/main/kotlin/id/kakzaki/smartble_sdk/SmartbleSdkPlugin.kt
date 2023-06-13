@@ -1812,6 +1812,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         digitalWeekTopY = dateAndWeekTop
     }
 
+
     private fun addControlBitmap(
         controlFileName: String,
         elementView: Boolean,
@@ -1943,6 +1944,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             return data
         }
     }
+
 
     private fun getTimeDigital(elements: ArrayList<Element>) {
         //AM PM
