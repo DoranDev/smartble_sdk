@@ -557,7 +557,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         mBleScanner.mBleScanFilter = self
         mBleConnector.launch()
         mBleConnector.addBleHandleDelegate(String(obj: self), self)
-       ABHBackgroundMonitoring.share.startListening()
+      // ABHBackgroundMonitoring.share.startListening()
   }
 
  var bleKey: BleKey = BleKey.NONE
