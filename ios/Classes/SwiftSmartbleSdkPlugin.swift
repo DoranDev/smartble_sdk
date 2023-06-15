@@ -1,6 +1,7 @@
 import Flutter
 import Contacts
 import UIKit
+import MobileCoreServices
 import CoreBluetooth
 
 public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandler, BleHandleDelegate , BleScanDelegate , BleScanFilter {
@@ -347,6 +348,81 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
     var mDevices = [[String:String]()]
     let mBleCache = BleCache.shared
 
+
+//    var btn240 = false
+//     var btn454 = false
+//     let bgView = UIView()
+//     var bgWidth :Int = 240
+//     var bgHeight :Int = 240
+//     var digitalTime = false
+//     var clock_pointer = false
+//     var clock_scale = false
+//     var bg_step = false
+//     var bg_hr  = false
+//     var bg_dis = false
+//     var bg_cal = false
+ //
+ //    let timeSymView :UIImageView = UIImageView() //Realtek平台特殊字符绘制 :
+ //    let dateSymView :UIImageView = UIImageView() //Realtek平台特殊字符绘制
+     var isBmpResoure = false
+     let bleBin = BleWatchFaceBin()
+     var imageCountStart :Int = 0
+     var pointerHourImageSize :[UInt32] = [UInt32]()
+     var pointerMinImageSize :[UInt32] = [UInt32]()
+     var pointerImageSize :[UInt32] = [UInt32]()
+
+     var timeAMImageSize :[UInt32] = [UInt32]()
+
+     var timeDateHourImageSize :[UInt32] = [UInt32]()
+     var timeDateSymbolImageSize :[UInt32] = [UInt32]()
+     var timeDateMinImageSize :[UInt32] = [UInt32]()
+
+     var timeWeekMonthImageSize :[UInt32] = [UInt32]()
+     var timeWeekSymbolImageSize :[UInt32] = [UInt32]()
+     var timeWeekDayImageSize :[UInt32] = [UInt32]()
+     var timeWeekImageSize :[UInt32] = [UInt32]()
+
+     var stepImageSize :[UInt32] = [UInt32]()
+     var hrImageSize :[UInt32] = [UInt32]()
+     var disImageSize :[UInt32] = [UInt32]()
+     var calImageSize :[UInt32] = [UInt32]()
+
+     var pointerHourBuffer :Data = Data()
+     var pointerMinBuffer :Data = Data()
+     var pointerBuffer :Data = Data()
+
+     var timeAMBuffer :Data = Data()
+
+     var timeDateHourBuffer :Data = Data()
+     var timeDateSymbolBuffer :Data = Data()
+     var timeDateMinBuffer :Data = Data()
+
+     var timeWeekMonthBuffer :Data = Data()
+     var timeWeekSymbolBuffer :Data = Data()
+     var timeWeekDayBuffer :Data = Data()
+     var timeWeekBuffer :Data = Data()
+
+     var stepBuffer :Data = Data()
+     var hrBuffer :Data = Data()
+     var disBuffer :Data = Data()
+     var calBuffer :Data = Data()
+
+     var timeAMSize  = CGSize()
+     var timeDateHourSize  = CGSize()
+     var timeDateMinSize  = CGSize()
+     var timeWeekMonthSize  = CGSize()
+     var timeWeekDaySize  = CGSize()
+     var timeWeekSize  = CGSize()
+
+     var stepSize = CGSize()
+     var hrSize = CGSize()
+     var disSize = CGSize()
+     var calSize = CGSize()
+
+     var hourSize = CGSize()
+     var minSize = CGSize()
+     var secSize = CGSize()
+
   public static func register(with registrar: FlutterPluginRegistrar) {
     let channel = FlutterMethodChannel(name: "smartble_sdk", binaryMessenger: registrar.messenger())
       let instance = SwiftSmartbleSdkPlugin(channel)
@@ -541,8 +617,8 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
     private var imageFormat = WatchFaceBuilder.sharedInstance.PNG_ARGB_8888 // Image encoding, the default is 8888, Realtek is RGB565
     private var X_CENTER = WatchFaceBuilder.sharedInstance.GRAVITY_X_CENTER // Relative coordinate mark, MTK and Realtek have different implementations
     private var Y_CENTER = WatchFaceBuilder.sharedInstance.GRAVITY_Y_CENTER // Relative coordinate mark, MTK and Realtek have different implementations
-    private var borderSize = 0 // When drawing graphics, add the width of the ring
-    private var ignoreBlack = 0 // Whether to ignore black, 0-do not ignore; 1-ignore
+//    private var borderSize = 0 // When drawing graphics, add the width of the ring
+//    private var ignoreBlack = 0 // Whether to ignore black, 0-do not ignore; 1-ignore
 
     var screenWidth = 0 // The actual size of the device screen - width
     var screenHeight = 0 // The actual size of the device screen - height
@@ -550,740 +626,878 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
     var screenPreviewHeight = 0 // The actual preview size of the device screen - height
     var digiLeft = 0
     var digiTop = 0
-    // Control related
-    private var stepValueCenterX: Float = 0
-    private var stepValueCenterY: Float = 0
-    private var caloriesValueCenterX: Float = 0
-    private var caloriesValueCenterY: Float = 0
-    private var distanceValueCenterX: Float = 0
-    private var distanceValueCenterY: Float = 0
-    private var heartRateValueCenterX: Float = 0
-    private var heartRateValueCenterY: Float = 0
-    var valueColor = 0
-    var custom = 0
 
-    // Digital time
-    private var amLeftX: Float = 0
-    private var amTopY: Float = 0
-    private var digitalTimeHourLeftX: Float = 0
-    private var digitalTimeHourTopY: Float = 0
-    private var digitalTimeMinuteLeftX: Float = 0
-    private var digitalTimeMinuteRightX: Float = 0
-    private var digitalTimeMinuteTopY: Float = 0
-    private var digitalTimeSymbolLeftX: Float = 0
-    private var digitalTimeSymbolTopY: Float = 0
-    private var digitalDateMonthLeftX: Float = 0
-    private var digitalDateMonthTopY: Float = 0
-    private var digitalDateDayLeftX: Float = 0
-    private var digitalDateDayTopY: Float = 0
-    private var digitalDateSymbolLeftX: Float = 0
-    private var digitalDateSymbolTopY: Float = 0
-    private var digitalWeekLeftX: Float = 0
-    private var digitalWeekTopY: Float = 0
-    private var digitalValueColor = 0
+//    var valueColor = 0
+   var custom = 0
 
-    // Pointer
-    private var pointerSelectNumber = 0
+    func convertToPNG(image: UIImage) -> UIImage? {
+        guard let pngData = image.pngData() else {
+            return nil
+        }
 
-    // Digital parameter
-    private let DIGITAL_AM_DIR = "am_pm"
-    private let DIGITAL_DATE_DIR = "date"
-    private let DIGITAL_HOUR_MINUTE_DIR = "hour_minute"
-    private let DIGITAL_WEEK_DIR = "week"
+        return UIImage(data: pngData)
+    }
 
-    // Pointer parameter
-    private let POINTER_HOUR = "pointer/hour"
-    private let POINTER_MINUTE = "pointer/minute"
-    private let POINTER_SECOND = "pointer/second"
+    func startCreateBinFile(){
+        let dataSourceArray = getItemsPiont() as! Dictionary<String, Any>
+        let image150 = getThumbnailImage()
+        let image240 = getMainBgImage()
+        isBmpResoure = true
+        var bgWidth16 :UInt16 = 0
+        var bgHeight16 :UInt16 = 0
+        var bgX :UInt16 = 0
+        var bgY :UInt16 = 0
+        var pvWidth :UInt16 = 0
+        var pvHeight :UInt16 = 0
+        var pvX :UInt16 = 0
+        var pvY :UInt16 = 0
+        //固件坐标
+        var bkGravity = UInt8(faceBuilder.GRAVITY_X_CENTER|faceBuilder.GRAVITY_Y_CENTER)//背景图
+        var ylGravity = UInt8(faceBuilder.GRAVITY_X_CENTER|faceBuilder.GRAVITY_Y_CENTER)//预览图
+        var apmGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)//am pm
+        var hourGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)//hour
+        var dayGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)//Day
+        var minGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)//min
+        var monthGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)//month
+        var weekSymGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)//weekSym
+        var weekDayGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)//weekDay
+        var weekGravity = UInt8(faceBuilder.GRAVITY_X_CENTER|faceBuilder.GRAVITY_Y_TOP)//week
+        var stepGravity = UInt8(faceBuilder.GRAVITY_X_CENTER|faceBuilder.GRAVITY_Y_CENTER)//step
+        var hrGravity = UInt8(faceBuilder.GRAVITY_X_CENTER|faceBuilder.GRAVITY_Y_CENTER)
+        var disGravity = UInt8(faceBuilder.GRAVITY_X_CENTER|faceBuilder.GRAVITY_Y_CENTER)
+        var calGravity = UInt8(faceBuilder.GRAVITY_X_CENTER|faceBuilder.GRAVITY_Y_CENTER)
+        var pointGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)
+        //MTK 平台默认为0
+        var IgnoreBlack = UInt8(1)//默认为0 , bmp相关的图片用1
+        var isFixCoordinate = true
+        bgWidth16  = UInt16(screenWidth)
+        bgHeight16 = UInt16(screenHeight)
+        pvWidth  = UInt16(screenPreviewWidth)
+        pvHeight = UInt16(screenPreviewHeight)
 
-    var elements = NSMutableArray()
+        bgX = bgWidth16/2
+        bgY = bgHeight16/2
+        pvX = pvWidth/2
+        pvY = pvHeight/2
+        //Realtek需要修正坐标参数
+        if isFixCoordinate {
+            bkGravity = UInt8(faceBuilder.GRAVITY_X_CENTER_R|faceBuilder.GRAVITY_Y_CENTER_R)
+            ylGravity = UInt8(faceBuilder.GRAVITY_X_CENTER_R|faceBuilder.GRAVITY_Y_CENTER_R)
+            apmGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)
+            hourGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)
+            dayGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)
+            minGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)
+            monthGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)
+            weekSymGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)
+            weekDayGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)
+            weekGravity = UInt8(faceBuilder.GRAVITY_X_CENTER_R|faceBuilder.GRAVITY_Y_TOP)
+            stepGravity = UInt8(faceBuilder.GRAVITY_X_CENTER_R|faceBuilder.GRAVITY_Y_CENTER_R)
+            hrGravity = UInt8(faceBuilder.GRAVITY_X_CENTER_R|faceBuilder.GRAVITY_Y_CENTER_R)
+            disGravity = UInt8(faceBuilder.GRAVITY_X_CENTER_R|faceBuilder.GRAVITY_Y_CENTER_R)
+            calGravity = UInt8(faceBuilder.GRAVITY_X_CENTER_R|faceBuilder.GRAVITY_Y_CENTER_R)
+            pointGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)
+            IgnoreBlack = UInt8(1)
+        }
+        var newArray :[Element] = []
+        //背景、预览处理
+        var newElement :Element = Element()
+        newElement.type = UInt8(faceBuilder.ELEMENT_BACKGROUND)
+        newElement.w = bgWidth16
+        newElement.h = bgHeight16
+        newElement.gravity = bkGravity
+        newElement.ignoreBlack = 0 //背景缩略图固定为0
+        newElement.x = bgX
+        newElement.y = bgY
+        newElement.bottomOffset = 0
+        newElement.leftOffset = 0
+        newElement.imageCount = UInt8(1)
+         //buffer每个元素大小
+        var newByte :Data = getBackBuffer(image240)
+        newElement.imageSizes = [UInt32(newByte.count)]
+        newElement.imageBuffer = newByte
+        newArray.append(newElement)
 
-//    private func getBg(isRound: Bool, bgBitmapX: UIImage) -> Data {
-//        let finalBgBitmap = getBgBitmap(isCanvasValue: false, isRound: isRound, bgBitmapX: bgBitmapX)
-//        let filePath = URL(fileURLWithPath: Bundle.main.resourceURL)
-//            .appendingPathComponent("dial_bg_file.png")
-//        if let data = finalBgBitmap.pngData() {
-//            try? data.write(to: filePath)
-//            return data
-//        } else {
-//            return Data()
-//        }
-//    }
-//
-//    private func getBgBitmap(isCanvasValue: Bool, isRound: Bool, bgBitmapX: UIImage) -> UIImage {
-//        let customDir: String
-//        if custom == 2 {
-//            customDir = "dial_customize_454"
-//        } else {
-//            customDir = "dial_customize_240"
-//        }
-//
-//        let CONTROL_DIR = "\(customDir)/control"
-//        let STEP_DIR = "\(CONTROL_DIR)/step"
-//        let CALORIES_DIR = "\(CONTROL_DIR)/calories"
-//        let DISTANCE_DIR = "\(CONTROL_DIR)/distance"
-//        let HEART_RATE_DIR = "\(CONTROL_DIR)/heart_rate"
-//
-//        let TIME_DIR = "\(customDir)/time"
-//        let DIGITAL_DIR = "\(TIME_DIR)/digital"
-//
-//        let VALUE_DIR = "\(customDir)/value"
-//
-//        let bgBitmap: UIImage
-//        if isRound {
-//            bgBitmap = bgBitmapX
-//        } else {
-//            bgBitmap = bgBitmapX
-//        }
-//
-//        var scaleWidth = CGFloat(screenWidth) / CGFloat(bgBitmap.size.width)
-//        var scaleHeight = (CGFloat(screenHeight) - CGFloat(screenReservedBoundary)) / CGFloat(bgBitmap.size.height)
-//        print("test getBgBitmap = \(bgBitmap.size.width)-\(bgBitmap.size.height); \(scaleWidth)-\(scaleHeight)")
-//
-//        let scale = ImageUtils.scale(bgBitmap, toWidth: scaleWidth, toHeight: scaleHeight)
-//
-//        let bgBitMap: UIImage
-//        if isRound {
-//            bgBitMap = ImageUtils.toRound(scale, withBorderSize: borderSize, borderColor: UIColor.black)
-//        } else {
-//            bgBitMap = ImageUtils.toRoundCorner(scale, withRadius: roundCornerRadius, borderWidth: 0, borderColor: UIColor.black)
-//        }
-//
-//        if !isRound {
-//            if let bgBitmapX = bgBitmapX {
-//                scaleWidth = CGFloat(screenWidth) / CGFloat(bgBitmapX.size.width)
-//                scaleHeight = (CGFloat(screenHeight) - CGFloat(screenReservedBoundary)) / CGFloat(bgBitmapX.size.height)
-//            }
-//        }
-//
-//        let canvas = UIGraphicsBeginImageContext(bgBitMap.size)
-//        let (stepX, stepY) = addControlBitmap(
-//            "\(STEP_DIR)/step_0.png",
-//            controlViewStep: controlViewStep,
-//            controlViewStepX: controlViewStepX,
-//            controlViewStepY: controlViewStepY,
-//            valueDir: "\(VALUE_DIR)/\(valueColor)/",
-//            valuePrefix: "18564",
-//            canvas: canvas,
-//            scaleWidth: scaleWidth,
-//            scaleHeight: scaleHeight,
-//            isCanvasValue: isCanvasValue
-//        )
-//        stepValueCenterX = stepX
-//        stepValueCenterY = stepY
-//
-//        let (caloriesX, caloriesY) = addControlBitmap(
-//            "\(CALORIES_DIR)/calories_0.png",
-//            controlViewCa: controlViewCa,
-//            controlViewCaX: controlViewCaX,
-//            controlViewCaY: controlViewCaY,
-//            valueDir: "\(VALUE_DIR)/\(valueColor)/",
-//            valuePrefix: "50",
-//            canvas: canvas,
-//            scaleWidth: scaleWidth,
-//            scaleHeight: scaleHeight,
-//            isCanvasValue: isCanvasValue
-//        )
-//        caloriesValueCenterX = caloriesX
-//        caloriesValueCenterY = caloriesY
-//
-//        let (distanceX, distanceY) = addControlBitmap(
-//            "\(DISTANCE_DIR)/distance_0.png",
-//            controlViewDis: controlViewDis,
-//            controlViewDisX: controlViewDisX,
-//            controlViewDisY: controlViewDisY,
-//            valueDir: "\(VALUE_DIR)/\(valueColor)/",
-//            valuePrefix: "6",
-//            canvas: canvas,
-//            scaleWidth: scaleWidth,
-//            scaleHeight: scaleHeight,
-//            isCanvasValue: isCanvasValue
-//        )
-//        distanceValueCenterX = distanceX
-//        distanceValueCenterY = distanceY
-//
-//        let (heartRateX, heartRateY) = addControlBitmap(
-//            "\(HEART_RATE_DIR)/heart_rate_0.png",
-//            controlViewHr: controlViewHr,
-//            controlViewHrX: controlViewHrX,
-//            controlViewHrY: controlViewHrY,
-//            valueDir: "\(VALUE_DIR)/\(valueColor)/",
-//            valuePrefix: "90",
-//            canvas: canvas,
-//            scaleWidth: scaleWidth,
-//            scaleHeight: scaleHeight,
-//            isCanvasValue: isCanvasValue
-//        )
-//        heartRateValueCenterX = heartRateX
-//        heartRateValueCenterY = heartRateY
-//
-//        if timeDigitalView {
-//            addDigitalTime(
-//                digitalDir: digitalDir: "\(DIGITAL_DIR)/\(digitalValueColor)/",
-//                scaleWidth: scaleWidth,
-//                scaleHeight: scaleHeight,
-//                canvas: canvas,
-//                isCanvasValue: isCanvasValue
-//            )
-//        }
-//
-//        if timePointView {
-//            // getPointerBg(timePointView, isCanvasValue, canvas)
-//        }
-//
-//        if timeScaleView {
-//            // getPointerBg(timeScaleView, true, canvas)
-//        }
-//
-//        return getFinalBgBitmap(bgBitmap: bgBitMap)
-//    }
-//
-//    private func getPointer(type: Int, dir: String, elements: inout [Element]) {
-//        let customDir: String
-//        if custom == 2 {
-//            customDir = "dial_customize_454"
-//        } else {
-//            customDir = "dial_customize_240"
-//        }
-//
-//        let TIME_DIR = "\(customDir)/time"
-//        let POINTER_DIR = "\(TIME_DIR)/pointer"
-//
-//        var pointerHour = Data]()
-//        if let tmpBitmap = ImageUtils.getBitmap(assetPath: "\(POINTER_DIR)/\(dir)/\(pointerSelectNumber).\(fileFormat)") {
-//            let w = tmpBitmap.width
-//            let h = tmpBitmap.height
-//            if let pointerHourValue = NSDataAsset(name: "\(POINTER_DIR)/\(dir)/\(pointerSelectNumber).\(fileFormat)")?.data {
-//                pointerHour.append(defaultConversion(fileFormat: fileFormat, data: pointerHourValue, width: w))
-//                let elementAmPm = Element(
-//                    type: UInt8(type),
-//                    w: w,
-//                    h: h,
-//                    gravity: UInt8(faceBuilder.GRAVITY_X_LEFT | faceBuilder.GRAVITY_Y_TOP),
-//                    ignoreBlack: UInt8(ignoreBlack),
-//                    x: UInt16(screenWidth / 2) - 1,
-//                    y: UInt16(screenHeight / 2) - 1,
-//                    bottomOffset: fileFormat == "png" ? 0 : h / 2,
-//                    leftOffset: fileFormat == "png" ? 0 : w / 2,
-//                    imageBuffer: pointerHour
-//                )
-//                elements.append(elementAmPm)
-//            }
-//        }
-//    }
-//
-//    private func addDigitalTimeParam(
-//        digitalDir: String,
-//        digitalSecondaryDir: String,
-//        tempValue: String,
-//        timeTop: CGFloat,
-//        top: Int,
-//        canvas: Canvas,
-//        timeLeft: CGFloat,
-//        isCanvasValue: Bool
-//    ) -> (UIImage, CGFloat) {
-//        //特殊符号处理-即使是瑞昱系列，也使用bng格式的特殊符号，因为特殊符号会被嵌入背景中，如果无法嵌入，需要单独做处理
-//        if let symbolBitmap = ImageUtils.getBitmap(assetPath: "\(digitalDir)\(digitalSecondaryDir)/symbol.png") {
-//            //此处涉及到预览，所以强制使用PNG图片，避免透明色不显示
-//            if let valueBitmap = ImageUtils.getBitmap(assetPath: "\(digitalDir)\(digitalSecondaryDir)/\(tempValue[0]).png") {
-//                let elementValueTop = timeTop + CGFloat(top) + 6       //普通元素距离上方二外增加6像素间隔
-//                let symbolValueTop = elementValueTop + (valueBitmap.height - symbolBitmap.height) / 2       //特殊元素在普通元素的基础上，在增加差异高度一半的间隔
-//
-//                if digitalSecondaryDir.contains(DIGITAL_HOUR_MINUTE_DIR) {
-//                    digitalTimeHourLeftX = Float(timeLeft)
-//                    digitalTimeHourTopY = Float(elementValueTop)
-//                    digitalTimeSymbolLeftX = Float(timeLeft + valueBitmap.width * 2)
-//                    digitalTimeSymbolTopY = symbolValueTop
-//                    digitalTimeMinuteLeftX = Float(timeLeft + valueBitmap.width * 2 + symbolBitmap.width)
-//                    digitalTimeMinuteTopY = Float(elementValueTop)
-//                    digitalTimeMinuteRightX = digitalTimeMinuteLeftX + valueBitmap.width * 2 - 6
-//                } else if digitalSecondaryDir.contains(DIGITAL_DATE_DIR) {
-//                    digitalDateMonthLeftX = Float(timeLeft)
-//                    digitalDateMonthTopY = Float(elementValueTop)
-//                    digitalDateSymbolLeftX = Float(timeLeft + valueBitmap.width * 2)
-//                    digitalDateSymbolTopY = symbolValueTop
-//                    digitalDateDayLeftX = Float(timeLeft + valueBitmap.width * 2 + symbolBitmap.width)
-//                    digitalDateDayTopY = Float(elementValueTop)
-//                }
-//
-//                if screenReservedBoundary == 0 {
-//                    //正常的图片，直接绘制特殊元素到背景，不用单独传输过去了，省得麻烦
-//                    var valueParam = 0
-//                    var valueSymWidth = 0
-//                    for (index, char) in tempValue.enumerated() {
-//                        if index == 2 {
-//                            canvas.drawBitmap(
-//                                symbolBitmap,
-//                                left: timeLeft + valueBitmap.width * CGFloat(valueParam),
-//                                top: symbolValueTop,
-//                                paint: nil
-//                            )
-//                            valueSymWidth = symbolBitmap.width
-//                        } else {
-//                            if isCanvasValue {
-//                                if let itemBitmap = ImageUtils.getBitmap(assetPath: "\(digitalDir)\(digitalSecondaryDir)/\(char).png") {
-//                                    canvas.drawBitmap(
-//                                        itemBitmap,
-//                                        left: timeLeft + valueBitmap.width * CGFloat(valueParam) + CGFloat(valueSymWidth),
-//                                        top: elementValueTop,
-//                                        paint: nil
-//                                    )
-//                                }
-//                            }
-//                            valueParam += 1
-//                        }
-//                    }
-//                } else {
-//                    if isCanvasValue {
-//                        var valueParam = 0
-//                        var valueSymWidth = 0
-//                        for (index, char) in tempValue.enumerated() {
-//                            if index == 2 {
-//                                canvas.drawBitmap(
-//                                    symbolBitmap,
-//                                    left: timeLeft + valueBitmap.width * CGFloat(valueParam),
-//                                    top: symbolValueTop,
-//                                    paint: nil
-//                                )
-//                                valueSymWidth = symbolBitmap.width
-//                            } else {
-//                                if let itemBitmap = ImageUtils.getBitmap(assetPath: "\(digitalDir)\(digitalSecondaryDir)/\(char).\(fileFormat)") {
-//                                    canvas.drawBitmap(
-//                                        itemBitmap,
-//                                        left: timeLeft + valueBitmap.width * CGFloat(valueParam) + CGFloat(valueSymWidth),
-//                                        top: elementValueTop,
-//                                        paint: nil
-//                                    )
-//                                }
-//                                valueParam += 1
-//                            }
-//                        }
-//                    }
-//                }
-//
-//                return (valueBitmap, elementValueTop)
-//            }
-//        }
-//
-//        return (UIImage(), 0)
-//    }
-//
-//    private func addDigitalTime(
-//        digitalDir: String,
-//        scaleWidth: CGFloat,
-//        scaleHeight: CGFloat,
-//        canvas: Canvas,
-//        isCanvasValue: Bool
-//    ) {
-//    //        val timeLeft = (screenWidth / 3.5f) * scaleWidth
-//    //        val timeTop = (screenHeight / 3) * scaleHeight
-//        let timeLeft = CGFloat(digiLeft) * scaleWidth
-//        let timeTop = CGFloat(digiTop) * scaleHeight
-//        LogUtils.d("test timeLeft=\(timeLeft),  timeTop=\(timeTop), timeDigitalView.width=\(timeDigitalViewWidth) ,scaleWidth =\(scaleWidth)")
-//        //获取AM原始资源.此处涉及到预览，所以强制使用PNG图片，避免透明色不显示
-//        if let amBitmap = ImageUtils.getBitmap(assetPath: "\(digitalDir)\(DIGITAL_AM_DIR)/pm.png") {
-//            //绘制小时分钟的时间,这几个元素总宽度最长,根据这几个元素,可以确定时间元素整体的总宽度为120
-//            let tempValue = "08:30"
-//            let (hourMinuteBitmap, hourMinuteTop) = addDigitalTimeParam(
-//                digitalDir: digitalDir,
-//                digitalSecondaryDir: DIGITAL_HOUR_MINUTE_DIR,
-//                tempValue: tempValue,
-//                timeTop: timeTop,
-//                top: amBitmap.height,
-//                canvas: canvas,
-//                timeLeft: timeLeft,
-//                isCanvasValue: isCanvasValue
-//            )
-//            //日期
-//            let tempDate = "07/08"
-//            let (_, dateAndWeekTop) = addDigitalTimeParam(
-//                digitalDir: digitalDir,
-//                digitalSecondaryDir: DIGITAL_DATE_DIR,
-//                tempValue: tempDate,
-//                timeTop: hourMinuteTop,
-//                top: hourMinuteBitmap.height,
-//                canvas: canvas,
-//                timeLeft: timeLeft,
-//                isCanvasValue: isCanvasValue
-//            )
-//            //时间主体绘制完毕后,即可确认位置,然后就可以绘制其他的从属元素了
-//            //AM-PM
-//            if isCanvasValue {
-//                canvas.drawBitmap(
-//                    amBitmap,
-//                    left: digitalTimeMinuteRightX - amBitmap.width,
-//                    top: timeTop,
-//                    paint: nil
-//                )
-//            }
-//            amLeftX = digitalTimeMinuteRightX - amBitmap.width
-//            amTopY = timeTop
-//            //week 此处涉及到预览，所以强制使用PNG图片，避免透明色不显示
-//            if let weekBitmap = ImageUtils.getBitmap(assetPath: "\(digitalDir)\(DIGITAL_WEEK_DIR)/4.png") {
-//                if isCanvasValue {
-//                    canvas.drawBitmap(
-//                        weekBitmap,
-//                        left: digitalTimeMinuteRightX - weekBitmap.width,
-//                        top: dateAndWeekTop,
-//                        paint: nil
-//                    )
-//                }
-//                digitalWeekLeftX = digitalTimeMinuteRightX - weekBitmap.width
-//                digitalWeekTopY = dateAndWeekTop
-//            }
-//        }
-//    }
-//
-//    private func addControlBitmap(
-//        controlFileName: String,
-//        elementView: Bool,
-//        elementViewX: Int,
-//        elementViewY: Int,
-//        controlValueFileDir: String,
-//        controlValue: String,
-//        canvas: Canvas,
-//        scaleWidth: CGFloat,
-//        scaleHeight: CGFloat,
-//        isCanvasValue: Bool
-//    ) -> (CGFloat, CGFloat) {
-//        if elementView {
-//            LogUtils.d("test addControlBitmap \(controlFileName) ,\(elementViewX) \(elementViewY)  \(scaleWidth) \(scaleHeight)")
-//            if let viewBitmap = ImageUtils.getBitmap(assetPath: controlFileName) {
-//                let viewLeft = CGFloat(elementViewX) * scaleWidth
-//                let viewTop = CGFloat(elementViewY) * scaleHeight
-//                //x.y 获取该view相对于父 view的的left,top坐标点
-//                canvas.drawBitmap(
-//                    viewBitmap,
-//                    left: viewLeft,
-//                    top: viewTop,
-//                    paint: nil
-//                )
-//                //计算底部横向中心点.为计算数值做准备
-//                let bottomCenterX = viewBitmap.width / 2 + viewLeft
-//                let bottomY = viewTop + viewBitmap.height + controlValueInterval   //图片和数字之间添加指定间隔，避免过于靠近
-//
-//                let firstValue = ImageUtils.getBitmap(assetPath: "\(controlValueFileDir)\(controlValue[0]).\(fileFormat)")
-//                let valueWidth = firstValue.width * controlValue.count + controlValue.count - 1
-//                let valueStartX = bottomCenterX - valueWidth / 2
-//
-//                if isCanvasValue {
-//                    for (index, value) in controlValue.enumerated() {
-//                        //此处涉及到预览，所以强制使用PNG图片，避免透明色不显示
-//                        if let valueBitmap = ImageUtils.getBitmap(assetPath: "\(controlValueFileDir)\(value).png") {
-//                            canvas.drawBitmap(
-//                                valueBitmap,
-//                                left: valueStartX + CGFloat(index) + CGFloat(valueBitmap.width) * CGFloat(index),
-//                                top: bottomY,
-//                                paint: nil
-//                            )
-//                        }
-//                    }
-//                }
-//
-//                //计算数值显示区域的中心点,并返回
-//                let bottomCenterY = bottomY + firstValue.height / 2
-//                return (bottomCenterX, bottomCenterY)
-//            }
-//        }
-//        return (0, 0)
-//    }
-//
-//    private func getFinalBgBitmap(bgBitmap: UIImage) -> UIImage {
-//        let finalBitmap = UIImage.createBitmap(
-//            width: bgBitmap.width,
-//            height: bgBitmap.height + 1,
-//            config: UIImage.Config.RGB_565
-//        )
-//        let canvas = Canvas(finalBitmap)
-//        let paint = Paint()
-//        paint.color = Color.BLACK
-//        canvas.drawBitmap(bgBitmap, left: 0, top: 0, paint: paint)
-//        return finalBitmap
-//    }
-//
-//    private func bitmap2Bytes(finalBgBitmap: UIImage) -> [UInt8] {
-//        guard let allocate = ByteBuffer.allocate(capacity: finalBgBitmap.byteCount) else {
-//            return []
-//        }
-//        finalBgBitmap.copyPixelsToBuffer(allocate)
-//        let array = allocate.array()
-//        return defaultConversion(fileFormat, array, finalBgBitmap.width, 16, 0, false)
-//    }
-//
-//    private func defaultConversion(
-//        fileFormat: String,
-//        data: [UInt8],
-//        w: Int,
-//        bitCount: Int = 16,
-//        headerInfoSize: Int = 70,
-//        isReverseRows: Bool = true
-//    ) -> [UInt8] {
-//        if fileFormat == "bmp" {
-//            let headerInfoSize2 = headerInfoSize == 0 ? 0 : Int(data[10])
-//            let data1 = Array(data.suffix(from: headerInfoSize2))
-//            let rowSize: Int = (bitCount * w + 31) / 32 * 4
-//            var data2 = [[UInt8]]()
-//            let offset = w % 2 == 0 ? 0 : 2
-//            for index in 0 ..< (data1.count / rowSize) {
-//                let tmpData = Array(data1[index * rowSize ..< index * rowSize + rowSize - offset])
-//                data2.append(tmpData)
-//            }
-//            let data3 = isReverseRows ? data2.reversed() : data2
-//            var test3 = [UInt8]()
-//            for row in data3 {
-//                var j = 0
-//                while j < row.count {
-//                    test3.append(row[j + 1])
-//                    test3.append(row[j])
-//                    j += 2
-//                }
-//            }
-//            let finalData = test3
-//            return finalData
-//        } else {
-//            return data
-//        }
-//    }
-//
-//    private func getTimeDigital(elements: inout [Element]) {
-//        // AM PM
-//        var amPmValue = [[UInt8]]()
-//        var customDir = ""
-//        if custom == 2 {
-//            customDir = "dial_customize_454"
-//        } else {
-//            customDir = "dial_customize_240"
-//        }
-//
-//        // time
-//        let TIME_DIR = "\(customDir)/time"
-//
-//        // digital
-//        let DIGITAL_DIR = "\(TIME_DIR)/digital"
-//        let tmpBitmap = ImageUtils.getBitmap(mContext!!.assets.open("\(DIGITAL_DIR)/\(digitalValueColor)/\(DIGITAL_AM_DIR)/am.\(fileFormat)"))
-//        var w = tmpBitmap.width
-//        var h = tmpBitmap.height
-//        let amValue = mContext!!.assets.open("\(DIGITAL_DIR)/\(digitalValueColor)/\(DIGITAL_AM_DIR)/am.\(fileFormat)").use { Data(it).toByteArray() }
-//        let pmValue = mContext!!.assets.open("\(DIGITAL_DIR)/\(digitalValueColor)/\(DIGITAL_AM_DIR)/pm.\(fileFormat)").use { Data(it).toByteArray() }
-//        amPmValue.append(defaultConversion(fileFormat: fileFormat, data: amValue, w: w))
-//        amPmValue.append(defaultConversion(fileFormat: fileFormat, data: pmValue, w: w))
-//        let elementAmPm = Element(
-//            type: UInt8(faceBuilder.ELEMENT_DIGITAL_AMPM),
-//            w: w,
-//            h: h,
-//            gravity: UInt8(faceBuilder.GRAVITY_X_LEFT | faceBuilder.GRAVITY_Y_TOP),
-//            ignoreBlack: ignoreBlack,
-//            x: UInt16(Int(amLeftX)),
-//            y: UInt16(Int(amTopY)),
-//            imageBuffer: amPmValue.map { $0 }
-//        )
-//        elements.append(elementAmPm)
-//
-//        // 数字时间
-//        let hourMinute = getNumberBuffers(dir: "\(DIGITAL_DIR)/\(digitalValueColor)/\(DIGITAL_HOUR_MINUTE_DIR)/")
-//        w = hourMinute.0
-//        h = hourMinute.1
-//        var valueBuffers = hourMinute.2.map { $0 }
-//        let elementHour = Element(
-//            type: UInt8(faceBuilder.ELEMENT_DIGITAL_HOUR),
-//            w: w,
-//            h: h,
-//            gravity: UInt8(faceBuilder.GRAVITY_X_LEFT | faceBuilder.GRAVITY_Y_TOP),
-//            ignoreBlack: ignoreBlack,
-//            x: Int(digitalTimeHourLeftX),
-//            y: UInt16(Int(digitalTimeHourTopY)),
-//            imageBuffer: valueBuffers
-//        )
-//        elements.append(elementHour)
-//        let elementMinute = Element(
-//            type: UInt8(faceBuilder.ELEMENT_DIGITAL_MIN),
-//            w: w,
-//            h: h,
-//            gravity: UInt8(faceBuilder.GRAVITY_X_LEFT | faceBuilder.GRAVITY_Y_TOP),
-//            ignoreBlack: ignoreBlack,
-//            x: UInt16(Int(digitalTimeMinuteLeftX)),
-//            y: UInt16(Int(digitalTimeMinuteTopY)),
-//            imageBuffer: valueBuffers
-//        )
-//        elements.append(elementMinute)
-//
-//        // 特殊元素需要手动传输，部分设备不能直接嵌入背景，那样部分设备可能回出现不一致的问题，例如MTK的设备，实际分辨率320x385,但是最终只用320x363
-//        if screenReservedBoundary != 0 {
-//            getSymbol(
-//                "\(DIGITAL_DIR)/\(digitalValueColor)/\(DIGITAL_HOUR_MINUTE_DIR)",
-//                type: faceBuilder.ELEMENT_DIGITAL_DIV_HOUR,
-//                x: Int(digitalTimeSymbolLeftX),
-//                y: Int(digitalTimeSymbolTopY),
-//                elements: &elements
-//            )
-//        }
-//
-//        // 日期
-//        let date = getNumberBuffers(dir: "\(DIGITAL_DIR)/\(digitalValueColor)/\(DIGITAL_DATE_DIR)/")
-//        w = date.0
-//        h = date.1
-//        valueBuffers = date.2.map { $0 }
-//        let elementMonth = Element(
-//            type: UInt8(faceBuilder.ELEMENT_DIGITAL_MONTH),
-//            w: w,
-//            h: h,
-//            gravity: UInt8(faceBuilder.GRAVITY_X_LEFT | faceBuilder.GRAVITY_Y_TOP),
-//            ignoreBlack: UInt8(ignoreBlack),
-//            x: UInt16(Int(digitalDateMonthLeftX)),
-//            y: UInt16(Int(digitalDateMonthTopY)),
-//            imageBuffer: valueBuffers
-//        )
-//        elements.append(elementMonth)
-//        let elementDay = Element(
-//            type: UInt8(faceBuilder.ELEMENT_DIGITAL_DAY),
-//            w: w,
-//            h: h,
-//            gravity: UInt8(faceBuilder.GRAVITY_X_LEFT | faceBuilder.GRAVITY_Y_TOP),
-//            ignoreBlack: UInt8(ignoreBlack),
-//            x: UInt16(Int(digitalDateDayLeftX)),
-//            y: UInt16(Int(digitalDateDayTopY)),
-//            imageBuffer: valueBuffers
-//        )
-//        elements.append(elementDay)
-//
-//        // 特殊元素需要手动传输，不能直接嵌入背景，那样部分设备可能回出现不一致的问题
-//        if screenReservedBoundary != 0 {
-//            getSymbol(
-//                "\(DIGITAL_DIR)/\(digitalValueColor)/\(DIGITAL_DATE_DIR)",
-//                type: faceBuilder.ELEMENT_DIGITAL_DIV_MONTH,
-//                x: Int(digitalDateSymbolLeftX),
-//                y: Int(digitalDateSymbolTopY),
-//                elements: &elements
-//            )
-//        }
-//
-//        // week
-//        let week = getNumberBuffers(dir: "\(DIGITAL_DIR)/\(digitalValueColor)/\(DIGITAL_WEEK_DIR)/", range: 6)
-//        w = week.0
-//        h = week.1
-//        valueBuffers = week.2.map { $0 }
-//        let elementWeek = Element(
-//            type: UInt8(faceBuilder.ELEMENT_DIGITAL_WEEKDAY),
-//            w: w,
-//            h: h,
-//            gravity: UInt8(faceBuilder.GRAVITY_X_LEFT | faceBuilder.GRAVITY_Y_TOP),
-//            ignoreBlack: UInt8(ignoreBlack),
-//            x: UInt16(Int(digitalWeekLeftX)),
-//            y: UInt16(Int(digitalWeekTopY)),
-//            imageBuffer: valueBuffers
-//        )
-//        elements.append(elementWeek)
-//    }
-//
-//
-//    private func getControl(elements: inout [Element]) {
-//        var customDir = ""
-//        if custom == 2 {
-//            customDir = "dial_customize_454"
-//        } else {
-//            customDir = "dial_customize_240"
-//        }
-//        // value
-//        let VALUE_DIR = "\(customDir)/value"
-//        let triple = getNumberBuffers(dir: "\(VALUE_DIR)/\(valueColor)/", range: controlValueRange)
-//        let w = triple.0
-//        let h = triple.1
-//        let valueBuffers = triple.2.map { $0 }
-//
-//        // 获取步数数值
-//        if controlViewStep {
-//            let elementStep = Element(
-//                type: UInt8(faceBuilder.ELEMENT_DIGITAL_STEP),
-//                w: UInt16(w),
-//                h: UInt16(h),
-//                gravity: UInt8(X_CENTER | Y_CENTER),
-//                ignoreBlack: UInt8(ignoreBlack),
-//                x: UInt16(Int(stepValueCenterX)),
-//                y: UInt16(Int(stepValueCenterY)),
-//                imageBuffer: valueBuffers
-//            )
-//            elements.append(elementStep)
-//        }
-//
-//        // 获取心率数值
-//        if controlViewHr {
-//            let elementHr = Element(
-//                type: UInt8(faceBuilder.ELEMENT_DIGITAL_HEART),
-//                w: UInt16(w),
-//                h: UInt16(h),
-//                gravity: UInt8(X_CENTER | Y_CENTER),
-//                ignoreBlack: UInt8(ignoreBlack),
-//                x: UInt16(Int(heartRateValueCenterX)),
-//                y: UInt16(Int(heartRateValueCenterY)),
-//                imageBuffer: valueBuffers
-//            )
-//            elements.append(elementHr)
-//        }
-//
-//        // 获取卡路里数值
-//        if controlViewCa {
-//            let elementCa = Element(
-//                type: UInt8(faceBuilder.ELEMENT_DIGITAL_CALORIE),
-//                w: UInt16(w),
-//                h: UInt16(h),
-//                gravity: UInt8(X_CENTER | Y_CENTER),
-//                ignoreBlack: UInt8(ignoreBlack),
-//                x: UInt16(Int(caloriesValueCenterX)),
-//                y: UInt16(Int(caloriesValueCenterY)),
-//                imageBuffer: valueBuffers
-//            )
-//            elements.append(elementCa)
-//        }
-//
-//        // 获取距离数值
-//        if controlViewDis {
-//            let elementDis = Element(
-//                type: UInt8(faceBuilder.ELEMENT_DIGITAL_DISTANCE),
-//                w: UInt16(w),
-//                h: UInt16(h),
-//                gravity: UInt8(X_CENTER | Y_CENTER),
-//                ignoreBlack: UInt8(ignoreBlack),
-//                x: UInt16(Int(distanceValueCenterX)),
-//                y: UInt16(Int(distanceValueCenterY)),
-//                imageBuffer: valueBuffers
-//            )
-//            elements.append(elementDis)
-//        }
-//    }
-//
-//
-//    private func getNumberBuffers(dir: String, range: Int = 9) -> (Int, Int, [Data]) {
-//        var w = 0
-//        var h = 0
-//        var valueByte = [Data]()
-//        for index in 0...range {
-//            if w == 0 {
-//                let tmpBitmap = ImageUtils.getBitmap(mContext.assets.open("\(dir)\(index).\(fileFormat)"))
-//                w = tmpBitmap.width
-//                h = tmpBitmap.height
-//            }
-//            let value = mContext.assets.open("\(dir)\(index).\(fileFormat)").use { $0.readData() }
-//            valueByte.append(defaultConversion(fileFormat: fileFormat, data: value, w: w))
-//        }
-//        return (w, h, valueByte)
-//    }
-//
-//    private func getPreview(isRound: Bool, bgBitmax: UIImage) -> Data {
-//        let finalBgBitMap = getBgBitmap(isCanvasValue: true, isRound: isRound, bgBitmapX: bgBitmax)
-//        let previewScaleWidth = Float(screenPreviewWidth) / Float(finalBgBitMap.size.width)
-//        let previewScaleHeight = Float(screenPreviewHeight) / Float(finalBgBitMap.size.height)
-//        let previewScale = ImageUtils.scale(finalBgBitMap, previewScaleWidth, previewScaleHeight)
-//        let finalPreviewBitMap: UIImage
-//        if isRound {
-//            finalPreviewBitMap = ImageUtils.toRound(previewScale, borderSize, Color.parseColor("#FF0000"))
-//        } else {
-//            finalPreviewBitMap = ImageUtils.toRoundCorner(previewScale, roundCornerRadius * previewScaleWidth, Float(borderSize), Color.parseColor("#FF0000"))
-//        }
-//        let previewFile = File(PathUtils.getExternalAppDataPath(), "dial_bg_preview_file.png")
-//        ImageUtils.save(finalPreviewBitMap, previewFile, UIImage.CompressFormat.PNG)
-//        return previewFile.readBytes()
-//    }
 
+        var newElement1 :Element = Element()
+        newElement1.type = UInt8(faceBuilder.ELEMENT_PREVIEW)
+        newElement1.w = pvWidth
+        newElement1.h = pvHeight
+        newElement1.gravity = ylGravity
+        newElement1.ignoreBlack = 0
+        newElement1.x = pvX
+        newElement1.y = pvY
+        newElement1.bottomOffset = 0
+        newElement1.leftOffset = 0
+        newElement1.imageCount = UInt8(1)
+        var newByte1 :Data = getBackBuffer(image150)
+        newElement1.imageSizes = [UInt32(newByte1.count)] //buffer每个元素大小
+        newElement1.imageBuffer = newByte1
+        newArray.append(newElement1)
+
+        //处理其他元素
+        let timeColor = UIColor.white
+        let itemColor = UIColor.white
+        var itemC = "_"
+        var imageType = "png"
+        if isBmpResoure {
+            itemC = "_bmp_"
+            imageType = "bmp"
+        }
+        for (key,value) in dataSourceArray {
+
+            if key.elementsEqual("TimeAM"){
+                bleLog("TimeAM is \(value)")
+                let point :CGPoint = dataSourceArray["TimeAM"] as! CGPoint
+                let colorNum = 0
+                //am
+                let amArray = identifyItemsColor(2,timeColor)
+                var amElement :Element = Element()
+                timeAMBuffer.removeAll()
+                timeAMImageSize.removeAll()
+                getImageBufferArray(amArray,0)
+                //hour
+                let hourArray = identifyItemsColor(3,timeColor)
+                var hourElement :Element = Element()
+                timeDateHourBuffer.removeAll()
+                timeDateHourImageSize.removeAll()
+                getImageBufferArray(hourArray,1)
+                //dateSymbol
+                var dateSyElement :Element = Element()
+                timeDateSymbolBuffer.removeAll()
+                timeDateSymbolImageSize.removeAll()
+                timeDateSymbolBuffer.append (getImageBuffer(getImageDeviceType()+"hour"+"\(colorNum)"+itemC+"symbol"))
+                let dateSySize = getImageSize(getImageDeviceType()+"hour"+"\(colorNum)"+itemC+"symbol",ofType: imageType)
+
+                timeDateSymbolImageSize = [UInt32(timeDateSymbolBuffer.count)]
+                //min
+                let minArray = identifyItemsColor(3,timeColor)
+                var minElement :Element = Element()
+                timeDateMinBuffer.removeAll()
+                timeDateMinImageSize.removeAll()
+                getImageBufferArray(minArray,2)
+                //month
+                let monthArray = identifyItemsColor(4,timeColor)
+                var monthElement :Element = Element()
+                timeWeekMonthBuffer.removeAll()
+                timeWeekMonthImageSize.removeAll()
+                getImageBufferArray(monthArray,3)
+                //weekSym
+                var weekSymElement :Element = Element()
+                let weekSymSize = getImageSize(getImageDeviceType()+"date"+"\(colorNum)"+itemC+"symbol",ofType: imageType)
+                timeWeekSymbolBuffer.removeAll()
+                timeWeekSymbolImageSize.removeAll()
+                timeWeekSymbolBuffer.append(getImageBuffer(getImageDeviceType()+"date"+"\(colorNum)"+itemC+"symbol"))
+                timeWeekSymbolImageSize = [UInt32(timeWeekSymbolBuffer.count)]
+                //week day
+                let weekDayArray = identifyItemsColor(4,timeColor)
+                var weekDayElement :Element = Element()
+                timeWeekDayBuffer.removeAll()
+                timeWeekDayImageSize.removeAll()
+                getImageBufferArray(weekDayArray,4)
+                //week
+                let weekArray = identifyItemsColor(5,timeColor)
+                var weekElement :Element = Element()
+                timeWeekBuffer.removeAll()
+                timeWeekImageSize.removeAll()
+                getImageBufferArray(weekArray,5)
+
+                //point
+                let hourY = point.y+timeAMSize.height+2
+                let weekY = point.y+timeAMSize.height+timeDateHourSize.height+4
+                let hourPoint = CGPoint(x: point.x-((timeDateHourSize.width*2)+(timeDateMinSize.width*2)+dateSySize.width+4), y: hourY)
+                let dateSyPoint = CGPoint(x: point.x-((timeDateMinSize.width*2)+dateSySize.width+2), y: hourY)
+                let minPoint = CGPoint(x: point.x-(timeDateMinSize.width*2), y: hourY)
+
+                let monthPoint = CGPoint(x: point.x-((timeWeekMonthSize.width*2)+(timeWeekDaySize.width*2)+timeWeekSize.width+weekSymSize.width+6), y: weekY)
+                let monthSyPoint = CGPoint(x: point.x-((timeWeekDaySize.width*2)+timeWeekSize.width+weekSymSize.width+4), y: weekY)
+                let dayPoint = CGPoint(x: point.x-((timeWeekDaySize.width*2)+timeWeekSize.width+2), y: weekY)
+                var weekPoint = CGPoint(x: point.x-timeWeekSize.width, y: weekY)
+                let imageWidth :CGFloat = isBmpResoure ? 1.0:2.0
+                if isFixCoordinate {
+                    weekPoint = CGPoint(x: point.x-(timeWeekSize.width * 0.5), y: weekY)
+                }
+                amElement.type = UInt8(faceBuilder.ELEMENT_DIGITAL_AMPM)
+                amElement.gravity = apmGravity
+                amElement.ignoreBlack = IgnoreBlack
+                amElement.bottomOffset = 0
+                amElement.leftOffset = UInt8(0)
+                amElement.imageCount = UInt8(amArray.count)
+                amElement.w = UInt16(timeAMSize.width)
+                amElement.h = UInt16(timeAMSize.height)
+                amElement.x = UInt16(point.x-timeAMSize.width)
+                amElement.y = UInt16(point.y)
+                amElement.imageSizes  = timeAMImageSize
+                amElement.imageBuffer = timeAMBuffer
+                newArray.append(amElement)
+
+
+                hourElement.type = UInt8(faceBuilder.ELEMENT_DIGITAL_HOUR)
+                hourElement.gravity = hourGravity
+                hourElement.ignoreBlack = IgnoreBlack
+                hourElement.bottomOffset = 0
+                hourElement.leftOffset = UInt8(0)
+                hourElement.imageCount = UInt8(hourArray.count)
+                hourElement.w = UInt16(timeDateHourSize.width*imageWidth)
+                hourElement.h = UInt16(timeDateHourSize.height)
+                hourElement.x = UInt16(hourPoint.x)
+                hourElement.y = UInt16(hourPoint.y)
+                hourElement.imageSizes  = timeDateHourImageSize
+                hourElement.imageBuffer = timeDateHourBuffer
+                newArray.append(hourElement)
+
+
+                dateSyElement.type = UInt8(faceBuilder.ELEMENT_DIGITAL_DIV_HOUR)
+                dateSyElement.gravity = dayGravity
+                dateSyElement.ignoreBlack = IgnoreBlack
+                dateSyElement.bottomOffset = 0
+                dateSyElement.leftOffset = UInt8(0)
+                dateSyElement.imageCount = UInt8(1)
+                dateSyElement.w = UInt16(dateSySize.width*imageWidth)
+                dateSyElement.h = UInt16(dateSySize.height)
+                dateSyElement.x = UInt16(dateSyPoint.x)
+                dateSyElement.y = UInt16(dateSyPoint.y)
+                dateSyElement.imageSizes = timeDateSymbolImageSize
+                dateSyElement.imageBuffer = timeDateSymbolBuffer
+                newArray.append(dateSyElement)
+
+                minElement.type = UInt8(faceBuilder.ELEMENT_DIGITAL_MIN)
+                minElement.gravity = minGravity
+                minElement.ignoreBlack = IgnoreBlack
+                minElement.bottomOffset = 0
+                minElement.leftOffset = UInt8(0)
+                minElement.imageCount = UInt8(minArray.count)
+                minElement.w = UInt16(timeDateMinSize.width*imageWidth)
+                minElement.h = UInt16(timeDateMinSize.height)
+                minElement.x = UInt16(minPoint.x)
+                minElement.y = UInt16(minPoint.y)
+                minElement.imageSizes = timeDateMinImageSize
+                minElement.imageBuffer = timeDateMinBuffer
+                newArray.append(minElement)
+
+                monthElement.type = UInt8(faceBuilder.ELEMENT_DIGITAL_MONTH)
+                monthElement.gravity = monthGravity
+                monthElement.ignoreBlack = IgnoreBlack
+                monthElement.bottomOffset = 0
+                monthElement.leftOffset = UInt8(0)
+                monthElement.imageCount = UInt8(monthArray.count)
+                monthElement.w = UInt16(timeWeekMonthSize.width*imageWidth)
+                monthElement.h = UInt16(timeWeekMonthSize.height)
+                monthElement.x = UInt16(monthPoint.x)
+                monthElement.y = UInt16(monthPoint.y)
+                monthElement.imageSizes = timeWeekMonthImageSize
+                monthElement.imageBuffer = timeWeekMonthBuffer
+                newArray.append(monthElement)
+
+                weekSymElement.type = UInt8(faceBuilder.ELEMENT_DIGITAL_DIV_MONTH)
+                weekSymElement.gravity = weekSymGravity
+                weekSymElement.ignoreBlack = IgnoreBlack
+                weekSymElement.bottomOffset = 0
+                weekSymElement.leftOffset = UInt8(0)
+                weekSymElement.imageCount = UInt8(1)
+                weekSymElement.w = UInt16(weekSymSize.width)
+                weekSymElement.h = UInt16(weekSymSize.height)
+                weekSymElement.x = UInt16(monthSyPoint.x)
+                weekSymElement.y = UInt16(monthSyPoint.y)
+                weekSymElement.imageSizes = timeWeekSymbolImageSize
+                weekSymElement.imageBuffer = timeWeekSymbolBuffer
+                newArray.append(weekSymElement)
+
+                weekDayElement.type = UInt8(faceBuilder.ELEMENT_DIGITAL_DAY)
+                weekDayElement.gravity = weekDayGravity
+                weekDayElement.ignoreBlack = IgnoreBlack
+                weekDayElement.bottomOffset = 0
+                weekDayElement.leftOffset = UInt8(0)
+                weekDayElement.imageCount = UInt8(weekDayArray.count)
+                weekDayElement.w = UInt16(timeWeekDaySize.width*imageWidth)
+                weekDayElement.h = UInt16(timeWeekDaySize.height)
+                weekDayElement.x = UInt16(dayPoint.x)
+                weekDayElement.y = UInt16(dayPoint.y)
+                weekDayElement.imageSizes = timeWeekDayImageSize
+                weekDayElement.imageBuffer = timeWeekDayBuffer
+                newArray.append(weekDayElement)
+
+                weekElement.type = UInt8(faceBuilder.ELEMENT_DIGITAL_WEEKDAY)
+                weekElement.gravity = weekGravity
+                weekElement.ignoreBlack = IgnoreBlack
+                weekElement.bottomOffset = 0
+                weekElement.leftOffset = UInt8(0)
+                weekElement.imageCount = UInt8(weekArray.count)
+                weekElement.w = UInt16(timeWeekSize.width)
+                weekElement.h = UInt16(timeWeekSize.height)
+                weekElement.x = UInt16(weekPoint.x)
+                weekElement.y = UInt16(weekPoint.y)
+                weekElement.imageSizes = timeWeekImageSize
+                weekElement.imageBuffer = timeWeekBuffer
+                newArray.append(weekElement)
+
+            }else if key.elementsEqual("Step"){
+                bleLog("Step is \(value)")
+                let point :CGPoint = dataSourceArray["Step"] as! CGPoint
+                let imaArray = identifyItemsColor(1,itemColor)
+                var newElement :Element = Element()
+                newElement.type = UInt8(faceBuilder.ELEMENT_DIGITAL_STEP)
+                newElement.gravity = stepGravity
+                newElement.ignoreBlack = IgnoreBlack
+                newElement.bottomOffset = 0
+                newElement.leftOffset = UInt8(0)
+                newElement.imageCount = UInt8(imaArray.count)
+                stepBuffer.removeAll()
+                stepImageSize.removeAll()
+                getImageBufferArray(imaArray,6)
+                newElement.x = UInt16(point.x)
+                newElement.y = UInt16(point.y)
+                newElement.w = UInt16(stepSize.width)
+                newElement.h = UInt16(stepSize.height)
+                newElement.imageSizes = stepImageSize
+                newElement.imageBuffer = stepBuffer
+                newArray.append(newElement)
+
+            }else if key.elementsEqual("HR"){
+                bleLog("HR is \(value)")
+                let point :CGPoint = dataSourceArray["HR"] as! CGPoint
+                let imaArray = identifyItemsColor(1,itemColor)
+                var newElement :Element = Element()
+                newElement.type = UInt8(faceBuilder.ELEMENT_DIGITAL_HEART)
+                newElement.gravity = hrGravity
+                newElement.ignoreBlack = IgnoreBlack
+                newElement.bottomOffset = 0
+                newElement.leftOffset = UInt8(0)
+                newElement.imageCount = UInt8(imaArray.count)
+                hrBuffer.removeAll()
+                hrImageSize.removeAll()
+                getImageBufferArray(imaArray,7)
+                newElement.w = UInt16(hrSize.width)
+                newElement.h = UInt16(hrSize.height)
+                newElement.x = UInt16(point.x)
+                newElement.y = UInt16(point.y)
+                newElement.imageSizes = hrImageSize
+                newElement.imageBuffer = hrBuffer
+                newArray.append(newElement)
+
+            }else if key.elementsEqual("Dis"){
+                bleLog("Dis is \(value)")
+                let point :CGPoint = dataSourceArray["Dis"] as! CGPoint
+                let imaArray = identifyItemsColor(1,itemColor)
+                var newElement :Element = Element()
+                newElement.type = UInt8(faceBuilder.ELEMENT_DIGITAL_DISTANCE)
+                newElement.gravity = disGravity
+                newElement.ignoreBlack = IgnoreBlack
+                newElement.bottomOffset = 0
+                newElement.leftOffset = UInt8(0)
+                newElement.imageCount = UInt8(imaArray.count)
+                disBuffer.removeAll()
+                disImageSize.removeAll()
+                getImageBufferArray(imaArray,8)
+                newElement.w = UInt16(disSize.width)
+                newElement.h = UInt16(disSize.height)
+                newElement.x = UInt16(point.x-disSize.width)
+                newElement.y = UInt16(point.y)
+                newElement.imageSizes = disImageSize
+                newElement.imageBuffer = disBuffer
+                newArray.append(newElement)
+
+            }else if key.elementsEqual("Cal"){
+                bleLog("Cal is \(value)")
+                let point :CGPoint = dataSourceArray["Cal"] as! CGPoint
+                let imaArray = identifyItemsColor(1,itemColor)
+                var newElement :Element = Element()
+                newElement.type = UInt8(faceBuilder.ELEMENT_DIGITAL_CALORIE)
+                newElement.gravity = calGravity
+                newElement.ignoreBlack = IgnoreBlack
+                newElement.bottomOffset = 0
+                newElement.leftOffset = UInt8(0)
+                newElement.imageCount = UInt8(imaArray.count)
+                calBuffer.removeAll()
+                calImageSize.removeAll()
+                getImageBufferArray(imaArray,9)
+                newElement.x = UInt16(point.x)
+                newElement.y = UInt16(point.y)
+                newElement.w = UInt16(calSize.width)
+                newElement.h = UInt16(calSize.height)
+                newElement.imageSizes = calImageSize
+                newElement.imageBuffer = calBuffer
+                newArray.append(newElement)
+
+            }else if key.elementsEqual("PointerNumber"){
+                bleLog("PointerNumber is \(value)")
+                let selNum :String = dataSourceArray["PointerNumber"] as! String
+                getPointerImage(selNum)
+                for index in 0..<3{
+                    var newElement :Element = Element()
+                    newElement.gravity = pointGravity
+                    newElement.ignoreBlack = 1
+                    newElement.x = bgX-1
+                    newElement.y = bgY-1
+                    newElement.imageCount = UInt8(1)
+                    switch index {
+                    case 0:
+                        newElement.w = UInt16(hourSize.width)
+                        newElement.h = UInt16(hourSize.height)
+                        newElement.type = UInt8(faceBuilder.ELEMENT_NEEDLE_HOUR)
+                        newElement.imageSizes = pointerHourImageSize
+                        newElement.imageBuffer = pointerHourBuffer
+                        newElement.bottomOffset = isBmpResoure ?  UInt8(hourSize.height/2) : UInt8(0)
+                        newElement.leftOffset = isBmpResoure ?  UInt8(hourSize.width/2) : UInt8(0)
+                        break
+                    case 1:
+                        newElement.w = UInt16(minSize.width)
+                        newElement.h = UInt16(minSize.height)
+                        newElement.type = UInt8(faceBuilder.ELEMENT_NEEDLE_MIN)
+                        newElement.imageSizes = pointerMinImageSize
+                        newElement.imageBuffer = pointerMinBuffer
+                        newElement.bottomOffset = isBmpResoure ?  UInt8(minSize.height/2) : UInt8(0)
+                        newElement.leftOffset = isBmpResoure ?  UInt8(minSize.width/2) : UInt8(0)
+                        break
+                    case 2:
+                        newElement.w = UInt16(secSize.width)
+                        newElement.h = UInt16(secSize.height)
+                        newElement.type = UInt8(faceBuilder.ELEMENT_NEEDLE_SEC)
+                        newElement.imageSizes = pointerImageSize
+                        newElement.imageBuffer = pointerBuffer
+                        newElement.bottomOffset = isBmpResoure ?  UInt8(secSize.height/2) : UInt8(0)
+                        newElement.leftOffset = isBmpResoure ?  UInt8(secSize.width/2) : UInt8(0)
+                        break
+                    default:
+                        break
+                    }
+                    newArray.append(newElement)
+                }
+            }
+        }
+
+        if newArray.count > 0{
+//            let sendData = buildWatchFace(newArray, newArray.count, dialCustomSenderImageFormat() ? Int32(faceBuilder.PNG_ARGB_8888) : Int32(faceBuilder.BMP_565))
+            let sendData = buildWatchFace(newArray, newArray.count,Int32(faceBuilder.PNG_ARGB_8888))
+            bleLog("bin文件大小 - \(sendData.toData().count)")
+            if mBleConnector.sendStream(.WATCH_FACE, sendData.toData(),0){
+                bleLog("sendStream - WATCH_FACE")
+            }
+
+        }
+    }
+
+    func getItemsPiont() -> NSMutableDictionary{
+        /**
+         the coordinate points will be offset due to the resource image and view size. please adjust the coordinate points according to the device and app UI design.
+         */
+        let newDic = NSMutableDictionary()
+        //计算比例尺
+        var scaleW = screenWidth/240
+        var scaleH = screenHeight/240
+        var controlViewSize = 38
+
+        if (custom == 2){
+            scaleW = screenWidth/454
+            scaleH = screenHeight/454
+            controlViewSize = 60
+        }
+
+        if controlViewHr == true {
+            //W 37 H 37 piont-> data below icon
+//            let rect :CGRect = bg_hr.frame
+            // let piont  = CGPoint(x: (rect.origin.x+(37/2))/scaleW, y: (rect.origin.y+rect.size.height+15)/scaleH)
+            let piont  = CGPoint(x: (controlViewHrX + (controlViewSize/2))/scaleW, y: (controlViewHrY + controlViewSize + 15)/scaleH)
+            newDic.setValue(piont, forKey: "HR")
+        }
+
+        if controlViewCa == true {
+            //W 37 H 37
+            // let piont  = CGPoint(x: (rect.origin.x+(rect.size.width/2))/scaleW, y: (rect.origin.y+rect.size.height+15)/scaleH)
+            let piont  = CGPoint(x: (controlViewCaX + (controlViewSize/2))/scaleW, y: (controlViewCaY + controlViewSize + 15)/scaleH)
+            newDic.setValue(piont, forKey: "Cal")
+        }
+
+        if controlViewDis == true {
+            //W 37 H 37
+            // let rect :CGRect = bg_dis.frame
+            // let piont  = CGPoint(x: (rect.origin.x+rect.size.width)/scaleW, y: (rect.origin.y+rect.size.height+15)/scaleH)
+            let piont  = CGPoint(x: (controlViewDisX + (controlViewSize/2))/scaleW, y: (controlViewDisY + controlViewSize + 15)/scaleH)
+            newDic.setValue(piont, forKey: "Dis")
+        }
+
+        if controlViewStep == true {
+            //W 37 H 37
+            // let rect :CGRect = bg_step.frame
+            // let piont  = CGPoint(x: (rect.origin.x+(rect.size.width/2))/scaleW, y: (rect.origin.y+rect.size.height+15)/scaleH)
+            let piont  = CGPoint(x: (controlViewStepX + (controlViewSize/2))/scaleW, y: (controlViewStepY + controlViewSize + 15)/scaleH)
+            newDic.setValue(piont, forKey: "Step")
+        }
+
+        if timeDigitalView == true {
+            //W 165 H 100 piont-> the coordinates of the upper right corner of the "digital_time" example
+            // let rect :CGRect = digitalTime.frame
+            // let piontAM  = CGPoint(x: (rect.origin.x + rect.size.width)/scaleW, y: rect.origin.y/scaleH)
+            let piont  = CGPoint(x: digiTop / scaleW, y: digiLeft / scaleH)
+            newDic.setValue(piont, forKey: "TimeAM")
+        }else{
+            /**
+             this is a watch type dial, and only the resource pictures of the hour hand, minute hand, and second hand are transmitted.
+             the scale and background image are combined as a new image to transfer to the device
+             */
+            newDic.setValue("1", forKey: "PointerNumber")
+        }
+        return newDic
+    }
+
+
+
+    func buildWatchFace(_ elements:[Element],_ elementCount:Int,_ imageFormat:Int32) ->BleWatchFaceBin{
+
+        //header
+        bleBin.header = BleWatchFaceBinToHeader.init(ImageTotal: UInt16(imageCountStart), ElementCount: UInt8(elements.count), ImageFormat: UInt8(imageFormat))
+
+        // ElementInfo[]
+        var imageSizeIndex :UInt16 = 0
+        let infoSize : Int = elementCount * BleWatchFaceBinElementInfo.ITEM_LENGTH
+        bleBin.ElementInfo.removeAll()
+        for i in 0..<elementCount {
+            let newInfo = BleWatchFaceBinElementInfo.init(imageBufferOffset: 0, imageSizeIndex: imageSizeIndex, w: elements[i].w, h: elements[i].h, x: elements[i].x, y: elements[i].y, imageCount: elements[i].imageCount, type: elements[i].type, gravity: elements[i].gravity,ignoreBlack:  elements[i].ignoreBlack, bottomOffset: elements[i].bottomOffset, leftOffset: elements[i].leftOffset, reserved: 0)
+            imageSizeIndex += UInt16(elements[i].imageCount)
+            bleBin.ElementInfo.append(newInfo)
+        }
+
+        // uint32_t[] 所有图片的长度
+        var elementImageBufferOffset : UInt32 = UInt32(BleWatchFaceBinToHeader.ITEM_LENGTH + infoSize+(4*imageCountStart))
+        bleBin.imageCount.removeAll()
+        for i in 0..<elementCount {
+            bleBin.ElementInfo[i].infoImageBufferOffset = elementImageBufferOffset
+            for j in 0..<Int(elements[i].imageSizes.count) {
+                elementImageBufferOffset += elements[i].imageSizes[j]
+                bleBin.imageCount.append(elements[i].imageSizes[j])
+            }
+        }
+
+        // int8_t[] 所有图片buffer
+        bleBin.imageBuffer.removeAll()
+        for i in 0..<elementCount {
+            bleBin.imageBuffer.append(elements[i].imageBuffer)
+        }
+        return bleBin
+    }
+
+
+    func getBackBuffer(_ imageBuffer:UIImage)-> Data{
+        imageCountStart = imageCountStart+1
+        let image16 :Data = ImageHelper.convertUIImage(toBitmapRGB565: imageBuffer)! as Data
+        //小端序修改为大端序
+        var index = 0
+        var newByte :Data = imageBuffer.pngData()!
+        newByte.removeAll()
+        while index<image16.count{
+            let item1 = image16[index]
+            let item2 = image16[index+1]
+            newByte.append(item2)
+            newByte.append(item1)
+            index += 2
+        }
+        return newByte
+    }
+
+    func identifyItemsColor(_ type:Int,_ idColor:UIColor) -> NSMutableArray{
+
+        let colorNum : Int  = 0
+        let imagArray = NSMutableArray()
+        var imageNumber :Int = 0
+        if type == 1{ //加载控件颜色
+            imageNumber = 10
+            if isBmpResoure {
+                imageNumber = 11
+            }
+        }else if type == 2{
+            imageNumber = 2
+        }else if type == 3{
+            imageNumber = 10
+        }else if type == 4{
+            imageNumber = 10
+        }else if type == 5{
+            imageNumber = 7
+        }
+        var itemC = "_"
+        if isBmpResoure {
+            itemC = "_bmp_"
+        }
+//        device(a)_date(b)_bmp_(c) a->尺寸 默认240 b->颜色 c->图片数组下标
+        for index in 0..<imageNumber{
+            var newImage :String = ""
+            if type == 1{
+                //items color
+                newImage = getImageDeviceType()+"items"+"\(colorNum)"+itemC+"\(index)"
+                imagArray.add(newImage)
+            }else if type == 2 {
+                //am pm
+                imagArray.add(getImageDeviceType()+"am"+itemC+"\(colorNum)")
+                imagArray.add(getImageDeviceType()+"pm"+itemC+"\(colorNum)")
+            }else if type == 3 {
+                //时间
+                imagArray.add(getImageDeviceType()+"hour"+"\(colorNum)"+itemC+"\(index)")
+            }else if type == 4 {
+                //日期
+                imagArray.add(getImageDeviceType()+"date"+"\(colorNum)"+itemC+"\(index)")
+
+            }else if type == 5{
+                imagArray.add(getImageDeviceType()+"week"+"\(colorNum)"+itemC+"\(index)")
+            }
+        }
+
+        return imagArray
+    }
+
+    func getImageDeviceType()-> String{
+        var imageSize = "device_"
+        if custom == 2 {
+           imageSize = "device454_"
+        } else {
+           imageSize = "device_"
+        }
+        return imageSize
+    }
+
+    func getPointerImage(_ number:String){
+        imageCountStart = imageCountStart+3
+
+        pointerHourImageSize.removeAll()
+        pointerMinImageSize.removeAll()
+        pointerImageSize.removeAll()
+
+        pointerHourBuffer.removeAll()
+        pointerMinBuffer.removeAll()
+        pointerBuffer.removeAll()
+        var pHour = "device_pointerHour_"
+        var pMinute = "device_pointerminute_"
+        var pSecond = "device_pointerSecond_"
+        var pType = "png"
+        if isBmpResoure {
+            pHour = getImageDeviceType()+"pointerHour_bmp_"
+            pMinute = getImageDeviceType()+"pointerminute_bmp_"
+            pSecond = getImageDeviceType()+"pointerSecond_bmp_"
+            pType = "bmp"
+        }
+
+        let path1 = Bundle.main.path(forResource: pHour+number, ofType: pType)
+        let path2 = Bundle.main.path(forResource: pMinute+number, ofType: pType)
+        let path3 = Bundle.main.path(forResource: pSecond+number, ofType: pType)
+
+        let newData1 :Data = getImagePathToData(pHour+number, ofType: pType)
+        let newData2 :Data = getImagePathToData(pMinute+number, ofType: pType)
+        let newData3 :Data = getImagePathToData(pSecond+number, ofType: pType)
+
+        let newImage1 = UIImage(contentsOfFile: path1!)
+        let newImage2 = UIImage(contentsOfFile: path2!)
+        let newImage3 = UIImage(contentsOfFile: path3!)
+
+        hourSize = CGSize(width: newImage1!.size.width, height: newImage1!.size.height)
+        minSize = CGSize(width: newImage2!.size.width, height: newImage2!.size.height)
+        secSize = CGSize(width: newImage3!.size.width, height: newImage3!.size.height)
+
+        pointerHourBuffer.append(newData1)
+        pointerMinBuffer.append(newData2)
+        pointerBuffer.append(newData3)
+
+        pointerHourImageSize = [UInt32(pointerHourBuffer.count)]
+        pointerMinImageSize = [UInt32(pointerMinBuffer.count)]
+        pointerImageSize = [UInt32(pointerBuffer.count)]
+
+    }
+    func getImagePathToData(_ imageName:String, ofType:String)-> Data{
+        let newPath = Bundle.main.path(forResource: imageName, ofType: ofType)
+        var newData :Data = Data()
+        if ofType.elementsEqual("bmp"){
+            //bmp图片特殊处理方式
+            let newImage = UIImage(contentsOfFile: newPath!)//用于计算图片宽度
+            let bmpWidth: Int = Int(newImage!.size.width)  //图片宽度
+            let bitCount: Int = 16 //位深度，可为8，16，24，32
+            let isReverseRows  = false  //是否反转行数据，就是将第一行置换为最后一行
+            let rowSize: Int = (bitCount * bmpWidth + 31) / 32 * 4
+            var offset = 0
+            if !(bmpWidth % 2 == 0){
+                offset = 2;
+            }
+            var image16 :Data  = NSData.init(contentsOfFile:String(newPath!) )! as Data
+            //删除BMP头部信息
+            let headerInfoSize: Int = Int(image16[10]) //头部信息长度
+            for _ in 0..<headerInfoSize{
+                image16.remove(at: 0)
+            }
+            //判断单、双数，单数要减去无用字节
+            let dataCount :Int = image16.count/rowSize
+            let tmpNewData :NSMutableArray = NSMutableArray()
+            let imageByte : [UInt8] = [UInt8] (image16)
+            for index in 0..<dataCount{
+                //截取每一行数据
+                var tmpData :Data = Data()
+                for rowIndex in 0..<(rowSize - offset) {
+                    tmpData.append(imageByte[index * rowSize + rowIndex])
+                }
+                tmpNewData.add(tmpData)
+            }
+            //将获得的行数据反转
+            image16.removeAll()
+            for index in 0..<tmpNewData.count {
+                var dataIndex = index
+                if !isReverseRows {//需要反转则重置下标
+                    dataIndex = tmpNewData.count-1-index
+                }
+                let data : Data = tmpNewData.object(at:dataIndex) as! Data
+                image16.append(data)
+            }
+            //小端序修改为大端序
+            var index = 0
+            newData.removeAll()
+            while index<image16.count{
+                let item1 = image16[index]
+                let item2 = image16[index+1]
+                newData.append(item2)
+                newData.append(item1)
+                index += 2
+            }
+            return newData
+        }else{
+            let newImage = UIImage(contentsOfFile: newPath!)
+            newData = newImage!.pngData()!
+        }
+        return newData
+    }
+
+    func getImageBuffer(_ imageName:String)-> Data{
+        imageCountStart = imageCountStart+1
+        var imageType = "png"
+        if isBmpResoure {
+            imageType = "bmp"
+        }
+        return getImagePathToData(imageName, ofType: imageType)
+    }
+
+    func getImageBufferArray(_ imageArray :NSMutableArray,_ getType:Int){
+        imageCountStart = imageCountStart+imageArray.count
+        for index in 0..<imageArray.count{
+            var imageType = "png"
+            if isBmpResoure {
+                imageType = "bmp"
+            }
+            let path = Bundle.main.path(forResource: (imageArray[index] as! String), ofType: imageType)
+            let newImage = UIImage(contentsOfFile: path!)
+            let imageData = getImagePathToData(imageArray[index] as! String, ofType: imageType)
+            switch getType {
+            case 0:
+                timeAMSize = CGSize(width: newImage!.size.width, height: newImage!.size.height)
+                timeAMBuffer.append(imageData)
+                timeAMImageSize.append(UInt32(imageData.count))
+                break
+            case 1:
+                timeDateHourSize = CGSize(width: newImage!.size.width, height: newImage!.size.height)
+                timeDateHourBuffer.append(imageData)
+                timeDateHourImageSize.append(UInt32(imageData.count))
+                break
+            case 2:
+                timeDateMinSize = CGSize(width: newImage!.size.width, height: newImage!.size.height)
+                timeDateMinBuffer.append(imageData)
+                timeDateMinImageSize.append(UInt32(imageData.count))
+                break
+            case 3:
+                timeWeekMonthSize = CGSize(width: newImage!.size.width, height: newImage!.size.height)
+                timeWeekMonthBuffer.append(imageData)
+                timeWeekMonthImageSize.append(UInt32(imageData.count))
+                break
+            case 4:
+                timeWeekDaySize = CGSize(width: newImage!.size.width, height: newImage!.size.height)
+                timeWeekDayBuffer.append(imageData)
+                timeWeekDayImageSize.append(UInt32(imageData.count))
+                break
+            case 5:
+                timeWeekSize = CGSize(width: newImage!.size.width, height: newImage!.size.height)
+                timeWeekBuffer.append(imageData)
+                timeWeekImageSize.append(UInt32(imageData.count))
+                break
+            case 6:
+                stepSize = CGSize(width: newImage!.size.width, height: newImage!.size.height)
+                stepBuffer.append(imageData)
+                stepImageSize.append(UInt32(imageData.count))
+                break
+            case 7:
+                hrSize = CGSize(width: newImage!.size.width, height: newImage!.size.height)
+                hrBuffer.append(imageData)
+                hrImageSize.append(UInt32(imageData.count))
+                break
+            case 8:
+                disSize = CGSize(width: newImage!.size.width, height: newImage!.size.height)
+                disBuffer.append(imageData)
+                disImageSize.append(UInt32(imageData.count))
+                break
+            case 9:
+                calSize = CGSize(width: newImage!.size.width, height: newImage!.size.height)
+                calBuffer.append(imageData)
+                calImageSize.append(UInt32(imageData.count))
+                break
+            default:
+                break
+            }
+        }
+    }
+
+
+    func showImageDialog(image: UIImage) {
+        let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
+
+        let imageView = UIImageView(image: image)
+        alertController.view.addSubview(imageView)
+
+        let imageHeight = NSLayoutConstraint(item: imageView, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 200)
+        let imageWidth = NSLayoutConstraint(item: imageView, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 200)
+        imageView.addConstraints([imageHeight, imageWidth])
+
+        let closeAction = UIAlertAction(title: "Close", style: .default, handler: nil)
+        alertController.addAction(closeAction)
+
+        if let rootViewController = UIApplication.shared.keyWindow?.rootViewController {
+            rootViewController.present(alertController, animated: true, completion: nil)
+        }
+    }
+
+    func getImageSize(_ imageName:String, ofType:String)-> CGSize{
+        let path = Bundle.main.path(forResource: imageName, ofType: ofType)
+        let newImage = UIImage(contentsOfFile: path!)
+        return CGSize(width: newImage!.size.width, height: newImage!.size.height)
+    }
+
+    var bgImage: [UInt8]? = nil
+    var thumbImage: [UInt8]? = nil
+
+    func getMainBgImage()->UIImage{
+//        let image = UIGraphicsGetImageFromCurrentImageContext()
+//        UIGraphicsEndImageContext()
+
+//        let image = UIImage(data: Data(bgImage!))
+//        let newImage  = image?.resize(to: CGSize(width: screenWidth, height: screenHeight))
+//        return maskRoundedImage(image: newImage!, radius: CGFloat(screenWidth/2))
+        let image = UIImage(data: Data(bgImage!))!
+        return convertToPNG(image: image)!
+    }
+
+
+
+
+    func getThumbnailImage() -> UIImage{//Thumbnail preview
+//        let image = UIGraphicsGetImageFromCurrentImageContext()
+//        UIGraphicsEndImageContext()
+
+//        let image = UIImage(data: Data(thumbImage!))
+//        let newImage  = image?.resize(to: CGSize(width: screenPreviewWidth, height:screenPreviewHeight))
+//        return maskRoundedImage(image: newImage!, radius: CGFloat(screenPreviewWidth/2))
+        let image = UIImage(data: Data(thumbImage!))!
+        return convertToPNG(image: image)!
+    }
+
+    func maskRoundedImage(image: UIImage, radius: CGFloat) -> UIImage {
+           let imageView: UIImageView = UIImageView(image: image)
+           let layer = imageView.layer
+           layer.masksToBounds = true
+           layer.cornerRadius = radius
+           UIGraphicsBeginImageContext(imageView.bounds.size)
+           layer.render(in: UIGraphicsGetCurrentContext()!)
+           let roundedImage = UIGraphicsGetImageFromCurrentImageContext()
+           UIGraphicsEndImageContext()
+           return roundedImage!
+    }
 
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -1323,10 +1537,8 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
             mBleConnector.unbind()
              break;
         case "customDials":
-            elements.removeAllObjects()
             timeDigitalView = args?["isDigital"] as! Bool
             isRound = args?["isRound"] as! Bool
-            let offset = 0
             custom = args?["custom"] as! Int
             screenWidth = args?["screenWidth"] as! Int
             screenHeight = args?["screenHeight"] as! Int
@@ -1353,47 +1565,21 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
             controlViewHrX = args?["controlViewHrX"] as! Int
             controlViewHrY = args?["controlViewHrY"] as! Int
 
-            controlValueInterval = 1
-            ignoreBlack = 1
-            controlValueRange = 10
 
-            fileFormat = "bmp"
-            imageFormat = faceBuilder.BMP_565
-            X_CENTER = faceBuilder.GRAVITY_X_CENTER_R
-            Y_CENTER = faceBuilder.GRAVITY_Y_CENTER_R
-            break;
+            if let data = args?["bgBytes"] as? FlutterStandardTypedData {
+                bgImage = [UInt8](data.data)
+                // Use the 'bytes' array here
+            } else {
+                // Handle the case when 'bgPreviewBytes' is not in the expected format
+            }
+            if let data = args?["bgPreviewBytes"] as? FlutterStandardTypedData {
+                thumbImage = [UInt8](data.data)
+                // Use the 'bytes' array here
+            } else {
+                // Handle the case when 'bgPreviewBytes' is not in the expected format
+            }
 
-//        case "customDials":
-//            elements.removeAllObjects()
-//            timeDigitalView = args?["isDigital"] as! Bool
-//            isRound = args?["isRound"] as! Bool
-//            let offset = 0
-//            custom = args?["custom"] as! Int
-//            screenWidth = args?["screenWidth"] as! Int
-//            screenHeight = args?["screenHeight"] as! Int
-//
-//            digiLeft = args?["digiLeft"] as! Int
-//            digiTop = args?["digiTop"] as! Int
-//
-//            screenPreviewWidth = args?["screenPreviewWidth"] as! Int
-//            screenPreviewHeight = args?["screenPreviewHeight"] as! Int
-//
-//            controlViewStep = args?["controlViewStep"] as! Bool
-//            controlViewStepX = args?["controlViewStepX"] as! Int
-//            controlViewStepY = args?["controlViewStepY"] as! Int
-//
-//            controlViewCa = args?["controlViewCa"] as! Bool
-//            controlViewCaX = args?["controlViewCaX"] as! Int
-//            controlViewCaY = args?["controlViewCaY"] as! Int
-//
-//            controlViewDis = args?["controlViewDis"] as! Bool
-//            controlViewDisX = args?["controlViewDisX"] as! Int
-//            controlViewDisY = args?["controlViewDisY"] as! Int
-//
-//            controlViewHr = args?["controlViewHr"] as! Bool
-//            controlViewHrX = args?["controlViewHrX"] as! Int
-//            controlViewHrY = args?["controlViewHrY"] as! Int
-//
+
 //            controlValueInterval = 1
 //            ignoreBlack = 1
 //            controlValueRange = 10
@@ -1402,64 +1588,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
 //            imageFormat = faceBuilder.BMP_565
 //            X_CENTER = faceBuilder.GRAVITY_X_CENTER_R
 //            Y_CENTER = faceBuilder.GRAVITY_Y_CENTER_R
-
-//            if let bgPreviewBytes = args?["bgPreviewBytes"] as? Data,
-//               let bgPreviewBitmapX = UIImage(data: bgPreviewBytes) {
-//
-//                let bgPreviewBytesNew = getPreview(isRound: isRound, bgBitmax: bgPreviewBitmapX)
-//
-//                // Get the background preview
-//                let elementPreview = Element(
-//                    type: UInt8(faceBuilder.ELEMENT_PREVIEW),
-//                    w: UInt16(screenPreviewWidth),
-//                    h: UInt16(screenPreviewHeight),
-//                    gravity: UInt8(X_CENTER | Y_CENTER),
-//                    x: UInt16(screenWidth / 2),
-//                    y: UInt16(screenHeight / 2 + 2),
-//                    imageBuffer: [bgPreviewBytesNew]
-//                )
-//                elements.append(elementPreview)
-//
-//                // Get the background size
-//                if let bgBytes = call.arguments["bgBytes"] as? Data,
-//                   let bgBitmapX = UIImage(data: bgBytes) {
-//
-//                    let bgBytesNew = getBg(isRound: isRound, bgBitmapX: bgBitmapX)
-//
-//                    let elementBg = Element(
-//                        type: UInt8(faceBuilder.ELEMENT_BACKGROUND),
-//                        w: UInt16(screenWidth),
-//                        h: UInt16(screenHeight),
-//                        gravity: UInt8(X_CENTER | Y_CENTER),
-//                        x: UInt16(screenWidth) / 2,
-//                        y: UInt16(screenHeight) / 2,
-//                        imageBuffer: [bgBytesNew]
-//                    )
-//                    elements.add(elementBg)
-//
-//                    // Get the relevant content of the control value
-//                    getControl(elements: &elements)
-//
-//                    // Get time-related content
-//                    if timeDigitalView {
-//                        getTimeDigital(elements: &elements)
-//                    } else {
-//                        getPointer(type: faceBuilder.ELEMENT_NEEDLE_HOUR, pointer: POINTER_HOUR, elements: &elements)
-//                        getPointer(type: faceBuilder.ELEMENT_NEEDLE_MIN, pointer: POINTER_MINUTE, elements: &elements)
-//                        getPointer(type: faceBuilder.ELEMENT_NEEDLE_SEC, pointer: POINTER_SECOND, elements: &elements)
-//                    }
-//
-//                    for element in elements {
-//                        print("customize dial length: \(element.imageBuffer.first!.count * 10 / 1024 / 10.0) KB")
-//                    }
-//
-//                    let bytes = faceBuilder.build(elements: elements, imageFormat: imageFormat)
-//
-//                    print("customize dial bytes size: \(bytes.count)")
-//                    mBleConnector.sendStream(BleKey.WATCH_FACE, bytes: bytes)
-//                }
-//            }
-
+            self.startCreateBinFile()
             break;
         case "OTA":
             bleKey = BleKey.OTA
@@ -3468,3 +3597,12 @@ func toJSON<T: Encodable>(_ value: T) -> String? {
 }
 
 
+extension UIImage {
+    func resize(to newSize: CGSize) -> UIImage {
+      UIGraphicsBeginImageContextWithOptions(newSize, true, 1)
+      draw(in: CGRect(x: 0, y: 0, width: newSize.width, height: newSize.height))
+      let result = UIGraphicsGetImageFromCurrentImageContext()
+      UIGraphicsEndImageContext()
+      return result!
+    }
+}
