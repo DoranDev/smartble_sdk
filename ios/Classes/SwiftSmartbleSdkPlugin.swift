@@ -642,6 +642,9 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         let dataSourceArray = getItemsPiont() as! Dictionary<String, Any>
         let image150 = getThumbnailImage()
         let image240 = getMainBgImage()
+
+
+
         isBmpResoure = true
         var bgWidth16 :UInt16 = 0
         var bgHeight16 :UInt16 = 0
@@ -705,7 +708,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         newElement.w = bgWidth16
         newElement.h = bgHeight16
         newElement.gravity = bkGravity
-        newElement.ignoreBlack = 0 //背景缩略图固定为0
+        newElement.ignoreBlack = 1 //背景缩略图固定为0
         newElement.x = bgX
         newElement.y = bgY
         newElement.bottomOffset = 0
@@ -723,7 +726,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         newElement1.w = pvWidth
         newElement1.h = pvHeight
         newElement1.gravity = ylGravity
-        newElement1.ignoreBlack = 0
+        newElement1.ignoreBlack = 1
         newElement1.x = pvX
         newElement1.y = pvY
         newElement1.bottomOffset = 0
@@ -816,6 +819,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                 if isFixCoordinate {
                     weekPoint = CGPoint(x: point.x-(timeWeekSize.width * 0.5), y: weekY)
                 }
+
                 amElement.type = UInt8(faceBuilder.ELEMENT_DIGITAL_AMPM)
                 amElement.gravity = apmGravity
                 amElement.ignoreBlack = IgnoreBlack
@@ -824,7 +828,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                 amElement.imageCount = UInt8(amArray.count)
                 amElement.w = UInt16(timeAMSize.width)
                 amElement.h = UInt16(timeAMSize.height)
-                amElement.x = UInt16(point.x-timeAMSize.width)
+                amElement.x = UInt16(point.x - timeAMSize.width)
                 amElement.y = UInt16(point.y)
                 amElement.imageSizes  = timeAMImageSize
                 amElement.imageBuffer = timeAMBuffer
@@ -837,7 +841,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                 hourElement.bottomOffset = 0
                 hourElement.leftOffset = UInt8(0)
                 hourElement.imageCount = UInt8(hourArray.count)
-                hourElement.w = UInt16(timeDateHourSize.width*imageWidth)
+                hourElement.w = UInt16(timeDateHourSize.width * imageWidth)
                 hourElement.h = UInt16(timeDateHourSize.height)
                 hourElement.x = UInt16(hourPoint.x)
                 hourElement.y = UInt16(hourPoint.y)
@@ -1067,7 +1071,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
 
         if newArray.count > 0{
 //            let sendData = buildWatchFace(newArray, newArray.count, dialCustomSenderImageFormat() ? Int32(faceBuilder.PNG_ARGB_8888) : Int32(faceBuilder.BMP_565))
-            let sendData = buildWatchFace(newArray, newArray.count,Int32(faceBuilder.PNG_ARGB_8888))
+            let sendData = buildWatchFace(newArray, newArray.count,Int32(faceBuilder.BMP_565))
             bleLog("bin文件大小 - \(sendData.toData().count)")
             if mBleConnector.sendStream(.WATCH_FACE, sendData.toData(),0){
                 bleLog("sendStream - WATCH_FACE")
@@ -1075,6 +1079,8 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
 
         }
     }
+
+    var controlViewSize = 38
 
     func getItemsPiont() -> NSMutableDictionary{
         /**
@@ -1084,7 +1090,6 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         //计算比例尺
         var scaleW = screenWidth/240
         var scaleH = screenHeight/240
-        var controlViewSize = 38
 
         if (custom == 2){
             scaleW = screenWidth/454
@@ -1096,14 +1101,16 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
             //W 37 H 37 piont-> data below icon
 //            let rect :CGRect = bg_hr.frame
             // let piont  = CGPoint(x: (rect.origin.x+(37/2))/scaleW, y: (rect.origin.y+rect.size.height+15)/scaleH)
-            let piont  = CGPoint(x: (controlViewHrX + (controlViewSize/2))/scaleW, y: (controlViewHrY + controlViewSize + 15)/scaleH)
+            //let piont  = CGPoint(x: (controlViewHrX + (controlViewSize/2))/scaleW, y: (controlViewHrY + controlViewSize + 15)/scaleH)
+            let piont  = CGPoint(x:controlViewSize/2+controlViewHrX, y:controlViewSize+8+controlViewHrY)
             newDic.setValue(piont, forKey: "HR")
         }
 
         if controlViewCa == true {
             //W 37 H 37
             // let piont  = CGPoint(x: (rect.origin.x+(rect.size.width/2))/scaleW, y: (rect.origin.y+rect.size.height+15)/scaleH)
-            let piont  = CGPoint(x: (controlViewCaX + (controlViewSize/2))/scaleW, y: (controlViewCaY + controlViewSize + 15)/scaleH)
+           // let piont  = CGPoint(x: (controlViewCaX + (controlViewSize/2))/scaleW, y: (controlViewCaY + controlViewSize + 15)/scaleH)
+            let piont  = CGPoint(x:controlViewSize/2+controlViewCaX, y:controlViewSize+8+controlViewCaY)
             newDic.setValue(piont, forKey: "Cal")
         }
 
@@ -1111,7 +1118,8 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
             //W 37 H 37
             // let rect :CGRect = bg_dis.frame
             // let piont  = CGPoint(x: (rect.origin.x+rect.size.width)/scaleW, y: (rect.origin.y+rect.size.height+15)/scaleH)
-            let piont  = CGPoint(x: (controlViewDisX + (controlViewSize/2))/scaleW, y: (controlViewDisY + controlViewSize + 15)/scaleH)
+           // let piont  = CGPoint(x: (controlViewDisX + (controlViewSize/2))/scaleW, y: (controlViewDisY + controlViewSize + 15)/scaleH)
+            let piont  = CGPoint(x:Int(Double(controlViewSize)/1.2)+controlViewDisX, y:controlViewSize+8+controlViewDisY)
             newDic.setValue(piont, forKey: "Dis")
         }
 
@@ -1119,7 +1127,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
             //W 37 H 37
             // let rect :CGRect = bg_step.frame
             // let piont  = CGPoint(x: (rect.origin.x+(rect.size.width/2))/scaleW, y: (rect.origin.y+rect.size.height+15)/scaleH)
-            let piont  = CGPoint(x: (controlViewStepX + (controlViewSize/2))/scaleW, y: (controlViewStepY + controlViewSize + 15)/scaleH)
+            let piont  = CGPoint(x:controlViewSize/2+controlViewStepX, y:controlViewSize+8+controlViewStepY)
             newDic.setValue(piont, forKey: "Step")
         }
 
@@ -1127,7 +1135,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
             //W 165 H 100 piont-> the coordinates of the upper right corner of the "digital_time" example
             // let rect :CGRect = digitalTime.frame
             // let piontAM  = CGPoint(x: (rect.origin.x + rect.size.width)/scaleW, y: rect.origin.y/scaleH)
-            let piont  = CGPoint(x: digiTop / scaleW, y: digiLeft / scaleH)
+            let piont  = CGPoint(x: digiTop , y: digiLeft)
             newDic.setValue(piont, forKey: "TimeAM")
         }else{
             /**
