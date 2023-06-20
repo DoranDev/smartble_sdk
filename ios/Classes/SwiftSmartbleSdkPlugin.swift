@@ -365,7 +365,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
  //    let timeSymView :UIImageView = UIImageView() //Realtek平台特殊字符绘制 :
  //    let dateSymView :UIImageView = UIImageView() //Realtek平台特殊字符绘制
      var isBmpResoure = false
-     let bleBin = BleWatchFaceBin()
+    var bleBin = BleWatchFaceBin()
      var imageCountStart :Int = 0
      var pointerHourImageSize :[UInt32] = [UInt32]()
      var pointerMinImageSize :[UInt32] = [UInt32]()
@@ -639,11 +639,68 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
     }
 
     func startCreateBinFile(){
+         isBmpResoure = false
+         bleBin = BleWatchFaceBin()
+         imageCountStart = 0
+         pointerHourImageSize = [UInt32]()
+         pointerMinImageSize = [UInt32]()
+         pointerImageSize  = [UInt32]()
+
+         timeAMImageSize  = [UInt32]()
+
+         timeDateHourImageSize = [UInt32]()
+         timeDateSymbolImageSize  = [UInt32]()
+         timeDateMinImageSize  = [UInt32]()
+
+         timeWeekMonthImageSize = [UInt32]()
+         timeWeekSymbolImageSize  = [UInt32]()
+         timeWeekDayImageSize  = [UInt32]()
+         timeWeekImageSize   = [UInt32]()
+
+         stepImageSize  = [UInt32]()
+         hrImageSize  = [UInt32]()
+         disImageSize  = [UInt32]()
+         calImageSize  = [UInt32]()
+
+         pointerHourBuffer = Data()
+         pointerMinBuffer = Data()
+         pointerBuffer = Data()
+
+         timeAMBuffer = Data()
+
+         timeDateHourBuffer = Data()
+         timeDateSymbolBuffer = Data()
+         timeDateMinBuffer = Data()
+
+         timeWeekMonthBuffer = Data()
+         timeWeekSymbolBuffer = Data()
+         timeWeekDayBuffer = Data()
+         timeWeekBuffer = Data()
+
+         stepBuffer = Data()
+         hrBuffer = Data()
+         disBuffer = Data()
+         calBuffer = Data()
+
+         timeAMSize  = CGSize()
+         timeDateHourSize  = CGSize()
+         timeDateMinSize  = CGSize()
+         timeWeekMonthSize  = CGSize()
+         timeWeekDaySize  = CGSize()
+         timeWeekSize  = CGSize()
+
+         stepSize = CGSize()
+         hrSize = CGSize()
+         disSize = CGSize()
+         calSize = CGSize()
+
+         hourSize = CGSize()
+         minSize = CGSize()
+         secSize = CGSize()
+
         let dataSourceArray = getItemsPiont() as! Dictionary<String, Any>
         let image150 = getThumbnailImage()
         let image240 = getMainBgImage()
-
-
 
         isBmpResoure = true
         var bgWidth16 :UInt16 = 0
@@ -751,6 +808,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
             if key.elementsEqual("TimeAM"){
                 bleLog("TimeAM is \(value)")
                 let point :CGPoint = dataSourceArray["TimeAM"] as! CGPoint
+                bleLog("TimeAM is \(point)")
                 let colorNum = 0
                 //am
                 let amArray = identifyItemsColor(2,timeColor)
@@ -843,8 +901,8 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                 hourElement.imageCount = UInt8(hourArray.count)
                 hourElement.w = UInt16(timeDateHourSize.width * imageWidth)
                 hourElement.h = UInt16(timeDateHourSize.height)
-                hourElement.x = UInt16(hourPoint.x)
-                hourElement.y = UInt16(hourPoint.y)
+                hourElement.x = UInt16(max(0, hourPoint.x))
+                hourElement.y = UInt16(max(0, hourPoint.y))
                 hourElement.imageSizes  = timeDateHourImageSize
                 hourElement.imageBuffer = timeDateHourBuffer
                 newArray.append(hourElement)
@@ -858,8 +916,8 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                 dateSyElement.imageCount = UInt8(1)
                 dateSyElement.w = UInt16(dateSySize.width*imageWidth)
                 dateSyElement.h = UInt16(dateSySize.height)
-                dateSyElement.x = UInt16(dateSyPoint.x)
-                dateSyElement.y = UInt16(dateSyPoint.y)
+                dateSyElement.x = UInt16(max(0,dateSyPoint.x))
+                dateSyElement.y = UInt16(max(0,dateSyPoint.y))
                 dateSyElement.imageSizes = timeDateSymbolImageSize
                 dateSyElement.imageBuffer = timeDateSymbolBuffer
                 newArray.append(dateSyElement)
@@ -872,8 +930,8 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                 minElement.imageCount = UInt8(minArray.count)
                 minElement.w = UInt16(timeDateMinSize.width*imageWidth)
                 minElement.h = UInt16(timeDateMinSize.height)
-                minElement.x = UInt16(minPoint.x)
-                minElement.y = UInt16(minPoint.y)
+                minElement.x = UInt16(max(0,minPoint.x))
+                minElement.y = UInt16(max(0,minPoint.y))
                 minElement.imageSizes = timeDateMinImageSize
                 minElement.imageBuffer = timeDateMinBuffer
                 newArray.append(minElement)
@@ -886,8 +944,8 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                 monthElement.imageCount = UInt8(monthArray.count)
                 monthElement.w = UInt16(timeWeekMonthSize.width*imageWidth)
                 monthElement.h = UInt16(timeWeekMonthSize.height)
-                monthElement.x = UInt16(monthPoint.x)
-                monthElement.y = UInt16(monthPoint.y)
+                monthElement.x = UInt16(max(0,monthPoint.x))
+                monthElement.y = UInt16(max(0,monthPoint.y))
                 monthElement.imageSizes = timeWeekMonthImageSize
                 monthElement.imageBuffer = timeWeekMonthBuffer
                 newArray.append(monthElement)
@@ -900,8 +958,8 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                 weekSymElement.imageCount = UInt8(1)
                 weekSymElement.w = UInt16(weekSymSize.width)
                 weekSymElement.h = UInt16(weekSymSize.height)
-                weekSymElement.x = UInt16(monthSyPoint.x)
-                weekSymElement.y = UInt16(monthSyPoint.y)
+                weekSymElement.x = UInt16(max(0,monthSyPoint.x))
+                weekSymElement.y = UInt16(max(0,monthSyPoint.y))
                 weekSymElement.imageSizes = timeWeekSymbolImageSize
                 weekSymElement.imageBuffer = timeWeekSymbolBuffer
                 newArray.append(weekSymElement)
@@ -914,8 +972,8 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                 weekDayElement.imageCount = UInt8(weekDayArray.count)
                 weekDayElement.w = UInt16(timeWeekDaySize.width*imageWidth)
                 weekDayElement.h = UInt16(timeWeekDaySize.height)
-                weekDayElement.x = UInt16(dayPoint.x)
-                weekDayElement.y = UInt16(dayPoint.y)
+                weekDayElement.x = UInt16(max(0,dayPoint.x))
+                weekDayElement.y = UInt16(max(0,dayPoint.y))
                 weekDayElement.imageSizes = timeWeekDayImageSize
                 weekDayElement.imageBuffer = timeWeekDayBuffer
                 newArray.append(weekDayElement)
@@ -928,8 +986,8 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                 weekElement.imageCount = UInt8(weekArray.count)
                 weekElement.w = UInt16(timeWeekSize.width)
                 weekElement.h = UInt16(timeWeekSize.height)
-                weekElement.x = UInt16(weekPoint.x)
-                weekElement.y = UInt16(weekPoint.y)
+                weekElement.x = UInt16(max(0,weekPoint.x))
+                weekElement.y = UInt16(max(0,weekPoint.y))
                 weekElement.imageSizes = timeWeekImageSize
                 weekElement.imageBuffer = timeWeekBuffer
                 newArray.append(weekElement)
@@ -1135,7 +1193,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
             //W 165 H 100 piont-> the coordinates of the upper right corner of the "digital_time" example
             // let rect :CGRect = digitalTime.frame
             // let piontAM  = CGPoint(x: (rect.origin.x + rect.size.width)/scaleW, y: rect.origin.y/scaleH)
-            let piont  = CGPoint(x: digiTop , y: digiLeft)
+            let piont  = CGPoint(x:digiLeft+Int(screenWidth/2), y: digiTop)
             newDic.setValue(piont, forKey: "TimeAM")
         }else{
             /**
@@ -1150,16 +1208,17 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
 
 
     func buildWatchFace(_ elements:[Element],_ elementCount:Int,_ imageFormat:Int32) ->BleWatchFaceBin{
-
+        bleBin = BleWatchFaceBin()
+        bleBin.header = nil
         //header
         bleBin.header = BleWatchFaceBinToHeader.init(ImageTotal: UInt16(imageCountStart), ElementCount: UInt8(elements.count), ImageFormat: UInt8(imageFormat))
 
         // ElementInfo[]
         var imageSizeIndex :UInt16 = 0
-        let infoSize : Int = elementCount * BleWatchFaceBinElementInfo.ITEM_LENGTH
+        var infoSize : Int = elementCount * BleWatchFaceBinElementInfo.ITEM_LENGTH
         bleBin.ElementInfo.removeAll()
         for i in 0..<elementCount {
-            let newInfo = BleWatchFaceBinElementInfo.init(imageBufferOffset: 0, imageSizeIndex: imageSizeIndex, w: elements[i].w, h: elements[i].h, x: elements[i].x, y: elements[i].y, imageCount: elements[i].imageCount, type: elements[i].type, gravity: elements[i].gravity,ignoreBlack:  elements[i].ignoreBlack, bottomOffset: elements[i].bottomOffset, leftOffset: elements[i].leftOffset, reserved: 0)
+            var newInfo = BleWatchFaceBinElementInfo.init(imageBufferOffset: 0, imageSizeIndex: imageSizeIndex, w: elements[i].w, h: elements[i].h, x: elements[i].x, y: elements[i].y, imageCount: elements[i].imageCount, type: elements[i].type, gravity: elements[i].gravity,ignoreBlack:  elements[i].ignoreBlack, bottomOffset: elements[i].bottomOffset, leftOffset: elements[i].leftOffset, reserved: 0)
             imageSizeIndex += UInt16(elements[i].imageCount)
             bleBin.ElementInfo.append(newInfo)
         }
