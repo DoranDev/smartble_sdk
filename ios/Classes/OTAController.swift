@@ -12,7 +12,7 @@ import CoreBluetooth
 import iOSDFULibrary
 
 
-class OTAController: UITableViewController {
+class OTAController {
 
     let dataSoure :[String] = ["Realtek","MTK","Goodix","Nordic","JL(杰里)"]
 
@@ -40,92 +40,14 @@ class OTAController: UITableViewController {
     let mJLOTA = JLOTA.shared()
     let progressLab = UILabel()
 
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        title = "Firmware Update"
-        createUI()
-        peripheral  = mBleConnector.mPeripheral!
-
-    }
-
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        BleConnector.shared.addBleHandleDelegate(String(obj: self), self)
-    }
-
-    override func viewDidDisappear(_ animated: Bool) {
-        super.viewDidDisappear(animated)
-        BleConnector.shared.removeBleHandleDelegate(String(obj: self))
-    }
-
-    func createUI(){
-        tableView.dataSource = self
-        tableView.delegate = self
-        tableView.separatorStyle = .none
-        tableView.showsVerticalScrollIndicator = false
-        tableView.showsHorizontalScrollIndicator = false
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "OTAKeyCell")
-
-    }
-
-    // MARK: - Table view data source
-    override func numberOfSections(in tableView: UITableView) -> Int {
-        return 1
-    }
-
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return dataSoure.count
-    }
-
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "OTAKeyCell", for: indexPath)
-        cell.textLabel?.text = dataSoure[indexPath.row]
-        return cell
-    }
-
-    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        bleLog("select - \(dataSoure[indexPath.row])")
-        if indexPath.row == 1 || indexPath.row == 2{
-            bleLog("汇顶、MTK OTA已屏蔽")
-        }else{
-            upgradeType = indexPath.row
-            goToSelectFileView()
-        }
-
-    }
 }
 
 extension OTAController {
 
-    func goToSelectFileView(){
-        let selectVC = selectOTAFileController()
-        selectVC.reloadBlock = { [weak self] (fileURL) in
-            self?.filePath = fileURL
-            bleLog("goToSelectFileView - \(String(describing: self?.filePath))")
-            DispatchQueue.main.asyncAfter(deadline: .now()+0.5) {
-                self!.startOTA()
-            }
-        }
-        self.navigationController?.pushViewController(selectVC, animated: true)
-    }
-
     func startOTA(){
         switch  upgradeType{
         case 0:
-            let alert = UIAlertController.init(title:"Upgrade mode", message: nil, preferredStyle: .actionSheet)
-            let SilentAction = UIAlertAction(title:"Silent upgrade --- UI of font bin", style: .default) {[weak self] (action) in
-                self?.refreshUI = false
-                self?.readyRealtekOTA()
-            }
-            let NormalAction = UIAlertAction(title:"Normal upgrade - firmware", style: .default) { [weak self](action) in
-                self?.refreshUI = true
-                self?.readyRealtekOTA()
-            }
-            let cancelAction = UIAlertAction(title:"Cancel", style: .cancel, handler: nil)
-            alert.addAction(SilentAction)
-            alert.addAction(NormalAction)
-            alert.addAction(cancelAction)
-            self.present(alert, animated: true, completion: nil)
+            readyRealtekOTA()
             break
         case 1:
             readyMTKOTA()
@@ -161,7 +83,6 @@ extension OTAController {
             return
         }
         ROTA?.haveSelectedPeripheral(peripheral)
-        ROTA?.refBlock = nil
         ROTA!.refBlock = ({ [weak self](type:Int?,connected:Bool?,progress:CGFloat) in
             if type == 0 {
                 if  connected! {
@@ -198,7 +119,7 @@ extension OTAController {
                     }
                 }
             }
-        }) as RefreshBlock
+        })
     }
 
     func realtekFileCheck(){
@@ -274,15 +195,6 @@ extension OTAController {
     }
 
     func readyJLOTA(){
-        if progressLab.text?.count ?? 0  < 1{
-            progressLab.frame = CGRect(x: 20, y: MaxHeight-200, width: MaxWidth-40, height: 100)
-            progressLab.numberOfLines = 0
-            progressLab.font = .systemFont(ofSize: 15)
-            progressLab.backgroundColor = .black
-            progressLab.textColor = .white
-            progressLab.textAlignment = .center
-            self.tableView.addSubview(progressLab)
-        }
 
 
         if filePath.count > 5{
@@ -373,21 +285,23 @@ extension OTAController: BleHandleDelegate,LoggerDelegate,DFUServiceDelegate,DFU
     }
 
     func startDFU(_ per:CBPeripheral){
+        do {
+            let selectedFirmware = try DFUFirmware(urlToZipFile: URL(fileURLWithPath: filePath))
+            let initiator = DFUServiceInitiator().with(firmware: selectedFirmware)
+            initiator.logger = self // - to get log info
+            initiator.delegate = self // - to be informed about current state and errors
+            initiator.progressDelegate = self // - to show progress bar
+            _ = initiator.start(target: per)
+        } catch {
+            // Handle the error here
+            print("An error occurred while creating the DFUFirmware: \(error)")
+        }
 
-        self.navigationItem.leftBarButtonItem?.isEnabled = false
-        let selectedFirmware = DFUFirmware(urlToZipFile: URL(fileURLWithPath: filePath))
-        let initiator = DFUServiceInitiator().with(firmware: selectedFirmware!)
-        initiator.logger = self // - to get log info
-        initiator.delegate = self // - to be informed about current state and errors
-        initiator.progressDelegate = self // - to show progress bar
-        _ = initiator.start(target: per)
     }
 
     func dfuStateDidChange(to state: DFUState) {
-        print("Nordic - state: \(state.description())")
+     
         if state == .completed {
-            do{try FileManager.default.removeItem(atPath: filePath)}catch{ bleLog("ERROR:removeItem error")}
-            self.navigationItem.leftBarButtonItem?.isEnabled = true
             mBleConnector.setTargetIdentifier(mBleCache.getDeviceIdentify()!)
             bleLog("Nordic Back To view")
         }
