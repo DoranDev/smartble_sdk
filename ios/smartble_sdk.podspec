@@ -16,6 +16,7 @@ A new Flutter project.
   s.source_files = 'Classes/**/*','Resource/**/*','Tools/**/*'
   s.dependency 'Flutter'
   s.dependency 'SnapKit'
+  s.dependency 'iOSDFULibrary', '~> 4.13.0'
   s.vendored_frameworks='FR/BeaconMonitor.framework',
   'FR/GRDFUSDK.framework',
   'FR/JL_BLEKIT.framework',
