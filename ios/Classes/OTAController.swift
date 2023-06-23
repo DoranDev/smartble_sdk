@@ -1,10 +1,4 @@
-//
-//  OTAController.swift
-//  blesdk3
-//
-//  Created by SMA on 2020/8/31.
-//  Copyright © 2020 szabh. All rights reserved.
-//
+
 
 import Foundation
 import UIKit
