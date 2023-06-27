@@ -132,6 +132,110 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
     var onStockReadSink: FlutterEventSink?
     var onStockDeleteSink: FlutterEventSink?
     var onBleErrorSink: FlutterEventSink?
+    var filePath : String = "" //升级文件路径
+    let mJLOTA = JLOTA.shared()
+
+    func performNetworkRequest(urlString: String, completion: @escaping (String?) -> Void) {
+        let fileURL = URL(string: urlString)
+        if(fileURL == nil){
+            completion(nil)
+            return
+        }
+        let downloadTask = URLSession.shared.downloadTask(with: fileURL!) { (location, response, error) in
+            if let error = error {
+                // Handle download error
+                print("Download error: \(error)")
+                completion(nil)
+                return
+            }
+
+            // Check if the download was successful based on the HTTP response status code
+            if let httpResponse = response as? HTTPURLResponse,
+               httpResponse.statusCode == 200 {
+                // File downloaded successfully
+                // Get the documents directory URL
+                guard let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
+                    // Handle error if documents directory is not available
+                    return
+                }
+
+                // Create a destination URL in the documents directory using the lastPathComponent of the original file URL
+                let destinationURL = documentsDirectory.appendingPathComponent(fileURL!.lastPathComponent)
+                let fileManager = FileManager.default
+
+                if fileManager.fileExists(atPath: destinationURL.path) {
+                    do {
+                        // Delete the existing file
+                        try fileManager.removeItem(at: destinationURL)
+                    } catch {
+                        // Handle error while deleting the existing file
+                        print("Error deleting existing file: \(error)")
+                        return
+                    }
+                }
+
+                do {
+                    // Move the downloaded file to the destination URL
+                    try fileManager.moveItem(at: location!, to: destinationURL)
+
+                    // File saved successfully
+                    print("File saved at: \(destinationURL.path)")
+                    if fileManager.fileExists(atPath: destinationURL.path) {
+                        print("File Path: \(destinationURL.path)")
+                        completion(destinationURL.path)
+
+                    } else {
+                        print("File download completed, but not found at the specified path.")
+                        completion(nil)
+                        // Handle file not found error
+                    }
+                    // Proceed with further actions on the downloaded file
+                } catch {
+                    // Handle file saving error
+                    print("Error saving file: \(error)")
+                    completion(nil)
+                }
+
+            } else {
+                // Handle unsuccessful download (e.g., non-200 status code)
+                print("Download failed with HTTP response: \(String(describing: response))")
+                completion(nil)
+            }
+        }
+
+        downloadTask.resume()
+    }
+
+
+    func readyJLOTA(){
+        if filePath.count > 5{
+            mJLOTA.setPathFromOTAFile(filePath)
+            mJLOTA.connectPeripheral(withUUID: (mBleConnector.mPeripheral?.identifier.uuidString)!)
+            mJLOTA.jlBlock = ({ (messageType:Int?, message: String) in
+                let type = messageType
+                if type == 0{
+                    bleLog("readyJLOTA - progress : \(message)%")
+                }else if type == 1{
+                    bleLog("readyJLOTA - error : \(message)")
+                }else if type == 2{
+                    bleLog("readyJLOTA - done : \(message)")
+                    DispatchQueue.main.asyncAfter(deadline: .now()+1.0){
+                        self.mJLOTA.disconnectBLE()
+                    }
+                }else if type == 3{
+                    bleLog("readyJLOTA - timeOut : \(message)")
+
+                }else if type == 4{
+                    bleLog("readyJLOTA - Preparing : \(message)")
+
+                }else if type == 5{
+                    bleLog("readyJLOTA - BleMacAddress : \(message)")
+                }
+
+            })
+        }
+    }
+
 
     //replace special characters
     func stringReplacingOccurrencesOfString(_ str:String) ->String {
@@ -1981,6 +2085,24 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
               // BleCommand.UPDATE
           case BleKey.OTA:
              // gotoOta()
+              let url = args?["url"] as? String
+              // Perform your network request to obtain the filePath
+              print("url \(String(describing: url))")
+              self.performNetworkRequest(urlString: String(url ?? "")) { [weak self] (fileURL) in
+                  self?.filePath = fileURL ?? ""
+                  print("performNetworkRequest - \(self?.filePath ?? "")")
+
+                  let fileManager = FileManager.default
+                  if fileManager.fileExists(atPath: self?.filePath ?? "") {
+                      DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                          self?.readyJLOTA()
+                      }
+                  } else {
+                      print("File does not exist at the specified path.")
+                  }
+
+
+              }
               print("OTA")
           case BleKey.XMODEM:
               _ = bleConnector.sendData(bleKey, bleKeyFlag)
