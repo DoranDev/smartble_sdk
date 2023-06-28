@@ -745,77 +745,77 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
     }
 
     func startCreateBinFile(){
-         bleBin = BleWatchFaceBin()
-         imageCountStart = 0
-         pointerHourImageSize = [UInt32]()
-         pointerMinImageSize = [UInt32]()
-         pointerImageSize  = [UInt32]()
-
-         timeAMImageSize  = [UInt32]()
-
-         timeDateHourImageSize = [UInt32]()
-         timeDateSymbolImageSize  = [UInt32]()
-         timeDateMinImageSize  = [UInt32]()
-
-         timeWeekMonthImageSize = [UInt32]()
-         timeWeekSymbolImageSize  = [UInt32]()
-         timeWeekDayImageSize  = [UInt32]()
-         timeWeekImageSize   = [UInt32]()
-
-         stepImageSize  = [UInt32]()
-         hrImageSize  = [UInt32]()
-         disImageSize  = [UInt32]()
-         calImageSize  = [UInt32]()
-
-         pointerHourBuffer = Data()
-         pointerMinBuffer = Data()
-         pointerBuffer = Data()
-
-         timeAMBuffer = Data()
-
-         timeDateHourBuffer = Data()
-         timeDateSymbolBuffer = Data()
-         timeDateMinBuffer = Data()
-
-         timeWeekMonthBuffer = Data()
-         timeWeekSymbolBuffer = Data()
-         timeWeekDayBuffer = Data()
-         timeWeekBuffer = Data()
-
-         stepBuffer = Data()
-         hrBuffer = Data()
-         disBuffer = Data()
-         calBuffer = Data()
-
-         timeAMSize  = CGSize()
-         timeDateHourSize  = CGSize()
-         timeDateMinSize  = CGSize()
-         timeWeekMonthSize  = CGSize()
-         timeWeekDaySize  = CGSize()
-         timeWeekSize  = CGSize()
-
-         stepSize = CGSize()
-         hrSize = CGSize()
-         disSize = CGSize()
-         calSize = CGSize()
-
-         hourSize = CGSize()
-         minSize = CGSize()
-         secSize = CGSize()
-
+        bleBin = BleWatchFaceBin()
+        imageCountStart = 0
+        pointerHourImageSize = [UInt32]()
+        pointerMinImageSize = [UInt32]()
+        pointerImageSize  = [UInt32]()
+        
+        timeAMImageSize  = [UInt32]()
+        
+        timeDateHourImageSize = [UInt32]()
+        timeDateSymbolImageSize  = [UInt32]()
+        timeDateMinImageSize  = [UInt32]()
+        
+        timeWeekMonthImageSize = [UInt32]()
+        timeWeekSymbolImageSize  = [UInt32]()
+        timeWeekDayImageSize  = [UInt32]()
+        timeWeekImageSize   = [UInt32]()
+        
+        stepImageSize  = [UInt32]()
+        hrImageSize  = [UInt32]()
+        disImageSize  = [UInt32]()
+        calImageSize  = [UInt32]()
+        
+        pointerHourBuffer = Data()
+        pointerMinBuffer = Data()
+        pointerBuffer = Data()
+        
+        timeAMBuffer = Data()
+        
+        timeDateHourBuffer = Data()
+        timeDateSymbolBuffer = Data()
+        timeDateMinBuffer = Data()
+        
+        timeWeekMonthBuffer = Data()
+        timeWeekSymbolBuffer = Data()
+        timeWeekDayBuffer = Data()
+        timeWeekBuffer = Data()
+        
+        stepBuffer = Data()
+        hrBuffer = Data()
+        disBuffer = Data()
+        calBuffer = Data()
+        
+        timeAMSize  = CGSize()
+        timeDateHourSize  = CGSize()
+        timeDateMinSize  = CGSize()
+        timeWeekMonthSize  = CGSize()
+        timeWeekDaySize  = CGSize()
+        timeWeekSize  = CGSize()
+        
+        stepSize = CGSize()
+        hrSize = CGSize()
+        disSize = CGSize()
+        calSize = CGSize()
+        
+        hourSize = CGSize()
+        minSize = CGSize()
+        secSize = CGSize()
+        
         var IgnoreBlack = UInt8(1)//默认为0 , bmp相关的图片用1
         var isFixCoordinate = true
-
+        
         let dataSourceArray = getItemsPiont() as! Dictionary<String, Any>
         let image150 = getThumbnailImage()
         let image240 = getMainBgImage()
-
+        
         isBmpResoure = true
-//        if custom == 2 {
-//            isBmpResoure = false
-////            IgnoreBlack = UInt8(0)
-//          //  isFixCoordinate = false
-//        }
+        //        if custom == 2 {
+        //            isBmpResoure = false
+        ////            IgnoreBlack = UInt8(0)
+        //          //  isFixCoordinate = false
+        //        }
         var bgWidth16 :UInt16 = 0
         var bgHeight16 :UInt16 = 0
         var bgX :UInt16 = 0
@@ -841,414 +841,435 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         var calGravity = UInt8(faceBuilder.GRAVITY_X_CENTER|faceBuilder.GRAVITY_Y_CENTER)
         var pointGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)
         //MTK 平台默认为0
-
+        
         bgWidth16  = UInt16(screenWidth)
         bgHeight16 = UInt16(screenHeight)
         pvWidth  = UInt16(screenPreviewWidth)
         pvHeight = UInt16(screenPreviewHeight)
-
+        
         bgX = bgWidth16/2
         bgY = bgHeight16/2
         pvX = pvWidth/2
         pvY = pvHeight/2
-        //Realtek需要修正坐标参数
-        if isFixCoordinate {
-            bkGravity = UInt8(faceBuilder.GRAVITY_X_CENTER_R|faceBuilder.GRAVITY_Y_CENTER_R)
-            ylGravity = UInt8(faceBuilder.GRAVITY_X_CENTER_R|faceBuilder.GRAVITY_Y_CENTER_R)
-            apmGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)
-            hourGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)
-            dayGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)
-            minGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)
-            monthGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)
-            weekSymGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)
-            weekDayGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)
-            weekGravity = UInt8(faceBuilder.GRAVITY_X_CENTER_R|faceBuilder.GRAVITY_Y_TOP)
-            stepGravity = UInt8(faceBuilder.GRAVITY_X_CENTER_R|faceBuilder.GRAVITY_Y_CENTER_R)
-            hrGravity = UInt8(faceBuilder.GRAVITY_X_CENTER_R|faceBuilder.GRAVITY_Y_CENTER_R)
-            disGravity = UInt8(faceBuilder.GRAVITY_X_CENTER_R|faceBuilder.GRAVITY_Y_CENTER_R)
-            calGravity = UInt8(faceBuilder.GRAVITY_X_CENTER_R|faceBuilder.GRAVITY_Y_CENTER_R)
-            pointGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)
-            IgnoreBlack = UInt8(1)
-        }
-        var newArray :[Element] = []
-        //背景、预览处理
-        var newElement :Element = Element()
-        newElement.type = UInt8(faceBuilder.ELEMENT_BACKGROUND)
-        newElement.w = bgWidth16
-        newElement.h = bgHeight16
-        newElement.gravity = bkGravity
-        newElement.ignoreBlack = IgnoreBlack //背景缩略图固定为0
-        newElement.x = bgX
-        newElement.y = bgY
-        newElement.bottomOffset = 0
-        newElement.leftOffset = 0
-        newElement.imageCount = UInt8(1)
-         //buffer每个元素大小
-        var newByte :Data = getBackBuffer(image240)
-        newElement.imageSizes = [UInt32(newByte.count)]
-        newElement.imageBuffer = newByte
-        newArray.append(newElement)
-
-
-        var newElement1 :Element = Element()
-        newElement1.type = UInt8(faceBuilder.ELEMENT_PREVIEW)
-        newElement1.w = pvWidth
-        newElement1.h = pvHeight
-        newElement1.gravity = ylGravity
-        newElement1.ignoreBlack = IgnoreBlack
-        newElement1.x = pvX
-        newElement1.y = pvY
-        newElement1.bottomOffset = 0
-        newElement1.leftOffset = 0
-        newElement1.imageCount = UInt8(1)
-        var newByte1 :Data = getBackBuffer(image150)
-        newElement1.imageSizes = [UInt32(newByte1.count)] //buffer每个元素大小
-        newElement1.imageBuffer = newByte1
-        newArray.append(newElement1)
-
-        //处理其他元素
-        let timeColor = UIColor.white
-        let itemColor = UIColor.white
-        var itemC = "_bmp_"
-        var imageType = "png"
-        if isBmpResoure {
-            itemC = "_bmp_"
-            imageType = "bmp"
-        }
-        for (key,value) in dataSourceArray {
-
-            if key.elementsEqual("TimeAM"){
-                bleLog("TimeAM is \(value)")
-                let point :CGPoint = dataSourceArray["TimeAM"] as! CGPoint
-                bleLog("TimeAM is \(point)")
-                let colorNum = 0
-                //am
-                let amArray = identifyItemsColor(2,timeColor)
-                var amElement :Element = Element()
-                timeAMBuffer.removeAll()
-                timeAMImageSize.removeAll()
-                getImageBufferArray(amArray,0)
-                //hour
-                let hourArray = identifyItemsColor(3,timeColor)
-                var hourElement :Element = Element()
-                timeDateHourBuffer.removeAll()
-                timeDateHourImageSize.removeAll()
-                getImageBufferArray(hourArray,1)
-                //dateSymbol
-                var dateSyElement :Element = Element()
-                timeDateSymbolBuffer.removeAll()
-                timeDateSymbolImageSize.removeAll()
-                timeDateSymbolBuffer.append (getImageBuffer(getImageDeviceType()+"hour"+"\(colorNum)"+itemC+"symbol"))
-                let dateSySize = getImageSize(getImageDeviceType()+"hour"+"\(colorNum)"+itemC+"symbol",ofType: imageType)
-
-                timeDateSymbolImageSize = [UInt32(timeDateSymbolBuffer.count)]
-                //min
-                let minArray = identifyItemsColor(3,timeColor)
-                var minElement :Element = Element()
-                timeDateMinBuffer.removeAll()
-                timeDateMinImageSize.removeAll()
-                getImageBufferArray(minArray,2)
-                //month
-                let monthArray = identifyItemsColor(4,timeColor)
-                var monthElement :Element = Element()
-                timeWeekMonthBuffer.removeAll()
-                timeWeekMonthImageSize.removeAll()
-                getImageBufferArray(monthArray,3)
-                //weekSym
-                var weekSymElement :Element = Element()
-                let weekSymSize = getImageSize(getImageDeviceType()+"date"+"\(colorNum)"+itemC+"symbol",ofType: imageType)
-                timeWeekSymbolBuffer.removeAll()
-                timeWeekSymbolImageSize.removeAll()
-                timeWeekSymbolBuffer.append(getImageBuffer(getImageDeviceType()+"date"+"\(colorNum)"+itemC+"symbol"))
-                timeWeekSymbolImageSize = [UInt32(timeWeekSymbolBuffer.count)]
-                //week day
-                let weekDayArray = identifyItemsColor(4,timeColor)
-                var weekDayElement :Element = Element()
-                timeWeekDayBuffer.removeAll()
-                timeWeekDayImageSize.removeAll()
-                getImageBufferArray(weekDayArray,4)
-                //week
-                let weekArray = identifyItemsColor(5,timeColor)
-                var weekElement :Element = Element()
-                timeWeekBuffer.removeAll()
-                timeWeekImageSize.removeAll()
-                getImageBufferArray(weekArray,5)
-
-                //point
-                let hourY = point.y+timeAMSize.height+2
-                let weekY = point.y+timeAMSize.height+timeDateHourSize.height+4
-                let hourPoint = CGPoint(x: point.x-((timeDateHourSize.width*2)+(timeDateMinSize.width*2)+dateSySize.width+4), y: hourY)
-                let dateSyPoint = CGPoint(x: point.x-((timeDateMinSize.width*2)+dateSySize.width+2), y: hourY)
-                let minPoint = CGPoint(x: point.x-(timeDateMinSize.width*2), y: hourY)
-
-                let monthPoint = CGPoint(x: point.x-((timeWeekMonthSize.width*2)+(timeWeekDaySize.width*2)+timeWeekSize.width+weekSymSize.width+6), y: weekY)
-                let monthSyPoint = CGPoint(x: point.x-((timeWeekDaySize.width*2)+timeWeekSize.width+weekSymSize.width+4), y: weekY)
-                let dayPoint = CGPoint(x: point.x-((timeWeekDaySize.width*2)+timeWeekSize.width+2), y: weekY)
-                var weekPoint = CGPoint(x: point.x-timeWeekSize.width, y: weekY)
-                let imageWidth :CGFloat = isBmpResoure ? 1.0:2.0
+       // Realtek需要修正坐标参数
                 if isFixCoordinate {
-                    weekPoint = CGPoint(x: point.x-(timeWeekSize.width * 0.5), y: weekY)
+                    bkGravity = UInt8(faceBuilder.GRAVITY_X_CENTER_R|faceBuilder.GRAVITY_Y_CENTER_R)
+                    ylGravity = UInt8(faceBuilder.GRAVITY_X_CENTER_R|faceBuilder.GRAVITY_Y_CENTER_R)
+                    apmGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)
+                    hourGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)
+                    dayGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)
+                    minGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)
+                    monthGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)
+                    weekSymGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)
+                    weekDayGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)
+                    weekGravity = UInt8(faceBuilder.GRAVITY_X_CENTER_R|faceBuilder.GRAVITY_Y_TOP)
+                    stepGravity = UInt8(faceBuilder.GRAVITY_X_CENTER_R|faceBuilder.GRAVITY_Y_CENTER_R)
+                    hrGravity = UInt8(faceBuilder.GRAVITY_X_CENTER_R|faceBuilder.GRAVITY_Y_CENTER_R)
+                    disGravity = UInt8(faceBuilder.GRAVITY_X_CENTER_R|faceBuilder.GRAVITY_Y_CENTER_R)
+                    calGravity = UInt8(faceBuilder.GRAVITY_X_CENTER_R|faceBuilder.GRAVITY_Y_CENTER_R)
+                    pointGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)
+                    IgnoreBlack = UInt8(1)
                 }
-
-                amElement.type = UInt8(faceBuilder.ELEMENT_DIGITAL_AMPM)
-                amElement.gravity = apmGravity
-                amElement.ignoreBlack = IgnoreBlack
-                amElement.bottomOffset = 0
-                amElement.leftOffset = UInt8(0)
-                amElement.imageCount = UInt8(amArray.count)
-                amElement.w = UInt16(timeAMSize.width)
-                amElement.h = UInt16(timeAMSize.height)
-                amElement.x = UInt16(point.x - timeAMSize.width)
-                amElement.y = UInt16(point.y)
-                amElement.imageSizes  = timeAMImageSize
-                amElement.imageBuffer = timeAMBuffer
-                newArray.append(amElement)
-
-
-                hourElement.type = UInt8(faceBuilder.ELEMENT_DIGITAL_HOUR)
-                hourElement.gravity = hourGravity
-                hourElement.ignoreBlack = IgnoreBlack
-                hourElement.bottomOffset = 0
-                hourElement.leftOffset = UInt8(0)
-                hourElement.imageCount = UInt8(hourArray.count)
-                hourElement.w = UInt16(timeDateHourSize.width * imageWidth)
-                hourElement.h = UInt16(timeDateHourSize.height)
-                hourElement.x = UInt16(max(0, hourPoint.x))
-                hourElement.y = UInt16(max(0, hourPoint.y))
-                hourElement.imageSizes  = timeDateHourImageSize
-                hourElement.imageBuffer = timeDateHourBuffer
-                newArray.append(hourElement)
-
-
-                dateSyElement.type = UInt8(faceBuilder.ELEMENT_DIGITAL_DIV_HOUR)
-                dateSyElement.gravity = dayGravity
-                dateSyElement.ignoreBlack = IgnoreBlack
-                dateSyElement.bottomOffset = 0
-                dateSyElement.leftOffset = UInt8(0)
-                dateSyElement.imageCount = UInt8(1)
-                dateSyElement.w = UInt16(dateSySize.width*imageWidth)
-                dateSyElement.h = UInt16(dateSySize.height)
-                dateSyElement.x = UInt16(max(0,dateSyPoint.x))
-                dateSyElement.y = UInt16(max(0,dateSyPoint.y))
-                dateSyElement.imageSizes = timeDateSymbolImageSize
-                dateSyElement.imageBuffer = timeDateSymbolBuffer
-                newArray.append(dateSyElement)
-
-                minElement.type = UInt8(faceBuilder.ELEMENT_DIGITAL_MIN)
-                minElement.gravity = minGravity
-                minElement.ignoreBlack = IgnoreBlack
-                minElement.bottomOffset = 0
-                minElement.leftOffset = UInt8(0)
-                minElement.imageCount = UInt8(minArray.count)
-                minElement.w = UInt16(timeDateMinSize.width*imageWidth)
-                minElement.h = UInt16(timeDateMinSize.height)
-                minElement.x = UInt16(max(0,minPoint.x))
-                minElement.y = UInt16(max(0,minPoint.y))
-                minElement.imageSizes = timeDateMinImageSize
-                minElement.imageBuffer = timeDateMinBuffer
-                newArray.append(minElement)
-
-                monthElement.type = UInt8(faceBuilder.ELEMENT_DIGITAL_MONTH)
-                monthElement.gravity = monthGravity
-                monthElement.ignoreBlack = IgnoreBlack
-                monthElement.bottomOffset = 0
-                monthElement.leftOffset = UInt8(0)
-                monthElement.imageCount = UInt8(monthArray.count)
-                monthElement.w = UInt16(timeWeekMonthSize.width*imageWidth)
-                monthElement.h = UInt16(timeWeekMonthSize.height)
-                monthElement.x = UInt16(max(0,monthPoint.x))
-                monthElement.y = UInt16(max(0,monthPoint.y))
-                monthElement.imageSizes = timeWeekMonthImageSize
-                monthElement.imageBuffer = timeWeekMonthBuffer
-                newArray.append(monthElement)
-
-                weekSymElement.type = UInt8(faceBuilder.ELEMENT_DIGITAL_DIV_MONTH)
-                weekSymElement.gravity = weekSymGravity
-                weekSymElement.ignoreBlack = IgnoreBlack
-                weekSymElement.bottomOffset = 0
-                weekSymElement.leftOffset = UInt8(0)
-                weekSymElement.imageCount = UInt8(1)
-                weekSymElement.w = UInt16(weekSymSize.width)
-                weekSymElement.h = UInt16(weekSymSize.height)
-                weekSymElement.x = UInt16(max(0,monthSyPoint.x))
-                weekSymElement.y = UInt16(max(0,monthSyPoint.y))
-                weekSymElement.imageSizes = timeWeekSymbolImageSize
-                weekSymElement.imageBuffer = timeWeekSymbolBuffer
-                newArray.append(weekSymElement)
-
-                weekDayElement.type = UInt8(faceBuilder.ELEMENT_DIGITAL_DAY)
-                weekDayElement.gravity = weekDayGravity
-                weekDayElement.ignoreBlack = IgnoreBlack
-                weekDayElement.bottomOffset = 0
-                weekDayElement.leftOffset = UInt8(0)
-                weekDayElement.imageCount = UInt8(weekDayArray.count)
-                weekDayElement.w = UInt16(timeWeekDaySize.width*imageWidth)
-                weekDayElement.h = UInt16(timeWeekDaySize.height)
-                weekDayElement.x = UInt16(max(0,dayPoint.x))
-                weekDayElement.y = UInt16(max(0,dayPoint.y))
-                weekDayElement.imageSizes = timeWeekDayImageSize
-                weekDayElement.imageBuffer = timeWeekDayBuffer
-                newArray.append(weekDayElement)
-
-                weekElement.type = UInt8(faceBuilder.ELEMENT_DIGITAL_WEEKDAY)
-                weekElement.gravity = weekGravity
-                weekElement.ignoreBlack = IgnoreBlack
-                weekElement.bottomOffset = 0
-                weekElement.leftOffset = UInt8(0)
-                weekElement.imageCount = UInt8(weekArray.count)
-                weekElement.w = UInt16(timeWeekSize.width)
-                weekElement.h = UInt16(timeWeekSize.height)
-                weekElement.x = UInt16(max(0,weekPoint.x))
-                weekElement.y = UInt16(max(0,weekPoint.y))
-                weekElement.imageSizes = timeWeekImageSize
-                weekElement.imageBuffer = timeWeekBuffer
-                newArray.append(weekElement)
-
-            }else if key.elementsEqual("Step"){
-                bleLog("Step is \(value)")
-                let point :CGPoint = dataSourceArray["Step"] as! CGPoint
-                let imaArray = identifyItemsColor(1,itemColor)
-                var newElement :Element = Element()
-                newElement.type = UInt8(faceBuilder.ELEMENT_DIGITAL_STEP)
-                newElement.gravity = stepGravity
-                newElement.ignoreBlack = IgnoreBlack
+        
+        if isSupp2D {
+            bkGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)//背景图
+        }
+        
+                var newArray :[Element] = []
+                //背景、预览处理
+        var newElement :Element = Element(type: Int(UInt8(faceBuilder.ELEMENT_BACKGROUND)), isAlpha: 0)
+        //        newElement.type = UInt8(faceBuilder.ELEMENT_BACKGROUND)
+        //        newElement.isAlpha = 0
+                newElement.w = bgWidth16
+                newElement.h = bgHeight16
+                newElement.gravity = bkGravity
+                newElement.ignoreBlack = isSupp2D ? 4:IgnoreBlack //背景缩略图固定为0
+                newElement.x = bgX
+                newElement.y = bgY
                 newElement.bottomOffset = 0
-                newElement.leftOffset = UInt8(0)
-                newElement.imageCount = UInt8(imaArray.count)
-                stepBuffer.removeAll()
-                stepImageSize.removeAll()
-                getImageBufferArray(imaArray,6)
-                newElement.x = UInt16(point.x)
-                newElement.y = UInt16(point.y)
-                newElement.w = UInt16(stepSize.width)
-                newElement.h = UInt16(stepSize.height)
-                newElement.imageSizes = stepImageSize
-                newElement.imageBuffer = stepBuffer
+                newElement.leftOffset = 0
+                newElement.imageCount = UInt8(1)
+                 //buffer每个元素大小
+                var newByte :Data = getBackBuffer(image240)
+                newElement.imageSizes = [UInt32(newByte.count)]
+                newElement.imageBuffer = newByte
                 newArray.append(newElement)
-
-            }else if key.elementsEqual("HR"){
-                bleLog("HR is \(value)")
-                let point :CGPoint = dataSourceArray["HR"] as! CGPoint
-                let imaArray = identifyItemsColor(1,itemColor)
-                var newElement :Element = Element()
-                newElement.type = UInt8(faceBuilder.ELEMENT_DIGITAL_HEART)
-                newElement.gravity = hrGravity
-                newElement.ignoreBlack = IgnoreBlack
-                newElement.bottomOffset = 0
-                newElement.leftOffset = UInt8(0)
-                newElement.imageCount = UInt8(imaArray.count)
-                hrBuffer.removeAll()
-                hrImageSize.removeAll()
-                getImageBufferArray(imaArray,7)
-                newElement.w = UInt16(hrSize.width)
-                newElement.h = UInt16(hrSize.height)
-                newElement.x = UInt16(point.x)
-                newElement.y = UInt16(point.y)
-                newElement.imageSizes = hrImageSize
-                newElement.imageBuffer = hrBuffer
-                newArray.append(newElement)
-
-            }else if key.elementsEqual("Dis"){
-                bleLog("Dis is \(value)")
-                let point :CGPoint = dataSourceArray["Dis"] as! CGPoint
-                let imaArray = identifyItemsColor(1,itemColor)
-                var newElement :Element = Element()
-                newElement.type = UInt8(faceBuilder.ELEMENT_DIGITAL_DISTANCE)
-                newElement.gravity = disGravity
-                newElement.ignoreBlack = IgnoreBlack
-                newElement.bottomOffset = 0
-                newElement.leftOffset = UInt8(0)
-                newElement.imageCount = UInt8(imaArray.count)
-                disBuffer.removeAll()
-                disImageSize.removeAll()
-                getImageBufferArray(imaArray,8)
-                newElement.w = UInt16(disSize.width)
-                newElement.h = UInt16(disSize.height)
-                newElement.x = UInt16(point.x-disSize.width)
-                newElement.y = UInt16(point.y)
-                newElement.imageSizes = disImageSize
-                newElement.imageBuffer = disBuffer
-                newArray.append(newElement)
-
-            }else if key.elementsEqual("Cal"){
-                bleLog("Cal is \(value)")
-                let point :CGPoint = dataSourceArray["Cal"] as! CGPoint
-                let imaArray = identifyItemsColor(1,itemColor)
-                var newElement :Element = Element()
-                newElement.type = UInt8(faceBuilder.ELEMENT_DIGITAL_CALORIE)
-                newElement.gravity = calGravity
-                newElement.ignoreBlack = IgnoreBlack
-                newElement.bottomOffset = 0
-                newElement.leftOffset = UInt8(0)
-                newElement.imageCount = UInt8(imaArray.count)
-                calBuffer.removeAll()
-                calImageSize.removeAll()
-                getImageBufferArray(imaArray,9)
-                newElement.x = UInt16(point.x)
-                newElement.y = UInt16(point.y)
-                newElement.w = UInt16(calSize.width)
-                newElement.h = UInt16(calSize.height)
-                newElement.imageSizes = calImageSize
-                newElement.imageBuffer = calBuffer
-                newArray.append(newElement)
-
-            }else if key.elementsEqual("PointerNumber"){
-                bleLog("PointerNumber is \(value)")
-                let selNum :String = dataSourceArray["PointerNumber"] as! String
-                getPointerImage(selNum)
-                for index in 0..<3{
-                    var newElement :Element = Element()
-                    newElement.gravity = pointGravity
-                    newElement.ignoreBlack = IgnoreBlack
-                    newElement.x = bgX-1
-                    newElement.y = bgY-1
-                    newElement.imageCount = UInt8(1)
-                    switch index {
-                    case 0:
-                        newElement.w = UInt16(hourSize.width)
-                        newElement.h = UInt16(hourSize.height)
-                        newElement.type = UInt8(faceBuilder.ELEMENT_NEEDLE_HOUR)
-                        newElement.imageSizes = pointerHourImageSize
-                        newElement.imageBuffer = pointerHourBuffer
-                        newElement.bottomOffset = isBmpResoure ?  UInt8(hourSize.height/2) : UInt8(0)
-                        newElement.leftOffset = isBmpResoure ?  UInt8(hourSize.width/2) : UInt8(0)
-                        break
-                    case 1:
-                        newElement.w = UInt16(minSize.width)
-                        newElement.h = UInt16(minSize.height)
-                        newElement.type = UInt8(faceBuilder.ELEMENT_NEEDLE_MIN)
-                        newElement.imageSizes = pointerMinImageSize
-                        newElement.imageBuffer = pointerMinBuffer
-                        newElement.bottomOffset = isBmpResoure ?  UInt8(minSize.height/2) : UInt8(0)
-                        newElement.leftOffset = isBmpResoure ?  UInt8(minSize.width/2) : UInt8(0)
-                        break
-                    case 2:
-                        newElement.w = UInt16(secSize.width)
-                        newElement.h = UInt16(secSize.height)
-                        newElement.type = UInt8(faceBuilder.ELEMENT_NEEDLE_SEC)
-                        newElement.imageSizes = pointerImageSize
-                        newElement.imageBuffer = pointerBuffer
-                        newElement.bottomOffset = isBmpResoure ?  UInt8(secSize.height/2) : UInt8(0)
-                        newElement.leftOffset = isBmpResoure ?  UInt8(secSize.width/2) : UInt8(0)
-                        break
-                    default:
-                        break
+        
+        
+        var newElement1 :Element = Element(type: Int(faceBuilder.ELEMENT_PREVIEW), isAlpha: 0)
+              //  newElement1.type = UInt8(faceBuilder.ELEMENT_PREVIEW)
+                newElement1.w = pvWidth
+                newElement1.h = pvHeight
+                newElement1.gravity = ylGravity
+                newElement1.ignoreBlack = isSupp2D ? 4:IgnoreBlack
+                newElement1.x = pvX
+                newElement1.y = pvY
+                newElement1.bottomOffset = 0
+                newElement1.leftOffset = 0
+                newElement1.imageCount = UInt8(1)
+                var newByte1 :Data = getBackBuffer(image150)
+                newElement1.imageSizes = [UInt32(newByte1.count)] //buffer每个元素大小
+                newElement1.imageBuffer = newByte1
+                newArray.append(newElement1)
+        
+                //处理其他元素
+                let timeColor = UIColor.white
+                let itemColor = UIColor.white
+                var itemC = "_bmp_"
+                var imageType = "png"
+                if isBmpResoure {
+                    itemC = "_bmp_"
+                    imageType = "bmp"
+                }
+                for (key,value) in dataSourceArray {
+        
+                    if key.elementsEqual("TimeAM"){
+                        bleLog("TimeAM is \(value)")
+                        let point :CGPoint = dataSourceArray["TimeAM"] as! CGPoint
+                        bleLog("TimeAM is \(point)")
+                        let colorNum = 0
+                        //am
+                        let amArray = identifyItemsColor(2,timeColor)
+                        var amElement :Element = Element(type: Int(faceBuilder.ELEMENT_DIGITAL_AMPM), isAlpha: 1)
+                        timeAMBuffer.removeAll()
+                        timeAMImageSize.removeAll()
+                        getImageBufferArray(amArray,0)
+                        //hour
+                        let hourArray = identifyItemsColor(3,timeColor)
+                        var hourElement :Element = Element(type: Int(faceBuilder.ELEMENT_DIGITAL_HOUR), isAlpha: 1)
+                        timeDateHourBuffer.removeAll()
+                        timeDateHourImageSize.removeAll()
+                        getImageBufferArray(hourArray,1)
+                        //dateSymbol
+                        var dateSyElement :Element = Element(type: Int(faceBuilder.ELEMENT_DIGITAL_DIV_HOUR), isAlpha: 1)
+                        timeDateSymbolBuffer.removeAll()
+                        timeDateSymbolImageSize.removeAll()
+                        timeDateSymbolBuffer.append (getImageBuffer(getImageDeviceType()+"hour"+"\(colorNum)"+itemC+"symbol"))
+                        let dateSySize = getImageSize(getImageDeviceType()+"hour"+"\(colorNum)"+itemC+"symbol",ofType: imageType)
+        
+                        timeDateSymbolImageSize = [UInt32(timeDateSymbolBuffer.count)]
+                        //min
+                        let minArray = identifyItemsColor(3,timeColor)
+                        var minElement :Element = Element(type: Int(faceBuilder.ELEMENT_DIGITAL_MIN), isAlpha: 1)
+                        timeDateMinBuffer.removeAll()
+                        timeDateMinImageSize.removeAll()
+                        getImageBufferArray(minArray,2)
+                        //month
+                        let monthArray = identifyItemsColor(4,timeColor)
+                        var monthElement :Element = Element(type: Int(faceBuilder.ELEMENT_DIGITAL_MONTH), isAlpha: 1)
+                        timeWeekMonthBuffer.removeAll()
+                        timeWeekMonthImageSize.removeAll()
+                        getImageBufferArray(monthArray,3)
+                        //weekSym
+                        var weekSymElement :Element = Element(type: Int(faceBuilder.ELEMENT_DIGITAL_DIV_MONTH), isAlpha: 1)
+                        let weekSymSize = getImageSize(getImageDeviceType()+"date"+"\(colorNum)"+itemC+"symbol",ofType: imageType)
+                        timeWeekSymbolBuffer.removeAll()
+                        timeWeekSymbolImageSize.removeAll()
+                        timeWeekSymbolBuffer.append(getImageBuffer(getImageDeviceType()+"date"+"\(colorNum)"+itemC+"symbol"))
+                        timeWeekSymbolImageSize = [UInt32(timeWeekSymbolBuffer.count)]
+                        //week day
+                        let weekDayArray = identifyItemsColor(4,timeColor)
+                        var weekDayElement :Element = Element(type: Int(faceBuilder.ELEMENT_DIGITAL_DAY), isAlpha: 1)
+                        timeWeekDayBuffer.removeAll()
+                        timeWeekDayImageSize.removeAll()
+                        getImageBufferArray(weekDayArray,4)
+                        //week
+                        let weekArray = identifyItemsColor(5,timeColor)
+                        var weekElement :Element = Element(type: Int(faceBuilder.ELEMENT_DIGITAL_WEEKDAY), isAlpha: 1)
+                        timeWeekBuffer.removeAll()
+                        timeWeekImageSize.removeAll()
+                        getImageBufferArray(weekArray,5)
+        
+                        //point
+                        let hourY = point.y+timeAMSize.height+2
+                        let weekY = point.y+timeAMSize.height+timeDateHourSize.height+4
+                        let hourPoint = CGPoint(x: point.x-((timeDateHourSize.width*2)+(timeDateMinSize.width*2)+dateSySize.width+4), y: hourY)
+                        let dateSyPoint = CGPoint(x: point.x-((timeDateMinSize.width*2)+dateSySize.width+2), y: hourY)
+                        let minPoint = CGPoint(x: point.x-(timeDateMinSize.width*2), y: hourY)
+        
+                        let monthPoint = CGPoint(x: point.x-((timeWeekMonthSize.width*2)+(timeWeekDaySize.width*2)+timeWeekSize.width+weekSymSize.width+6), y: weekY)
+                        let monthSyPoint = CGPoint(x: point.x-((timeWeekDaySize.width*2)+timeWeekSize.width+weekSymSize.width+4), y: weekY)
+                        let dayPoint = CGPoint(x: point.x-((timeWeekDaySize.width*2)+timeWeekSize.width+2), y: weekY)
+                        var weekPoint = CGPoint(x: point.x-timeWeekSize.width, y: weekY)
+                        let imageWidth :CGFloat = isBmpResoure ? 1.0:2.0
+                        if isFixCoordinate {
+                            weekPoint = CGPoint(x: point.x-(timeWeekSize.width * 0.5), y: weekY)
+                        }
+        
+                       // amElement.type = UInt8(faceBuilder.ELEMENT_DIGITAL_AMPM)
+                        amElement.gravity = apmGravity
+                        amElement.ignoreBlack = isSupp2D ? 4:IgnoreBlack
+                        amElement.bottomOffset = 0
+                        amElement.leftOffset = UInt8(0)
+                        amElement.imageCount = UInt8(amArray.count)
+                        amElement.w = UInt16(timeAMSize.width)
+                        amElement.h = UInt16(timeAMSize.height)
+                        amElement.x = UInt16(point.x - timeAMSize.width)
+                        amElement.y = UInt16(point.y)
+                        amElement.imageSizes  = timeAMImageSize
+                        amElement.imageBuffer = timeAMBuffer
+                        newArray.append(amElement)
+        
+        
+                       // hourElement.type = UInt8(faceBuilder.ELEMENT_DIGITAL_HOUR)
+                        hourElement.gravity = hourGravity
+                        hourElement.ignoreBlack = isSupp2D ? 4:IgnoreBlack
+                        hourElement.bottomOffset = 0
+                        hourElement.leftOffset = UInt8(0)
+                        hourElement.imageCount = UInt8(hourArray.count)
+                        hourElement.w = UInt16(timeDateHourSize.width * imageWidth)
+                        hourElement.h = UInt16(timeDateHourSize.height)
+                        hourElement.x = UInt16(max(0, hourPoint.x))
+                        hourElement.y = UInt16(max(0, hourPoint.y))
+                        hourElement.imageSizes  = timeDateHourImageSize
+                        hourElement.imageBuffer = timeDateHourBuffer
+                        newArray.append(hourElement)
+        
+        
+                      //  dateSyElement.type = UInt8(faceBuilder.ELEMENT_DIGITAL_DIV_HOUR)
+                        dateSyElement.gravity = dayGravity
+                        dateSyElement.ignoreBlack = isSupp2D ? 4:IgnoreBlack
+                        dateSyElement.bottomOffset = 0
+                        dateSyElement.leftOffset = UInt8(0)
+                        dateSyElement.imageCount = UInt8(1)
+                        dateSyElement.w = UInt16(dateSySize.width*imageWidth)
+                        dateSyElement.h = UInt16(dateSySize.height)
+                        dateSyElement.x = UInt16(max(0,dateSyPoint.x))
+                        dateSyElement.y = UInt16(max(0,dateSyPoint.y))
+                        dateSyElement.imageSizes = timeDateSymbolImageSize
+                        dateSyElement.imageBuffer = timeDateSymbolBuffer
+                        newArray.append(dateSyElement)
+        
+                       // minElement.type = UInt8(faceBuilder.ELEMENT_DIGITAL_MIN)
+                        minElement.gravity = minGravity
+                        minElement.ignoreBlack = isSupp2D ? 4:IgnoreBlack
+                        minElement.bottomOffset = 0
+                        minElement.leftOffset = UInt8(0)
+                        minElement.imageCount = UInt8(minArray.count)
+                        minElement.w = UInt16(timeDateMinSize.width*imageWidth)
+                        minElement.h = UInt16(timeDateMinSize.height)
+                        minElement.x = UInt16(max(0,minPoint.x))
+                        minElement.y = UInt16(max(0,minPoint.y))
+                        minElement.imageSizes = timeDateMinImageSize
+                        minElement.imageBuffer = timeDateMinBuffer
+                        newArray.append(minElement)
+        
+                       // monthElement.type = UInt8(faceBuilder.ELEMENT_DIGITAL_MONTH)
+                        monthElement.gravity = monthGravity
+                        monthElement.ignoreBlack = isSupp2D ? 4:IgnoreBlack
+                        monthElement.bottomOffset = 0
+                        monthElement.leftOffset = UInt8(0)
+                        monthElement.imageCount = UInt8(monthArray.count)
+                        monthElement.w = UInt16(timeWeekMonthSize.width*imageWidth)
+                        monthElement.h = UInt16(timeWeekMonthSize.height)
+                        monthElement.x = UInt16(max(0,monthPoint.x))
+                        monthElement.y = UInt16(max(0,monthPoint.y))
+                        monthElement.imageSizes = timeWeekMonthImageSize
+                        monthElement.imageBuffer = timeWeekMonthBuffer
+                        newArray.append(monthElement)
+        
+                        //weekSymElement.type = UInt8(faceBuilder.ELEMENT_DIGITAL_DIV_MONTH)
+                        weekSymElement.gravity = weekSymGravity
+                        weekSymElement.ignoreBlack = isSupp2D ? 4:IgnoreBlack
+                        weekSymElement.bottomOffset = 0
+                        weekSymElement.leftOffset = UInt8(0)
+                        weekSymElement.imageCount = UInt8(1)
+                        weekSymElement.w = UInt16(weekSymSize.width)
+                        weekSymElement.h = UInt16(weekSymSize.height)
+                        weekSymElement.x = UInt16(max(0,monthSyPoint.x))
+                        weekSymElement.y = UInt16(max(0,monthSyPoint.y))
+                        weekSymElement.imageSizes = timeWeekSymbolImageSize
+                        weekSymElement.imageBuffer = timeWeekSymbolBuffer
+                        newArray.append(weekSymElement)
+        
+                       // weekDayElement.type = UInt8(faceBuilder.ELEMENT_DIGITAL_DAY)
+                        weekDayElement.gravity = weekDayGravity
+                        weekDayElement.ignoreBlack = isSupp2D ? 4:IgnoreBlack
+                        weekDayElement.bottomOffset = 0
+                        weekDayElement.leftOffset = UInt8(0)
+                        weekDayElement.imageCount = UInt8(weekDayArray.count)
+                        weekDayElement.w = UInt16(timeWeekDaySize.width*imageWidth)
+                        weekDayElement.h = UInt16(timeWeekDaySize.height)
+                        weekDayElement.x = UInt16(max(0,dayPoint.x))
+                        weekDayElement.y = UInt16(max(0,dayPoint.y))
+                        weekDayElement.imageSizes = timeWeekDayImageSize
+                        weekDayElement.imageBuffer = timeWeekDayBuffer
+                        newArray.append(weekDayElement)
+        
+                       // weekElement.type = UInt8(faceBuilder.ELEMENT_DIGITAL_WEEKDAY)
+                        weekElement.gravity = weekGravity
+                        weekElement.ignoreBlack = isSupp2D ? 4:IgnoreBlack
+                        weekElement.bottomOffset = 0
+                        weekElement.leftOffset = UInt8(0)
+                        weekElement.imageCount = UInt8(weekArray.count)
+                        weekElement.w = UInt16(timeWeekSize.width)
+                        weekElement.h = UInt16(timeWeekSize.height)
+                        weekElement.x = UInt16(max(0,weekPoint.x))
+                        weekElement.y = UInt16(max(0,weekPoint.y))
+                        weekElement.imageSizes = timeWeekImageSize
+                        weekElement.imageBuffer = timeWeekBuffer
+                        newArray.append(weekElement)
+        
+                    }else if key.elementsEqual("Step"){
+                        bleLog("Step is \(value)")
+                        let point :CGPoint = dataSourceArray["Step"] as! CGPoint
+                        let imaArray = identifyItemsColor(1,itemColor)
+                        var newElement :Element = Element(type: Int(faceBuilder.ELEMENT_DIGITAL_STEP), isAlpha: 1)
+                        //newElement.type = UInt8(faceBuilder.ELEMENT_DIGITAL_STEP)
+                        newElement.gravity = stepGravity
+                        newElement.ignoreBlack = isSupp2D ? 4:IgnoreBlack
+                        newElement.bottomOffset = 0
+                        newElement.leftOffset = UInt8(0)
+                        newElement.imageCount = UInt8(imaArray.count)
+                        stepBuffer.removeAll()
+                        stepImageSize.removeAll()
+                        getImageBufferArray(imaArray,6)
+                        newElement.x = UInt16(point.x)
+                        newElement.y = UInt16(point.y)
+                        newElement.w = UInt16(stepSize.width)
+                        newElement.h = UInt16(stepSize.height)
+                        newElement.imageSizes = stepImageSize
+                        newElement.imageBuffer = stepBuffer
+                        newArray.append(newElement)
+        
+                    }else if key.elementsEqual("HR"){
+                        bleLog("HR is \(value)")
+                        let point :CGPoint = dataSourceArray["HR"] as! CGPoint
+                        let imaArray = identifyItemsColor(1,itemColor)
+                        var newElement :Element = Element(type: Int(faceBuilder.ELEMENT_DIGITAL_HEART), isAlpha: 1)
+                      //  newElement.type = UInt8(faceBuilder.ELEMENT_DIGITAL_HEART)
+                        newElement.gravity = hrGravity
+                        newElement.ignoreBlack = isSupp2D ? 4:IgnoreBlack
+                        newElement.bottomOffset = 0
+                        newElement.leftOffset = UInt8(0)
+                        newElement.imageCount = UInt8(imaArray.count)
+                        hrBuffer.removeAll()
+                        hrImageSize.removeAll()
+                        getImageBufferArray(imaArray,7)
+                        newElement.w = UInt16(hrSize.width)
+                        newElement.h = UInt16(hrSize.height)
+                        newElement.x = UInt16(point.x)
+                        newElement.y = UInt16(point.y)
+                        newElement.imageSizes = hrImageSize
+                        newElement.imageBuffer = hrBuffer
+                        newArray.append(newElement)
+        
+                    }else if key.elementsEqual("Dis"){
+                        bleLog("Dis is \(value)")
+                        let point :CGPoint = dataSourceArray["Dis"] as! CGPoint
+                        let imaArray = identifyItemsColor(1,itemColor)
+                        var newElement :Element = Element(type: Int(faceBuilder.ELEMENT_DIGITAL_DISTANCE), isAlpha: 1)
+                       // newElement.type = UInt8(faceBuilder.ELEMENT_DIGITAL_DISTANCE)
+                        newElement.gravity = disGravity
+                        newElement.ignoreBlack = isSupp2D ? 4:IgnoreBlack
+                        newElement.bottomOffset = 0
+                        newElement.leftOffset = UInt8(0)
+                        newElement.imageCount = UInt8(imaArray.count)
+                        disBuffer.removeAll()
+                        disImageSize.removeAll()
+                        getImageBufferArray(imaArray,8)
+                        newElement.w = UInt16(disSize.width)
+                        newElement.h = UInt16(disSize.height)
+                        newElement.x = UInt16(point.x-disSize.width)
+                        newElement.y = UInt16(point.y)
+                        newElement.imageSizes = disImageSize
+                        newElement.imageBuffer = disBuffer
+                        newArray.append(newElement)
+        
+                    }else if key.elementsEqual("Cal"){
+                        bleLog("Cal is \(value)")
+                        let point :CGPoint = dataSourceArray["Cal"] as! CGPoint
+                        let imaArray = identifyItemsColor(1,itemColor)
+                        var newElement :Element = Element(type: Int(faceBuilder.ELEMENT_DIGITAL_CALORIE), isAlpha: 1)
+                       // newElement.type = UInt8(faceBuilder.ELEMENT_DIGITAL_CALORIE)
+                        newElement.gravity = calGravity
+                        newElement.ignoreBlack = isSupp2D ? 4:IgnoreBlack
+                        newElement.bottomOffset = 0
+                        newElement.leftOffset = UInt8(0)
+                        newElement.imageCount = UInt8(imaArray.count)
+                        calBuffer.removeAll()
+                        calImageSize.removeAll()
+                        getImageBufferArray(imaArray,9)
+                        newElement.x = UInt16(point.x)
+                        newElement.y = UInt16(point.y)
+                        newElement.w = UInt16(calSize.width)
+                        newElement.h = UInt16(calSize.height)
+                        newElement.imageSizes = calImageSize
+                        newElement.imageBuffer = calBuffer
+                        newArray.append(newElement)
+        
+                    }else if key.elementsEqual("PointerNumber"){
+                        bleLog("PointerNumber is \(value)")
+                        let selNum :String = dataSourceArray["PointerNumber"] as! String
+                        getPointerImage(selNum)
+                        for index in 0..<3{
+                            switch index {
+                            case 0:
+                                var newElement :Element = Element(type: Int(faceBuilder.ELEMENT_NEEDLE_HOUR), isAlpha: 1)
+                                newElement.gravity = pointGravity
+                                newElement.ignoreBlack = isSupp2D ? 4:IgnoreBlack
+                                newElement.x = bgX-1
+                                newElement.y = bgY-1
+                                newElement.imageCount = UInt8(1)
+                                newElement.w = UInt16(hourSize.width)
+                                newElement.h = UInt16(hourSize.height)
+                              //  newElement.type = UInt8(faceBuilder.ELEMENT_NEEDLE_HOUR)
+                                newElement.imageSizes = pointerHourImageSize
+                                newElement.imageBuffer = pointerHourBuffer
+                                newElement.bottomOffset = isBmpResoure ?  UInt8(hourSize.height/2) : UInt8(0)
+                                newElement.leftOffset = isBmpResoure ?  UInt8(hourSize.width/2) : UInt8(0)
+                                break
+                            case 1:
+                                var newElement :Element = Element(type: Int(faceBuilder.ELEMENT_NEEDLE_MIN), isAlpha: 1)
+                                newElement.gravity = pointGravity
+                                newElement.ignoreBlack = isSupp2D ? 4:IgnoreBlack
+                                newElement.x = bgX-1
+                                newElement.y = bgY-1
+                                newElement.imageCount = UInt8(1)
+                                newElement.w = UInt16(minSize.width)
+                                newElement.h = UInt16(minSize.height)
+                              //  newElement.type = UInt8(faceBuilder.ELEMENT_NEEDLE_MIN)
+                                newElement.imageSizes = pointerMinImageSize
+                                newElement.imageBuffer = pointerMinBuffer
+                                newElement.bottomOffset = isBmpResoure ?  UInt8(minSize.height/2) : UInt8(0)
+                                newElement.leftOffset = isBmpResoure ?  UInt8(minSize.width/2) : UInt8(0)
+                                break
+                            case 2:
+                                var newElement :Element = Element(type: Int(faceBuilder.ELEMENT_NEEDLE_SEC), isAlpha: 1)
+                                newElement.gravity = pointGravity
+                                newElement.ignoreBlack = isSupp2D ? 4:IgnoreBlack
+                                newElement.x = bgX-1
+                                newElement.y = bgY-1
+                                newElement.imageCount = UInt8(1)
+                                newElement.w = UInt16(secSize.width)
+                                newElement.h = UInt16(secSize.height)
+                              //  newElement.type = UInt8(faceBuilder.ELEMENT_NEEDLE_SEC)
+                                newElement.imageSizes = pointerImageSize
+                                newElement.imageBuffer = pointerBuffer
+                                newElement.bottomOffset = isBmpResoure ?  UInt8(secSize.height/2) : UInt8(0)
+                                newElement.leftOffset = isBmpResoure ?  UInt8(secSize.width/2) : UInt8(0)
+                                break
+                            default:
+                                break
+                            }
+                            newArray.append(newElement)
+                        }
                     }
-                    newArray.append(newElement)
                 }
-            }
-        }
-
-        if newArray.count > 0{
-            let sendData = buildWatchFace(newArray, newArray.count, dialCustomSenderImageFormat() ? Int32(faceBuilder.PNG_ARGB_8888) : Int32(faceBuilder.BMP_565))
-           // let sendData = buildWatchFace(newArray, newArray.count,Int32(faceBuilder.BMP_565))
-            bleLog("bin文件大小 - \(sendData.toData().count)")
-            if mBleConnector.sendStream(.WATCH_FACE, sendData.toData(),0){
-                bleLog("sendStream - WATCH_FACE")
-            }
-
-        }
+        
+                if newArray.count > 0{
+                    let sendData = buildWatchFace(newArray, newArray.count, isSupp2D ? Int32(faceBuilder.PNG_ARGB_8888) : Int32(faceBuilder.BMP_565))
+                   // let sendData = buildWatchFace(newArray, newArray.count,Int32(faceBuilder.BMP_565))
+                    bleLog("bin文件大小 - \(sendData.toData().count)")
+                    if mBleConnector.sendStream(.WATCH_FACE, sendData.toData(),0){
+                        bleLog("sendStream - WATCH_FACE")
+                    }
+        
+                }
+    
     }
+
+    
 
     var controlViewSize = 38
 
@@ -1688,7 +1709,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
             break;
         case "setAddress":
             let bmac = (args?["bmac"] as? String)!
-            mBleConnector.setTargetIdentifier(bmac)
+            mBleConnector.setTargetIdentifier(bmac, BleConnectorType.systemUUID)
             break;
        case "connect":
             mBleScanner.scan(false)
@@ -3540,16 +3561,16 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         var item = [String: Any]()
 
         let i = WorkOut.map { data -> [String: Any] in
-            return ["mStart":data.startTime,
-                    "mEnd":data.endTime,
+            return ["mStart":data.mStart,
+                    "mEnd":data.mEnd,
                     "mDuration":data.mDuration,
                     "mAltitude":data.mAltitude,
                     "mAirPressure":data.mAirPressure,
-                    "mSpm":data.mSmp,
-                    "mMode":data.mModeSport,
+                    "mSpm":data.mSpm,
+                    "mMode":data.mMode,
                     "mStep":data.mStep,
                     "mDistance":data.mDistance,
-                    "mCalorie":data.mCalories,
+                    "mCalorie":data.mCalorie,
                     "mSpeed":data.mSpeed,
                     "mPace":data.mPace,
                     "mAvgBpm":data.mAvgBpm,
@@ -3568,16 +3589,16 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         var item = [String: Any]()
 
         let i = WorkOut.map { data -> [String: Any] in
-            return ["mStart":data.startTime,
-                    "mEnd":data.endTime,
+            return ["mStart":data.mStart,
+                    "mEnd":data.mEnd,
                     "mDuration":data.mDuration,
                     "mAltitude":data.mAltitude,
                     "mAirPressure":data.mAirPressure,
-                    "mSmp":data.mSmp,
-                    "mMode":data.mModeSport,
+                    "mSmp":data.mSpm,
+                    "mMode":data.mMode,
                     "mStep":data.mStep,
                     "mDistance":data.mDistance,
-                    "mCalories":data.mCalories,
+                    "mCalories":data.mCalorie,
                     "mSpeed":data.mSpeed,
                     "mPace":data.mPace,
                     "mAvgBpm":data.mAvgBpm,
@@ -3619,7 +3640,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         let i = BloodOxygen.map { data -> [String: Any] in
             //return data.toDictionary()
             return ["mTime":data.mTime,
-                    "mValue":data.mBloodOxygenValue]
+                    "mValue":data.mValue]
         }
 
         item["bloodOxygen"] =  i
@@ -3800,3 +3821,14 @@ extension UIImage {
       return result!
     }
 }
+
+struct WatchFaceRect {
+
+
+    var x: UInt16
+    var y: UInt16
+
+    var width: UInt16
+    var height: UInt16
+}
+

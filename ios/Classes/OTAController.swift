@@ -262,11 +262,11 @@ extension OTAController: BleHandleDelegate,LoggerDelegate,DFUServiceDelegate,DFU
 
     func onOTA(_ status: Bool) {
         if status {
-            mBleScanner.mBleScanDelegate = self
-            mBleScanner.mBleScanFilter = nil
-            mBleConnector.mBleScanner.mCentralManager.stopScan()
-            mBleConnector.setTargetIdentifier("698A6B2A-6939-270B-CD48-79B5236DD923")
-            mBleScanner.mCentralManager.scanForPeripherals(withServices: [CBUUID.init(string: "FE59")], options: nil)
+//            mBleScanner.mBleScanDelegate = self
+//            mBleScanner.mBleScanFilter = nil
+//            mBleConnector.mBleScanner.mCentralManager.stopScan()
+////            mBleConnector.setTargetIdentifier("698A6B2A-6939-270B-CD48-79B5236DD923")
+//            mBleScanner.mCentralManager.scanForPeripherals(withServices: [CBUUID.init(string: "FE59")], options: nil)
         }
     }
 
@@ -294,7 +294,7 @@ extension OTAController: BleHandleDelegate,LoggerDelegate,DFUServiceDelegate,DFU
     func dfuStateDidChange(to state: DFUState) {
      
         if state == .completed {
-            mBleConnector.setTargetIdentifier(mBleCache.getDeviceIdentify()!)
+           // mBleConnector.setTargetIdentifier(mBleCache.getDeviceIdentify()!)
             bleLog("Nordic Back To view")
         }
     }

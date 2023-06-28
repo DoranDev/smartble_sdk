@@ -34,4 +34,18 @@ extension Data {
             .joined(separator: "")
     }
 
+    func hexToDecimal() -> Int {
+        var sum = 0
+
+        let str = self.hexadecimal().uppercased()
+
+        for i in str.utf8 {
+            sum = sum * 16 + Int(i) - 48
+            if i >= 65 {
+                sum -= 7
+            }
+        }
+
+        return sum
+    }
 }

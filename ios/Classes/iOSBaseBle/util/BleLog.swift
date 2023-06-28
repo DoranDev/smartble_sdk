@@ -19,7 +19,7 @@ func bleLog(_ message: String) {
     if BASE_BLE_DEBUG {
         print("\(Thread.current) - \(dateFormat1.string(from: Date()))-\(getMilliStampLog(Date()))  \(message)")
         //if UserDefaults.standard.bool(forKey: kRuntimeBleLog) {
-        ABHBleLog.share.startWriteMessage(message)
+        //ABHBleLog.share.startWriteMessage(message)
         //}
     }
 }
