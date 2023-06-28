@@ -6,5 +6,8 @@
 import Foundation
 
 enum ByteOrder {
-    case BIG_ENDIAN, LITTLE_ENDIAN
+    /// 大端字节序
+    case BIG_ENDIAN
+    /// 小端字节序
+    case LITTLE_ENDIAN
 }

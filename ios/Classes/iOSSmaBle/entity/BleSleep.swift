@@ -65,6 +65,13 @@ class BleSleep: BleReadable {
         }
         var hasFallenAsleep = false // 是否有入睡点的数据
         var result: [BleSleep] = []
+        bleLog("测试数据analyseSleep 执行, takeLastOrigin.count=\(takeLastOrigin.count)")
+        
+        
+        if takeLastOrigin.count <= 2 {
+            return []
+        }
+        bleLog("测试数据analyseSleep 执行Flage = 2")
         //判断数据是否有效
         for index in 0..<takeLastOrigin.count-2{
             if ((takeLastOrigin[index + 1].mTime - takeLastOrigin[index].mTime) >= BleSleep.ERROR_DATA) {

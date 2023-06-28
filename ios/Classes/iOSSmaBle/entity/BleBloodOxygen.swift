@@ -12,22 +12,25 @@ class BleBloodOxygen: BleReadable {
     static let ITEM_LENGTH = 6
     
     var mTime: Int = 0 // 距离当地2000/1/1 00:00:00的秒数
-    var mBloodOxygenValue: Int = 0 //血氧值
+    var mValue: Int = 0 //血氧值
 
     override func decode() {
         super.decode()
         mTime = Int(readInt32())
-        mBloodOxygenValue = Int(readUInt8())
+        mValue = Int(readUInt8())
        
     }
 
     override var description: String {
-        "BleBloodOxygen(mTime: \(mTime), mBloodOxygenValue: \(mBloodOxygenValue))"
+        "BleBloodOxygen(mTime: \(mTime), mValue:\(mValue))"
     }
     
-    func toDictionary()->[String:Any]{
-        let dic : [String : Any] = ["mTime":mTime,
-                                    "mBloodOxygenValue":mBloodOxygenValue]
+    func toDictionary() -> [String:Any] {
+        let dic = [
+            "mTime":mTime,
+            "mValue":mValue
+        ]
+        // [String : Any]
         return dic
     }
     
@@ -38,7 +41,7 @@ class BleBloodOxygen: BleReadable {
             return newModel
         }
         newModel.mTime = dic["mTime"] as? Int ?? 0
-        newModel.mBloodOxygenValue = dic["mBloodOxygenValue"] as? Int ?? 0
+        newModel.mValue = dic["mValue"] as? Int ?? 0
         return newModel
     }
 }

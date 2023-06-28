@@ -25,9 +25,13 @@ class BleNotificationSettings: BleWritable {
 //    static let QQ = "com.tencent.mqq"
 //    static let WE_CHAT = "com.tencent.xin"
 
+    /// 镜像手机（消息全部推送）
     static let MIRROR_PHONE = "mirror_phone"
+    /// 来电
     static let CALL = "tel"
+    /// 信息
     static let SMS = "sms"
+    /// 邮件
     static let EMAIL = "mailto"
     static let SKYPE = "skype"
     static let FACEBOOK_MESSENGER = "fbauth2"
@@ -47,6 +51,14 @@ class BleNotificationSettings: BleWritable {
     static let NAVERCAFE = "navercafe"
     static let YOUTUBE = "youtube"
     static let NETFLIX = "nflx"
+    static let Tik_Tok = "awemesso" // 注意这个是国外版本的抖音, 不要搞错了
+    static let SNAPCHAT = "snapchat"
+    static let AMAZON = "com.amazon.mobile.shopping"
+    static let UBER = "uberx"
+    static let LYFT = "co.uk.weinstant.instant"
+    static let GOOGLE_MAPS = "GOOGLE_MAPS"
+    static let SLACK = "SLACK"
+    static let Discord = "discord"
 
     // 最初始支持的APP，之后如果有新增app，再BleCache中增加，即修改BleCache.mNotificationBundleIds
     // 计算属性的返回值，这个原始的数组千万不要修改，谢谢
@@ -61,7 +73,8 @@ class BleNotificationSettings: BleWritable {
         MIRROR_PHONE: 1, CALL: 1 << 1, SMS: 1 << 2, EMAIL: 1 << 3,
         SKYPE: 1 << 4, FACEBOOK_MESSENGER: 1 << 5, WHATS_APP: 1 << 6, LINE: 1 << 7,
         INSTAGRAM: 1 << 8, KAKAO_TALK: 1 << 9, GMAIL: 1 << 10, TWITTER: 1 << 11,
-        LINKED_IN: 1 << 12, SINA_WEIBO: 1 << 13, QQ: 1 << 14, WE_CHAT: 1 << 15, BAND: 1 << 16,TELEGRAM: 1 << 17,BETWEEN: 1 << 18,NAVERCAFE: 1 << 19,YOUTUBE: 1 << 20,NETFLIX: 1 << 21,
+        LINKED_IN: 1 << 12, SINA_WEIBO: 1 << 13, QQ: 1 << 14, WE_CHAT: 1 << 15, BAND: 1 << 16,TELEGRAM: 1 << 17,BETWEEN: 1 << 18,NAVERCAFE: 1 << 19,YOUTUBE: 1 << 20,NETFLIX: 1 << 21, Tik_Tok: 1 << 22, SNAPCHAT: 1 << 23, AMAZON: 1 << 24, UBER: 1 << 25,
+        LYFT: 1 << 26, GOOGLE_MAPS: 1 << 27, SLACK: 1 << 28, Discord: 1 << 29
     ]
 
     override var mLengthToWrite: Int {
@@ -75,7 +88,7 @@ class BleNotificationSettings: BleWritable {
     }
 
     override func encode() {
-        super.encode()
+        super.encode()  // 32769 25165824
         writeInt32(mNotificationBits)
     }
 

@@ -151,12 +151,55 @@ class BleCache {
         mDeviceInfo?.mSupportNoDisturbSet ?? 0
     }
     
-    var mSupportSetPassWord : Int{
-        mDeviceInfo?.mSupportSetPassWord ?? 0
+    var mSupportSetWatchPassword : Int{
+        mDeviceInfo?.mSupportSetWatchPassword ?? 0
     }
     
     var mSupportRealTimeMeasurement : Int{
         mDeviceInfo?.mSupportRealTimeMeasurement ?? 0
+    }
+    
+    /// 设备是否支持是否支持省电模式功能
+    var mSupportPowerSaveMode: Int{
+        mDeviceInfo?.mSupportPowerSaveMode ?? 0
+    }
+    
+    /// 是否支持发送二维码数据到设备
+    var mSupportQrcode: Int{
+        mDeviceInfo?.mSupportQrcode ?? 0
+    }
+    
+    /// 设备是否支持新的天气协议(支持7天)
+    var mSupportWeather2: Int{
+        mDeviceInfo?.mSupportWeather2 ?? 0
+    }
+    
+    /// 是否支持支付宝
+    var mSupportAliPay: Int{
+        mDeviceInfo?.mSupportAliPay ?? 0
+    }
+    /// 是否支持待机设置
+    var mSupportStandbySetting: Int{
+        mDeviceInfo?.mSupportStandbySetting ?? 0
+    }
+    /// 是否支持2D加速资源, 例如在线表盘, 自定义表盘之类的
+    var mSupport2DAcceleration: Int{
+        mDeviceInfo?.mSupport2DAcceleration ?? 0
+    }
+    
+    /// 是否支持药物提醒2简化版功能, 这个是简化版本的吃药提醒, 就类似闹钟
+    var mSupportMedicationAlarm: Int{
+        mDeviceInfo?.mSupportMedicationAlarm ?? 0
+    }
+    
+    /// 是否支持读取获取手表字库/UI/语言包/信息
+    var mSupportReadPackageStatus: Bool {
+        (mDeviceInfo?.mSupportReadPackageStatus ?? 0)  == 1
+    }
+    
+    /// 是否支持心率警报设置
+    var mSupportHeartRateAlarmSetting: Bool {
+        (mDeviceInfo?.mSupportHeartRateAlarmSetting ?? 0)  == 1
     }
     
     var mAGpsFileUrl: String {
@@ -171,6 +214,14 @@ class BleCache {
         bundleIds.append(BleNotificationSettings.NAVERCAFE)
         bundleIds.append(BleNotificationSettings.YOUTUBE)
         bundleIds.append(BleNotificationSettings.NETFLIX)
+        // 2023-02-20 新增
+        //bundleIds.append(BleNotificationSettings.Tik_Tok)  // 注意这个是国外版本的抖音, 不要搞错了
+        bundleIds.append(BleNotificationSettings.SNAPCHAT)
+        //bundleIds.append(BleNotificationSettings.AMAZON)
+        //bundleIds.append(BleNotificationSettings.UBER)
+        //bundleIds.append(BleNotificationSettings.LYFT)
+        //bundleIds.append(BleNotificationSettings.GOOGLE_MAPS)
+        
         switch mPrototype {
         default:
             return bundleIds
@@ -261,8 +312,8 @@ class BleCache {
                 mUserDefault.set(nil, forKey: getKey(bleKey, keyFlag))
             } else {
                 let data = try JSONEncoder().encode(object)
-                bleLog("BleCache putObject -> \(getKey(bleKey, keyFlag)), \(String(describing: object))"
-                    + ", \(String(data: data, encoding: .utf8) ?? "")")
+                bleLog("BleCache putObject -> \(getKey(bleKey, keyFlag)), object:\(String(describing: object))"
+                    + ", data:\(String(data: data, encoding: .utf8) ?? "")")
                 mUserDefault.set(data, forKey: getKey(bleKey, keyFlag))
             }
         } catch {
@@ -282,6 +333,42 @@ class BleCache {
                 return t
             }
         } catch {
+        }
+        return nil
+    }
+    
+    
+    /**
+     * 存入对象。
+     */
+    func putObject<T: Encodable>(_ key: String, _ object: T?) {
+        do {
+            if object == nil {
+                bleLog("BleCache putObject -> key:\(key), object:nil")
+                mUserDefault.set(nil, forKey: key)
+            } else {
+                let data = try JSONEncoder().encode(object)
+                bleLog("BleCache putObject -> key:\(key), object:\(String(describing: object))"
+                    + ", data:\(String(data: data, encoding: .utf8) ?? "")")
+                mUserDefault.set(data, forKey: key)
+            }
+        } catch {
+
+        }
+    }
+
+    /**
+     * 取出对象，可能为nil。
+     */
+    func getObject<T: Decodable>(_ key: String) -> T? {
+        do {
+            if let data = mUserDefault.data(forKey: key) {
+                let t: T = try JSONDecoder().decode(T.self, from: data)
+                bleLog("BleCache getObject -> key:\(key), " + "\(String(data: data, encoding: .utf8) ?? ""), \(t)")
+                return t
+            }
+        } catch {
+            bleLog("key:\(key) error:\(error)")
         }
         return nil
     }
@@ -351,10 +438,12 @@ class BleCache {
             return bleKeyFlag == .CREATE || bleKeyFlag == .DELETE || bleKeyFlag == .UPDATE || bleKeyFlag == .RESET
         case .PUSH:
             return (bleKey == .SCHEDULE && (bleKeyFlag == .CREATE || bleKeyFlag == .DELETE || bleKeyFlag == .UPDATE))
-                || (bleKey == .WEATHER_REALTIME && bleKeyFlag == .UPDATE)
-                || (bleKey == .WEATHER_FORECAST && bleKeyFlag == .UPDATE)
-                || (bleKey == .WORLD_CLOCK && (bleKeyFlag == .CREATE || bleKeyFlag == .DELETE))
-                || (bleKey == .STOCK && (bleKeyFlag == .CREATE || bleKeyFlag == .DELETE))
+            || (bleKey == .WEATHER_REALTIME && bleKeyFlag == .UPDATE)
+            || (bleKey == .WEATHER_FORECAST && bleKeyFlag == .UPDATE)
+            || (bleKey == .WEATHER_REALTIME2 && bleKeyFlag == .UPDATE)
+            || (bleKey == .WEATHER_FORECAST2 && bleKeyFlag == .UPDATE)
+            || (bleKey == .WORLD_CLOCK && (bleKeyFlag == .CREATE || bleKeyFlag == .DELETE))
+            || (bleKey == .STOCK && (bleKeyFlag == .CREATE || bleKeyFlag == .DELETE))
         default:
             return false
         }
@@ -378,6 +467,9 @@ class BleCache {
             return worldClock
         }else if bleKey == .STOCK {
             let mStock: [BleStock] = getArray(bleKey)
+            return mStock
+        }else if bleKey == .LOVE_TAP_USER {
+            let mStock: [BleLoveTapUser] = getArray(bleKey)
             return mStock
         }
         return []

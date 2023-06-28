@@ -16,7 +16,7 @@ class ABHRealTimeHR: BleReadable {
     override func decode() {
         super.decode()
         mTime = Int(readInt32())
-        mHR = Int(readInt8())
+        mHR = Int(readUInt8())
         
     }
     override var description: String {

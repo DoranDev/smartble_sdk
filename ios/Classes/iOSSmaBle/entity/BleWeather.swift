@@ -31,10 +31,11 @@ class BleWeather: BleWritable {
     var mMinTemperature: Int = 0     // 摄氏度，for BleWeatherForecast
     var mWeatherCode: Int = 0        // 天气类型，for both
     var mWindSpeed: Int = 0          // km/h，for both
-    var mHumidity: Int = 0           // %，for both
+    var mHumidity: Int = 0           // %，for both  2023-04-07 从for BleWeatherForecast, 其他地方还未修改
     var mVisibility: Int = 0         // km，for both
     // https://en.wikipedia.org/wiki/Ultraviolet_index
     // https://zh.wikipedia.org/wiki/%E7%B4%AB%E5%A4%96%E7%BA%BF%E6%8C%87%E6%95%B0
+    // 紫外线指数，在API没有此数据的情况下，由云量和天气状态推算得出大概值，
     // [0, 2] -> low, [3, 5] -> moderate, [6, 7] -> high, [8, 10] -> very high, >10 -> extreme
     var mUltraVioletIntensity: Int = 0  // 紫外线强度，for BleWeatherForecast
     var mPrecipitation: Int = 0         // 降水量 mm，for both
@@ -159,5 +160,39 @@ class BleWeather: BleWritable {
         newModel.mUltraVioletIntensity = dic["mUltraVioletIntensity"] as? Int ?? 0
         newModel.mPrecipitation = dic["mPrecipitation"] as? Int ?? 0
         return newModel
+    }
+        
+    
+    /// 注意这个方法有2个, 另外一个在支持7天天气协议的地方
+    /// 把天气服务code转成BLE协议中的code, 这个是我们公司的天气服务请求的数据转换对应的天气类型
+    /// 其他公司使用的天气服务器需要他们单独写一个
+    func transformWeatherCode(code: Int) -> Int {
+        var weatherCode = BleWeather.OTHER
+        switch code {
+        case 200, 201, 202, 210, 211, 212, 230, 231, 232:   //Group 2xx: Thunderstorm
+            weatherCode = BleWeather.THUNDERSHOWER
+        case 300, 301, 302, 310, 311, 312, 313, 314, 321:  //Group 3xx: Drizzle 毛毛雨
+            weatherCode = BleWeather.RAINY
+        case 500, 501, 502, 503, 504, 511, 520, 521, 522, 531:   //Group 5xx: Rain
+            weatherCode = BleWeather.RAINY
+        case 600, 601, 602, 611, 612, 613, 615, 616, 620, 621, 622:  //Group 6xx: Snow
+            weatherCode = BleWeather.SNOWY
+        case 701, 711, 721, 741: //Group 7xx: Atmosphere
+            weatherCode = BleWeather.FOGGY
+        case 731, 751, 761, 762:
+            weatherCode = BleWeather.SAND_STORM
+        case 771, 781: //Squall、Tornado
+            weatherCode = BleWeather.HIGH_WINDY
+        case 800: //Group 800: Clear 晴
+            weatherCode = BleWeather.SUNNY
+        case 801: //Group 80x: Clouds 阴
+            weatherCode = BleWeather.OVERCAST
+        case 802, 803, 804:  //多云
+            weatherCode = BleWeather.CLOUDY
+        default:
+            weatherCode = BleWeather.OTHER
+        }
+
+        return weatherCode
     }
 }

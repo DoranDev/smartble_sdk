@@ -14,7 +14,7 @@ class BleDrinkWaterSettings: BleWritable {
     override var mLengthToWrite: Int {
         BleDrinkWaterSettings.ITEM_LENGTH
     }
-    //////初始化值 10:00～21:00
+    // 初始化值 10:00～21:00
     var mEnabled: Int = 0 //0->off 1->open
     var mRepeat: Int = 0 //Monday - Sunday (Arbitrary choice)
     var mStartHour: Int = 9
@@ -76,6 +76,37 @@ class BleDrinkWaterSettings: BleWritable {
         case mEnabled, mRepeat, mStartHour, mStartMinute, mEndHour, mEndMinute, mInterval
     }
 
+    
+    func toDictionary()->[String:Any]{
+        let dic : [String : Any] = [
+            "mEnabled": mEnabled,
+            "mRepeat": mRepeat,
+            "mStartHour": mStartHour,
+            "mStartMinute": mStartMinute,
+            "mEndHour": mEndHour,
+            "mEndMinute": mEndMinute,
+            "mInterval": mInterval
+        ]
+        return dic
+    }
+    
+    func dictionaryToObjct(_ dic:[String:Any]) -> BleDrinkWaterSettings {
+
+        let newModel = BleDrinkWaterSettings()
+        if dic.keys.count<1{
+            return newModel
+        }
+        newModel.mEnabled = dic["mEnabled"] as? Int ?? 0
+        newModel.mRepeat = dic["mRepeat"] as? Int ?? 0
+        newModel.mStartHour = dic["mStartHour"] as? Int ?? 0
+        newModel.mStartMinute = dic["mStartMinute"] as? Int ?? 0
+        newModel.mEndHour = dic["mEndHour"] as? Int ?? 21
+        newModel.mEndMinute = dic["mEndMinute"] as? Int ?? 0
+        newModel.mInterval = dic["mInterval"] as? Int ?? 60
+        
+        return newModel
+    }
+    
     override var description: String {
         "BleDrinkWaterSettings(mEnabled: \(mEnabled), mRepeat: \(mRepeat), mStartHour: \(mStartHour)"
             + ", mStartMinute: \(mStartMinute), mEndHour: \(mEndHour), mEndMinute: \(mEndMinute)"

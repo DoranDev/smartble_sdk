@@ -491,6 +491,8 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
      var disImageSize :[UInt32] = [UInt32]()
      var calImageSize :[UInt32] = [UInt32]()
 
+     private let isSupp2D = BleCache.shared.mSupport2DAcceleration != 0
+
      var pointerHourBuffer :Data = Data()
      var pointerMinBuffer :Data = Data()
      var pointerBuffer :Data = Data()
@@ -718,7 +720,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
     private var controlValueRange = 9 // The content of the digital part below the control such as distance and steps
     private var fileFormat = "png" // The original format of the image of the dial element is generally in png format, and Realtek's is in bmp format
     let faceBuilder = WatchFaceBuilder.sharedInstance
-    private var imageFormat = WatchFaceBuilder.sharedInstance.PNG_ARGB_8888 // Image encoding, the default is 8888, Realtek is RGB565
+    private var imageFormat = WatchFaceBuilder.sharedInstance.BMP_565 // Image encoding, the default is 8888, Realtek is RGB565
     private var X_CENTER = WatchFaceBuilder.sharedInstance.GRAVITY_X_CENTER // Relative coordinate mark, MTK and Realtek have different implementations
     private var Y_CENTER = WatchFaceBuilder.sharedInstance.GRAVITY_Y_CENTER // Relative coordinate mark, MTK and Realtek have different implementations
 //    private var borderSize = 0 // When drawing graphics, add the width of the ring
@@ -743,7 +745,6 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
     }
 
     func startCreateBinFile(){
-         isBmpResoure = false
          bleBin = BleWatchFaceBin()
          imageCountStart = 0
          pointerHourImageSize = [UInt32]()
@@ -802,11 +803,19 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
          minSize = CGSize()
          secSize = CGSize()
 
+        var IgnoreBlack = UInt8(1)//默认为0 , bmp相关的图片用1
+        var isFixCoordinate = true
+
         let dataSourceArray = getItemsPiont() as! Dictionary<String, Any>
         let image150 = getThumbnailImage()
         let image240 = getMainBgImage()
 
         isBmpResoure = true
+//        if custom == 2 {
+//            isBmpResoure = false
+////            IgnoreBlack = UInt8(0)
+//          //  isFixCoordinate = false
+//        }
         var bgWidth16 :UInt16 = 0
         var bgHeight16 :UInt16 = 0
         var bgX :UInt16 = 0
@@ -832,8 +841,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         var calGravity = UInt8(faceBuilder.GRAVITY_X_CENTER|faceBuilder.GRAVITY_Y_CENTER)
         var pointGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)
         //MTK 平台默认为0
-        var IgnoreBlack = UInt8(1)//默认为0 , bmp相关的图片用1
-        var isFixCoordinate = true
+
         bgWidth16  = UInt16(screenWidth)
         bgHeight16 = UInt16(screenHeight)
         pvWidth  = UInt16(screenPreviewWidth)
@@ -869,7 +877,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         newElement.w = bgWidth16
         newElement.h = bgHeight16
         newElement.gravity = bkGravity
-        newElement.ignoreBlack = 1 //背景缩略图固定为0
+        newElement.ignoreBlack = IgnoreBlack //背景缩略图固定为0
         newElement.x = bgX
         newElement.y = bgY
         newElement.bottomOffset = 0
@@ -887,7 +895,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         newElement1.w = pvWidth
         newElement1.h = pvHeight
         newElement1.gravity = ylGravity
-        newElement1.ignoreBlack = 1
+        newElement1.ignoreBlack = IgnoreBlack
         newElement1.x = pvX
         newElement1.y = pvY
         newElement1.bottomOffset = 0
@@ -901,7 +909,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         //处理其他元素
         let timeColor = UIColor.white
         let itemColor = UIColor.white
-        var itemC = "_"
+        var itemC = "_bmp_"
         var imageType = "png"
         if isBmpResoure {
             itemC = "_bmp_"
@@ -1191,7 +1199,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                 for index in 0..<3{
                     var newElement :Element = Element()
                     newElement.gravity = pointGravity
-                    newElement.ignoreBlack = 1
+                    newElement.ignoreBlack = IgnoreBlack
                     newElement.x = bgX-1
                     newElement.y = bgY-1
                     newElement.imageCount = UInt8(1)
@@ -1232,8 +1240,8 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         }
 
         if newArray.count > 0{
-//            let sendData = buildWatchFace(newArray, newArray.count, dialCustomSenderImageFormat() ? Int32(faceBuilder.PNG_ARGB_8888) : Int32(faceBuilder.BMP_565))
-            let sendData = buildWatchFace(newArray, newArray.count,Int32(faceBuilder.BMP_565))
+            let sendData = buildWatchFace(newArray, newArray.count, dialCustomSenderImageFormat() ? Int32(faceBuilder.PNG_ARGB_8888) : Int32(faceBuilder.BMP_565))
+           // let sendData = buildWatchFace(newArray, newArray.count,Int32(faceBuilder.BMP_565))
             bleLog("bin文件大小 - \(sendData.toData().count)")
             if mBleConnector.sendStream(.WATCH_FACE, sendData.toData(),0){
                 bleLog("sendStream - WATCH_FACE")
@@ -1383,7 +1391,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         }else if type == 5{
             imageNumber = 7
         }
-        var itemC = "_"
+        var itemC = "_bmp_"
         if isBmpResoure {
             itemC = "_bmp_"
         }
@@ -1433,9 +1441,9 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         pointerHourBuffer.removeAll()
         pointerMinBuffer.removeAll()
         pointerBuffer.removeAll()
-        var pHour = "device_pointerHour_"
-        var pMinute = "device_pointerminute_"
-        var pSecond = "device_pointerSecond_"
+        var pHour = getImageDeviceType()+"pointerHour_bmp_"
+        var pMinute = getImageDeviceType()+"pointerminute_bmp_"
+        var pSecond = getImageDeviceType()+"pointerSecond_bmp_"
         var pType = "png"
         if isBmpResoure {
             pHour = getImageDeviceType()+"pointerHour_bmp_"
@@ -1533,7 +1541,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         imageCountStart = imageCountStart+1
         var imageType = "png"
         if isBmpResoure {
-            imageType = "bmp"
+                imageType = "bmp"
         }
         return getImagePathToData(imageName, ofType: imageType)
     }
@@ -1543,7 +1551,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         for index in 0..<imageArray.count{
             var imageType = "png"
             if isBmpResoure {
-                imageType = "bmp"
+                    imageType = "bmp"
             }
             let path = Bundle.main.path(forResource: (imageArray[index] as! String), ofType: imageType)
             let newImage = UIImage(contentsOfFile: path!)
@@ -1606,6 +1614,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
     }
 
 
+
     func showImageDialog(image: UIImage) {
         let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
 
@@ -1624,6 +1633,16 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         }
     }
 
+    func dialCustomSenderImageFormat()->Bool{
+        //true 表示传输协议用PNG false 表示BMP Realtek必须用BMP
+        var isImage = true
+        if BleCache.shared.mPlatform ==  BleDeviceInfo.PLATFORM_REALTEK{
+            isImage = false
+        }
+        return isImage
+
+    }
+
     func getImageSize(_ imageName:String, ofType:String)-> CGSize{
         let path = Bundle.main.path(forResource: imageName, ofType: ofType)
         let newImage = UIImage(contentsOfFile: path!)
@@ -1634,26 +1653,12 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
     var thumbImage: [UInt8]? = nil
 
     func getMainBgImage()->UIImage{
-//        let image = UIGraphicsGetImageFromCurrentImageContext()
-//        UIGraphicsEndImageContext()
-
-//        let image = UIImage(data: Data(bgImage!))
-//        let newImage  = image?.resize(to: CGSize(width: screenWidth, height: screenHeight))
-//        return maskRoundedImage(image: newImage!, radius: CGFloat(screenWidth/2))
         let image = UIImage(data: Data(bgImage!))!
         return convertToPNG(image: image)!
     }
 
 
-
-
     func getThumbnailImage() -> UIImage{//Thumbnail preview
-//        let image = UIGraphicsGetImageFromCurrentImageContext()
-//        UIGraphicsEndImageContext()
-
-//        let image = UIImage(data: Data(thumbImage!))
-//        let newImage  = image?.resize(to: CGSize(width: screenPreviewWidth, height:screenPreviewHeight))
-//        return maskRoundedImage(image: newImage!, radius: CGFloat(screenPreviewWidth/2))
         let image = UIImage(data: Data(thumbImage!))!
         return convertToPNG(image: image)!
     }

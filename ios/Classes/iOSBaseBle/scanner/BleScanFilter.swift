@@ -18,13 +18,20 @@ protocol BleScanFilter {
 
 // 根据设备identifier来过滤扫描结果, 不区分大小写
 class IdentifierFilter: BleScanFilter {
+    
     var mIdentifier: String
-
-    init(_ identifier: String) {
-        mIdentifier = identifier
+    var mConnecType = BleConnectorType.systemUUID
+    
+    init(_ identifier: String, _ mConnecType: BleConnectorType) {
+        self.mIdentifier = identifier
+        self.mConnecType = mConnecType
     }
 
     func match(_ bleDevice: BleDevice) -> Bool {
-        mIdentifier.compare(bleDevice.mPeripheral.identifier.uuidString, options: .caseInsensitive) == .orderedSame
+        if self.mConnecType == .systemUUID {
+            return mIdentifier.compare(bleDevice.mPeripheral.identifier.uuidString, options: .caseInsensitive) == .orderedSame
+        } else {
+            return mIdentifier.compare(bleDevice.address, options: .caseInsensitive) == .orderedSame
+        }
     }
 }

@@ -70,9 +70,12 @@ class BleNoDisturbSettings: BleWritable {
     }
     
     func toDictionary()->[String:Any]{
-        let dic : [String : Any] = [ "mEnabled":mEnabled,
-                                     "mBleTimeRange1":mBleTimeRange1.toDictionary(),
-                                     "mBleTimeRange2":mBleTimeRange2.toDictionary()]
+        let dic : [String : Any] = [
+            "mEnabled":mEnabled,
+            "mBleTimeRange1":mBleTimeRange1.toDictionary(),
+            "mBleTimeRange2":mBleTimeRange2.toDictionary(),
+            "mBleTimeRange3":mBleTimeRange3.toDictionary()
+        ]
         return dic
     }
     
@@ -84,8 +87,10 @@ class BleNoDisturbSettings: BleWritable {
         newModel.mEnabled = dic["mEnabled"] as? Int ?? 0
         let dic1 : [String:Any] = dic["mBleTimeRange1"] as? [String:Any] ?? [:]
         let dic2 : [String:Any] = dic["mBleTimeRange2"] as? [String:Any] ?? [:]
+        let dic3 : [String:Any] = dic["mBleTimeRange3"] as? [String:Any] ?? [:]
         newModel.mBleTimeRange1 = BleTimeRange().dictionaryToObjct(dic1)
         newModel.mBleTimeRange2 = BleTimeRange().dictionaryToObjct(dic2)
+        newModel.mBleTimeRange3 = BleTimeRange().dictionaryToObjct(dic3)
         return newModel
     }
 }
