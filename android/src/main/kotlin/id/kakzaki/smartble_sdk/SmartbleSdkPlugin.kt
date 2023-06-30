@@ -95,7 +95,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private var onOTAChannel: EventChannel? = null
     private var onOTASink: EventSink? = null
     private var onReadPowerChannel: EventChannel? = null
-    private var onReadPowerSink: EventSink? = null
+    private var onReadPowerSink: EventSink? = null.
     private var onReadFirmwareVersionChannel: EventChannel? = null
     private var onReadFirmwareVersionSink: EventSink? = null
     private var onReadBleAddressChannel: EventChannel? = null
