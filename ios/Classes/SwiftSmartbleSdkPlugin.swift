@@ -5,6 +5,23 @@ import MobileCoreServices
 import CoreBluetooth
 
 public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandler, BleHandleDelegate , BleScanDelegate , BleScanFilter {
+    func onReadDeviceInfo(_ status: Bool, _ deviceInfo: BleDeviceInfo) {
+        var item = [String: Any]()
+        item["deviceInfo"] =   toJSON(deviceInfo)
+
+        if let onReadDeviceInfoSink = onReadDeviceInfoSink {
+            onReadDeviceInfoSink(item)
+        }
+    }
+
+    func onReadDeviceInfo2(_ deviceInfo2: BleDeviceInfo2) {
+        var item = [String: Any]()
+        item["deviceInfo2"] =   toJSON(deviceInfo2)
+
+        if let onReadDeviceInfoSink = onReadDeviceInfoSink {
+            onReadDeviceInfoSink(item)
+        }
+    }
 
 
     static let eventChannelNameScan = "smartble_sdk/scan";
@@ -750,66 +767,66 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         pointerHourImageSize = [UInt32]()
         pointerMinImageSize = [UInt32]()
         pointerImageSize  = [UInt32]()
-        
+
         timeAMImageSize  = [UInt32]()
-        
+
         timeDateHourImageSize = [UInt32]()
         timeDateSymbolImageSize  = [UInt32]()
         timeDateMinImageSize  = [UInt32]()
-        
+
         timeWeekMonthImageSize = [UInt32]()
         timeWeekSymbolImageSize  = [UInt32]()
         timeWeekDayImageSize  = [UInt32]()
         timeWeekImageSize   = [UInt32]()
-        
+
         stepImageSize  = [UInt32]()
         hrImageSize  = [UInt32]()
         disImageSize  = [UInt32]()
         calImageSize  = [UInt32]()
-        
+
         pointerHourBuffer = Data()
         pointerMinBuffer = Data()
         pointerBuffer = Data()
-        
+
         timeAMBuffer = Data()
-        
+
         timeDateHourBuffer = Data()
         timeDateSymbolBuffer = Data()
         timeDateMinBuffer = Data()
-        
+
         timeWeekMonthBuffer = Data()
         timeWeekSymbolBuffer = Data()
         timeWeekDayBuffer = Data()
         timeWeekBuffer = Data()
-        
+
         stepBuffer = Data()
         hrBuffer = Data()
         disBuffer = Data()
         calBuffer = Data()
-        
+
         timeAMSize  = CGSize()
         timeDateHourSize  = CGSize()
         timeDateMinSize  = CGSize()
         timeWeekMonthSize  = CGSize()
         timeWeekDaySize  = CGSize()
         timeWeekSize  = CGSize()
-        
+
         stepSize = CGSize()
         hrSize = CGSize()
         disSize = CGSize()
         calSize = CGSize()
-        
+
         hourSize = CGSize()
         minSize = CGSize()
         secSize = CGSize()
-        
+
         var IgnoreBlack = UInt8(1)//默认为0 , bmp相关的图片用1
         var isFixCoordinate = true
-        
+
         let dataSourceArray = getItemsPiont() as! Dictionary<String, Any>
         let image150 = getThumbnailImage()
         let image240 = getMainBgImage()
-        
+
         isBmpResoure = true
         //        if custom == 2 {
         //            isBmpResoure = false
@@ -841,12 +858,12 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         var calGravity = UInt8(faceBuilder.GRAVITY_X_CENTER|faceBuilder.GRAVITY_Y_CENTER)
         var pointGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)
         //MTK 平台默认为0
-        
+
         bgWidth16  = UInt16(screenWidth)
         bgHeight16 = UInt16(screenHeight)
         pvWidth  = UInt16(screenPreviewWidth)
         pvHeight = UInt16(screenPreviewHeight)
-        
+
         bgX = bgWidth16/2
         bgY = bgHeight16/2
         pvX = pvWidth/2
@@ -870,11 +887,11 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                     pointGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)
                     IgnoreBlack = UInt8(1)
                 }
-        
+
         if isSupp2D {
             bkGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)//背景图
         }
-        
+
                 var newArray :[Element] = []
                 //背景、预览处理
         var newElement :Element = Element(type: Int(UInt8(faceBuilder.ELEMENT_BACKGROUND)), isAlpha: 0)
@@ -894,8 +911,8 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                 newElement.imageSizes = [UInt32(newByte.count)]
                 newElement.imageBuffer = newByte
                 newArray.append(newElement)
-        
-        
+
+
         var newElement1 :Element = Element(type: Int(faceBuilder.ELEMENT_PREVIEW), isAlpha: 0)
               //  newElement1.type = UInt8(faceBuilder.ELEMENT_PREVIEW)
                 newElement1.w = pvWidth
@@ -911,7 +928,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                 newElement1.imageSizes = [UInt32(newByte1.count)] //buffer每个元素大小
                 newElement1.imageBuffer = newByte1
                 newArray.append(newElement1)
-        
+
                 //处理其他元素
                 let timeColor = UIColor.white
                 let itemColor = UIColor.white
@@ -922,7 +939,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                     imageType = "bmp"
                 }
                 for (key,value) in dataSourceArray {
-        
+
                     if key.elementsEqual("TimeAM"){
                         bleLog("TimeAM is \(value)")
                         let point :CGPoint = dataSourceArray["TimeAM"] as! CGPoint
@@ -946,7 +963,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                         timeDateSymbolImageSize.removeAll()
                         timeDateSymbolBuffer.append (getImageBuffer(getImageDeviceType()+"hour"+"\(colorNum)"+itemC+"symbol"))
                         let dateSySize = getImageSize(getImageDeviceType()+"hour"+"\(colorNum)"+itemC+"symbol",ofType: imageType)
-        
+
                         timeDateSymbolImageSize = [UInt32(timeDateSymbolBuffer.count)]
                         //min
                         let minArray = identifyItemsColor(3,timeColor)
@@ -979,14 +996,14 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                         timeWeekBuffer.removeAll()
                         timeWeekImageSize.removeAll()
                         getImageBufferArray(weekArray,5)
-        
+
                         //point
                         let hourY = point.y+timeAMSize.height+2
                         let weekY = point.y+timeAMSize.height+timeDateHourSize.height+4
                         let hourPoint = CGPoint(x: point.x-((timeDateHourSize.width*2)+(timeDateMinSize.width*2)+dateSySize.width+4), y: hourY)
                         let dateSyPoint = CGPoint(x: point.x-((timeDateMinSize.width*2)+dateSySize.width+2), y: hourY)
                         let minPoint = CGPoint(x: point.x-(timeDateMinSize.width*2), y: hourY)
-        
+
                         let monthPoint = CGPoint(x: point.x-((timeWeekMonthSize.width*2)+(timeWeekDaySize.width*2)+timeWeekSize.width+weekSymSize.width+6), y: weekY)
                         let monthSyPoint = CGPoint(x: point.x-((timeWeekDaySize.width*2)+timeWeekSize.width+weekSymSize.width+4), y: weekY)
                         let dayPoint = CGPoint(x: point.x-((timeWeekDaySize.width*2)+timeWeekSize.width+2), y: weekY)
@@ -995,7 +1012,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                         if isFixCoordinate {
                             weekPoint = CGPoint(x: point.x-(timeWeekSize.width * 0.5), y: weekY)
                         }
-        
+
                        // amElement.type = UInt8(faceBuilder.ELEMENT_DIGITAL_AMPM)
                         amElement.gravity = apmGravity
                         amElement.ignoreBlack = isSupp2D ? 4:IgnoreBlack
@@ -1009,8 +1026,8 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                         amElement.imageSizes  = timeAMImageSize
                         amElement.imageBuffer = timeAMBuffer
                         newArray.append(amElement)
-        
-        
+
+
                        // hourElement.type = UInt8(faceBuilder.ELEMENT_DIGITAL_HOUR)
                         hourElement.gravity = hourGravity
                         hourElement.ignoreBlack = isSupp2D ? 4:IgnoreBlack
@@ -1024,8 +1041,8 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                         hourElement.imageSizes  = timeDateHourImageSize
                         hourElement.imageBuffer = timeDateHourBuffer
                         newArray.append(hourElement)
-        
-        
+
+
                       //  dateSyElement.type = UInt8(faceBuilder.ELEMENT_DIGITAL_DIV_HOUR)
                         dateSyElement.gravity = dayGravity
                         dateSyElement.ignoreBlack = isSupp2D ? 4:IgnoreBlack
@@ -1039,7 +1056,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                         dateSyElement.imageSizes = timeDateSymbolImageSize
                         dateSyElement.imageBuffer = timeDateSymbolBuffer
                         newArray.append(dateSyElement)
-        
+
                        // minElement.type = UInt8(faceBuilder.ELEMENT_DIGITAL_MIN)
                         minElement.gravity = minGravity
                         minElement.ignoreBlack = isSupp2D ? 4:IgnoreBlack
@@ -1053,7 +1070,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                         minElement.imageSizes = timeDateMinImageSize
                         minElement.imageBuffer = timeDateMinBuffer
                         newArray.append(minElement)
-        
+
                        // monthElement.type = UInt8(faceBuilder.ELEMENT_DIGITAL_MONTH)
                         monthElement.gravity = monthGravity
                         monthElement.ignoreBlack = isSupp2D ? 4:IgnoreBlack
@@ -1067,7 +1084,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                         monthElement.imageSizes = timeWeekMonthImageSize
                         monthElement.imageBuffer = timeWeekMonthBuffer
                         newArray.append(monthElement)
-        
+
                         //weekSymElement.type = UInt8(faceBuilder.ELEMENT_DIGITAL_DIV_MONTH)
                         weekSymElement.gravity = weekSymGravity
                         weekSymElement.ignoreBlack = isSupp2D ? 4:IgnoreBlack
@@ -1081,7 +1098,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                         weekSymElement.imageSizes = timeWeekSymbolImageSize
                         weekSymElement.imageBuffer = timeWeekSymbolBuffer
                         newArray.append(weekSymElement)
-        
+
                        // weekDayElement.type = UInt8(faceBuilder.ELEMENT_DIGITAL_DAY)
                         weekDayElement.gravity = weekDayGravity
                         weekDayElement.ignoreBlack = isSupp2D ? 4:IgnoreBlack
@@ -1095,7 +1112,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                         weekDayElement.imageSizes = timeWeekDayImageSize
                         weekDayElement.imageBuffer = timeWeekDayBuffer
                         newArray.append(weekDayElement)
-        
+
                        // weekElement.type = UInt8(faceBuilder.ELEMENT_DIGITAL_WEEKDAY)
                         weekElement.gravity = weekGravity
                         weekElement.ignoreBlack = isSupp2D ? 4:IgnoreBlack
@@ -1109,7 +1126,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                         weekElement.imageSizes = timeWeekImageSize
                         weekElement.imageBuffer = timeWeekBuffer
                         newArray.append(weekElement)
-        
+
                     }else if key.elementsEqual("Step"){
                         bleLog("Step is \(value)")
                         let point :CGPoint = dataSourceArray["Step"] as! CGPoint
@@ -1131,7 +1148,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                         newElement.imageSizes = stepImageSize
                         newElement.imageBuffer = stepBuffer
                         newArray.append(newElement)
-        
+
                     }else if key.elementsEqual("HR"){
                         bleLog("HR is \(value)")
                         let point :CGPoint = dataSourceArray["HR"] as! CGPoint
@@ -1153,7 +1170,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                         newElement.imageSizes = hrImageSize
                         newElement.imageBuffer = hrBuffer
                         newArray.append(newElement)
-        
+
                     }else if key.elementsEqual("Dis"){
                         bleLog("Dis is \(value)")
                         let point :CGPoint = dataSourceArray["Dis"] as! CGPoint
@@ -1175,7 +1192,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                         newElement.imageSizes = disImageSize
                         newElement.imageBuffer = disBuffer
                         newArray.append(newElement)
-        
+
                     }else if key.elementsEqual("Cal"){
                         bleLog("Cal is \(value)")
                         let point :CGPoint = dataSourceArray["Cal"] as! CGPoint
@@ -1197,7 +1214,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                         newElement.imageSizes = calImageSize
                         newElement.imageBuffer = calBuffer
                         newArray.append(newElement)
-        
+
                     }else if key.elementsEqual("PointerNumber"){
                         bleLog("PointerNumber is \(value)")
                         let selNum :String = dataSourceArray["PointerNumber"] as! String
@@ -1256,7 +1273,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                         }
                     }
                 }
-        
+
                 if newArray.count > 0{
                     let sendData = buildWatchFace(newArray, newArray.count, isSupp2D ? Int32(faceBuilder.PNG_ARGB_8888) : Int32(faceBuilder.BMP_565))
                    // let sendData = buildWatchFace(newArray, newArray.count,Int32(faceBuilder.BMP_565))
@@ -1264,12 +1281,12 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                     if mBleConnector.sendStream(.WATCH_FACE, sendData.toData(),0){
                         bleLog("sendStream - WATCH_FACE")
                     }
-        
+
                 }
-    
+
     }
 
-    
+
 
     var controlViewSize = 38
 
@@ -1709,6 +1726,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
             break;
         case "setAddress":
             let bmac = (args?["bmac"] as? String)!
+            print("bmac \(bmac)")
             mBleConnector.setTargetIdentifier(bmac, BleConnectorType.systemUUID)
             break;
        case "connect":
@@ -2793,7 +2811,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                   _ = bleConnector.sendInt32(bleKey, bleKeyFlag, Int.random(in: 1..<0xffffffff))
               } else if bleKeyFlag ==  BleKeyFlag.READ {
                   _ = bleConnector.sendData(bleKey, bleKeyFlag)
-                  onReadDeviceInfo()
+                  onReadDeviceInfo(true, mBleCache.mDeviceInfo!)
               }
           case BleKey.PAIR:
               //蓝牙配对
@@ -3092,27 +3110,19 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         print("onDeviceConnecting - \(status)")
     }
 
-    func onIdentityCreate(_ status: Bool) {
-//        if status {
-//            _ = mBleConnector.sendData(.PAIR,  BleKeyFlag.UPDATE)
-////            dismiss(animated: true)
-////            present(storyboard!.instantiateViewController(withIdentifier: "nav"), animated: true)
-//        }
+   func onIdentityCreate(_ status: Bool, _ deviceInfo: BleDeviceInfo?) {
+
+        if status {
+            _ = mBleConnector.sendData(.PAIR,  BleKeyFlag.UPDATE)
+//            dismiss(animated: true)
+//            present(storyboard!.instantiateViewController(withIdentifier: "nav"), animated: true)
+        }
         var item = [String: Any]()
         item["status"] = status
-        item["deviceInfo"] =    toJSON(mBleCache.mDeviceInfo)
+        item["deviceInfo"] =  toJSON(deviceInfo)
 
         if let onIdentityCreateSink = onIdentityCreateSink {
             onIdentityCreateSink(item)
-        }
-    }
-
-    func onReadDeviceInfo() {
-        var item = [String: Any]()
-        item["deviceInfo"] =   toJSON(mBleCache.mDeviceInfo)
-
-        if let onReadDeviceInfoSink = onReadDeviceInfoSink {
-            onReadDeviceInfoSink(item)
         }
     }
 
