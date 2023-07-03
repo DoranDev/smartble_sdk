@@ -18,3 +18,4 @@ fun PermissionUtils.require(vararg permission: String, action: (Boolean) -> Unit
         }).request()
     }
 }
+

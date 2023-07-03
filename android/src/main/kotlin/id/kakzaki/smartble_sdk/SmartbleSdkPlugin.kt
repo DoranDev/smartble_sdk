@@ -58,6 +58,7 @@ import com.jieli.jl_bt_ota.constant.StateCode
 import com.jieli.jl_bt_ota.interfaces.BtEventCallback
 import java.io.BufferedInputStream
 import java.io.FileOutputStream
+import com.jieli.bmp_convert.BmpConvert
 
 /** SmartbleSdkPlugin */
 class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
@@ -74,6 +75,14 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private lateinit var mBleKey: BleKey
     private lateinit var mBleKeyFlag: BleKeyFlag
     private var mType = 0
+    val SIZE_4 = 4
+
+    private val isSupport2DAcceleration
+        get() = BleCache.mSupport2DAcceleration == BleDeviceInfo.SUPPORT_2D_ACCELERATION_1
+    private var isTo8565 =
+        BleCache.mPlatform == BleDeviceInfo.PLATFORM_JL && !isSupport2DAcceleration
+
+
 
     data class Contact(var name: String, var phone: String)
 
@@ -1367,11 +1376,18 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
     private fun getBg(isRound: Boolean, bgBitmapx: Bitmap): ByteArray {
         val finalBgBitMap = getBgBitmap(false, isRound, bgBitmapx)
+        val pngFile = File(PathUtils.getExternalAppDataPath(), "dial_bg_file.png")
         ImageUtils.save(
             finalBgBitMap,
             File(PathUtils.getExternalAppDataPath(), "dial_bg_file.png"),
             Bitmap.CompressFormat.PNG
         )
+        if (isSupport2DAcceleration) {
+            val bytes = convertPng(pngFile, false)
+            if (bytes != null) {
+                return bytes
+            }
+        }
         return bitmap2Bytes(finalBgBitMap)
     }
 
@@ -1630,7 +1646,11 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         val tmpBitmap =
             ImageUtils.getBitmap(mContext!!.assets.open("$POINTER_DIR/${dir}/${pointerSelectNumber}.${fileFormat}"))
         val w = tmpBitmap.width
-        val h = tmpBitmap.height
+        val h = if (isTo8565) {
+            (tmpBitmap.height * 0.6f).toInt() //固件的内存不足，这里按比例截取一下高度
+        } else {
+            tmpBitmap.height
+        }
         val pointerHourValue =
             mContext!!.assets.open("$POINTER_DIR/${dir}/${pointerSelectNumber}.${fileFormat}")
                 .use { it.readBytes() }
@@ -1638,14 +1658,59 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         pointerHour.add(defaultConversion(fileFormat, pointerHourValue, w))
         val elementAmPm = Element(
             type = type,
+            hasAlpha = isTo8565.toInt(),
             w = w,
             h = h,
             gravity = WatchFaceBuilder.GRAVITY_X_LEFT or WatchFaceBuilder.GRAVITY_Y_TOP,
             ignoreBlack = ignoreBlack,
             x = screenWidth / 2 - 1,
             y = screenHeight / 2 - 1,
-            bottomOffset = if (fileFormat == "png") 0 else h / 2,
-            leftOffset = if (fileFormat == "png") 0 else w / 2,
+            bottomOffset = if (fileFormat == "png" && !isTo8565) 0 else h - tmpBitmap.height / 2,
+            leftOffset = if (fileFormat == "png" && !isTo8565) 0 else w / 2,
+            imageBuffers = pointerHour.toTypedArray()
+        )
+        elements.add(elementAmPm)
+    }
+
+    private fun getPointer2(type: Int, dir: String, elements: ArrayList<Element>) {
+        val customDir: String
+        if (custom == 2) {
+            customDir = "dial_customize_454"
+        } else {
+            customDir = "dial_customize_240"
+        }
+
+        //time
+        val TIME_DIR = "$customDir/time"
+
+        val POINTER_DIR = "$TIME_DIR/pointer"
+        val pointerHour = ArrayList<ByteArray>()
+        val pointerFileName = "$POINTER_DIR/${dir}/${pointerSelectNumber}.${fileFormat}"
+        val tmpBitmap =
+            ImageUtils.getBitmap(mContext!!.assets.open(pointerFileName))
+        val w = tmpBitmap.width
+        val h = (tmpBitmap.height * 0.6f).toInt() //固件的内存不足，这里按比例截取一下高度
+
+        pointerHour.add(
+            defaultConversion(
+                fileFormat,
+                mContext!!.assets.open(pointerFileName).use { it.readBytes() },
+                w,
+                isTo8565 = true,
+                h = h
+            )
+        )
+        val elementAmPm = Element(
+            type = type,
+            hasAlpha = 1,
+            w = w,
+            h = h,
+            gravity = WatchFaceBuilder.GRAVITY_X_LEFT or WatchFaceBuilder.GRAVITY_Y_TOP,
+            ignoreBlack = 1,
+            x = screenWidth / 2,
+            y = screenHeight / 2,
+            bottomOffset = h - tmpBitmap.height / 2,
+            leftOffset = w / 2,
             imageBuffers = pointerHour.toTypedArray()
         )
         elements.add(elementAmPm)
@@ -1887,13 +1952,15 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         return defaultConversion(fileFormat, array, finalBgBitMap.width, 16, 0, false)
     }
 
-    private fun defaultConversion(
+    fun defaultConversion(
         fileFormat: String,
         data: ByteArray,
         w: Int,                      //图片宽度
         bitCount: Int = 16,          //位深度，可为8，16，24，32
         headerInfoSize: Int = 70,   //头部信息长度，默认70
-        isReverseRows: Boolean = true   //是否反转行数据，就是将第一行置换为最后一行
+        isReverseRows: Boolean = true,   //是否反转行数据，就是将第一行置换为最后一行
+        isTo8565: Boolean = false, // 一般都是png文件转8565格式
+        h: Int = 0                //图片高度
     ): ByteArray {
         if (fileFormat == "bmp") {
 
@@ -1939,9 +2006,37 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             }
             return finalData
         } else {
-            //非bmp的目前不需要转换，直接用
-            return data
+            return if (isTo8565) {
+                pngTo8565(data, w, h)
+            } else {
+                data
+            }
         }
+
+    }
+
+    fun pngTo8565(bytes: ByteArray, w: Int, h:Int) :ByteArray {
+        val tmpBitmap =
+            ImageUtils.getBitmap(bytes, 0)
+        val pixels = IntArray(tmpBitmap.height * tmpBitmap.width)
+        tmpBitmap.getPixels(pixels, 0, tmpBitmap.width, 0, 0, tmpBitmap.width, tmpBitmap.height)
+
+        val rowSize = (w * 3 + SIZE_4 - 1) / SIZE_4 * SIZE_4//4字节对齐
+        val data = ByteArray(rowSize * h)
+        for (y in 0 until h) {
+            val rawBytes = ByteArray(rowSize)
+            for (x in 0 until w) {
+                val index = y * w + x
+                val a565 = argb8888To8565(pixels[index])
+                val offset = x * 3
+                rawBytes[offset + 2] = (a565 and 255).toByte()//2
+                rawBytes[offset + 1] = (a565 shr 8 and 255).toByte()//1.
+                rawBytes[offset + 0] = (a565 shr 16 and 255).toByte()//0.alpha
+            }
+            System.arraycopy(rawBytes, 0, data, y * rowSize, rowSize)
+        }
+        LogUtils.d("pngTo8565 -> w=$w, h=$h, rowSize=$rowSize, data=${data.size}")
+        return data
     }
 
     private fun getTimeDigital(elements: ArrayList<Element>) {
@@ -1973,6 +2068,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         amPmValue.add(defaultConversion(fileFormat, pmValue, w))
         val elementAmPm = Element(
             type = WatchFaceBuilder.ELEMENT_DIGITAL_AMPM,
+            hasAlpha = isTo8565.toInt(),
             w = w,
             h = h,
             gravity = WatchFaceBuilder.GRAVITY_X_LEFT or WatchFaceBuilder.GRAVITY_Y_TOP,
@@ -1990,6 +2086,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         var valueBuffers = hourMinute.third.toTypedArray()
         val elementHour = Element(
             type = WatchFaceBuilder.ELEMENT_DIGITAL_HOUR,
+            hasAlpha = isTo8565.toInt(),
             w = w,
             h = h,
             gravity = WatchFaceBuilder.GRAVITY_X_LEFT or WatchFaceBuilder.GRAVITY_Y_TOP,
@@ -2001,6 +2098,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         elements.add(elementHour)
         val elementMinute = Element(
             type = WatchFaceBuilder.ELEMENT_DIGITAL_MIN,
+            hasAlpha = isTo8565.toInt(),
             w = w,
             h = h,
             gravity = WatchFaceBuilder.GRAVITY_X_LEFT or WatchFaceBuilder.GRAVITY_Y_TOP,
@@ -2027,6 +2125,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         valueBuffers = date.third.toTypedArray()
         val elementMonth = Element(
             type = WatchFaceBuilder.ELEMENT_DIGITAL_MONTH,
+            hasAlpha = isTo8565.toInt(),
             w = w,
             h = h,
             gravity = WatchFaceBuilder.GRAVITY_X_LEFT or WatchFaceBuilder.GRAVITY_Y_TOP,
@@ -2038,6 +2137,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         elements.add(elementMonth)
         val elementDay = Element(
             type = WatchFaceBuilder.ELEMENT_DIGITAL_DAY,
+            hasAlpha = isTo8565.toInt(),
             w = w,
             h = h,
             gravity = WatchFaceBuilder.GRAVITY_X_LEFT or WatchFaceBuilder.GRAVITY_Y_TOP,
@@ -2064,6 +2164,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         valueBuffers = week.third.toTypedArray()
         val elementWeek = Element(
             type = WatchFaceBuilder.ELEMENT_DIGITAL_WEEKDAY,
+            hasAlpha = isTo8565.toInt(),
             w = w,
             h = h,
             gravity = WatchFaceBuilder.GRAVITY_X_LEFT or WatchFaceBuilder.GRAVITY_Y_TOP,
@@ -2075,6 +2176,167 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         elements.add(elementWeek)
     }
 
+    private fun getTimeDigital2(elements: ArrayList<Element>) {
+        val DIGITAL_DIR: String = if (custom == 2) {
+            "dial_customize_454"
+        } else {
+            "dial_customize_240"
+        }
+
+        //time
+        //AM PM
+        val amFileName = "$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_AM_DIR/am.${fileFormat}"
+        val pmFileName = "$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_AM_DIR/pm.${fileFormat}"
+
+        val amPmValue = ArrayList<ByteArray>()
+        val tmpBitmap =
+            ImageUtils.getBitmap(mContext!!.assets.open(amFileName))
+        var w = tmpBitmap.width
+        var h = tmpBitmap.height
+        val amValue =
+            mContext!!.assets.open(amFileName)
+                .use { it.readBytes() }
+        val pmValue =
+            mContext!!.assets.open(pmFileName)
+                .use { it.readBytes() }
+
+        val amFile = File(
+            PathUtils.getExternalAppDataPath(),
+            amFileName
+        )
+        FileIOUtils.writeFileFromBytesByStream(
+            amFile, amValue
+        )
+
+        val pmFile = File(
+            PathUtils.getExternalAppDataPath(),
+            pmFileName
+        )
+        FileIOUtils.writeFileFromBytesByStream(
+            pmFile, pmValue
+        )
+
+        convertPng(amFile)?.let {
+            amPmValue.add(it)
+        }
+
+        convertPng(pmFile)?.let {
+            amPmValue.add(it)
+        }
+
+        val elementAmPm = Element(
+            type = WatchFaceBuilder.ELEMENT_DIGITAL_AMPM,
+            hasAlpha = 1,
+            w = w,
+            h = h,
+            gravity = WatchFaceBuilder.GRAVITY_X_LEFT or WatchFaceBuilder.GRAVITY_Y_TOP,
+            ignoreBlack = ignoreBlack,
+            x = amLeftX.toInt(),
+            y = amTopY.toInt(),
+            imageBuffers = amPmValue.toTypedArray()
+        )
+        elements.add(elementAmPm)
+
+
+        //数字时间
+        val hourMinute =
+            getNumberBuffers2("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_HOUR_MINUTE_DIR/")
+        w = hourMinute.first
+        h = hourMinute.second
+        var valueBuffers = hourMinute.third.toTypedArray()
+        val elementHour = Element(
+            type = WatchFaceBuilder.ELEMENT_DIGITAL_HOUR,
+            hasAlpha = 1,
+            w = w,
+            h = h,
+            gravity = WatchFaceBuilder.GRAVITY_X_LEFT or WatchFaceBuilder.GRAVITY_Y_TOP,
+            ignoreBlack = ignoreBlack,
+            x = digitalTimeHourLeftX.toInt(),
+            y = digitalTimeHourTopY.toInt(),
+            imageBuffers = valueBuffers
+        )
+        elements.add(elementHour)
+        val elementMinute = Element(
+            type = WatchFaceBuilder.ELEMENT_DIGITAL_MIN,
+            hasAlpha = 1,
+            w = w,
+            h = h,
+            gravity = WatchFaceBuilder.GRAVITY_X_LEFT or WatchFaceBuilder.GRAVITY_Y_TOP,
+            ignoreBlack = ignoreBlack,
+            x = digitalTimeMinuteLeftX.toInt(),
+            y = digitalTimeMinuteTopY.toInt(),
+            imageBuffers = valueBuffers
+        )
+        elements.add(elementMinute)
+        //特殊元素需要手动传输，部分设备不能直接嵌入背景，那样部分设备可能回出现不一致的问题,例如MTK的设备，实际分辨率320x385,但是最终只用320x363
+        if (screenReservedBoundary != 0) {
+            getSymbol2(
+                "$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_HOUR_MINUTE_DIR",
+                WatchFaceBuilder.ELEMENT_DIGITAL_DIV_HOUR,
+                digitalTimeSymbolLeftX.toInt(),
+                digitalTimeSymbolTopY.toInt(),
+                elements
+            )
+        }
+
+        //日期
+        val date = getNumberBuffers2("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_DATE_DIR/")
+        w = date.first
+        h = date.second
+        valueBuffers = date.third.toTypedArray()
+        val elementMonth = Element(
+            type = WatchFaceBuilder.ELEMENT_DIGITAL_MONTH,
+            hasAlpha = 1,
+            w = w,
+            h = h,
+            gravity = WatchFaceBuilder.GRAVITY_X_LEFT or WatchFaceBuilder.GRAVITY_Y_TOP,
+            ignoreBlack = ignoreBlack,
+            x = digitalDateMonthLeftX.toInt(),
+            y = digitalDateMonthTopY.toInt(),
+            imageBuffers = valueBuffers
+        )
+        elements.add(elementMonth)
+        val elementDay = Element(
+            type = WatchFaceBuilder.ELEMENT_DIGITAL_DAY,
+            hasAlpha = 1,
+            w = w,
+            h = h,
+            gravity = WatchFaceBuilder.GRAVITY_X_LEFT or WatchFaceBuilder.GRAVITY_Y_TOP,
+            ignoreBlack = ignoreBlack,
+            x = digitalDateDayLeftX.toInt(),
+            y = digitalDateDayTopY.toInt(),
+            imageBuffers = valueBuffers
+        )
+        elements.add(elementDay)
+        //特殊元素需要手动传输，不能直接嵌入背景，那样部分设备可能回出现不一致的问题
+        if (screenReservedBoundary != 0) {
+            getSymbol2(
+                "$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_DATE_DIR",
+                WatchFaceBuilder.ELEMENT_DIGITAL_DIV_MONTH,
+                digitalDateSymbolLeftX.toInt(),
+                digitalDateSymbolTopY.toInt(),
+                elements
+            )
+        }
+
+        //week
+        val week = getNumberBuffers2("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_WEEK_DIR/", 6)
+        w = week.first
+        h = week.second
+        valueBuffers = week.third.toTypedArray()
+        val elementWeek = Element(
+            type = WatchFaceBuilder.ELEMENT_DIGITAL_WEEKDAY,
+            hasAlpha = 1,
+            w = w,
+            h = h,
+            gravity = WatchFaceBuilder.GRAVITY_X_LEFT or WatchFaceBuilder.GRAVITY_Y_TOP,
+            ignoreBlack = ignoreBlack,
+            x = digitalWeekLeftX.toInt(),
+            y = digitalWeekTopY.toInt(),
+            imageBuffers = valueBuffers
+        )
+        elements.add(elementWeek)
+    }
     private fun getSymbol(
         dir: String,
         type: Int,
@@ -2096,6 +2358,48 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         val valueBuffers = symbolValue.toTypedArray()
         val elementSymbol = Element(
             type = type,
+            hasAlpha = isTo8565.toInt(),
+            w = w,
+            h = h,
+            gravity = WatchFaceBuilder.GRAVITY_X_LEFT or WatchFaceBuilder.GRAVITY_Y_TOP,
+            ignoreBlack = ignoreBlack,
+            x = x,
+            y = y,
+            imageBuffers = valueBuffers
+        )
+        elements.add(elementSymbol)
+    }
+
+    private fun getSymbol2(
+        dir: String,
+        type: Int,
+        x: Int, y: Int,
+        elements: ArrayList<Element>
+    ) {
+        val symbolFileName = "${dir}/symbol.${fileFormat}"
+        val symbolValue = ArrayList<ByteArray>()
+        val symbolBitmap =
+            ImageUtils.getBitmap(mContext!!.assets.open(symbolFileName))
+        val w = symbolBitmap.width
+        val h = symbolBitmap.height
+
+        val symbolBytes = mContext!!.assets.open(symbolFileName)
+            .use { it.readBytes() }
+        val symbolFile = File(
+            PathUtils.getExternalAppDataPath(),
+            symbolFileName
+        )
+        FileIOUtils.writeFileFromBytesByStream(
+            symbolFile, symbolBytes
+        )
+        convertPng(symbolFile)?.let {
+            symbolValue.add(it)
+        }
+
+        val valueBuffers = symbolValue.toTypedArray()
+        val elementSymbol = Element(
+            type = type,
+            hasAlpha = 1,
             w = w,
             h = h,
             gravity = WatchFaceBuilder.GRAVITY_X_LEFT or WatchFaceBuilder.GRAVITY_Y_TOP,
@@ -2123,6 +2427,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         if (controlViewStep) {
             val elementStep = Element(
                 type = WatchFaceBuilder.ELEMENT_DIGITAL_STEP,
+                hasAlpha = isTo8565.toInt(),
                 w = w,
                 h = h,
                 gravity = X_CENTER or Y_CENTER,
@@ -2137,6 +2442,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         if (controlViewHr) {
             val elementHr = Element(
                 type = WatchFaceBuilder.ELEMENT_DIGITAL_HEART,
+                hasAlpha = isTo8565.toInt(),
                 w = w,
                 h = h,
                 gravity = X_CENTER or Y_CENTER,
@@ -2151,6 +2457,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         if (controlViewCa) {
             val elementCa = Element(
                 type = WatchFaceBuilder.ELEMENT_DIGITAL_CALORIE,
+                hasAlpha = isTo8565.toInt(),
                 w = w,
                 h = h,
                 gravity = X_CENTER or Y_CENTER,
@@ -2165,6 +2472,82 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         if (controlViewDis) {
             val elementDis = Element(
                 type = WatchFaceBuilder.ELEMENT_DIGITAL_DISTANCE,
+                hasAlpha = isTo8565.toInt(),
+                w = w,
+                h = h,
+                gravity = X_CENTER or Y_CENTER,
+                ignoreBlack = ignoreBlack,
+                x = distanceValueCenterX.toInt(),
+                y = distanceValueCenterY.toInt(),
+                imageBuffers = valueBuffers
+            )
+            LogUtils.d("test distanceValueCenterX=$distanceValueCenterX  distanceValueCenterY=$distanceValueCenterY")
+            elements.add(elementDis)
+        }
+    }
+
+    private fun getControl2(elements: ArrayList<Element>) {
+        val customDir: String = if (custom == 2) {
+            "dial_customize_454"
+        } else {
+            "dial_customize_240"
+        }
+        //value
+        val VALUE_DIR = "$customDir/value"
+        val triple = getNumberBuffers2("$VALUE_DIR/${valueColor}/", controlValueRange)
+        val w = triple.first
+        val h = triple.second
+        val valueBuffers = triple.third.toTypedArray()
+        //获取步数数值
+        if (controlViewStep) {
+            val elementStep = Element(
+                type = WatchFaceBuilder.ELEMENT_DIGITAL_STEP,
+                hasAlpha = 1,
+                w = w,
+                h = h,
+                gravity = X_CENTER or Y_CENTER,
+                ignoreBlack = ignoreBlack,
+                x = stepValueCenterX.toInt(),
+                y = stepValueCenterY.toInt(),
+                imageBuffers = valueBuffers
+            )
+            elements.add(elementStep)
+        }
+        //获取心率数值
+        if (controlViewHr) {
+            val elementHr = Element(
+                type = WatchFaceBuilder.ELEMENT_DIGITAL_HEART,
+                hasAlpha = 1,
+                w = w,
+                h = h,
+                gravity = X_CENTER or Y_CENTER,
+                ignoreBlack = ignoreBlack,
+                x = heartRateValueCenterX.toInt(),
+                y = heartRateValueCenterY.toInt(),
+                imageBuffers = valueBuffers
+            )
+            elements.add(elementHr)
+        }
+        //获取卡路里数值
+        if (controlViewCa) {
+            val elementCa = Element(
+                type = WatchFaceBuilder.ELEMENT_DIGITAL_CALORIE,
+                hasAlpha = 1,
+                w = w,
+                h = h,
+                gravity = X_CENTER or Y_CENTER,
+                ignoreBlack = ignoreBlack,
+                x = caloriesValueCenterX.toInt(),
+                y = caloriesValueCenterY.toInt(),
+                imageBuffers = valueBuffers
+            )
+            elements.add(elementCa)
+        }
+        //获取距离数值
+        if (controlViewDis) {
+            val elementDis = Element(
+                type = WatchFaceBuilder.ELEMENT_DIGITAL_DISTANCE,
+                hasAlpha = 1,
                 w = w,
                 h = h,
                 gravity = X_CENTER or Y_CENTER,
@@ -2199,6 +2582,40 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         }
         return Triple(w, h, valueByte)
     }
+     private fun getNumberBuffers2(
+        dir: String,
+        range: Int = 9
+    ): Triple<Int, Int, ArrayList<ByteArray>> {
+        var w = 0
+        var h = 0
+        val valueByte = ArrayList<ByteArray>()
+         for (index in 0..range) {
+             val fileName = "$dir${index}.${fileFormat}"
+             if (w == 0) {
+                 val tmpBitmap =
+                     ImageUtils.getBitmap(mContext!!.assets.open(fileName))
+                 w = tmpBitmap.width
+                 h = tmpBitmap.height
+             }
+
+             val value =
+                 mContext!!.assets.open(fileName)
+                     .use { it.readBytes() }
+
+             val pngFile = File(
+                 PathUtils.getExternalAppDataPath(),
+                 fileName
+             )
+             FileIOUtils.writeFileFromBytesByStream(
+                 pngFile, value
+             )
+             val bytes = convertPng(pngFile)
+             if (bytes != null) {
+                 valueByte.add(bytes)
+             }
+         }
+        return Triple(w, h, valueByte)
+    }
 
     private fun getPreview(isRound: Boolean, bgBitmax: Bitmap): ByteArray {
         // The size needs to be strictly corresponding, so the background needs to be generated twice
@@ -2226,13 +2643,51 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 Color.parseColor("#FF0000")
             )
         }
-
+        val pngFile = File(PathUtils.getExternalAppDataPath(), "dial_bg_preview_file.png")
         ImageUtils.save(
             finalPreviewBitMap,
             File(PathUtils.getExternalAppDataPath(), "dial_bg_preview_file.png"),
             Bitmap.CompressFormat.PNG
         )
+        if (isSupport2DAcceleration) {
+            val bytes = convertPng(pngFile, false)
+            if (bytes != null) {
+                return bytes
+            }
+        }
         return bitmap2Bytes(finalPreviewBitMap)
+    }
+
+    private fun convertPng(
+        pngFile: File,
+        isAlpha: Boolean = true,
+    ): ByteArray? {
+        val outFilePath = pngFile.path + ".bin"
+        val type = if (isAlpha) {
+            BmpConvert.TYPE_BR_28_ALPHA_RAW
+        } else {
+            BmpConvert.TYPE_BR_28_RAW
+        }
+        LogUtils.d("convertPng type=$type, pngFile=$pngFile, outFilePath=$outFilePath")
+        //目前是用杰里的库转换
+        val ret = BmpConvert().bitmapConvertBlock(type, pngFile.path, outFilePath)
+        if (ret <= 0) {
+            LogUtils.d("convertPng error = $ret")
+            return null
+        }
+        val outFileBytes = FileIOUtils.readFile2BytesByChannel(outFilePath)
+        val bytesSize = (outFileBytes.size + SIZE_4 - 1) / SIZE_4 * SIZE_4
+        val bytes = ByteArray(bytesSize)
+        System.arraycopy(outFileBytes, 0, bytes, 0, outFileBytes.size)
+        LogUtils.d("convertPng outFileBytes=${outFileBytes.size}, bytes=${bytes.size}")
+        return bytes
+    }
+    fun argb8888To8565(argb: Int): Int {
+        val b = argb and 255
+        val g = argb shr 8 and 255
+        val r = argb shr 16 and 255
+        val a = argb shr 24 and 255
+        return (a shl 16) + (r shr 3 shl 11) + (g shr 2 shl 5) + (b shr 3)
     }
 
     val elements = ArrayList<Element>()
@@ -2386,10 +2841,15 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 controlViewHrY = call.argument<Int>("controlViewHrY")!!
 
                 controlValueInterval = 1
-                ignoreBlack = 1
+                //ignoreBlack = 1
                 controlValueRange = 10
-
-                fileFormat = "bmp"
+                ignoreBlack =
+                    if (isSupport2DAcceleration
+                    ) 4 else 1
+                controlValueRange = 10
+                fileFormat = if (isSupport2DAcceleration || isTo8565
+                ) "png" else "bmp"
+              //  fileFormat = "bmp"
                 imageFormat = WatchFaceBuilder.BMP_565
                 X_CENTER = WatchFaceBuilder.GRAVITY_X_CENTER_R
                 Y_CENTER = WatchFaceBuilder.GRAVITY_Y_CENTER_R
@@ -2401,17 +2861,6 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
                 val bgPreviewBytesNew = getPreview(isRound!!, bgPreviewBitmapX!!)
                 // get the background preview
-                val elementPreview = Element(
-                    type = WatchFaceBuilder.ELEMENT_PREVIEW,
-                    w = screenPreviewWidth, //预览的尺寸为
-                    h = screenPreviewHeight,
-                    gravity = X_CENTER or Y_CENTER,
-                    x = screenWidth / 2,
-                    y = screenHeight / 2 + 2,
-                    imageBuffers = arrayOf(bgPreviewBytesNew!!)
-                )
-                elements.add(elementPreview)
-
                 // get the background size
                 val bgBytes: ByteArray? = call.argument<ByteArray?>("bgBytes")
 
@@ -2420,29 +2869,81 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 val bgBitmapX = BitmapFactory.decodeByteArray(bgBytes, offset, bglength)
 
                 val bgBytesNew = getBg(isRound!!, bgBitmapX!!)
-                val elementBg = Element(
-                    type = WatchFaceBuilder.ELEMENT_BACKGROUND,
-                    w = screenWidth, //背景的尺寸
-                    h = screenHeight,
-                    gravity = X_CENTER or Y_CENTER,
-                    x = screenWidth / 2,
-                    y = screenHeight / 2,
-                    imageBuffers = arrayOf(bgBytesNew!!)
-                )
-                elements.add(elementBg)
 
-                // Get the relevant content of the control value
-                getControl(elements)
+                if (isSupport2DAcceleration) {
+                    //获取预览
+                    val elementPreview = Element(
+                        type = WatchFaceBuilder.ELEMENT_PREVIEW,
+                        w = screenPreviewWidth, //预览的尺寸为
+                        h = screenPreviewHeight,
+                        gravity = 0,
+                        x = 0,
+                        y = 0,
+                        ignoreBlack = ignoreBlack,
+                        imageBuffers = arrayOf(bgPreviewBytesNew!!)
+                    )
+                    elements.add(elementPreview)
 
-                // Get time related content
-                if (timeDigitalView) {
-                    getTimeDigital(elements)
+                    //获取背景
+                    val elementBg = Element(
+                        type = WatchFaceBuilder.ELEMENT_BACKGROUND,
+                        w = screenWidth, //背景的尺寸
+                        h = screenHeight + 1,
+                        gravity = WatchFaceBuilder.GRAVITY_X_LEFT or WatchFaceBuilder.GRAVITY_Y_TOP,
+                        x = 0,
+                        y = 0,
+                        ignoreBlack = ignoreBlack,
+                        imageBuffers = arrayOf(bgBytesNew!!)
+                    )
+                    elements.add(elementBg)
+
+                    //获取控件数值相关内容
+                    getControl2(elements)
+
+                    //获取时间相关内容
+                    if (timeDigitalView) {
+                        getTimeDigital2(elements)
+                    }
+                    if (timePointView) {
+                        getPointer2(WatchFaceBuilder.ELEMENT_NEEDLE_HOUR, POINTER_HOUR, elements)
+                        getPointer2(WatchFaceBuilder.ELEMENT_NEEDLE_MIN, POINTER_MINUTE, elements)
+                        getPointer2(WatchFaceBuilder.ELEMENT_NEEDLE_SEC, POINTER_SECOND, elements)
+                    }
                 } else {
-                    getPointer(WatchFaceBuilder.ELEMENT_NEEDLE_HOUR, POINTER_HOUR, elements)
-                    getPointer(WatchFaceBuilder.ELEMENT_NEEDLE_MIN, POINTER_MINUTE, elements)
-                    getPointer(WatchFaceBuilder.ELEMENT_NEEDLE_SEC, POINTER_SECOND, elements)
-                }
+                    val elementPreview = Element(
+                        type = WatchFaceBuilder.ELEMENT_PREVIEW,
+                        w = screenPreviewWidth, //预览的尺寸为
+                        h = screenPreviewHeight,
+                        gravity = X_CENTER or Y_CENTER,
+                        x = screenWidth / 2,
+                        y = screenHeight / 2 + 2,
+                        imageBuffers = arrayOf(bgPreviewBytesNew!!)
+                    )
+                    elements.add(elementPreview)
 
+                    val elementBg = Element(
+                        type = WatchFaceBuilder.ELEMENT_BACKGROUND,
+                        w = screenWidth, //背景的尺寸
+                        h = screenHeight,
+                        gravity = X_CENTER or Y_CENTER,
+                        x = screenWidth / 2,
+                        y = screenHeight / 2,
+                        imageBuffers = arrayOf(bgBytesNew!!)
+                    )
+                    elements.add(elementBg)
+
+                    // Get the relevant content of the control value
+                    getControl(elements)
+
+                    // Get time related content
+                    if (timeDigitalView) {
+                        getTimeDigital(elements)
+                    } else {
+                        getPointer(WatchFaceBuilder.ELEMENT_NEEDLE_HOUR, POINTER_HOUR, elements)
+                        getPointer(WatchFaceBuilder.ELEMENT_NEEDLE_MIN, POINTER_MINUTE, elements)
+                        getPointer(WatchFaceBuilder.ELEMENT_NEEDLE_SEC, POINTER_SECOND, elements)
+                    }
+                }
                 for (element in elements) {
                     LogUtils.d("customize dial length: ${element.imageBuffers.first().size * 10 / 1024 / 10.0} KB")
                 }
@@ -4853,6 +5354,8 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             }
         }
 
+    fun Boolean.toInt() = if (this) 1 else 0
+
 }
 
 
@@ -5040,3 +5543,4 @@ class DownloadTaskOTA(val bleKey: BleKey) : AsyncTask<String, Int, ByteArray>() 
         BleConnector.sendStream(BleKey.of(REQUEST_CODE_UPGRADE_J), result)
     }
 }
+
