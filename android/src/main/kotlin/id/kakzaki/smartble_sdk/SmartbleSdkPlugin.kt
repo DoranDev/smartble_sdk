@@ -1354,17 +1354,17 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             override fun onSessionStateChange(status: Boolean) {
                 if (status) {
 //                    if(statusState==false){
-                        connector.sendObject(BleKey.TIME_ZONE, BleKeyFlag.UPDATE, BleTimeZone())
-                        connector.sendObject(BleKey.TIME, BleKeyFlag.UPDATE, BleTime.local())
-                        connector.sendInt8(
-                            BleKey.HOUR_SYSTEM, BleKeyFlag.UPDATE,
-                            if (DateFormat.is24HourFormat(Utils.getApp())) 0 else 1
+                    connector.sendObject(BleKey.TIME_ZONE, BleKeyFlag.UPDATE, BleTimeZone())
+                    connector.sendObject(BleKey.TIME, BleKeyFlag.UPDATE, BleTime.local())
+                    connector.sendInt8(
+                        BleKey.HOUR_SYSTEM, BleKeyFlag.UPDATE,
+                        if (DateFormat.is24HourFormat(Utils.getApp())) 0 else 1
 
-                        )
+                    )
 //                        statusState=true
                     connector.sendData(BleKey.POWER, BleKeyFlag.READ)
 //          connector.sendData(BleKey.FIRMWARE_VERSION, BleKeyFlag.READ)
-          connector.sendInt8(BleKey.LANGUAGE, BleKeyFlag.UPDATE, Languages.languageToCode())
+                    connector.sendInt8(BleKey.LANGUAGE, BleKeyFlag.UPDATE, Languages.languageToCode())
 //                    connector.sendData(BleKey.MUSIC_CONTROL, BleKeyFlag.READ)
 //                    }
 
@@ -2587,38 +2587,38 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         }
         return Triple(w, h, valueByte)
     }
-     private fun getNumberBuffers2(
+    private fun getNumberBuffers2(
         dir: String,
         range: Int = 9
     ): Triple<Int, Int, ArrayList<ByteArray>> {
         var w = 0
         var h = 0
         val valueByte = ArrayList<ByteArray>()
-         for (index in 0..range) {
-             val fileName = "$dir${index}.${fileFormat}"
-             if (w == 0) {
-                 val tmpBitmap =
-                     ImageUtils.getBitmap(mContext!!.assets.open(fileName))
-                 w = tmpBitmap.width
-                 h = tmpBitmap.height
-             }
+        for (index in 0..range) {
+            val fileName = "$dir${index}.${fileFormat}"
+            if (w == 0) {
+                val tmpBitmap =
+                    ImageUtils.getBitmap(mContext!!.assets.open(fileName))
+                w = tmpBitmap.width
+                h = tmpBitmap.height
+            }
 
-             val value =
-                 mContext!!.assets.open(fileName)
-                     .use { it.readBytes() }
+            val value =
+                mContext!!.assets.open(fileName)
+                    .use { it.readBytes() }
 
-             val pngFile = File(
-                 PathUtils.getExternalAppDataPath(),
-                 fileName
-             )
-             FileIOUtils.writeFileFromBytesByStream(
-                 pngFile, value
-             )
-             val bytes = convertPng(pngFile)
-             if (bytes != null) {
-                 valueByte.add(bytes)
-             }
-         }
+            val pngFile = File(
+                PathUtils.getExternalAppDataPath(),
+                fileName
+            )
+            FileIOUtils.writeFileFromBytesByStream(
+                pngFile, value
+            )
+            val bytes = convertPng(pngFile)
+            if (bytes != null) {
+                valueByte.add(bytes)
+            }
+        }
         return Triple(w, h, valueByte)
     }
 
@@ -2854,7 +2854,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 controlValueRange = 10
                 fileFormat = if (isSupport2DAcceleration || isTo8565
                 ) "png" else "bmp"
-              //  fileFormat = "bmp"
+                //  fileFormat = "bmp"
                 imageFormat = WatchFaceBuilder.BMP_565
                 X_CENTER = WatchFaceBuilder.GRAVITY_X_CENTER_R
                 Y_CENTER = WatchFaceBuilder.GRAVITY_Y_CENTER_R
@@ -2908,8 +2908,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     //获取时间相关内容
                     if (timeDigitalView) {
                         getTimeDigital2(elements)
-                    }
-                    if (timePointView) {
+                    }else{
                         getPointer2(WatchFaceBuilder.ELEMENT_NEEDLE_HOUR, POINTER_HOUR, elements)
                         getPointer2(WatchFaceBuilder.ELEMENT_NEEDLE_MIN, POINTER_MINUTE, elements)
                         getPointer2(WatchFaceBuilder.ELEMENT_NEEDLE_SEC, POINTER_SECOND, elements)
@@ -2957,8 +2956,6 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     elements.toTypedArray(),
                     imageFormat
                 )
-
-                FileIOUtils.writeFileFromBytesByStream(File(PathUtils.getExternalAppDataPath(), "dial.bin"), bytes)
 
                 LogUtils.d("customize dial bytes size  ${bytes.size}")
                 BleConnector.sendStream(
