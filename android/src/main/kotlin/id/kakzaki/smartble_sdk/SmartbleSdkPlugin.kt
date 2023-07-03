@@ -2177,12 +2177,17 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     }
 
     private fun getTimeDigital2(elements: ArrayList<Element>) {
-        val DIGITAL_DIR: String = if (custom == 2) {
+        val customDir: String = if (custom == 2) {
             "dial_customize_454"
         } else {
             "dial_customize_240"
         }
 
+        //time
+        val TIME_DIR = "$customDir/time"
+
+        //digital
+        val DIGITAL_DIR = "$TIME_DIR/digital"
         //time
         //AM PM
         val amFileName = "$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_AM_DIR/am.${fileFormat}"
