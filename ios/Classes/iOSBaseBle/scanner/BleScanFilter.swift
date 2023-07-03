@@ -30,8 +30,8 @@ class IdentifierFilter: BleScanFilter {
     func match(_ bleDevice: BleDevice) -> Bool {
         if self.mConnecType == .systemUUID {
             return mIdentifier.compare(bleDevice.mPeripheral.identifier.uuidString, options: .caseInsensitive) == .orderedSame
-       } else {
-           return mIdentifier.compare(bleDevice.address, options: .caseInsensitive) == .orderedSame
-       }
+        } else {
+            return mIdentifier.compare(bleDevice.address, options: .caseInsensitive) == .orderedSame
+        }
     }
 }

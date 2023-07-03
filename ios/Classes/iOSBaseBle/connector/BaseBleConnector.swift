@@ -138,7 +138,7 @@ class BaseBleConnector: NSObject {
 //                bleLog("BaseBleConnector connectedPeripherals=\(connectedPeripherals)")
                 for peripheral in connectedPeripherals {
                     if peripheral.identifier.uuidString == self.mTargetIdentifier {
-                        bleLog("BaseBleConnector connect directly")
+                        bleLog("BaseBleConnector connect directly \(peripheral.description)")
                         self.connect(peripheral)
                         return
                     }
