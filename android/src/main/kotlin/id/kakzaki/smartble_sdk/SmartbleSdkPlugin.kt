@@ -2958,6 +2958,8 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     imageFormat
                 )
 
+                FileIOUtils.writeFileFromBytesByStream(File(PathUtils.getExternalAppDataPath(), "dial.bin"), bytes)
+
                 LogUtils.d("customize dial bytes size  ${bytes.size}")
                 BleConnector.sendStream(
                     BleKey.WATCH_FACE,
