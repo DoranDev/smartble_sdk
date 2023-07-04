@@ -303,7 +303,7 @@ class SmartbleSdk {
     required SelectedBlekeyFlag flag,
     required int mEnabled,
   }) =>
-      _channel.invokeMethod('HR_MONITORING', {
+      _channel.invokeMethod('HR_WARNING', {
         'flag': flag.name,
         'mEnabled': mEnabled,
       });
