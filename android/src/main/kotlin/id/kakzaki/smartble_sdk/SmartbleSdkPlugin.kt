@@ -79,6 +79,8 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
     private val isSupport2DAcceleration
         get() = BleCache.mSupport2DAcceleration == BleDeviceInfo.SUPPORT_2D_ACCELERATION_1
+
+
     private var isTo8565 =
         BleCache.mPlatform == BleDeviceInfo.PLATFORM_JL && !isSupport2DAcceleration
 
@@ -1487,39 +1489,37 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     //pointer
     private var pointerSelectNumber = 0
 
+    private lateinit var DIAL_CUSTOMIZE_DIR: String
+
+    //control
+    private lateinit var CONTROL_DIR: String
+    private lateinit var STEP_DIR: String
+    private lateinit var CALORIES_DIR: String
+    private lateinit var DISTANCE_DIR: String
+    private lateinit var HEART_RATE_DIR: String
+
+    //value
+    private lateinit var VALUE_DIR: String
+
+    //time
+    private lateinit var TIME_DIR: String
+
+    //digital
+    private lateinit var DIGITAL_DIR: String
+    private lateinit var POINTER_DIR: String
+
     //digital_parameter
-    private val DIGITAL_AM_DIR = "am_pm"
-    private val DIGITAL_DATE_DIR = "date"
-    private val DIGITAL_HOUR_MINUTE_DIR = "hour_minute"
-    private val DIGITAL_WEEK_DIR = "week"
+    val DIGITAL_AM_DIR = "am_pm"
+    val DIGITAL_DATE_DIR = "date"
+    val DIGITAL_HOUR_MINUTE_DIR = "hour_minute"
+    val DIGITAL_WEEK_DIR = "week"
 
     //pointer_parameter
-    private val POINTER_HOUR = "pointer/hour"
-    private val POINTER_MINUTE = "pointer/minute"
-    private val POINTER_SECOND = "pointer/second"
+    val POINTER_HOUR = "pointer/hour"
+    val POINTER_MINUTE = "pointer/minute"
+    val POINTER_SECOND = "pointer/second"
 
     private fun getBgBitmap(isCanvasValue: Boolean, isRound: Boolean, bgBitmapx: Bitmap): Bitmap {
-        val customDir: String
-        if (custom == 2) {
-            customDir = "dial_customize_454"
-        } else {
-            customDir = "dial_customize_240"
-        }
-
-        //初始资源路径
-        val CONTROL_DIR = "$customDir/control"
-        val STEP_DIR = "$CONTROL_DIR/step"
-        val CALORIES_DIR = "$CONTROL_DIR/calories"
-        val DISTANCE_DIR = "$CONTROL_DIR/distance"
-        val HEART_RATE_DIR = "$CONTROL_DIR/heart_rate"
-
-        //time
-        val TIME_DIR = "$customDir/time"
-        val DIGITAL_DIR = "$TIME_DIR/digital"
-
-        //value
-        val VALUE_DIR = "$customDir/value"
-
         val bgBitmap = if (isRound) {
             //圆
             bgBitmapx
@@ -1631,17 +1631,6 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     }
 
     private fun getPointer(type: Int, dir: String, elements: ArrayList<Element>) {
-        val customDir: String
-        if (custom == 2) {
-            customDir = "dial_customize_454"
-        } else {
-            customDir = "dial_customize_240"
-        }
-
-        //time
-        val TIME_DIR = "$customDir/time"
-
-        val POINTER_DIR = "$TIME_DIR/pointer"
         val pointerHour = ArrayList<ByteArray>()
         val tmpBitmap =
             ImageUtils.getBitmap(mContext!!.assets.open("$POINTER_DIR/${dir}/${pointerSelectNumber}.${fileFormat}"))
@@ -1673,17 +1662,6 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     }
 
     private fun getPointer2(type: Int, dir: String, elements: ArrayList<Element>) {
-        val customDir: String
-        if (custom == 2) {
-            customDir = "dial_customize_454"
-        } else {
-            customDir = "dial_customize_240"
-        }
-
-        //time
-        val TIME_DIR = "$customDir/time"
-
-        val POINTER_DIR = "$TIME_DIR/pointer"
         val pointerHour = ArrayList<ByteArray>()
         val pointerFileName = "$POINTER_DIR/${dir}/${pointerSelectNumber}.${fileFormat}"
         val tmpBitmap =
@@ -1955,12 +1933,12 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     fun defaultConversion(
         fileFormat: String,
         data: ByteArray,
-        w: Int,                      //图片宽度
-        bitCount: Int = 16,          //位深度，可为8，16，24，32
-        headerInfoSize: Int = 70,   //头部信息长度，默认70
-        isReverseRows: Boolean = true,   //是否反转行数据，就是将第一行置换为最后一行
-        isTo8565: Boolean = false, // 一般都是png文件转8565格式
-        h: Int = 0                //图片高度
+        w: Int, //image width
+        bitCount: Int = 16, //bit depth, can be 8, 16, 24, 32
+        headerInfoSize: Int = 70, //Header information length, default 70
+        isReverseRows: Boolean = true, //Whether to reverse row data, that is, replace the first row with the last row
+        isTo8565: Boolean = false, // generally convert png files to 8565 format
+        h: Int = 0 //image height
     ): ByteArray {
         if (fileFormat == "bmp") {
 
@@ -2042,18 +2020,6 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private fun getTimeDigital(elements: ArrayList<Element>) {
         //AM PM
         val amPmValue = ArrayList<ByteArray>()
-
-        val customDir: String = if (custom == 2) {
-            "dial_customize_454"
-        } else {
-            "dial_customize_240"
-        }
-
-        //time
-        val TIME_DIR = "$customDir/time"
-
-        //digital
-        val DIGITAL_DIR = "$TIME_DIR/digital"
         val tmpBitmap =
             ImageUtils.getBitmap(mContext!!.assets.open("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_AM_DIR/am.${fileFormat}"))
         var w = tmpBitmap.width
@@ -2177,18 +2143,6 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     }
 
     private fun getTimeDigital2(elements: ArrayList<Element>) {
-        val customDir: String = if (custom == 2) {
-            "dial_customize_454"
-        } else {
-            "dial_customize_240"
-        }
-
-        //time
-        val TIME_DIR = "$customDir/time"
-
-        //digital
-        val DIGITAL_DIR = "$TIME_DIR/digital"
-        //time
         //AM PM
         val amFileName = "$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_AM_DIR/am.${fileFormat}"
         val pmFileName = "$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_AM_DIR/pm.${fileFormat}"
@@ -2417,13 +2371,6 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     }
 
     private fun getControl(elements: ArrayList<Element>) {
-        val customDir: String = if (custom == 2) {
-            "dial_customize_454"
-        } else {
-            "dial_customize_240"
-        }
-        //value
-        val VALUE_DIR = "$customDir/value"
         val triple = getNumberBuffers("$VALUE_DIR/${valueColor}/", controlValueRange)
         val w = triple.first
         val h = triple.second
@@ -2492,13 +2439,6 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     }
 
     private fun getControl2(elements: ArrayList<Element>) {
-        val customDir: String = if (custom == 2) {
-            "dial_customize_454"
-        } else {
-            "dial_customize_240"
-        }
-        //value
-        val VALUE_DIR = "$customDir/value"
         val triple = getNumberBuffers2("$VALUE_DIR/${valueColor}/", controlValueRange)
         val w = triple.first
         val h = triple.second
@@ -2859,6 +2799,30 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 X_CENTER = WatchFaceBuilder.GRAVITY_X_CENTER_R
                 Y_CENTER = WatchFaceBuilder.GRAVITY_Y_CENTER_R
 
+                //初始资源路径
+                if (custom == 2) {
+                    DIAL_CUSTOMIZE_DIR = "dial_customize_454"
+                } else if (custom == 3) {
+                    DIAL_CUSTOMIZE_DIR = "dial_customize_240"
+                } else {
+                    DIAL_CUSTOMIZE_DIR = "dial_customize_240"
+                }
+                CONTROL_DIR = "$DIAL_CUSTOMIZE_DIR/control"
+                STEP_DIR = "$CONTROL_DIR/step"
+                CALORIES_DIR = "$CONTROL_DIR/calories"
+                DISTANCE_DIR = "$CONTROL_DIR/distance"
+                HEART_RATE_DIR = "$CONTROL_DIR/heart_rate"
+
+                //value
+                VALUE_DIR = "$DIAL_CUSTOMIZE_DIR/value"
+
+                //time
+                TIME_DIR = "$DIAL_CUSTOMIZE_DIR/time"
+
+                //digital
+                DIGITAL_DIR = "$TIME_DIR/digital"
+                POINTER_DIR = "$TIME_DIR/pointer"
+
                 val bgPreviewBytes: ByteArray? = call.argument<ByteArray?>("bgPreviewBytes")
                 val bgPreviewlength = bgPreviewBytes!!.size
                 val bgPreviewBitmapX =
@@ -2872,8 +2836,13 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
                 val bglength = bgBytes!!.size
                 val bgBitmapX = BitmapFactory.decodeByteArray(bgBytes, offset, bglength)
-
+                /**
+                 *8565 is a pixel format with an alpha channel.
+                 * Whether to convert png to 8565 format, when it is equal to true, png files must be used, currently only some non-2d devices support it.
+                 * The bin file will become larger.
+                 */
                 val bgBytesNew = getBg(isRound!!, bgBitmapX!!)
+                LogUtils.d("isSupport2DAcceleration: ${isSupport2DAcceleration}")
 
                 if (isSupport2DAcceleration) {
                     //获取预览
