@@ -3129,6 +3129,9 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     "HR_MONITORING" -> {
                         mBleKey = BleKey.HR_MONITORING
                     }
+                    "HR_WARNING" -> {
+                        mBleKey = BleKey.HR_WARNING_SET
+                    }
                     "UI_PACK_VERSION" -> {
                         mBleKey = BleKey.UI_PACK_VERSION
                     }
@@ -4016,6 +4019,22 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                         } else if (bleKeyFlag == BleKeyFlag.READ) {
                             BleConnector.sendData(bleKey, bleKeyFlag)
                         }
+                    }
+                    BleKey.HR_WARNING_SET -> {
+                        if(bleKeyFlag == BleKeyFlag.UPDATE){
+                            val mEnabled: Int? = call.argument<Int>("mEnabled")
+                            BleConnector.sendObject(
+                                bleKey,
+                                bleKeyFlag,
+                                BleHrWarningSettings(
+                                    mHighSwitch = mEnabled!!,
+                                    mHighValue = 150,
+                                    mLowSwitch = mEnabled!!,
+                                    mLowValue = 60
+                                )
+                            )
+                        }
+
                     }
                     // 读取UI包版本
                     BleKey.UI_PACK_VERSION -> BleConnector.sendData(bleKey, bleKeyFlag)
