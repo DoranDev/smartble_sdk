@@ -1630,7 +1630,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         return getFinalBgBitmap(bgBitMap)
     }
 
-    private fun getPointer(type: Int, dir: String, elements: ArrayList<Element>) {
+    private fun getPointer(type: Int, dir: String, ) {
         val pointerHour = ArrayList<ByteArray>()
         val tmpBitmap =
             ImageUtils.getBitmap(mContext!!.assets.open("$POINTER_DIR/${dir}/${pointerSelectNumber}.${fileFormat}"))
@@ -1661,7 +1661,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         elements.add(elementAmPm)
     }
 
-    private fun getPointer2(type: Int, dir: String, elements: ArrayList<Element>) {
+    private fun getPointer2(type: Int, dir: String, ) {
         val pointerHour = ArrayList<ByteArray>()
         val pointerFileName = "$POINTER_DIR/${dir}/${pointerSelectNumber}.${fileFormat}"
         val tmpBitmap =
@@ -2017,7 +2017,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         return data
     }
 
-    private fun getTimeDigital(elements: ArrayList<Element>) {
+    private fun getTimeDigital() {
         //AM PM
         val amPmValue = ArrayList<ByteArray>()
         val tmpBitmap =
@@ -2081,7 +2081,6 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 WatchFaceBuilder.ELEMENT_DIGITAL_DIV_HOUR,
                 digitalTimeSymbolLeftX.toInt(),
                 digitalTimeSymbolTopY.toInt(),
-                elements
             )
         }
         //日期
@@ -2120,7 +2119,6 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 WatchFaceBuilder.ELEMENT_DIGITAL_DIV_MONTH,
                 digitalDateSymbolLeftX.toInt(),
                 digitalDateSymbolTopY.toInt(),
-                elements
             )
         }
         //week
@@ -2142,7 +2140,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         elements.add(elementWeek)
     }
 
-    private fun getTimeDigital2(elements: ArrayList<Element>) {
+    private fun getTimeDigital2() {
         //AM PM
         val amFileName = "$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_AM_DIR/am.${fileFormat}"
         val pmFileName = "$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_AM_DIR/pm.${fileFormat}"
@@ -2233,8 +2231,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 "$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_HOUR_MINUTE_DIR",
                 WatchFaceBuilder.ELEMENT_DIGITAL_DIV_HOUR,
                 digitalTimeSymbolLeftX.toInt(),
-                digitalTimeSymbolTopY.toInt(),
-                elements
+                digitalTimeSymbolTopY.toInt()
             )
         }
 
@@ -2273,8 +2270,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 "$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_DATE_DIR",
                 WatchFaceBuilder.ELEMENT_DIGITAL_DIV_MONTH,
                 digitalDateSymbolLeftX.toInt(),
-                digitalDateSymbolTopY.toInt(),
-                elements
+                digitalDateSymbolTopY.toInt()
             )
         }
 
@@ -2300,8 +2296,8 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         dir: String,
         type: Int,
         x: Int, y: Int,
-        elements: ArrayList<Element>
-    ) {
+
+        ) {
         val symbolValue = ArrayList<ByteArray>()
         val symbolBitmap =
             ImageUtils.getBitmap(mContext!!.assets.open("${dir}/symbol.${fileFormat}"))
@@ -2333,8 +2329,8 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         dir: String,
         type: Int,
         x: Int, y: Int,
-        elements: ArrayList<Element>
-    ) {
+
+        ) {
         val symbolFileName = "${dir}/symbol.${fileFormat}"
         val symbolValue = ArrayList<ByteArray>()
         val symbolBitmap =
@@ -2370,7 +2366,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         elements.add(elementSymbol)
     }
 
-    private fun getControl(elements: ArrayList<Element>) {
+    private fun getControl() {
         val triple = getNumberBuffers("$VALUE_DIR/${valueColor}/", controlValueRange)
         val w = triple.first
         val h = triple.second
@@ -2438,7 +2434,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         }
     }
 
-    private fun getControl2(elements: ArrayList<Element>) {
+    private fun getControl2() {
         val triple = getNumberBuffers2("$VALUE_DIR/${valueColor}/", controlValueRange)
         val w = triple.first
         val h = triple.second
@@ -2635,7 +2631,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         return (a shl 16) + (r shr 3 shl 11) + (g shr 2 shl 5) + (b shr 3)
     }
 
-    val elements = ArrayList<Element>()
+    var elements = ArrayList<Element>()
 
     override fun onMethodCall(call: MethodCall, result: Result) {
         this.mResult = result
@@ -2872,15 +2868,15 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     elements.add(elementBg)
 
                     //获取控件数值相关内容
-                    getControl2(elements)
+                    getControl2()
 
                     //获取时间相关内容
                     if (timeDigitalView) {
-                        getTimeDigital2(elements)
+                        getTimeDigital2()
                     }else{
-                        getPointer2(WatchFaceBuilder.ELEMENT_NEEDLE_HOUR, POINTER_HOUR, elements)
-                        getPointer2(WatchFaceBuilder.ELEMENT_NEEDLE_MIN, POINTER_MINUTE, elements)
-                        getPointer2(WatchFaceBuilder.ELEMENT_NEEDLE_SEC, POINTER_SECOND, elements)
+                        getPointer2(WatchFaceBuilder.ELEMENT_NEEDLE_HOUR, POINTER_HOUR)
+                        getPointer2(WatchFaceBuilder.ELEMENT_NEEDLE_MIN, POINTER_MINUTE)
+                        getPointer2(WatchFaceBuilder.ELEMENT_NEEDLE_SEC, POINTER_SECOND)
                     }
                 } else {
                     val elementPreview = Element(
@@ -2906,15 +2902,15 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     elements.add(elementBg)
 
                     // Get the relevant content of the control value
-                    getControl(elements)
+                    getControl()
 
                     // Get time related content
                     if (timeDigitalView) {
-                        getTimeDigital(elements)
+                        getTimeDigital()
                     } else {
-                        getPointer(WatchFaceBuilder.ELEMENT_NEEDLE_HOUR, POINTER_HOUR, elements)
-                        getPointer(WatchFaceBuilder.ELEMENT_NEEDLE_MIN, POINTER_MINUTE, elements)
-                        getPointer(WatchFaceBuilder.ELEMENT_NEEDLE_SEC, POINTER_SECOND, elements)
+                        getPointer(WatchFaceBuilder.ELEMENT_NEEDLE_HOUR, POINTER_HOUR)
+                        getPointer(WatchFaceBuilder.ELEMENT_NEEDLE_MIN, POINTER_MINUTE)
+                        getPointer(WatchFaceBuilder.ELEMENT_NEEDLE_SEC, POINTER_SECOND)
                     }
                 }
                 for (element in elements) {
