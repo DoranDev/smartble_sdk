@@ -299,6 +299,16 @@ class SmartbleSdk {
         'mInterval': mInterval,
       });
 
+  Future<dynamic> kHR_WARNING({
+    required SelectedBlekeyFlag flag,
+    required int mEnabled,
+  }) =>
+      _channel.invokeMethod('HR_WARNING', {
+        'flag': flag.name,
+        'mEnabled': mEnabled,
+      });
+
+
   Future<dynamic> kUI_PACK_VERSION({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('UI_PACK_VERSION', {'flag': flag.name});
 
