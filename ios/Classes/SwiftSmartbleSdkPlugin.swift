@@ -1989,23 +1989,27 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                   _ = BleConnector.shared.sendData(bleKey, bleKeyFlag)
                   return
               }
-              let fileURL = args?["url"] as! String
+              if bleKeyFlag ==  BleKeyFlag.UPDATE {
+                  let fileURL = args?["url"] as! String
 
-              if let url = URL(string: fileURL) {
-                print("Valid URL: \(url)")
+                  if let url = URL(string: fileURL) {
+                    print("Valid URL: \(url)")
 
-                let task = URLSession.shared.dataTask(with: url) { (data, response, error) in
-                  if let error = error {
-                    print("Error: \(error)")
-                  } else if let data = data {
-                    print("Received data: \(data)")
-                    _ = bleConnector.sendStream(self.bleKey, data)
+                    let task = URLSession.shared.dataTask(with: url) { (data, response, error) in
+                      if let error = error {
+                        print("Error: \(error)")
+                      } else if let data = data {
+                        print("Received data: \(data)")
+                        _ = bleConnector.sendStream(self.bleKey, data)
+                      }
+                    }
+                    task.resume()
+                  } else {
+                    print("Invalid URL: \(String(describing: fileURL))")
                   }
-                }
-                task.resume()
-              } else {
-                print("Invalid URL: \(String(describing: fileURL))")
+                  return
               }
+
  //              _ = bleConnector.sendStream(bleKey, URL.init(fileURLWithPath: fileURL))
 //
               break
@@ -2918,10 +2922,12 @@ extension SwiftSmartbleSdkPlugin {
     // MARK: - create watchFile
     func startCreateBinFile(){
         let dataSourceArray = getItemsPiont() as! Dictionary<String, Any>
-        image150 = getThumbnailImage()
-        image240 = getMainBgImage()
+        image150 = getThumbnailImageNew()
+        image240 = getMainBgImageNew()
         isBmpResoure = false
         
+        
+        //showImageDialog(image: image240!);
         var bgWidth :UInt16 = 0
         var bgHeight :UInt16 = 0
         var bgX :UInt16 = 0
@@ -2951,6 +2957,7 @@ extension SwiftSmartbleSdkPlugin {
             pvX = 80
             pvY = 90
             break
+            bleLog("type WATCH_FACE_320x363")
         case BleDeviceInfo.WATCH_FACE_REALTEK_SQUARE_240x280,BleDeviceInfo.WATCH_FACE_REALTEK_SQUARE_240x280_2,BleDeviceInfo.WATCH_FACE_REALTEK_SQUARE_240x280_19,BleDeviceInfo.WATCH_FACE_REALTEK_SQUARE_240x280_20,BleDeviceInfo.WATCH_FACE_REALTEK_SQUARE_240x295_21:
             bgWidth  = 240
             bgHeight = 280
@@ -2967,6 +2974,7 @@ extension SwiftSmartbleSdkPlugin {
             pvY = 120
             isBmpResoure = true
             isFixCoordinate = true
+            bleLog("type WATCH_FACE_REALTEK_SQUARE_240x280")
             break
         case BleDeviceInfo.WATCH_FACE_REALTEK_ROUND_360x360:
             bgWidth  = 360
@@ -2979,6 +2987,7 @@ extension SwiftSmartbleSdkPlugin {
             pvY = 112
             isBmpResoure = true
             isFixCoordinate = true
+            bleLog("type WATCH_FACE_REALTEK_ROUND_360x360")
             break
         
         case BleDeviceInfo.WATCH_FACE_REALTEK_RACKET:
@@ -2990,6 +2999,7 @@ extension SwiftSmartbleSdkPlugin {
             pvHeight = 106
             pvX = 120
             pvY = 120
+            bleLog("type WATCH_FACE_REALTEK_RACKET")
             break
         case BleDeviceInfo.WATCH_FACE_REALTEK_ROUND_454x454:
             bgWidth  = 454
@@ -3000,6 +3010,7 @@ extension SwiftSmartbleSdkPlugin {
             pvHeight = 280
             pvX = 140
             pvY = 140
+            bleLog("type WATCH_FACE_REALTEK_ROUND_454x454")
             break
         case BleDeviceInfo.WATCH_FACE_SERVER: // 这里表示自定义表盘
             let thArray = getThumbnailImageWidthHeight()
@@ -3012,6 +3023,7 @@ extension SwiftSmartbleSdkPlugin {
             pvHeight = UInt16(thArray[1])
             pvX = pvWidth/2
             pvY = pvHeight/2
+            bleLog("type WATCH_FACE_SERVER")
             break
         default:
             bgWidth  = 240
@@ -3022,6 +3034,7 @@ extension SwiftSmartbleSdkPlugin {
             pvHeight = 150
             pvX = 120
             pvY = 120
+            bleLog("type default")
             break
         }
         
@@ -3029,18 +3042,21 @@ extension SwiftSmartbleSdkPlugin {
         if self.isSupp2D {
             
             // 支持2D表盘, x, y传递0即可
-            let bgFrame = WatchFaceRect(x: 0, y: 0, width: bgWidth, height: bgHeight)
-            let pvFrame = WatchFaceRect(x: 0, y: 0, width: pvWidth, height: pvHeight)
+//            let bgFrame = WatchFaceRect(x: 0, y: 0, width: bgWidth, height: bgHeight)
+//            let pvFrame = WatchFaceRect(x: 0, y: 0, width: pvWidth, height: pvHeight)
+            let bgFrame = WatchFaceRect(x: bgX, y: bgY, width: bgWidth, height: bgHeight)
+            let pvFrame = WatchFaceRect(x: pvX, y: pvY, width: pvWidth, height: pvHeight)
+            bleLog("isSupp2D is \(isSupp2D)")
             self.createBinForSupport2DWatchFace(dataSourceArray, isFixCoordinate: isFixCoordinate, bgFrame: bgFrame, pvFrame: pvFrame)
         } else {
-            
+            bleLog("isSupp2D is \(isSupp2D)")
             let bgFrame = WatchFaceRect(x: bgX, y: bgY, width: bgWidth, height: bgHeight)
             let pvFrame = WatchFaceRect(x: pvX, y: pvY, width: pvWidth, height: pvHeight)
             // 不支持2D, 如果使用bmp资源图片, 使用下面的方法
-            //self.createBinForBMP_File(dataSourceArray, isFixCoordinate: isFixCoordinate, bgFrame: bgFrame, pvFrame: pvFrame)
+            self.createBinForBMP_File(dataSourceArray, isFixCoordinate: isFixCoordinate, bgFrame: bgFrame, pvFrame: pvFrame)
             // 不支持2D, 如果使用png资源图片, 使用下面的方法
             // 2D is not supported, if you use png resource images, use the following method
-            self.createBinForNotSupport2DWatchFace(dataSourceArray, isFixCoordinate: isFixCoordinate, bgFrame: bgFrame, pvFrame: pvFrame)
+          //  self.createBinForNotSupport2DWatchFace(dataSourceArray, isFixCoordinate: isFixCoordinate, bgFrame: bgFrame, pvFrame: pvFrame)
             
         }
         
@@ -3077,6 +3093,7 @@ extension SwiftSmartbleSdkPlugin {
             disGravity = UInt8(faceBuilder.GRAVITY_X_CENTER_R|faceBuilder.GRAVITY_Y_CENTER_R)
             calGravity = UInt8(faceBuilder.GRAVITY_X_CENTER_R|faceBuilder.GRAVITY_Y_CENTER_R)
         }
+        
         
         // 这个背景问题, 有疑问, 参考安卓修改为这个值
         if isSupp2D {
@@ -3426,6 +3443,8 @@ extension SwiftSmartbleSdkPlugin {
                 }
             }
         }
+        
+        bleLog("watchFaceElements - \(watchFaceElements)")
        
         if watchFaceElements.count > 0{
             #warning("For devices that support 2D, you must use faceBuilder.PNG_ARGB_8888")
@@ -4607,6 +4626,213 @@ extension SwiftSmartbleSdkPlugin {
 
 extension SwiftSmartbleSdkPlugin {
    
+    func getMainBgImageNew()->UIImage{
+        var bgWidth :CGFloat = 0
+        var bgHeight :CGFloat = 0
+        let isSquare = dialCustomIsRound()
+        switch BleCache.shared.mWatchFaceType {
+        case BleDeviceInfo.WATCH_FACE_320x363:
+            bgWidth  = 320
+            bgHeight = 363
+            break
+        case BleDeviceInfo.WATCH_FACE_REALTEK_SQUARE_240x280,BleDeviceInfo.WATCH_FACE_REALTEK_SQUARE_240x280_2,BleDeviceInfo.WATCH_FACE_REALTEK_SQUARE_240x280_19,BleDeviceInfo.WATCH_FACE_REALTEK_SQUARE_240x280_20,BleDeviceInfo.WATCH_FACE_REALTEK_SQUARE_240x295_21:
+            bgWidth  = 240
+            bgHeight = 280
+            break
+        case BleDeviceInfo.WATCH_FACE_REALTEK_ROUND_360x360:
+            bgWidth  = 360
+            bgHeight = 360
+            break
+        case BleDeviceInfo.WATCH_FACE_REALTEK_ROUND_454x454:
+            bgWidth  = 454
+            bgHeight = 454
+            break
+        case BleDeviceInfo.WATCH_FACE_SERVER:
+            let array = getWatchDialBKWidthHeight()
+            bgWidth  = CGFloat(array[0])
+            bgHeight = CGFloat(array[1])
+            break
+        default:
+            bgWidth  = 240
+            bgHeight = 240
+            break
+        }
+        
+        // 截图, 修改图片大小
+        //let newImage  = image?.resize(to: CGSize(width: bgWidth, height: bgHeight))
+        let newImage = getMainBgImage()
+        
+        var newImage1:UIImage?
+        if isSquare == false {
+            
+            if BleCache.shared.mWatchFaceType == BleDeviceInfo.WATCH_FACE_320x363{
+                var newIMA : UIImage?
+                let newData = compressWithMaxCount(origin: newImage, maxCount: 8192, newSize: CGSize(width: bgWidth, height: bgHeight-20))
+                if newData!.count>10 {
+                    newIMA = UIImage.init(data: newData!)
+                }
+                let bkImage = UIImage().createImageWithColor(UIColor.clear,CGRect(x: 0, y: 0, width: bgWidth, height: bgHeight+22))
+                newImage1 =  composeImageWithLogo(bgImage: bkImage, imageRect: [CGRect(x: 0, y: 22, width: bgWidth, height: bgHeight)], images: [newIMA!])
+            }else{
+                let newData = compressWithMaxCount(origin: newImage, maxCount: 8192, newSize: CGSize(width: bgWidth, height: bgHeight))
+                if newData!.count>10 {
+                    newImage1 = UIImage.init(data: newData!)
+                }
+            }
+        }
+        
+        //两图合并
+        func composeImageWithLogo( bgImage: UIImage, imageRect: [CGRect],images:[UIImage]) -> UIImage {
+            bleLog("---两图合并----")
+            //以bgImage的图大小为底图
+            let imageRef = bgImage.cgImage
+            let w: CGFloat = CGFloat((imageRef?.width)!)
+            let h: CGFloat = CGFloat((imageRef?.height)!)
+            //以1.png的图大小为画布创建上下文
+            UIGraphicsBeginImageContext(CGSize(width: w, height: h))
+            bgImage.draw(in: CGRect(x: 0, y: 0, width: w, height: h))
+            //先把1.png 画到上下文中
+            for i in 0..<images.count {
+                images[i].draw(in: CGRect(x: imageRect[i].origin.x,
+                                          y: imageRect[i].origin.y,
+                                          width: imageRect[i].size.width,
+                                          height:imageRect[i].size.height))
+            }
+            //再把小图放在上下文中
+            let resultImg: UIImage? = UIGraphicsGetImageFromCurrentImageContext()
+            //从当前上下文中获得最终图片
+            UIGraphicsEndImageContext()
+            return resultImg!
+            
+        }
+        
+    
+        if isSquare {
+            return maskRoundedImage(image: newImage, radius: CGFloat(bgWidth/2))
+        }else{
+            return newImage1!
+        }
+    }
+    
+    func getThumbnailImageNew() -> UIImage{//Thumbnail preview
+        
+        var previewWidth :CGFloat = 0
+        var previewHeight :CGFloat = 0
+        
+        let isSquare = dialCustomIsRound() // 圆形
+        switch BleCache.shared.mWatchFaceType {
+        case BleDeviceInfo.WATCH_FACE_320x363:
+            previewWidth  = 160
+            previewHeight = 180
+            break
+        case BleDeviceInfo.WATCH_FACE_REALTEK_SQUARE_240x280,BleDeviceInfo.WATCH_FACE_REALTEK_SQUARE_240x280_2,BleDeviceInfo.WATCH_FACE_REALTEK_SQUARE_240x280_19,BleDeviceInfo.WATCH_FACE_REALTEK_SQUARE_240x280_20,BleDeviceInfo.WATCH_FACE_REALTEK_SQUARE_240x295_21:
+            previewWidth  = 150
+            previewHeight = 170
+            break
+        case BleDeviceInfo.WATCH_FACE_REALTEK_ROUND_360x360:
+            previewWidth  = 225
+            previewHeight = 225
+            break
+        case BleDeviceInfo.WATCH_FACE_REALTEK_RACKET:
+            previewWidth  = 106
+            previewHeight = 106
+            break
+        case BleDeviceInfo.WATCH_FACE_REALTEK_ROUND_454x454:
+            previewWidth  = 280
+            previewHeight = 280
+            break
+        case BleDeviceInfo.WATCH_FACE_SERVER:
+            let array = getThumbnailImageWidthHeight()
+            previewWidth  = CGFloat(array[0])
+            previewHeight = CGFloat(array[1])
+            break
+        default:
+            previewWidth  = 150
+            previewHeight = 150
+            break
+        }
+        
+        //UIGraphicsBeginImageContextWithOptions(bgView.bounds.size,true, UIScreen.main.scale)
+        //bgView.layer.render(in: UIGraphicsGetCurrentContext()!)
+        //let image = UIGraphicsGetImageFromCurrentImageContext()
+        //UIGraphicsEndImageContext()
+        //let newImage  = image?.resize(to: CGSize(width: previewWidth, height: previewHeight))
+        ////square watch face return newImage
+        //return maskRoundedImage(image: newImage!, radius: previewWidth/2)
+        
+        
+        let newImage = getThumbnailImage()
+        var newImage1:UIImage?
+        if isSquare {
+            newImage1 = maskRoundedImage(image: newImage, radius: previewWidth/2)
+        }else{
+            let newData = compressWithMaxCount(origin: newImage, maxCount: 4608, newSize: CGSize(width: previewWidth, height: previewHeight))
+            if newData!.count>10 {
+                newImage1 = UIImage.init(data: newData!)
+            }
+            return newImage1!
+        }
+        
+        return newImage1!
+    }
+    
+    func compressWithMaxCount(origin:UIImage,maxCount:Int,newSize:CGSize) -> Data? {
+
+        var compression:CGFloat = 1
+        guard var data = origin.jpegData(compressionQuality: compression) else { return nil }
+        if data.count <= maxCount {
+            return data
+        }
+        var max:CGFloat = 1,min:CGFloat = 0.8//最小0.8
+        for _ in 0..<6 {//最多压缩6次
+            compression = (max+min)/2
+            if let tmpdata = origin.jpegData(compressionQuality: compression) {
+                data = tmpdata
+            } else {
+                return nil
+            }
+            if data.count <= maxCount {
+                return data
+            } else {
+                max = compression
+            }
+        }
+//        //压缩分辨率
+        guard var resultImage = UIImage(data: data) else { return nil }
+        var lastDataCount:Int = 0
+        while data.count > maxCount && data.count != lastDataCount {
+            lastDataCount = data.count
+            let size = CGSize(width: newSize.width, height: newSize.height)
+            UIGraphicsBeginImageContextWithOptions(CGSize(width: CGFloat(Int(size.width)), height: CGFloat(Int(size.height))), true, 1)//防止黑边
+            resultImage.draw(in: CGRect(origin: .zero, size: size))//比转成Int清晰
+            if let tmp = UIGraphicsGetImageFromCurrentImageContext() {
+                resultImage = tmp
+                UIGraphicsEndImageContext()
+            } else {
+                UIGraphicsEndImageContext()
+                return nil
+            }
+            if let tmpdata = resultImage.jpegData(compressionQuality: compression) {
+                data = tmpdata
+            } else {
+                return nil
+            }
+        }
+        return data
+    }
+    
+    func maskRoundedImage(image: UIImage, radius: CGFloat) -> UIImage {
+           let imageView: UIImageView = UIImageView(image: image)
+           let layer = imageView.layer
+           layer.masksToBounds = true
+           layer.cornerRadius = radius
+           UIGraphicsBeginImageContext(imageView.bounds.size)
+           layer.render(in: UIGraphicsGetCurrentContext()!)
+           let roundedImage = UIGraphicsGetImageFromCurrentImageContext()
+           UIGraphicsEndImageContext()
+           return roundedImage!
+    }
+    
     
     func getItemsPiont() -> NSMutableDictionary{
         var controlViewSize = 38
