@@ -2921,12 +2921,70 @@ extension SwiftSmartbleSdkPlugin {
    
     // MARK: - create watchFile
     func startCreateBinFile(){
+        isBmpResoure = false
+        bleBin = BleWatchFaceBin()
+        imageCountStart = 0
+        pointerHourImageSize = [UInt32]()
+        pointerMinImageSize = [UInt32]()
+        pointerImageSize  = [UInt32]()
+
+        timeAMImageSize  = [UInt32]()
+
+        timeDateHourImageSize = [UInt32]()
+        timeDateSymbolImageSize  = [UInt32]()
+        timeDateMinImageSize  = [UInt32]()
+
+        timeWeekMonthImageSize = [UInt32]()
+        timeWeekSymbolImageSize  = [UInt32]()
+        timeWeekDayImageSize  = [UInt32]()
+        timeWeekImageSize   = [UInt32]()
+
+        stepImageSize  = [UInt32]()
+        hrImageSize  = [UInt32]()
+        disImageSize  = [UInt32]()
+        calImageSize  = [UInt32]()
+
+        pointerHourBuffer = Data()
+        pointerMinBuffer = Data()
+        pointerBuffer = Data()
+
+        timeAMBuffer = Data()
+
+        timeDateHourBuffer = Data()
+        timeDateSymbolBuffer = Data()
+        timeDateMinBuffer = Data()
+
+        timeWeekMonthBuffer = Data()
+        timeWeekSymbolBuffer = Data()
+        timeWeekDayBuffer = Data()
+        timeWeekBuffer = Data()
+
+        stepBuffer = Data()
+        hrBuffer = Data()
+        disBuffer = Data()
+        calBuffer = Data()
+
+        timeAMSize  = CGSize()
+        timeDateHourSize  = CGSize()
+        timeDateMinSize  = CGSize()
+        timeWeekMonthSize  = CGSize()
+        timeWeekDaySize  = CGSize()
+        timeWeekSize  = CGSize()
+
+        stepSize = CGSize()
+        hrSize = CGSize()
+        disSize = CGSize()
+        calSize = CGSize()
+
+        hourSize = CGSize()
+        minSize = CGSize()
+        secSize = CGSize()
         let dataSourceArray = getItemsPiont() as! Dictionary<String, Any>
         image150 = getThumbnailImageNew()
         image240 = getMainBgImageNew()
         isBmpResoure = false
-        
-        
+
+
         //showImageDialog(image: image240!);
         var bgWidth :UInt16 = 0
         var bgHeight :UInt16 = 0
@@ -2936,8 +2994,8 @@ extension SwiftSmartbleSdkPlugin {
         var pvHeight :UInt16 = 0
         var pvX :UInt16 = 0
         var pvY :UInt16 = 0
-        
-        
+
+
         var isFixCoordinate = false
         if BleCache.shared.mPlatform ==  BleDeviceInfo.PLATFORM_REALTEK ||
             BleCache.shared.mPlatform ==  BleDeviceInfo.PLATFORM_NORDIC ||
@@ -2989,7 +3047,7 @@ extension SwiftSmartbleSdkPlugin {
             isFixCoordinate = true
             bleLog("type WATCH_FACE_REALTEK_ROUND_360x360")
             break
-        
+
         case BleDeviceInfo.WATCH_FACE_REALTEK_RACKET:
             bgWidth  = 240
             bgHeight = 240
@@ -3037,10 +3095,10 @@ extension SwiftSmartbleSdkPlugin {
             bleLog("type default")
             break
         }
-        
-        
+
+
         if self.isSupp2D {
-            
+
             // 支持2D表盘, x, y传递0即可
 //            let bgFrame = WatchFaceRect(x: 0, y: 0, width: bgWidth, height: bgHeight)
 //            let pvFrame = WatchFaceRect(x: 0, y: 0, width: pvWidth, height: pvHeight)
@@ -3057,14 +3115,13 @@ extension SwiftSmartbleSdkPlugin {
             // 不支持2D, 如果使用png资源图片, 使用下面的方法
             // 2D is not supported, if you use png resource images, use the following method
           //  self.createBinForNotSupport2DWatchFace(dataSourceArray, isFixCoordinate: isFixCoordinate, bgFrame: bgFrame, pvFrame: pvFrame)
-            
+
         }
-        
+
     }
-    
-    /// 支持2D表盘的处理
+
     private func createBinForSupport2DWatchFace(_ dataSourceArray: [String:Any], isFixCoordinate: Bool, bgFrame: WatchFaceRect, pvFrame: WatchFaceRect) {
-        
+
         //固件坐标
         var bkGravity = UInt8(faceBuilder.GRAVITY_X_CENTER|faceBuilder.GRAVITY_Y_CENTER)//背景图
         var ylGravity = UInt8(faceBuilder.GRAVITY_X_CENTER|faceBuilder.GRAVITY_Y_CENTER)//预览图
@@ -3081,7 +3138,7 @@ extension SwiftSmartbleSdkPlugin {
         var disGravity = UInt8(faceBuilder.GRAVITY_X_CENTER|faceBuilder.GRAVITY_Y_CENTER)
         var calGravity = UInt8(faceBuilder.GRAVITY_X_CENTER|faceBuilder.GRAVITY_Y_CENTER)
         let pointGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)
-        
+
 
         //Realtek需要修正坐标参数
         if isFixCoordinate {
@@ -3093,16 +3150,15 @@ extension SwiftSmartbleSdkPlugin {
             disGravity = UInt8(faceBuilder.GRAVITY_X_CENTER_R|faceBuilder.GRAVITY_Y_CENTER_R)
             calGravity = UInt8(faceBuilder.GRAVITY_X_CENTER_R|faceBuilder.GRAVITY_Y_CENTER_R)
         }
-        
-        
+
         // 这个背景问题, 有疑问, 参考安卓修改为这个值
         if isSupp2D {
             bkGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)//背景图
         }
-        
+
         // 存储表盘的所有元素数据
         var watchFaceElements = [Element]()
-        
+
         // 背景图 虽然使用了使用的是 image240?.pngData()! 带透明的资源, 但是经过 .getImgWith(UIImage(data: bgPngData!)!, isAlpha: false) 方法转换, 就是不带透明度的资源了, 所以isAlpha应该设置为0
         // Although the background image uses image240?.pngData()! with transparent resources, but after conversion by .getImgWith(UIImage(data: bgPngData!), isAlpha: false) method, it is a resource without transparency, so isAlpha should be set to 0
         var elementBg = Element(type: faceBuilder.ELEMENT_BACKGROUND, isAlpha: 0)
@@ -3120,11 +3176,11 @@ extension SwiftSmartbleSdkPlugin {
         elementBg.imageSizes = [UInt32(bgByte.count)]
         elementBg.imageBuffer = bgByte
         watchFaceElements.append(elementBg)
-        
-        
+
+
         // 预览图, 虽然使用了使用的是 image150?.pngData()! 带透明的资源, 但是经过 .getImgWith(UIImage(data: pvPngData!)!, isAlpha: false) 方法转换, 就是不带透明度的资源了, 所以isAlpha应该设置为0
         // Although the preview image uses image150?.pngData()! resources with transparency, but after conversion with the .getImgWith(UIImage(data: pvPngData!), isAlpha: false) method, it is a resource without transparency. So isAlpha should be set to 0
-        var elementPrevie = Element(type: faceBuilder.ELEMENT_PREVIEW, isAlpha: 0)
+        var elementPrevie = Element(type: faceBuilder.ELEMENT_PREVIEW_2D, isAlpha: 0)
         elementPrevie.w = pvFrame.width
         elementPrevie.h = pvFrame.height
         elementPrevie.gravity = ylGravity
@@ -3136,11 +3192,11 @@ extension SwiftSmartbleSdkPlugin {
         let pvPngData = image150?.pngData()!
         let newBytePv = ImageConverTools.getImgWith(UIImage(data: pvPngData!)!, isAlpha: false)
         let pvByte = self.viewModel.byteAlignment(newBytePv)
-        
+
         elementPrevie.imageSizes = [UInt32(pvByte.count)] //buffer每个元素大小
         elementPrevie.imageBuffer = pvByte
         watchFaceElements.append(elementPrevie)
-        
+
         //处理其他元素
         var timeColor = dial_select_color1
         var itemColor = dial_select_color1
@@ -3150,27 +3206,27 @@ extension SwiftSmartbleSdkPlugin {
         if dataSourceArray.keys.contains("TimeColor"){
             timeColor = dataSourceArray["TimeColor"] as! UIColor
         }
-        
-        
+
+
         for (key,value) in dataSourceArray {
-            
+
             if key.elementsEqual("TimeAM"){
                 bleLog("TimeAM is \(value)")
-                
+
                 // 在资源文件中, 颜色的索引
                 let colorNum = getColorNumber(timeColor)
                 let point :CGPoint = dataSourceArray["TimeAM"] as! CGPoint
-                
-                
+
+
                 //am
                 let ampmRes = self.viewModel.getImageBufferArray(.AMPM, true, colorNum)
-                
+
                 // hour
                 let hourRes = self.viewModel.getImageBufferArray(.HOUR, true, colorNum)
                 // min
                 let minRes = self.viewModel.getImageBufferArray(.MINUTES, true, colorNum)
-                
-                
+
+
                 // month
                 let monthRes = self.viewModel.getImageBufferArray(.MONTH, true, colorNum)
                 let timeWeekMonthSize = monthRes.imageSize
@@ -3180,46 +3236,46 @@ extension SwiftSmartbleSdkPlugin {
                 // week
                 let weekRes = self.viewModel.getImageBufferArray(.WEAK, true, colorNum)
                 let timeWeekSize = weekRes.imageSize
-                
-                
+
+
                 // 日期之间的分割线
                 let dateSymbolRes = self.viewModel.getImageBufferArray(.dateSymbol, true, colorNum)
                 let dateSySize = dateSymbolRes.imageSize
                 // 星期之间的分割线
                 let weekSymbolRes = self.viewModel.getImageBufferArray(.weakSymbol, true, colorNum)
                 let weekSymSize = weekSymbolRes.imageSize
-                
+
                 //point
                 let hourY = point.y+ampmRes.imageSize.height+2
                 let weekY = point.y+ampmRes.imageSize.height+hourRes.imageSize.height+4
                 let hourPoint = CGPoint(x: point.x-((hourRes.imageSize.width*2)+(minRes.imageSize.width*2)+dateSySize.width+4), y: hourY)
                 let dateSyPoint = CGPoint(x: point.x-((minRes.imageSize.width*2)+dateSySize.width+2), y: hourY)
                 let minPoint = CGPoint(x: point.x-(minRes.imageSize.width*2), y: hourY)
-                
-                
+
+
                 // 月 / 日, 数据增加偏移值, 在F11上面周一, 周三, 周日出现日期和星期太靠近
                 let monthEleOffset:CGFloat = 10
                 let monthPoint = CGPoint(x: point.x-((timeWeekMonthSize.width*2)+(timeWeekDaySize.width*2)+timeWeekSize.width+weekSymSize.width+6) - monthEleOffset, y: weekY)
                 let monthSyPoint = CGPoint(x: point.x-((timeWeekDaySize.width*2)+timeWeekSize.width+weekSymSize.width+4) - monthEleOffset, y: weekY)
                 let dayPoint = CGPoint(x: point.x-((timeWeekDaySize.width*2)+timeWeekSize.width+2) - monthEleOffset, y: weekY)
-                
+
                 var weekPoint = CGPoint(x: point.x-timeWeekSize.width, y: weekY)
                 let imageWidth :CGFloat = isBmpResoure ? 1.0:2.0
                 if isFixCoordinate {
                     weekPoint = CGPoint(x: point.x-(timeWeekSize.width*0.5), y: weekY)
                 }
-                
-                
-                
+
+
+
                 // am pm  支持2D  ignoreBlack使用4;
                 //let ampmImgArray = self.viewModel.identifyItemsColor(.AMPM, colorNum)
                 //let ampmRes = self.viewModel.getImageBufferArray(ampmImgArray, .AMPM)
                 let tempAmPmPoint = CGPoint(x: point.x-ampmRes.imageSize.width, y: point.y)
-                
+
                 var amElement = Element(type: faceBuilder.ELEMENT_DIGITAL_AMPM, isAlpha: 1)
                 amElement.setElementData(point: tempAmPmPoint, size: ampmRes.imageSize, ignoreBlack: 4, watchRes: ampmRes)
                 amElement.gravity = apmGravity
-                
+
                 watchFaceElements.append(amElement)
 
 
@@ -3228,11 +3284,11 @@ extension SwiftSmartbleSdkPlugin {
                 //let hourRes = self.viewModel.getImageBufferArray(hourImgArray, .HOUR)
 
                 let tempHourSize = CGSize(width: hourRes.imageSize.width * imageWidth, height: hourRes.imageSize.height)
-                
+
                 var hourElement = Element(type: faceBuilder.ELEMENT_DIGITAL_HOUR, isAlpha: 1)
                 hourElement.setElementData(point: hourPoint, size: tempHourSize, ignoreBlack: 4, watchRes: hourRes)
                 hourElement.gravity = hourGravity
-                
+
                 watchFaceElements.append(hourElement)
 
 
@@ -3241,11 +3297,11 @@ extension SwiftSmartbleSdkPlugin {
                 //let dateSymbolRes = self.viewModel.getImageBufferArray(dateSymbolImgArray, .dateSymbol)
 
                 let tempdateSySize = CGSize(width: dateSymbolRes.imageSize.width * imageWidth, height: dateSymbolRes.imageSize.height)
-                
+
                 var dateSyElement = Element(type: faceBuilder.ELEMENT_BACKGROUND, isAlpha: 1)
                 dateSyElement.setElementData(point: dateSyPoint, size: tempdateSySize, ignoreBlack: 4, watchRes: dateSymbolRes)
                 dateSyElement.gravity = dayGravity
-                
+
                 watchFaceElements.append(dateSyElement)
 
 
@@ -3255,7 +3311,7 @@ extension SwiftSmartbleSdkPlugin {
                 //let minRes = self.viewModel.getImageBufferArray(minImgArray, .MINUTES)
 
                 let tempMinSySize = CGSize(width: minRes.imageSize.width * imageWidth, height: minRes.imageSize.height)
-                
+
                 var minElement = Element(type: faceBuilder.ELEMENT_DIGITAL_MIN, isAlpha: 1)
                 minElement.setElementData(point: minPoint, size: tempMinSySize, ignoreBlack: 4, watchRes: minRes)
                 minElement.gravity = minGravity
@@ -3266,32 +3322,32 @@ extension SwiftSmartbleSdkPlugin {
                 // month  支持2D  ignoreBlack使用4;
                 //let monthImgArray = self.viewModel.identifyItemsColor(.MONTH, colorNum)
                 //let monthRes = self.viewModel.getImageBufferArray(monthImgArray, .MONTH)
-                
+
                 let tempMonthSize = CGSize(width: monthRes.imageSize.width * imageWidth, height: monthRes.imageSize.height)
-                
+
                 var monthElement = Element(type: faceBuilder.ELEMENT_DIGITAL_MONTH, isAlpha: 1)
                 monthElement.setElementData(point: monthPoint, size: tempMonthSize, ignoreBlack: 4, watchRes: monthRes)
                 monthElement.gravity = monthGravity
                 watchFaceElements.append(monthElement)
-                
-                
+
+
 
                 // 日期之间的分割线  支持2D  ignoreBlack使用4;
                 //let weekSymbolImgArray = self.viewModel.identifyItemsColor(.weakSymbol, colorNum)
                 //let weekSymbolRes = self.viewModel.getImageBufferArray(weekSymbolImgArray, .weakSymbol)
 
-                var weekSymElement = Element(type: faceBuilder.ELEMENT_BACKGROUND, isAlpha: 1)
-                weekSymElement.setElementData(point: monthSyPoint, size: weekSymbolRes.imageSize, ignoreBlack: 4, watchRes: weekSymbolRes)
-                weekSymElement.gravity = weekSymGravity
-                
-                watchFaceElements.append(weekSymElement)
+//                var weekSymElement = Element(type: faceBuilder.ELEMENT_BACKGROUND, isAlpha: 1)
+//                weekSymElement.setElementData(point: monthSyPoint, size: weekSymbolRes.imageSize, ignoreBlack: 4, watchRes: weekSymbolRes)
+//                weekSymElement.gravity = weekSymGravity
+//
+//                watchFaceElements.append(weekSymElement)
 
 
 
                 // day  支持2D  ignoreBlack使用4;
                 //let dayImgArray = self.viewModel.identifyItemsColor(.DAY, colorNum)
                 //let dayRes = self.viewModel.getImageBufferArray(dayImgArray, .DAY)
-                
+
                 let tempDaySize = CGSize(width: dayRes.imageSize.width * imageWidth, height: dayRes.imageSize.height)
 
                 var dayElement = Element(type: faceBuilder.ELEMENT_DIGITAL_DAY, isAlpha: 1)
@@ -3317,13 +3373,13 @@ extension SwiftSmartbleSdkPlugin {
                 // 在资源文件中, 颜色的索引
                 let colorNum = getColorNumber(itemColor)
                 let point :CGPoint = dataSourceArray["Step"] as! CGPoint
-                
+
                 // 脚步  支持2D  ignoreBlack使用4;
                 let stepRes = self.viewModel.getImageBufferArray(.STEP, true, colorNum)
-                
+
                 var elementStep = Element(type: faceBuilder.ELEMENT_DIGITAL_STEP, isAlpha: 1)
                 elementStep.setElementData(point: point, size: stepRes.imageSize, ignoreBlack: 4, watchRes: stepRes)
-                
+
                 elementStep.gravity = stepGravity
                 watchFaceElements.append(elementStep)
 
@@ -3332,10 +3388,10 @@ extension SwiftSmartbleSdkPlugin {
                 // 在资源文件中, 颜色的索引
                 let colorNum = getColorNumber(itemColor)
                 let point :CGPoint = dataSourceArray["HR"] as! CGPoint
-                
+
                 // 心率  支持2D  ignoreBlack使用4;
                 let hrRes = self.viewModel.getImageBufferArray(.HEART_RATE, true, colorNum)
-                
+
                 var elementHR = Element(type: faceBuilder.ELEMENT_DIGITAL_HEART, isAlpha: 1)
                 elementHR.setElementData(point: point, size: hrRes.imageSize, ignoreBlack: 4, watchRes: hrRes)
                 elementHR.gravity = hrGravity
@@ -3347,33 +3403,33 @@ extension SwiftSmartbleSdkPlugin {
                 let colorNum = getColorNumber(itemColor)
                 let rawDisPoint = dataSourceArray["Dis"] as! CGPoint
                 bleLog("表盘元素rawDisPoint:\(rawDisPoint)")
-                
+
                 // 距离  支持2D  ignoreBlack使用4;
                 let disRes = self.viewModel.getImageBufferArray(.DISTANCE, true, colorNum)
                 let disPoint = CGPoint(x: rawDisPoint.x-disRes.imageSize.width, y: rawDisPoint.y)
                 bleLog("表盘元素disPoint:\(disPoint)")
-                
+
                 var elementDis = Element(type: faceBuilder.ELEMENT_DIGITAL_DISTANCE, isAlpha: 1)
                 elementDis.setElementData(point: disPoint, size: disRes.imageSize, ignoreBlack: 4, watchRes: disRes)
                 elementDis.gravity = disGravity
-                
+
                 /**
                  (lldb) po disSize
                  ▿ (18.0, 24.0)
                  - width : 18.0
                  - height : 24.0
-                 
+
                  (lldb) po dataSourceArray["Dis"]
                  ▿ Optional<Any>
                  - some : NSPoint: {432.13372093023253, 266.86627906976742}
-                 
+
                  (lldb) po newElement.x
                  414
 
                  (lldb) po newElement.y
                  266
                  */
-                
+
                 watchFaceElements.append(elementDis)
 
             }else if key.elementsEqual("Cal"){
@@ -3381,10 +3437,10 @@ extension SwiftSmartbleSdkPlugin {
                 // 在资源文件中, 颜色的索引
                 let colorNum = getColorNumber(itemColor)
                 let point :CGPoint = dataSourceArray["Cal"] as! CGPoint
-                
+
                 // 卡路里  支持2D  ignoreBlack使用4;
                 let calRes = self.viewModel.getImageBufferArray(.CALORIES, true, colorNum)
-                
+
                 var elementCal = Element(type: faceBuilder.ELEMENT_DIGITAL_CALORIE, isAlpha: 1)
                 elementCal.setElementData(point: point, size: calRes.imageSize, ignoreBlack: 4, watchRes: calRes)
                 elementCal.gravity = calGravity
@@ -3393,27 +3449,27 @@ extension SwiftSmartbleSdkPlugin {
             }else if key.elementsEqual("PointerNumber"){
                 bleLog("PointerNumber is \(value)")
                 let tempNum = dataSourceArray["PointerNumber"] as! String
-                
+
                 guard var index = Int(tempNum) else {
                     bleLog("获取指针转换失败")
                     return
                 }
-                
+
                 // 指针资源图片索引, 这个需要开发者根据自己的资源图片来布局
                 index -= 1
                 if index < 0 {
                     index = 0
                 }
-                
+
                 guard let pinitGroup = self.viewModel.getPointerImage(index, isPNG: true) else {
 
                     // 这里代表获取指针失败, 需要提示用户
                     bleLog("获取指针数据失败, 需要提示用户")
                     return
                 }
-                
+
                 for index in 0..<3{
-                    
+
                     var newElement: Element?
                     switch index {
                     case 0:
@@ -3431,7 +3487,7 @@ extension SwiftSmartbleSdkPlugin {
                     default:
                         break
                     }
-                    
+
                     newElement?.gravity = pointGravity
                     newElement?.ignoreBlack = UInt8(1)  // 指针,支持2D  ignoreBlack应该使用固定值 1
                     newElement?.x = bgFrame.width / 2
@@ -3443,9 +3499,7 @@ extension SwiftSmartbleSdkPlugin {
                 }
             }
         }
-        
-        bleLog("watchFaceElements - \(watchFaceElements)")
-       
+
         if watchFaceElements.count > 0{
             #warning("For devices that support 2D, you must use faceBuilder.PNG_ARGB_8888")
             // 支持2D的设备, 必须使用faceBuilder.PNG_ARGB_8888
@@ -3466,10 +3520,11 @@ extension SwiftSmartbleSdkPlugin {
 
         }
     }
-    
+
+
     /// 不支持2D表盘的处理
     private func createBinForNotSupport2DWatchFace(_ dataSourceArray: [String:Any], isFixCoordinate: Bool, bgFrame: WatchFaceRect, pvFrame: WatchFaceRect) {
-        
+
         //固件坐标
         var bkGravity = UInt8(faceBuilder.GRAVITY_X_CENTER|faceBuilder.GRAVITY_Y_CENTER)//背景图
         var ylGravity = UInt8(faceBuilder.GRAVITY_X_CENTER|faceBuilder.GRAVITY_Y_CENTER)//预览图
@@ -3505,7 +3560,7 @@ extension SwiftSmartbleSdkPlugin {
         }
 
         // 存储表盘的所有元素数据
-        var watchFaceElements = [Element]()
+        var watchFaceElements :[Element] = []
 
         // 不支持2D设备, 背景图片, 由于调用了rearrangePixels(1.0).pixData得出的是8565带透明度的图片, 所以isAlpha需要传递1
         // 2D devices and background images are not supported, and the result of calling rearrangePixels(1.0).pixData is 8565 images with transparency, so isAlpha needs to pass 1
@@ -3524,7 +3579,7 @@ extension SwiftSmartbleSdkPlugin {
 
         elementBg.imageSizes = [UInt32(bgByte!.count)]
         elementBg.imageBuffer = bgByte!
-        
+
         watchFaceElements.append(elementBg)
 
 
@@ -3565,21 +3620,21 @@ extension SwiftSmartbleSdkPlugin {
 
             if key.elementsEqual("TimeAM"){
                 bleLog("TimeAM is \(value)")
-                
+
                 // 在资源文件中, 颜色的索引
                 let colorNum = getColorNumber(timeColor)
                 let point :CGPoint = dataSourceArray["TimeAM"] as! CGPoint
-                
-                
+
+
                 //am  支持2D  ignoreBlack使用4;
                 let ampmRes = self.viewModel.getImageBufferArray(.AMPM, false, colorNum)
-                
+
                 // hour  支持2D  ignoreBlack使用4;
                 let hourRes = self.viewModel.getImageBufferArray(.HOUR, false, colorNum)
                 // min  支持2D  ignoreBlack使用4;
                 let minRes = self.viewModel.getImageBufferArray(.MINUTES, false, colorNum)
-                
-                
+
+
                 // month  支持2D  ignoreBlack使用4;
                 let monthRes = self.viewModel.getImageBufferArray(.MONTH, false, colorNum)
                 let timeWeekMonthSize = monthRes.imageSize
@@ -3589,47 +3644,47 @@ extension SwiftSmartbleSdkPlugin {
                 // week  支持2D  ignoreBlack使用4;
                 let weekRes = self.viewModel.getImageBufferArray(.WEAK, false, colorNum)
                 let timeWeekSize = weekRes.imageSize
-                
-                
+
+
                 // 日期之间的分割线  支持2D  ignoreBlack使用4;
                 let dateSymbolRes = self.viewModel.getImageBufferArray(.dateSymbol, false, colorNum)
                 let dateSySize = dateSymbolRes.imageSize
                 // 星期之间的分割线  支持2D  ignoreBlack使用4;
                 let weekSymbolRes = self.viewModel.getImageBufferArray(.weakSymbol, false, colorNum)
                 let weekSymSize = weekSymbolRes.imageSize
-                
+
                 //point
                 let hourY = point.y+ampmRes.imageSize.height+2
                 let weekY = point.y+ampmRes.imageSize.height+hourRes.imageSize.height+4
                 let hourPoint = CGPoint(x: point.x-((hourRes.imageSize.width*2)+(minRes.imageSize.width*2)+dateSySize.width+4), y: hourY)
                 let dateSyPoint = CGPoint(x: point.x-((minRes.imageSize.width*2)+dateSySize.width+2), y: hourY)
                 let minPoint = CGPoint(x: point.x-(minRes.imageSize.width*2), y: hourY)
-                
-                
+
+
                 // 月 / 日, 数据增加偏移值, 在F11上面周一, 周三, 周日出现日期和星期太靠近
                 let monthEleOffset:CGFloat = 10
                 let monthPoint = CGPoint(x: point.x-((timeWeekMonthSize.width*2)+(timeWeekDaySize.width*2)+timeWeekSize.width+weekSymSize.width+6) - monthEleOffset, y: weekY)
                 let monthSyPoint = CGPoint(x: point.x-((timeWeekDaySize.width*2)+timeWeekSize.width+weekSymSize.width+4) - monthEleOffset, y: weekY)
                 let dayPoint = CGPoint(x: point.x-((timeWeekDaySize.width*2)+timeWeekSize.width+2) - monthEleOffset, y: weekY)
-                
+
                 var weekPoint = CGPoint(x: point.x-timeWeekSize.width, y: weekY)
                 let imageWidth :CGFloat = isBmpResoure ? 1.0:2.0
                 if isFixCoordinate {
                     weekPoint = CGPoint(x: point.x-(timeWeekSize.width*0.5), y: weekY)
                 }
-                
-                
-                
+
+
+
                 // am pm  支持2D  ignoreBlack使用1, 否则使用0
                 let tempAmPmPoint = CGPoint(x: point.x-ampmRes.imageSize.width, y: point.y)
-                
+
                 var amElement = Element(type: faceBuilder.ELEMENT_DIGITAL_AMPM, isAlpha: 1)
                 amElement.setElementData(point: tempAmPmPoint, size: ampmRes.imageSize, ignoreBlack: kNotSupport2D_IgnoreBlack, watchRes: ampmRes)
                 amElement.gravity = apmGravity
-                
+
                 watchFaceElements.append(amElement)
-                
-                
+
+
                 // hour  支持2D  ignoreBlack使用1, 否则使用0
                 let tempHourSize = CGSize(width: hourRes.imageSize.width * imageWidth, height: hourRes.imageSize.height)
 
@@ -3719,13 +3774,13 @@ extension SwiftSmartbleSdkPlugin {
                 // 在资源文件中, 颜色的索引
                 let colorNum = getColorNumber(itemColor)
                 let point :CGPoint = dataSourceArray["Step"] as! CGPoint
-                
+
                 // 脚步  支持2D  ignoreBlack使用1, 否则使用0
                 let stepRes = self.viewModel.getImageBufferArray(.STEP, false, colorNum)
-                
+
                 var elementStep = Element(type: faceBuilder.ELEMENT_DIGITAL_STEP, isAlpha: 1)
                 elementStep.setElementData(point: point, size: stepRes.imageSize, ignoreBlack: kNotSupport2D_IgnoreBlack, watchRes: stepRes)
-                
+
                 elementStep.gravity = stepGravity
                 watchFaceElements.append(elementStep)
             }else if key.elementsEqual("HR"){
@@ -3733,10 +3788,10 @@ extension SwiftSmartbleSdkPlugin {
                 // 在资源文件中, 颜色的索引
                 let colorNum = getColorNumber(itemColor)
                 let point :CGPoint = dataSourceArray["HR"] as! CGPoint
-                
+
                 // 心率  支持2D  ignoreBlack使用1, 否则使用0
                 let hrRes = self.viewModel.getImageBufferArray(.HEART_RATE, false, colorNum)
-                
+
                 var elementHR = Element(type: faceBuilder.ELEMENT_DIGITAL_HEART, isAlpha: 1)
                 elementHR.setElementData(point: point, size: hrRes.imageSize, ignoreBlack: kNotSupport2D_IgnoreBlack, watchRes: hrRes)
                 elementHR.gravity = hrGravity
@@ -3747,16 +3802,16 @@ extension SwiftSmartbleSdkPlugin {
                 let colorNum = getColorNumber(itemColor)
                 let rawDisPoint = dataSourceArray["Dis"] as! CGPoint
                 bleLog("表盘元素rawDisPoint:\(rawDisPoint)")
-                
+
                 // 距离  支持2D  ignoreBlack使用1, 否则使用0
                 let disRes = self.viewModel.getImageBufferArray(.DISTANCE, false, colorNum)
                 let disPoint = CGPoint(x: rawDisPoint.x-disRes.imageSize.width, y: rawDisPoint.y)
                 bleLog("表盘元素disPoint:\(disPoint)")
-                
+
                 var elementDis = Element(type: faceBuilder.ELEMENT_DIGITAL_DISTANCE, isAlpha: 1)
                 elementDis.setElementData(point: disPoint, size: disRes.imageSize, ignoreBlack: kNotSupport2D_IgnoreBlack, watchRes: disRes)
                 elementDis.gravity = disGravity
-                
+
                 watchFaceElements.append(elementDis)
             }else if key.elementsEqual("Cal"){
                 bleLog("Cal is \(value)")
@@ -3795,11 +3850,11 @@ extension SwiftSmartbleSdkPlugin {
                 }
 
 
-            
+
                 for index in 0..<3{
-                    
+
                     var newElement: Element?
-                    
+
                     switch index {
                     case 0:
                         newElement = getPointElement(type: faceBuilder.ELEMENT_NEEDLE_HOUR, isAlpha: 1)
@@ -3816,13 +3871,13 @@ extension SwiftSmartbleSdkPlugin {
                     default:
                         break
                     }
-                    
+
                     newElement?.gravity = pointGravity
                     newElement?.ignoreBlack = UInt8(1)  // 指针, 不支持2D  ignoreBlack应该使用固定值 1
                     newElement?.x = bgFrame.width / 2
                     newElement?.y = bgFrame.height / 2
                     newElement?.imageCount = UInt8(1)
-                    
+
                     if let tempEle = newElement {
                         watchFaceElements.append(tempEle)
                     }
@@ -3831,7 +3886,7 @@ extension SwiftSmartbleSdkPlugin {
         }
 
         if watchFaceElements.count > 0{
-            
+
             #warning("2D accelerated devices are not supported, you should use the faceBuilder.BMP_565 parameter")
             // 不支持2D加速设备, 应该使用 faceBuilder.BMP_565 参数
             // 2D accelerated devices are not supported, you should use the faceBuilder.BMP_565 parameter
@@ -3852,16 +3907,16 @@ extension SwiftSmartbleSdkPlugin {
 
         }
     }
-    
+
     private func getPointElement(type: Int, isAlpha: UInt8) -> Element {
-        
+
         let newElementModel = Element(type: type, isAlpha: isAlpha)
-        
+
         return newElementModel
     }
-    
+
     func createBinForBMP_File(_ dataSourceArray: [String:Any], isFixCoordinate: Bool, bgFrame: WatchFaceRect, pvFrame: WatchFaceRect){
-        
+
         //固件坐标
         var bkGravity = UInt8(faceBuilder.GRAVITY_X_CENTER|faceBuilder.GRAVITY_Y_CENTER)//背景图
         var ylGravity = UInt8(faceBuilder.GRAVITY_X_CENTER|faceBuilder.GRAVITY_Y_CENTER)//预览图
@@ -3878,11 +3933,11 @@ extension SwiftSmartbleSdkPlugin {
         var disGravity = UInt8(faceBuilder.GRAVITY_X_CENTER|faceBuilder.GRAVITY_Y_CENTER)
         var calGravity = UInt8(faceBuilder.GRAVITY_X_CENTER|faceBuilder.GRAVITY_Y_CENTER)
         let pointGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)
-        
-        
+
+
         //MTK 平台默认为0
         var IgnoreBlack = UInt8(0)//默认为0 , bmp相关的图片用1
-        
+
         //Realtek需要修正坐标参数
         if isFixCoordinate {
             bkGravity = UInt8(faceBuilder.GRAVITY_X_CENTER_R|faceBuilder.GRAVITY_Y_CENTER_R)
@@ -3892,15 +3947,15 @@ extension SwiftSmartbleSdkPlugin {
             hrGravity = UInt8(faceBuilder.GRAVITY_X_CENTER_R|faceBuilder.GRAVITY_Y_CENTER_R)
             disGravity = UInt8(faceBuilder.GRAVITY_X_CENTER_R|faceBuilder.GRAVITY_Y_CENTER_R)
             calGravity = UInt8(faceBuilder.GRAVITY_X_CENTER_R|faceBuilder.GRAVITY_Y_CENTER_R)
-            
+
             IgnoreBlack = UInt8(1)
         }
-        
-        
-        
+
+
+
         var watchFaceElements :[Element] = []
-        
-        
+
+
         //背景、预览处理
         var elementBg :Element = Element(type: faceBuilder.ELEMENT_BACKGROUND, isAlpha: 0)
         elementBg.w = bgFrame.width
@@ -3938,8 +3993,8 @@ extension SwiftSmartbleSdkPlugin {
         elementBg.imageSizes = [UInt32(bgByte.count)]
         elementBg.imageBuffer = bgByte
         watchFaceElements.append(elementBg)
-        
-        
+
+
         // 预览图
         var elementPrevie = Element(type: faceBuilder.ELEMENT_PREVIEW, isAlpha: 0)
         elementPrevie.w = pvFrame.width
@@ -3968,7 +4023,7 @@ extension SwiftSmartbleSdkPlugin {
         elementPrevie.imageSizes = [UInt32(pvByte.count)] //buffer每个元素大小
         elementPrevie.imageBuffer = pvByte
         watchFaceElements.append(elementPrevie)
-        
+
         //处理其他元素
         let timeColor = UIColor.white
         let itemColor = UIColor.white
@@ -3978,13 +4033,13 @@ extension SwiftSmartbleSdkPlugin {
             itemC = "_bmp_"
             imageType = "bmp"
         }
-        
+
         let colorNum = 0 // 颜色索引, 用于获取资源图片
         for (key,value) in dataSourceArray {
-            
+
             if key.elementsEqual("TimeAM"){
                 bleLog("TimeAM is \(value)")
-                
+
                 let point :CGPoint = dataSourceArray["TimeAM"] as! CGPoint
 
                 //am
@@ -3993,7 +4048,7 @@ extension SwiftSmartbleSdkPlugin {
                 let hourRes = self.viewModel.getImageBmpBufferArray(.HOUR, colorNum)
                 // min
                 let minRes = self.viewModel.getImageBmpBufferArray(.MINUTES, colorNum)
-                
+
                 // month
                 let monthRes = self.viewModel.getImageBmpBufferArray(.MONTH, colorNum)
                 let timeWeekMonthSize = monthRes.imageSize
@@ -4003,8 +4058,8 @@ extension SwiftSmartbleSdkPlugin {
                 // week
                 let weekRes = self.viewModel.getImageBmpBufferArray(.WEAK, colorNum)
                 let timeWeekSize = weekRes.imageSize
-                
-                
+
+
                 // 日期之间的分割线
                 let dateSymbolRes = self.viewModel.getImageBmpBufferArray(.dateSymbol, colorNum)
                 let dateSySize = dateSymbolRes.imageSize
@@ -4012,39 +4067,39 @@ extension SwiftSmartbleSdkPlugin {
                 let weekSymbolRes = self.viewModel.getImageBmpBufferArray(.weakSymbol, colorNum)
                 let weekSymSize = weekSymbolRes.imageSize
 
-                
+
                 //point
                 let hourY = point.y+ampmRes.imageSize.height+2
                 let weekY = point.y+ampmRes.imageSize.height+hourRes.imageSize.height+4
                 let hourPoint = CGPoint(x: point.x-((hourRes.imageSize.width*2)+(minRes.imageSize.width*2)+dateSySize.width+4), y: hourY)
                 let dateSyPoint = CGPoint(x: point.x-((minRes.imageSize.width*2)+dateSySize.width+2), y: hourY)
                 let minPoint = CGPoint(x: point.x-(minRes.imageSize.width*2), y: hourY)
-                
-                
+
+
                 // 月 / 日, 数据增加偏移值, 在F11上面周一, 周三, 周日出现日期和星期太靠近
                 let monthEleOffset:CGFloat = 10
                 let monthPoint = CGPoint(x: point.x-((timeWeekMonthSize.width*2)+(timeWeekDaySize.width*2)+timeWeekSize.width+weekSymSize.width+6) - monthEleOffset, y: weekY)
                 let monthSyPoint = CGPoint(x: point.x-((timeWeekDaySize.width*2)+timeWeekSize.width+weekSymSize.width+4) - monthEleOffset, y: weekY)
                 let dayPoint = CGPoint(x: point.x-((timeWeekDaySize.width*2)+timeWeekSize.width+2) - monthEleOffset, y: weekY)
-                
+
                 var weekPoint = CGPoint(x: point.x-timeWeekSize.width, y: weekY)
                 let imageWidth :CGFloat = isBmpResoure ? 1.0:2.0
                 if isFixCoordinate {
                     weekPoint = CGPoint(x: point.x-(timeWeekSize.width*0.5), y: weekY)
                 }
-                
-                
-                
+
+
+
                 // am pm
                 //let ampmImgArray = self.viewModel.identifyItemsColor(.AMPM, colorNum)
                 //let ampmRes = self.viewModel.getImageBufferArray(ampmImgArray, .AMPM)
                 let tempAmPmPoint = CGPoint(x: point.x-ampmRes.imageSize.width, y: point.y)
-                
-                
+
+
                 var amElement = Element(type: faceBuilder.ELEMENT_DIGITAL_AMPM, isAlpha: 0)
                 amElement.setElementData(point: tempAmPmPoint, size: ampmRes.imageSize, ignoreBlack: Int(IgnoreBlack), watchRes: ampmRes)
                 amElement.gravity = apmGravity
-                
+
                 watchFaceElements.append(amElement)
 
 
@@ -4053,11 +4108,11 @@ extension SwiftSmartbleSdkPlugin {
                 //let hourRes = self.viewModel.getImageBufferArray(hourImgArray, .HOUR)
 
                 let tempHourSize = CGSize(width: hourRes.imageSize.width * imageWidth, height: hourRes.imageSize.height)
-                
+
                 var hourElement = Element(type: faceBuilder.ELEMENT_DIGITAL_HOUR, isAlpha: 0)
                 hourElement.setElementData(point: hourPoint, size: tempHourSize, ignoreBlack: Int(IgnoreBlack), watchRes: hourRes)
                 hourElement.gravity = hourGravity
-                
+
                 watchFaceElements.append(hourElement)
 
 
@@ -4066,11 +4121,11 @@ extension SwiftSmartbleSdkPlugin {
                 //let dateSymbolRes = self.viewModel.getImageBufferArray(dateSymbolImgArray, .dateSymbol)
 
                 let tempdateSySize = CGSize(width: dateSymbolRes.imageSize.width * imageWidth, height: dateSymbolRes.imageSize.height)
-                
+
                 var dateSyElement = Element(type: faceBuilder.ELEMENT_BACKGROUND, isAlpha: 0)
                 dateSyElement.setElementData(point: dateSyPoint, size: tempdateSySize, ignoreBlack: Int(IgnoreBlack), watchRes: dateSymbolRes)
                 dateSyElement.gravity = dayGravity
-                
+
                 watchFaceElements.append(dateSyElement)
 
 
@@ -4080,7 +4135,7 @@ extension SwiftSmartbleSdkPlugin {
                 //let minRes = self.viewModel.getImageBufferArray(minImgArray, .MINUTES)
 
                 let tempMinSySize = CGSize(width: minRes.imageSize.width * imageWidth, height: minRes.imageSize.height)
-                
+
                 var minElement = Element(type: faceBuilder.ELEMENT_DIGITAL_MIN, isAlpha: 0)
                 minElement.setElementData(point: minPoint, size: tempMinSySize, ignoreBlack: Int(IgnoreBlack), watchRes: minRes)
                 minElement.gravity = minGravity
@@ -4091,15 +4146,15 @@ extension SwiftSmartbleSdkPlugin {
                 // month
                 //let monthImgArray = self.viewModel.identifyItemsColor(.MONTH, colorNum)
                 //let monthRes = self.viewModel.getImageBufferArray(monthImgArray, .MONTH)
-                
+
                 let tempMonthSize = CGSize(width: monthRes.imageSize.width * imageWidth, height: monthRes.imageSize.height)
-                
+
                 var monthElement = Element(type: faceBuilder.ELEMENT_DIGITAL_MONTH, isAlpha: 0)
                 monthElement.setElementData(point: monthPoint, size: tempMonthSize, ignoreBlack: Int(IgnoreBlack), watchRes: monthRes)
                 monthElement.gravity = monthGravity
                 watchFaceElements.append(monthElement)
-                
-                
+
+
 
                 // 日期之间的分割线
                 //let weekSymbolImgArray = self.viewModel.identifyItemsColor(.weakSymbol, colorNum)
@@ -4108,7 +4163,7 @@ extension SwiftSmartbleSdkPlugin {
                 var weekSymElement = Element(type: faceBuilder.ELEMENT_BACKGROUND, isAlpha: 0)
                 weekSymElement.setElementData(point: monthSyPoint, size: weekSymbolRes.imageSize, ignoreBlack: Int(IgnoreBlack), watchRes: weekSymbolRes)
                 weekSymElement.gravity = weekSymGravity
-                
+
                 watchFaceElements.append(weekSymElement)
 
 
@@ -4116,7 +4171,7 @@ extension SwiftSmartbleSdkPlugin {
                 // day
                 //let dayImgArray = self.viewModel.identifyItemsColor(.DAY, colorNum)
                 //let dayRes = self.viewModel.getImageBufferArray(dayImgArray, .DAY)
-                
+
                 let tempDaySize = CGSize(width: dayRes.imageSize.width * imageWidth, height: dayRes.imageSize.height)
 
                 var dayElement = Element(type: faceBuilder.ELEMENT_DIGITAL_DAY, isAlpha: 0)
@@ -4134,82 +4189,82 @@ extension SwiftSmartbleSdkPlugin {
                 weekElement.setElementData(point: weekPoint, size: weekRes.imageSize, ignoreBlack: Int(IgnoreBlack), watchRes: weekRes)
                 weekElement.gravity = weekGravity
                 watchFaceElements.append(weekElement)
-                
+
             }else if key.elementsEqual("Step") {
                 bleLog("Step is \(value)")
-                
+
                 let point :CGPoint = dataSourceArray["Step"] as! CGPoint
                 // 获取资源图片相关数据
                 let stepRes = self.viewModel.getImageBmpBufferArray(.STEP, colorNum)
                 print("测试数据stepRes:\(stepRes)")
-                
-                
-                
+
+
+
                 var elementStep = Element(type: faceBuilder.ELEMENT_DIGITAL_STEP, isAlpha: 0)
                 elementStep.setElementData(point: point, size: stepRes.imageSize, ignoreBlack: Int(IgnoreBlack), watchRes: stepRes)
                 elementStep.gravity = stepGravity
-                
+
                 watchFaceElements.append(elementStep)
             } else if key.elementsEqual("HR") {
                 bleLog("HR is \(value)")
-                
+
                 let point :CGPoint = dataSourceArray["HR"] as! CGPoint
                 let hrRes = self.viewModel.getImageBmpBufferArray(.HEART_RATE, colorNum)
-                
+
                 var elementHR = Element(type: faceBuilder.ELEMENT_DIGITAL_HEART, isAlpha: 0)
                 elementHR.setElementData(point: point, size: hrRes.imageSize, ignoreBlack: Int(IgnoreBlack), watchRes: hrRes)
                 elementHR.gravity = hrGravity
                 watchFaceElements.append(elementHR)
             } else if key.elementsEqual("Dis") {
                 bleLog("Dis is \(value)")
-                
+
                 let rawDisPoint :CGPoint = dataSourceArray["Dis"] as! CGPoint
                 let disRes = self.viewModel.getImageBmpBufferArray(.DISTANCE, colorNum)
                 let disPoint = CGPoint(x: rawDisPoint.x-disRes.imageSize.width, y: rawDisPoint.y)
-                
+
                 var elementDis = Element(type: faceBuilder.ELEMENT_DIGITAL_DISTANCE, isAlpha: 0)
                 elementDis.setElementData(point: disPoint, size: disRes.imageSize, ignoreBlack: Int(IgnoreBlack), watchRes: disRes)
                 elementDis.gravity = disGravity
-                
+
                 watchFaceElements.append(elementDis)
             } else if key.elementsEqual("Cal") {
                 bleLog("Cal is \(value)")
                 let point :CGPoint = dataSourceArray["Cal"] as! CGPoint
-                
+
                 // 卡路里  支持2D  ignoreBlack使用4;
                 let calRes = self.viewModel.getImageBmpBufferArray(.CALORIES, colorNum)
-                
+
                 var elementCal = Element(type: faceBuilder.ELEMENT_DIGITAL_CALORIE, isAlpha: 0)
                 elementCal.setElementData(point: point, size: calRes.imageSize, ignoreBlack: Int(IgnoreBlack), watchRes: calRes)
                 elementCal.gravity = calGravity
                 watchFaceElements.append(elementCal)
             } else if key.elementsEqual("PointerNumber") {
                 bleLog("PointerNumber is \(value)")
-                
+
                 let selNum :String = dataSourceArray["PointerNumber"] as! String
-                
+
                 guard var index = Int(selNum) else {
                     bleLog("获取指针转换失败")
                     return
                 }
-                
-                
+
+
                 index -= 1
                 if index < 0 {
                     index = 0
                 }
-                
+
                 guard let pinitGroup = self.viewModel.getPointerImage(index, isPNG: false) else {
 
                     // 这里代表获取指针失败, 需要提示用户
                     bleLog("获取指针数据失败, 需要提示用户")
                     return
                 }
-                
+
                 for index in 0..<3{
-                    
+
                     var newElement: Element?
-                    
+
                     switch index {
                     case 0:
                         newElement = getPointElement(type: faceBuilder.ELEMENT_NEEDLE_HOUR, isAlpha: 0)
@@ -4226,22 +4281,22 @@ extension SwiftSmartbleSdkPlugin {
                     default:
                         break
                     }
-                    
+
                     newElement?.gravity = pointGravity
                     newElement?.ignoreBlack = IgnoreBlack
                     newElement?.x = bgFrame.width / 2
                     newElement?.y = bgFrame.height / 2
                     newElement?.imageCount = UInt8(1)
-                    
+
                     if let tempElement = newElement {
                         watchFaceElements.append(tempElement)
                     }
                 }
             }
         }
-        
-        
-        
+
+
+
         if watchFaceElements.count > 0{
             let sendData = buildWatchFace(watchFaceElements, watchFaceElements.count, Int32(faceBuilder.BMP_565))
             bleLog("bin文件大小 - \(sendData.toData().count)")
@@ -4251,7 +4306,7 @@ extension SwiftSmartbleSdkPlugin {
 
         }
     }
-    
+
     func dialCustomSenderImageFormat()->Bool{
         //true 表示传输协议用PNG false 表示BMP Realtek必须用BMP
 //        var isImage = true
@@ -4260,12 +4315,12 @@ extension SwiftSmartbleSdkPlugin {
 //        }
 //        return isImage
 //
-        
+
         return false
     }
-    
+
     func buildWatchFace(_ elements:[Element],_ elementCount:Int,_ imageFormat:Int32) ->BleWatchFaceBin{
-        
+
         var num = 0
         for item in elements {
             num += Int(item.imageCount)
@@ -4284,7 +4339,7 @@ extension SwiftSmartbleSdkPlugin {
             imageSizeIndex += UInt16(elements[i].imageCount)
             bleBin.ElementInfo.append(newInfo)
         }
-        
+
         // uint32_t[] 所有图片的长度
         var elementImageBufferOffset : UInt32 = UInt32(BleWatchFaceBinToHeader.ITEM_LENGTH + infoSize+(4*imageCountStart))
         bleBin.imageCount.removeAll()
@@ -4303,14 +4358,14 @@ extension SwiftSmartbleSdkPlugin {
         }
         return bleBin
     }
-    
-    
+
+
     func getBackBuffer(_ imageBuffer:UIImage)-> Data{
         imageCountStart = imageCountStart+1
         return imageBuffer.pngData()!
     }
-    
-    
+
+
     func identifyItemsColor(_ type:Int,_ idColor:UIColor) -> NSMutableArray{
 
         let colorNum : Int  = getColorNumber(idColor)
@@ -4356,24 +4411,24 @@ extension SwiftSmartbleSdkPlugin {
             }else if type == 4 {
                 //日期
                 imagArray.add(getImageDeviceType()+"date"+"\(colorNum)"+itemC+"\(index)")
-                
+
             }else if type == 5{
                 imagArray.add(getImageDeviceType()+"week"+"\(colorNum)"+itemC+"\(index)")
             }
         }
-        
+
         return imagArray
     }
-    
+
     private func identifyItemsColor2(_ type: WatchElementType, _ colorNum: Int) -> [String] {
-        
+
         var imagArray = [String]()
-        
+
         if type == .AMPM {
             imagArray.append(getImageDeviceType_2() + "time/digital/" + "\(colorNum)/" + "am_pm/am")
             imagArray.append(getImageDeviceType_2() + "time/digital/" + "\(colorNum)/" + "am_pm/pm")
         } else if type == .HOUR || type == .MINUTES {
-            
+
             // 小时和分钟, 应该有10个图片, 0到9
             for index in 0..<10 {
                 imagArray.append(getImageDeviceType_2() + "time/digital/" + "\(colorNum)/" + "hour_minute/" + "\(index)")
@@ -4405,11 +4460,11 @@ extension SwiftSmartbleSdkPlugin {
                 imagArray.append(getImageDeviceType_2() + "value/" + "\(colorNum)/" + "\(index)")
             }
         }
-        
+
         return imagArray
     }
-    
-    
+
+
     func getImageDeviceType()-> String{
         var imageSize = "device_"
         switch BleCache.shared.mWatchFaceType {
@@ -4452,13 +4507,13 @@ extension SwiftSmartbleSdkPlugin {
         }
         return imageSize
     }
-    
+
     /// 根据设备类型, 获取指定的图片资源
     private func getImageDeviceType_2()-> String{
-        
+
         var imageSize = "dial_customize_240/"
         switch BleCache.shared.mWatchFaceType {
-            
+
         case BleDeviceInfo.WATCH_FACE_REALTEK_ROUND_360x360:
             imageSize = "dial_customize_360/"
             break
@@ -4469,12 +4524,12 @@ extension SwiftSmartbleSdkPlugin {
             imageSize = "dial_customize_454/"
             break
         case BleDeviceInfo.WATCH_FACE_SERVER: // 99, 这里代表自定义表盘的哪些判断
-            
+
             if BleCache.shared.mPrototype == BleDeviceInfo.PROTOTYPE_F12 ||
                 BleCache.shared.mPrototype == BleDeviceInfo.PROTOTYPE_V2 ||
                 dialCustomIs360_360() || dialCustomIs412_412() || dialCustomIs368_448() ||
                 dialCustomIs356_400() || dialCustomIs410_502() {
-                
+
                 imageSize = "dial_customize_360/"  // 已经更改, 支持2D表盘的路径
             } else if dialCustomIs240_286() {
                 imageSize = "dial_customize_240/"
@@ -4488,24 +4543,24 @@ extension SwiftSmartbleSdkPlugin {
         default:
             break
         }
-        
-        
+
+
 //        if dialCustomIs128(){
 //            imageSize = "device128_"
 //        }else if dialCustomIsWristband(){
 //            imageSize = "deviceB9_172_"
 //        }
-    
+
         return imageSize
     }
-    
+
     func getPointerImage(_ number:String){
         imageCountStart = imageCountStart+3
-        
+
         pointerHourImageSize.removeAll()
         pointerMinImageSize.removeAll()
         pointerImageSize.removeAll()
-        
+
         pointerHourBuffer.removeAll()
         pointerMinBuffer.removeAll()
         pointerBuffer.removeAll()
@@ -4519,11 +4574,11 @@ extension SwiftSmartbleSdkPlugin {
             pSecond = getImageDeviceType()+"pointerSecond_bmp_"
             pType = "bmp"
         }
-        
+
         let path1 = Bundle.main.path(forResource: pHour+number, ofType: pType)
         let path2 = Bundle.main.path(forResource: pMinute+number, ofType: pType)
         let path3 = Bundle.main.path(forResource: pSecond+number, ofType: pType)
-        
+
         let newData1 :Data = getImagePathToData(pHour+number, ofType: pType)
         let newData2 :Data = getImagePathToData(pMinute+number, ofType: pType)
         let newData3 :Data = getImagePathToData(pSecond+number, ofType: pType)
@@ -4531,15 +4586,15 @@ extension SwiftSmartbleSdkPlugin {
         let newImage1 = UIImage(contentsOfFile: path1!)
         let newImage2 = UIImage(contentsOfFile: path2!)
         let newImage3 = UIImage(contentsOfFile: path3!)
-        
+
         hourSize = CGSize(width: newImage1!.size.width, height: newImage1!.size.height)
         minSize = CGSize(width: newImage2!.size.width, height: newImage2!.size.height)
         secSize = CGSize(width: newImage3!.size.width, height: newImage3!.size.height)
-        
+
         pointerHourBuffer.append(newData1)
         pointerMinBuffer.append(newData2)
         pointerBuffer.append(newData3)
-        
+
         pointerHourImageSize = [UInt32(pointerHourBuffer.count)]
         pointerMinImageSize = [UInt32(pointerMinBuffer.count)]
         pointerImageSize = [UInt32(pointerBuffer.count)]
@@ -4604,7 +4659,7 @@ extension SwiftSmartbleSdkPlugin {
         }
         return newData
     }
-    
+
     func getImageBuffer(_ imageName:String)-> Data{
         imageCountStart = imageCountStart+1
         var imageType = "png"
@@ -4613,9 +4668,9 @@ extension SwiftSmartbleSdkPlugin {
         }
         return getImagePathToData(imageName, ofType: imageType)
     }
-    
-    
-    
+
+
+
     func getImageSize(_ imageName:String, ofType:String)-> CGSize{
         let path = Bundle.main.path(forResource: imageName, ofType: ofType)
         let newImage = UIImage(contentsOfFile: path!)
@@ -4625,8 +4680,13 @@ extension SwiftSmartbleSdkPlugin {
 
 
 extension SwiftSmartbleSdkPlugin {
-   
+
     func getMainBgImageNew()->UIImage{
+        //设备主页背景
+        //UIGraphicsBeginImageContextWithOptions(bgView.bounds.size,true, UIScreen.main.scale)
+        //bgView.layer.render(in: UIGraphicsGetCurrentContext()!)
+        //let image = UIGraphicsGetImageFromCurrentImageContext()
+        //UIGraphicsEndImageContext()
         var bgWidth :CGFloat = 0
         var bgHeight :CGFloat = 0
         let isSquare = dialCustomIsRound()
@@ -4657,14 +4717,14 @@ extension SwiftSmartbleSdkPlugin {
             bgHeight = 240
             break
         }
-        
+
         // 截图, 修改图片大小
         //let newImage  = image?.resize(to: CGSize(width: bgWidth, height: bgHeight))
-        let newImage = getMainBgImage()
-        
+        let newImage = getMainBgImage().resize(to: CGSize(width: bgWidth, height: bgHeight))
+
         var newImage1:UIImage?
         if isSquare == false {
-            
+
             if BleCache.shared.mWatchFaceType == BleDeviceInfo.WATCH_FACE_320x363{
                 var newIMA : UIImage?
                 let newData = compressWithMaxCount(origin: newImage, maxCount: 8192, newSize: CGSize(width: bgWidth, height: bgHeight-20))
@@ -4680,39 +4740,45 @@ extension SwiftSmartbleSdkPlugin {
                 }
             }
         }
-        
-        //两图合并
-        func composeImageWithLogo( bgImage: UIImage, imageRect: [CGRect],images:[UIImage]) -> UIImage {
-            bleLog("---两图合并----")
-            //以bgImage的图大小为底图
-            let imageRef = bgImage.cgImage
-            let w: CGFloat = CGFloat((imageRef?.width)!)
-            let h: CGFloat = CGFloat((imageRef?.height)!)
-            //以1.png的图大小为画布创建上下文
-            UIGraphicsBeginImageContext(CGSize(width: w, height: h))
-            bgImage.draw(in: CGRect(x: 0, y: 0, width: w, height: h))
-            //先把1.png 画到上下文中
-            for i in 0..<images.count {
-                images[i].draw(in: CGRect(x: imageRect[i].origin.x,
-                                          y: imageRect[i].origin.y,
-                                          width: imageRect[i].size.width,
-                                          height:imageRect[i].size.height))
-            }
-            //再把小图放在上下文中
-            let resultImg: UIImage? = UIGraphicsGetImageFromCurrentImageContext()
-            //从当前上下文中获得最终图片
-            UIGraphicsEndImageContext()
-            return resultImg!
-            
-        }
-        
-    
+
+
+
+        //let newImage  = image?.resize(to: CGSize(width: bgWidth, height: bgHeight)
+        //square watch face return newImage
+        //return maskRoundedImage(image: newImage!, radius: CGFloat(bgWidth/2))
+
         if isSquare {
             return maskRoundedImage(image: newImage, radius: CGFloat(bgWidth/2))
         }else{
             return newImage1!
         }
     }
+
+
+    func composeImageWithLogo( bgImage: UIImage, imageRect: [CGRect],images:[UIImage]) -> UIImage {
+        bleLog("---两图合并----")
+        //以bgImage的图大小为底图
+        let imageRef = bgImage.cgImage
+        let w: CGFloat = CGFloat((imageRef?.width)!)
+        let h: CGFloat = CGFloat((imageRef?.height)!)
+        //以1.png的图大小为画布创建上下文
+        UIGraphicsBeginImageContext(CGSize(width: w, height: h))
+        bgImage.draw(in: CGRect(x: 0, y: 0, width: w, height: h))
+        //先把1.png 画到上下文中
+        for i in 0..<images.count {
+            images[i].draw(in: CGRect(x: imageRect[i].origin.x,
+                                      y: imageRect[i].origin.y,
+                                      width: imageRect[i].size.width,
+                                      height:imageRect[i].size.height))
+        }
+        //再把小图放在上下文中
+        let resultImg: UIImage? = UIGraphicsGetImageFromCurrentImageContext()
+        //从当前上下文中获得最终图片
+        UIGraphicsEndImageContext()
+        return resultImg!
+
+    }
+
     
     func getThumbnailImageNew() -> UIImage{//Thumbnail preview
         
