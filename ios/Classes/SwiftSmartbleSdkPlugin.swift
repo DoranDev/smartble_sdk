@@ -3336,11 +3336,11 @@ extension SwiftSmartbleSdkPlugin {
                 //let weekSymbolImgArray = self.viewModel.identifyItemsColor(.weakSymbol, colorNum)
                 //let weekSymbolRes = self.viewModel.getImageBufferArray(weekSymbolImgArray, .weakSymbol)
 
-//                var weekSymElement = Element(type: faceBuilder.ELEMENT_BACKGROUND, isAlpha: 1)
-//                weekSymElement.setElementData(point: monthSyPoint, size: weekSymbolRes.imageSize, ignoreBlack: 4, watchRes: weekSymbolRes)
-//                weekSymElement.gravity = weekSymGravity
-//
-//                watchFaceElements.append(weekSymElement)
+                var weekSymElement = Element(type: faceBuilder.ELEMENT_BACKGROUND, isAlpha: 1)
+                weekSymElement.setElementData(point: monthSyPoint, size: weekSymbolRes.imageSize, ignoreBlack: 4, watchRes: weekSymbolRes)
+                weekSymElement.gravity = weekSymGravity
+
+                watchFaceElements.append(weekSymElement)
 
 
 
