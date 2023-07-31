@@ -8,10 +8,16 @@ import android.content.Intent
 import android.graphics.*
 import android.media.AudioManager
 import android.os.*
+import android.provider.Telephony
+import android.telecom.Call
+import android.telecom.InCallService
+import android.telecom.PhoneAccountHandle
 import android.telecom.TelecomManager
+import android.telephony.TelephonyManager
 import android.text.format.DateFormat
 import android.util.Log
 import android.view.KeyEvent
+import androidx.annotation.RequiresApi
 import androidx.multidex.BuildConfig
 import com.bestmafen.baseble.scanner.BleDevice
 import com.bestmafen.baseble.scanner.BleScanCallback
@@ -237,6 +243,8 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             })
             .setBleScanCallback(object : BleScanCallback {
 
+
+
                 override fun onBluetoothDisabled() {
                     print("onBluetoothDisabled")
                 }
@@ -267,6 +275,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
     private val mBleHandleCallback by lazy {
         object : BleHandleCallback {
+
 
             override fun onDeviceConnected(device: BluetoothDevice) {
                 blueDevice=device
@@ -595,23 +604,94 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     onIncomingCallStatusSink!!.success(item)
                 }
 
+//                if (status == 0) {
+//                    //angkat telepon
+//                    try {
+//                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//                            val manager =
+//                                mContext?.getSystemService(Context.TELECOM_SERVICE) as TelecomManager?
+//                            manager?.acceptRingingCall()
+//                        } else {
+//                            val audioManager =
+//                                mContext?.getSystemService(Context.AUDIO_SERVICE) as AudioManager?
+//                            val eventDown =
+//                                KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_HEADSETHOOK)
+//                            val eventUp = KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_HEADSETHOOK)
+//                            audioManager?.dispatchMediaKeyEvent(eventDown)
+//                            audioManager?.dispatchMediaKeyEvent(eventUp)
+//                            Runtime.getRuntime()
+//                                .exec("input keyevent " + Integer.toString(KeyEvent.KEYCODE_HEADSETHOOK))
+//                        }
+//                    } catch (e: Exception) {
+//                        e.printStackTrace()
+//                    }
+//                } else {
+//                    //reject telepon
+//                    if (Build.VERSION.SDK_INT < 28) {
+//                        try {
+//                            val telephonyClass =
+//                                Class.forName("com.android.internal.telephony.ITelephony")
+//                            val telephonyStubClass = telephonyClass.classes[0]
+//                            val serviceManagerClass = Class.forName("android.os.ServiceManager")
+//                            val serviceManagerNativeClass =
+//                                Class.forName("android.os.ServiceManagerNative")
+//                            val getService =
+//                                serviceManagerClass.getMethod("getService", String::class.java)
+//                            val tempInterfaceMethod =
+//                                serviceManagerNativeClass.getMethod(
+//                                    "asInterface",
+//                                    IBinder::class.java
+//                                )
+//                            val tmpBinder = Binder()
+//                            tmpBinder.attachInterface(null, "fake")
+//                            val serviceManagerObject = tempInterfaceMethod.invoke(null, tmpBinder)
+//                            val retbinder =
+//                                getService.invoke(serviceManagerObject, "phone") as IBinder
+//                            val serviceMethod =
+//                                telephonyStubClass.getMethod("asInterface", IBinder::class.java)
+//                            val telephonyObject = serviceMethod.invoke(null, retbinder)
+//                            val telephonyEndCall = telephonyClass.getMethod("endCall")
+//                            telephonyEndCall.invoke(telephonyObject)
+//                        } catch (e: Exception) {
+//                            LogUtils.d("hang up error " + e.message)
+//                        }
+//                    } else {
+//                        PermissionUtils
+//                            .permission(PermissionConstants.PHONE)
+//                            .request2 {
+//                                if (it == PermissionStatus.GRANTED) {
+//                                    LogUtils.d("hang up OK")
+//                                    val manager =
+//                                        mContext?.getSystemService(Context.TELECOM_SERVICE) as TelecomManager
+//                                    manager.endCall()
+//                                }
+//                            }
+//                    }
+//                }
+
                 if (status == 0) {
                     //angkat telepon
                     try {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            val manager =
-                                mContext?.getSystemService(Context.TELECOM_SERVICE) as TelecomManager?
-                            manager?.acceptRingingCall()
+                            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
+
+
+                                val callService = MyCallService()
+                                callService.acceptCall()
+
+
+                            }else{
+                                val manager = mContext?.getSystemService(Context.TELECOM_SERVICE) as TelecomManager?
+                                manager?.acceptRingingCall()
+                            }
+
                         } else {
                             val audioManager =
                                 mContext?.getSystemService(Context.AUDIO_SERVICE) as AudioManager?
-                            val eventDown =
-                                KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_HEADSETHOOK)
+                            val eventDown = KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_HEADSETHOOK)
                             val eventUp = KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_HEADSETHOOK)
                             audioManager?.dispatchMediaKeyEvent(eventDown)
                             audioManager?.dispatchMediaKeyEvent(eventUp)
-                            Runtime.getRuntime()
-                                .exec("input keyevent " + Integer.toString(KeyEvent.KEYCODE_HEADSETHOOK))
                         }
                     } catch (e: Exception) {
                         e.printStackTrace()
@@ -620,8 +700,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     //reject telepon
                     if (Build.VERSION.SDK_INT < 28) {
                         try {
-                            val telephonyClass =
-                                Class.forName("com.android.internal.telephony.ITelephony")
+                            val telephonyClass = Class.forName("com.android.internal.telephony.ITelephony")
                             val telephonyStubClass = telephonyClass.classes[0]
                             val serviceManagerClass = Class.forName("android.os.ServiceManager")
                             val serviceManagerNativeClass =
@@ -644,17 +723,22 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                             val telephonyEndCall = telephonyClass.getMethod("endCall")
                             telephonyEndCall.invoke(telephonyObject)
                         } catch (e: Exception) {
-                            LogUtils.d("hang up error " + e.message)
+                            LogUtils.d("hang up error: %s".format(e.message))
                         }
                     } else {
-                        PermissionUtils
-                            .permission(PermissionConstants.PHONE)
+                        PermissionUtils.permission(PermissionConstants.PHONE)
                             .request2 {
                                 if (it == PermissionStatus.GRANTED) {
                                     LogUtils.d("hang up OK")
-                                    val manager =
-                                        mContext?.getSystemService(Context.TELECOM_SERVICE) as TelecomManager
-                                    manager.endCall()
+                                    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
+                                        val callService = MyCallService()
+                                        callService.rejectCall()
+
+                                    }else{
+                                        val manager = mContext?.getSystemService(Context.TELECOM_SERVICE) as TelecomManager
+                                        manager.endCall()
+                                    }
+
                                 }
                             }
                     }
@@ -5534,3 +5618,14 @@ class DownloadTaskOTA(val bleKey: BleKey) : AsyncTask<String, Int, ByteArray>() 
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.R)
+class MyCallService : InCallService(){
+
+    fun acceptCall(){
+        calls[0].answer(0)
+    }
+
+    fun rejectCall(){
+        calls[0].reject(Call.REJECT_REASON_DECLINED)
+    }
+}
