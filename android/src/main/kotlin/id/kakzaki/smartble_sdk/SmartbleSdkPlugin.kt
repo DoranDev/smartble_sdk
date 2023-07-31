@@ -8,10 +8,16 @@ import android.content.Intent
 import android.graphics.*
 import android.media.AudioManager
 import android.os.*
+import android.provider.Telephony
+import android.telecom.Call
+import android.telecom.InCallService
+import android.telecom.PhoneAccountHandle
 import android.telecom.TelecomManager
+import android.telephony.TelephonyManager
 import android.text.format.DateFormat
 import android.util.Log
 import android.view.KeyEvent
+import androidx.annotation.RequiresApi
 import androidx.multidex.BuildConfig
 import com.bestmafen.baseble.scanner.BleDevice
 import com.bestmafen.baseble.scanner.BleScanCallback
@@ -79,6 +85,8 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
     private val isSupport2DAcceleration
         get() = BleCache.mSupport2DAcceleration == BleDeviceInfo.SUPPORT_2D_ACCELERATION_1
+
+
     private var isTo8565 =
         BleCache.mPlatform == BleDeviceInfo.PLATFORM_JL && !isSupport2DAcceleration
 
@@ -235,6 +243,8 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             })
             .setBleScanCallback(object : BleScanCallback {
 
+
+
                 override fun onBluetoothDisabled() {
                     print("onBluetoothDisabled")
                 }
@@ -265,6 +275,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
     private val mBleHandleCallback by lazy {
         object : BleHandleCallback {
+
 
             override fun onDeviceConnected(device: BluetoothDevice) {
                 blueDevice=device
@@ -593,23 +604,94 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     onIncomingCallStatusSink!!.success(item)
                 }
 
+//                if (status == 0) {
+//                    //angkat telepon
+//                    try {
+//                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//                            val manager =
+//                                mContext?.getSystemService(Context.TELECOM_SERVICE) as TelecomManager?
+//                            manager?.acceptRingingCall()
+//                        } else {
+//                            val audioManager =
+//                                mContext?.getSystemService(Context.AUDIO_SERVICE) as AudioManager?
+//                            val eventDown =
+//                                KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_HEADSETHOOK)
+//                            val eventUp = KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_HEADSETHOOK)
+//                            audioManager?.dispatchMediaKeyEvent(eventDown)
+//                            audioManager?.dispatchMediaKeyEvent(eventUp)
+//                            Runtime.getRuntime()
+//                                .exec("input keyevent " + Integer.toString(KeyEvent.KEYCODE_HEADSETHOOK))
+//                        }
+//                    } catch (e: Exception) {
+//                        e.printStackTrace()
+//                    }
+//                } else {
+//                    //reject telepon
+//                    if (Build.VERSION.SDK_INT < 28) {
+//                        try {
+//                            val telephonyClass =
+//                                Class.forName("com.android.internal.telephony.ITelephony")
+//                            val telephonyStubClass = telephonyClass.classes[0]
+//                            val serviceManagerClass = Class.forName("android.os.ServiceManager")
+//                            val serviceManagerNativeClass =
+//                                Class.forName("android.os.ServiceManagerNative")
+//                            val getService =
+//                                serviceManagerClass.getMethod("getService", String::class.java)
+//                            val tempInterfaceMethod =
+//                                serviceManagerNativeClass.getMethod(
+//                                    "asInterface",
+//                                    IBinder::class.java
+//                                )
+//                            val tmpBinder = Binder()
+//                            tmpBinder.attachInterface(null, "fake")
+//                            val serviceManagerObject = tempInterfaceMethod.invoke(null, tmpBinder)
+//                            val retbinder =
+//                                getService.invoke(serviceManagerObject, "phone") as IBinder
+//                            val serviceMethod =
+//                                telephonyStubClass.getMethod("asInterface", IBinder::class.java)
+//                            val telephonyObject = serviceMethod.invoke(null, retbinder)
+//                            val telephonyEndCall = telephonyClass.getMethod("endCall")
+//                            telephonyEndCall.invoke(telephonyObject)
+//                        } catch (e: Exception) {
+//                            LogUtils.d("hang up error " + e.message)
+//                        }
+//                    } else {
+//                        PermissionUtils
+//                            .permission(PermissionConstants.PHONE)
+//                            .request2 {
+//                                if (it == PermissionStatus.GRANTED) {
+//                                    LogUtils.d("hang up OK")
+//                                    val manager =
+//                                        mContext?.getSystemService(Context.TELECOM_SERVICE) as TelecomManager
+//                                    manager.endCall()
+//                                }
+//                            }
+//                    }
+//                }
+
                 if (status == 0) {
                     //angkat telepon
                     try {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            val manager =
-                                mContext?.getSystemService(Context.TELECOM_SERVICE) as TelecomManager?
-                            manager?.acceptRingingCall()
+                            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
+
+
+                                val callService = MyCallService()
+                                callService.acceptCall()
+
+
+                            }else{
+                                val manager = mContext?.getSystemService(Context.TELECOM_SERVICE) as TelecomManager?
+                                manager?.acceptRingingCall()
+                            }
+
                         } else {
                             val audioManager =
                                 mContext?.getSystemService(Context.AUDIO_SERVICE) as AudioManager?
-                            val eventDown =
-                                KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_HEADSETHOOK)
+                            val eventDown = KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_HEADSETHOOK)
                             val eventUp = KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_HEADSETHOOK)
                             audioManager?.dispatchMediaKeyEvent(eventDown)
                             audioManager?.dispatchMediaKeyEvent(eventUp)
-                            Runtime.getRuntime()
-                                .exec("input keyevent " + Integer.toString(KeyEvent.KEYCODE_HEADSETHOOK))
                         }
                     } catch (e: Exception) {
                         e.printStackTrace()
@@ -618,8 +700,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     //reject telepon
                     if (Build.VERSION.SDK_INT < 28) {
                         try {
-                            val telephonyClass =
-                                Class.forName("com.android.internal.telephony.ITelephony")
+                            val telephonyClass = Class.forName("com.android.internal.telephony.ITelephony")
                             val telephonyStubClass = telephonyClass.classes[0]
                             val serviceManagerClass = Class.forName("android.os.ServiceManager")
                             val serviceManagerNativeClass =
@@ -642,17 +723,22 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                             val telephonyEndCall = telephonyClass.getMethod("endCall")
                             telephonyEndCall.invoke(telephonyObject)
                         } catch (e: Exception) {
-                            LogUtils.d("hang up error " + e.message)
+                            LogUtils.d("hang up error: %s".format(e.message))
                         }
                     } else {
-                        PermissionUtils
-                            .permission(PermissionConstants.PHONE)
+                        PermissionUtils.permission(PermissionConstants.PHONE)
                             .request2 {
                                 if (it == PermissionStatus.GRANTED) {
                                     LogUtils.d("hang up OK")
-                                    val manager =
-                                        mContext?.getSystemService(Context.TELECOM_SERVICE) as TelecomManager
-                                    manager.endCall()
+                                    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
+                                        val callService = MyCallService()
+                                        callService.rejectCall()
+
+                                    }else{
+                                        val manager = mContext?.getSystemService(Context.TELECOM_SERVICE) as TelecomManager
+                                        manager.endCall()
+                                    }
+
                                 }
                             }
                     }
@@ -1487,39 +1573,37 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     //pointer
     private var pointerSelectNumber = 0
 
+    private lateinit var DIAL_CUSTOMIZE_DIR: String
+
+    //control
+    private lateinit var CONTROL_DIR: String
+    private lateinit var STEP_DIR: String
+    private lateinit var CALORIES_DIR: String
+    private lateinit var DISTANCE_DIR: String
+    private lateinit var HEART_RATE_DIR: String
+
+    //value
+    private lateinit var VALUE_DIR: String
+
+    //time
+    private lateinit var TIME_DIR: String
+
+    //digital
+    private lateinit var DIGITAL_DIR: String
+    private lateinit var POINTER_DIR: String
+
     //digital_parameter
-    private val DIGITAL_AM_DIR = "am_pm"
-    private val DIGITAL_DATE_DIR = "date"
-    private val DIGITAL_HOUR_MINUTE_DIR = "hour_minute"
-    private val DIGITAL_WEEK_DIR = "week"
+    val DIGITAL_AM_DIR = "am_pm"
+    val DIGITAL_DATE_DIR = "date"
+    val DIGITAL_HOUR_MINUTE_DIR = "hour_minute"
+    val DIGITAL_WEEK_DIR = "week"
 
     //pointer_parameter
-    private val POINTER_HOUR = "pointer/hour"
-    private val POINTER_MINUTE = "pointer/minute"
-    private val POINTER_SECOND = "pointer/second"
+    val POINTER_HOUR = "pointer/hour"
+    val POINTER_MINUTE = "pointer/minute"
+    val POINTER_SECOND = "pointer/second"
 
     private fun getBgBitmap(isCanvasValue: Boolean, isRound: Boolean, bgBitmapx: Bitmap): Bitmap {
-        val customDir: String
-        if (custom == 2) {
-            customDir = "dial_customize_454"
-        } else {
-            customDir = "dial_customize_240"
-        }
-
-        //初始资源路径
-        val CONTROL_DIR = "$customDir/control"
-        val STEP_DIR = "$CONTROL_DIR/step"
-        val CALORIES_DIR = "$CONTROL_DIR/calories"
-        val DISTANCE_DIR = "$CONTROL_DIR/distance"
-        val HEART_RATE_DIR = "$CONTROL_DIR/heart_rate"
-
-        //time
-        val TIME_DIR = "$customDir/time"
-        val DIGITAL_DIR = "$TIME_DIR/digital"
-
-        //value
-        val VALUE_DIR = "$customDir/value"
-
         val bgBitmap = if (isRound) {
             //圆
             bgBitmapx
@@ -1630,18 +1714,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         return getFinalBgBitmap(bgBitMap)
     }
 
-    private fun getPointer(type: Int, dir: String, elements: ArrayList<Element>) {
-        val customDir: String
-        if (custom == 2) {
-            customDir = "dial_customize_454"
-        } else {
-            customDir = "dial_customize_240"
-        }
-
-        //time
-        val TIME_DIR = "$customDir/time"
-
-        val POINTER_DIR = "$TIME_DIR/pointer"
+    private fun getPointer(type: Int, dir: String, ) {
         val pointerHour = ArrayList<ByteArray>()
         val tmpBitmap =
             ImageUtils.getBitmap(mContext!!.assets.open("$POINTER_DIR/${dir}/${pointerSelectNumber}.${fileFormat}"))
@@ -1672,18 +1745,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         elements.add(elementAmPm)
     }
 
-    private fun getPointer2(type: Int, dir: String, elements: ArrayList<Element>) {
-        val customDir: String
-        if (custom == 2) {
-            customDir = "dial_customize_454"
-        } else {
-            customDir = "dial_customize_240"
-        }
-
-        //time
-        val TIME_DIR = "$customDir/time"
-
-        val POINTER_DIR = "$TIME_DIR/pointer"
+    private fun getPointer2(type: Int, dir: String, ) {
         val pointerHour = ArrayList<ByteArray>()
         val pointerFileName = "$POINTER_DIR/${dir}/${pointerSelectNumber}.${fileFormat}"
         val tmpBitmap =
@@ -1955,12 +2017,12 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     fun defaultConversion(
         fileFormat: String,
         data: ByteArray,
-        w: Int,                      //图片宽度
-        bitCount: Int = 16,          //位深度，可为8，16，24，32
-        headerInfoSize: Int = 70,   //头部信息长度，默认70
-        isReverseRows: Boolean = true,   //是否反转行数据，就是将第一行置换为最后一行
-        isTo8565: Boolean = false, // 一般都是png文件转8565格式
-        h: Int = 0                //图片高度
+        w: Int, //image width
+        bitCount: Int = 16, //bit depth, can be 8, 16, 24, 32
+        headerInfoSize: Int = 70, //Header information length, default 70
+        isReverseRows: Boolean = true, //Whether to reverse row data, that is, replace the first row with the last row
+        isTo8565: Boolean = false, // generally convert png files to 8565 format
+        h: Int = 0 //image height
     ): ByteArray {
         if (fileFormat == "bmp") {
 
@@ -2039,21 +2101,9 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         return data
     }
 
-    private fun getTimeDigital(elements: ArrayList<Element>) {
+    private fun getTimeDigital() {
         //AM PM
         val amPmValue = ArrayList<ByteArray>()
-
-        val customDir: String = if (custom == 2) {
-            "dial_customize_454"
-        } else {
-            "dial_customize_240"
-        }
-
-        //time
-        val TIME_DIR = "$customDir/time"
-
-        //digital
-        val DIGITAL_DIR = "$TIME_DIR/digital"
         val tmpBitmap =
             ImageUtils.getBitmap(mContext!!.assets.open("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_AM_DIR/am.${fileFormat}"))
         var w = tmpBitmap.width
@@ -2115,7 +2165,6 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 WatchFaceBuilder.ELEMENT_DIGITAL_DIV_HOUR,
                 digitalTimeSymbolLeftX.toInt(),
                 digitalTimeSymbolTopY.toInt(),
-                elements
             )
         }
         //日期
@@ -2154,7 +2203,6 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 WatchFaceBuilder.ELEMENT_DIGITAL_DIV_MONTH,
                 digitalDateSymbolLeftX.toInt(),
                 digitalDateSymbolTopY.toInt(),
-                elements
             )
         }
         //week
@@ -2176,19 +2224,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         elements.add(elementWeek)
     }
 
-    private fun getTimeDigital2(elements: ArrayList<Element>) {
-        val customDir: String = if (custom == 2) {
-            "dial_customize_454"
-        } else {
-            "dial_customize_240"
-        }
-
-        //time
-        val TIME_DIR = "$customDir/time"
-
-        //digital
-        val DIGITAL_DIR = "$TIME_DIR/digital"
-        //time
+    private fun getTimeDigital2() {
         //AM PM
         val amFileName = "$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_AM_DIR/am.${fileFormat}"
         val pmFileName = "$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_AM_DIR/pm.${fileFormat}"
@@ -2279,8 +2315,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 "$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_HOUR_MINUTE_DIR",
                 WatchFaceBuilder.ELEMENT_DIGITAL_DIV_HOUR,
                 digitalTimeSymbolLeftX.toInt(),
-                digitalTimeSymbolTopY.toInt(),
-                elements
+                digitalTimeSymbolTopY.toInt()
             )
         }
 
@@ -2319,8 +2354,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 "$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_DATE_DIR",
                 WatchFaceBuilder.ELEMENT_DIGITAL_DIV_MONTH,
                 digitalDateSymbolLeftX.toInt(),
-                digitalDateSymbolTopY.toInt(),
-                elements
+                digitalDateSymbolTopY.toInt()
             )
         }
 
@@ -2346,8 +2380,8 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         dir: String,
         type: Int,
         x: Int, y: Int,
-        elements: ArrayList<Element>
-    ) {
+
+        ) {
         val symbolValue = ArrayList<ByteArray>()
         val symbolBitmap =
             ImageUtils.getBitmap(mContext!!.assets.open("${dir}/symbol.${fileFormat}"))
@@ -2379,8 +2413,8 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         dir: String,
         type: Int,
         x: Int, y: Int,
-        elements: ArrayList<Element>
-    ) {
+
+        ) {
         val symbolFileName = "${dir}/symbol.${fileFormat}"
         val symbolValue = ArrayList<ByteArray>()
         val symbolBitmap =
@@ -2416,14 +2450,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         elements.add(elementSymbol)
     }
 
-    private fun getControl(elements: ArrayList<Element>) {
-        val customDir: String = if (custom == 2) {
-            "dial_customize_454"
-        } else {
-            "dial_customize_240"
-        }
-        //value
-        val VALUE_DIR = "$customDir/value"
+    private fun getControl() {
         val triple = getNumberBuffers("$VALUE_DIR/${valueColor}/", controlValueRange)
         val w = triple.first
         val h = triple.second
@@ -2491,14 +2518,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         }
     }
 
-    private fun getControl2(elements: ArrayList<Element>) {
-        val customDir: String = if (custom == 2) {
-            "dial_customize_454"
-        } else {
-            "dial_customize_240"
-        }
-        //value
-        val VALUE_DIR = "$customDir/value"
+    private fun getControl2() {
         val triple = getNumberBuffers2("$VALUE_DIR/${valueColor}/", controlValueRange)
         val w = triple.first
         val h = triple.second
@@ -2695,7 +2715,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         return (a shl 16) + (r shr 3 shl 11) + (g shr 2 shl 5) + (b shr 3)
     }
 
-    val elements = ArrayList<Element>()
+    var elements = ArrayList<Element>()
 
     override fun onMethodCall(call: MethodCall, result: Result) {
         this.mResult = result
@@ -2859,6 +2879,30 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 X_CENTER = WatchFaceBuilder.GRAVITY_X_CENTER_R
                 Y_CENTER = WatchFaceBuilder.GRAVITY_Y_CENTER_R
 
+                //初始资源路径
+                if (custom == 2) {
+                    DIAL_CUSTOMIZE_DIR = "dial_customize_454"
+                } else if (custom == 3) {
+                    DIAL_CUSTOMIZE_DIR = "dial_customize_240"
+                } else {
+                    DIAL_CUSTOMIZE_DIR = "dial_customize_240"
+                }
+                CONTROL_DIR = "$DIAL_CUSTOMIZE_DIR/control"
+                STEP_DIR = "$CONTROL_DIR/step"
+                CALORIES_DIR = "$CONTROL_DIR/calories"
+                DISTANCE_DIR = "$CONTROL_DIR/distance"
+                HEART_RATE_DIR = "$CONTROL_DIR/heart_rate"
+
+                //value
+                VALUE_DIR = "$DIAL_CUSTOMIZE_DIR/value"
+
+                //time
+                TIME_DIR = "$DIAL_CUSTOMIZE_DIR/time"
+
+                //digital
+                DIGITAL_DIR = "$TIME_DIR/digital"
+                POINTER_DIR = "$TIME_DIR/pointer"
+
                 val bgPreviewBytes: ByteArray? = call.argument<ByteArray?>("bgPreviewBytes")
                 val bgPreviewlength = bgPreviewBytes!!.size
                 val bgPreviewBitmapX =
@@ -2872,8 +2916,13 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
                 val bglength = bgBytes!!.size
                 val bgBitmapX = BitmapFactory.decodeByteArray(bgBytes, offset, bglength)
-
+                /**
+                 *8565 is a pixel format with an alpha channel.
+                 * Whether to convert png to 8565 format, when it is equal to true, png files must be used, currently only some non-2d devices support it.
+                 * The bin file will become larger.
+                 */
                 val bgBytesNew = getBg(isRound!!, bgBitmapX!!)
+                LogUtils.d("isSupport2DAcceleration: ${isSupport2DAcceleration}")
 
                 if (isSupport2DAcceleration) {
                     //获取预览
@@ -2903,15 +2952,15 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     elements.add(elementBg)
 
                     //获取控件数值相关内容
-                    getControl2(elements)
+                    getControl2()
 
                     //获取时间相关内容
                     if (timeDigitalView) {
-                        getTimeDigital2(elements)
+                        getTimeDigital2()
                     }else{
-                        getPointer2(WatchFaceBuilder.ELEMENT_NEEDLE_HOUR, POINTER_HOUR, elements)
-                        getPointer2(WatchFaceBuilder.ELEMENT_NEEDLE_MIN, POINTER_MINUTE, elements)
-                        getPointer2(WatchFaceBuilder.ELEMENT_NEEDLE_SEC, POINTER_SECOND, elements)
+                        getPointer2(WatchFaceBuilder.ELEMENT_NEEDLE_HOUR, POINTER_HOUR)
+                        getPointer2(WatchFaceBuilder.ELEMENT_NEEDLE_MIN, POINTER_MINUTE)
+                        getPointer2(WatchFaceBuilder.ELEMENT_NEEDLE_SEC, POINTER_SECOND)
                     }
                 } else {
                     val elementPreview = Element(
@@ -2937,15 +2986,15 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     elements.add(elementBg)
 
                     // Get the relevant content of the control value
-                    getControl(elements)
+                    getControl()
 
                     // Get time related content
                     if (timeDigitalView) {
-                        getTimeDigital(elements)
+                        getTimeDigital()
                     } else {
-                        getPointer(WatchFaceBuilder.ELEMENT_NEEDLE_HOUR, POINTER_HOUR, elements)
-                        getPointer(WatchFaceBuilder.ELEMENT_NEEDLE_MIN, POINTER_MINUTE, elements)
-                        getPointer(WatchFaceBuilder.ELEMENT_NEEDLE_SEC, POINTER_SECOND, elements)
+                        getPointer(WatchFaceBuilder.ELEMENT_NEEDLE_HOUR, POINTER_HOUR)
+                        getPointer(WatchFaceBuilder.ELEMENT_NEEDLE_MIN, POINTER_MINUTE)
+                        getPointer(WatchFaceBuilder.ELEMENT_NEEDLE_SEC, POINTER_SECOND)
                     }
                 }
                 for (element in elements) {
@@ -2956,6 +3005,8 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     elements.toTypedArray(),
                     imageFormat
                 )
+
+                FileIOUtils.writeFileFromBytesByStream(File(PathUtils.getExternalAppDataPath(), "dial.bin"), bytes)
 
                 LogUtils.d("customize dial bytes size  ${bytes.size}")
                 BleConnector.sendStream(
@@ -5567,3 +5618,14 @@ class DownloadTaskOTA(val bleKey: BleKey) : AsyncTask<String, Int, ByteArray>() 
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.R)
+class MyCallService : InCallService(){
+
+    fun acceptCall(){
+        calls[0].answer(0)
+    }
+
+    fun rejectCall(){
+        calls[0].reject(Call.REJECT_REASON_DECLINED)
+    }
+}
