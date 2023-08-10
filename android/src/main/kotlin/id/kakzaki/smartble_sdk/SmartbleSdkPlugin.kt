@@ -243,8 +243,6 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             })
             .setBleScanCallback(object : BleScanCallback {
 
-
-
                 override fun onBluetoothDisabled() {
                     print("onBluetoothDisabled")
                 }
@@ -260,6 +258,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     val item: MutableMap<String, Any> = HashMap()
                     item["deviceName"] = device.mBluetoothDevice.name
                     item["deviceMacAddress"] = device.mBluetoothDevice.address
+                    item["rssi"] = device.mRssi
                     if (!(mDevices.contains(item))) {
                         mDevices.add(item)
                     }
