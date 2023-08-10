@@ -2140,6 +2140,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         item["deviceName"] = device.name
         item["deviceMacAddress"] = device.address
         item["deviceIdentifier"] = device.identifier
+        item["rssi"] = String(device.mRssi)
         if !mDevices.contains(item) {
             mDevices.append(item)
 //            let newIndexPath = IndexPath(row: mDevices.count - 1, section: 0)
