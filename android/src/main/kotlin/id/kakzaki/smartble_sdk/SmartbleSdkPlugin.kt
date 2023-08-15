@@ -2,18 +2,18 @@ package id.kakzaki.smartble_sdk
 
 import android.Manifest
 import android.app.Activity
+import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.*
 import android.media.AudioManager
 import android.os.*
-import android.provider.Telephony
 import android.telecom.Call
 import android.telecom.InCallService
-import android.telecom.PhoneAccountHandle
 import android.telecom.TelecomManager
-import android.telephony.TelephonyManager
 import android.text.format.DateFormat
 import android.util.Log
 import android.view.KeyEvent
@@ -59,11 +59,8 @@ import java.nio.ByteBuffer
 import java.util.*
 import kotlin.collections.HashMap
 import kotlin.random.Random
-import com.jieli.bluetooth_connect.bean.ble.BleScanMessage
 import com.jieli.jl_bt_ota.constant.StateCode
 import com.jieli.jl_bt_ota.interfaces.BtEventCallback
-import java.io.BufferedInputStream
-import java.io.FileOutputStream
 import com.jieli.bmp_convert.BmpConvert
 
 /** SmartbleSdkPlugin */
@@ -225,8 +222,13 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private var onStockDeleteSink: EventSink? = null
     private var onBleErrorChannel: EventChannel? = null
     private var onBleErrorSink: EventSink? = null
+    private var onBluetoothPairingStatusChannel: EventChannel? = null
+    private var onBluetoothPairingSink: EventSink? = null
 
     private var blueDevice: BluetoothDevice? = null
+
+    private var bluetoothPairingReceiver: MyBluetoohthPairingReceiver? = null
+
 
     private var mResult: Result? = null
     private val mDevices = mutableListOf<Any>()
@@ -259,9 +261,18 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     item["deviceName"] = device.mBluetoothDevice.name
                     item["deviceMacAddress"] = device.mBluetoothDevice.address
                     item["rssi"] = device.mRssi
-                    if (!(mDevices.contains(item))) {
+//                    if (!(mDevices.contains(item))) {
+//                        mDevices.add(item)
+//                    }
+                    val existingIndex =  mDevices.indexOfFirst { (it as? Map<String, Any>)?.get("deviceMacAddress") == item["deviceMacAddress"] }
+
+                    if(existingIndex != -1){
+                        mDevices[existingIndex] = item
+                    }else{
                         mDevices.add(item)
                     }
+
+                    mDevices.sortWith(compareByDescending { (it as? Map<String, Any>)?.get("rssi") as? Int ?: -100 })
 //         Handler(Looper.getMainLooper()).post {
                     scanSink.success(mDevices)
 //          }
@@ -1427,6 +1438,8 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         onStockDeleteChannel!!.setStreamHandler(onStockDeleteResultHandler)
         onBleErrorChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onBleError")
         onBleErrorChannel!!.setStreamHandler(onBleErrorResultHandler)
+        onBluetoothPairingStatusChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onBluetoothPairingStatus")
+        onBluetoothPairingStatusChannel!!.setStreamHandler(onBluetoothPairingResultHandler)
 
         val connector = BleConnector.Builder(flutterPluginBinding.applicationContext)
             .supportRealtekDfu(false) // Whether to support Realtek device Dfu, pass false if no support is required.
@@ -3104,6 +3117,25 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 mAudioManager.dispatchMediaKeyEvent(eventPrev)
                 mAudioManager.dispatchMediaKeyEvent(eventPrev2)
             }
+            "isPaired" -> {
+                val blueToothAdapter: BluetoothAdapter? = BluetoothAdapter.getDefaultAdapter()
+                val targetDeviceAddress = blueDevice?.address
+                val targetDevice = blueToothAdapter?.getRemoteDevice(targetDeviceAddress)
+
+                val isPaired: Boolean = targetDevice?.let {
+                    val pairedDevices: Set<BluetoothDevice> = blueToothAdapter.bondedDevices
+                    pairedDevices.contains(it)
+                } ?: false
+                if(isPaired){
+                    result.success(true)
+                }else{
+                    result.success(false)
+                }
+            }
+//            "bluetoothPairingStatus" -> {
+//                val
+//            }
+
 
 
             else -> {
@@ -5427,6 +5459,25 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             }
         }
 
+    private val onBluetoothPairingResultHandler: EventChannel.StreamHandler =
+        object : EventChannel.StreamHandler{
+            override fun onListen(arguments: Any?, eventSink: EventSink?) {
+                if(eventSink != null){
+                    bluetoothPairingReceiver = MyBluetoohthPairingReceiver(eventSink, blueDevice)
+                    val filter = IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED)
+                    mContext?.registerReceiver(bluetoothPairingReceiver, filter)
+                    onBluetoothPairingSink = eventSink
+                }
+            }
+
+            override fun onCancel(arguments: Any?) {
+                bluetoothPairingReceiver?.let {
+                    mContext?.unregisterReceiver(it)
+                    bluetoothPairingReceiver = null
+                }
+            }
+        }
+
     fun Boolean.toInt() = if (this) 1 else 0
 
 }
@@ -5626,5 +5677,23 @@ class MyCallService : InCallService(){
 
     fun rejectCall(){
         calls[0].reject(Call.REJECT_REASON_DECLINED)
+    }
+}
+
+class MyBluetoohthPairingReceiver(private val eventSink: EventSink, private val targetDevice: BluetoothDevice?): BroadcastReceiver(){
+    override fun onReceive(context: Context?, intent: Intent?) {
+        val action = intent?.action
+        if(BluetoothDevice.ACTION_BOND_STATE_CHANGED == action && targetDevice!=null){
+            val device: BluetoothDevice? = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+            if(device == targetDevice){
+                val bondState = device?.bondState
+                if(bondState == BluetoothDevice.BOND_BONDED){
+                    eventSink.success(true)
+                }else{
+                    eventSink.success(false)
+                }
+            }
+
+        }
     }
 }
