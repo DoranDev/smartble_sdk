@@ -278,8 +278,10 @@ class SmartbleSdk {
       _channel.invokeMethod('FIND_PHONE', {'flag': flag.name});
 
   Future<dynamic> kNOTIFICATION_REMINDER(
+
       {required SelectedBlekeyFlag flag,
         required List<Map<String, dynamic>> listApp}) =>
+
       _channel.invokeMethod(
           'NOTIFICATION_REMINDER', {'flag': flag.name, 'listApp': listApp});
 
