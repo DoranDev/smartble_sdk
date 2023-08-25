@@ -1984,7 +1984,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
               }
               break
               // BleCommand.IO
-          case BleKey.WATCH_FACE:
+          case BleKey.WATCH_FACE, BleKey.AGPS_FILE, BleKey.FONT_FILE, BleKey.UI_FILE, BleKey.LANGUAGE_FILE:
               if bleKeyFlag ==  BleKeyFlag.DELETE {
                   _ = BleConnector.shared.sendData(bleKey, bleKeyFlag)
                   return
