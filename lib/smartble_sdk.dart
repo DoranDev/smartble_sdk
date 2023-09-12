@@ -646,8 +646,10 @@ class SmartbleSdk {
   Future<dynamic> kAGPS_FILE({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('AGPS_FILE', {'flag': flag.name});
 
-  Future<dynamic> kFONT_FILE({required SelectedBlekeyFlag flag}) =>
-      _channel.invokeMethod('FONT_FILE', {'flag': flag.name});
+  Future<dynamic> kFONT_FILE(
+          {required SelectedBlekeyFlag flag, String? path, String? url}) =>
+      _channel.invokeMethod(
+          'FONT_FILE', {'flag': flag.name, 'path': path, 'url': url});
 
   Future<dynamic> kCONTACT(
           {required SelectedBlekeyFlag flag,
