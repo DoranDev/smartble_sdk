@@ -275,11 +275,13 @@ class SmartbleSdk {
   Future<dynamic> kFIND_PHONE({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('FIND_PHONE', {'flag': flag.name});
 
+
   Future<dynamic> kNOTIFICATION_REMINDER(
           {required SelectedBlekeyFlag flag,
           required List<Map<String, dynamic>> listApp}) =>
       _channel.invokeMethod(
           'NOTIFICATION_REMINDER', {'flag': flag.name, 'listApp': listApp});
+
 
   Future<dynamic> kANTI_LOST(
           {required SelectedBlekeyFlag flag, required bool isAntiLost}) =>
@@ -303,15 +305,6 @@ class SmartbleSdk {
         'mEndHour': mEndHour,
         'mEndMinute': mEndMinute,
         'mInterval': mInterval,
-      });
-
-  Future<dynamic> kHR_WARNING({
-    required SelectedBlekeyFlag flag,
-    required int mEnabled,
-  }) =>
-      _channel.invokeMethod('HR_WARNING', {
-        'flag': flag.name,
-        'mEnabled': mEnabled,
       });
 
   Future<dynamic> kUI_PACK_VERSION({required SelectedBlekeyFlag flag}) =>
@@ -643,15 +636,11 @@ class SmartbleSdk {
       _channel.invokeMethod(
           'WATCH_FACE', {'flag': flag.name, 'path': path, 'url': url});
 
-  Future<dynamic> kAGPS_FILE(
-          {required SelectedBlekeyFlag flag, String? path, String? url}) =>
-      _channel.invokeMethod(
-          'AGPS_FILE', {'flag': flag.name, 'path': path, 'url': url});
+  Future<dynamic> kAGPS_FILE({required SelectedBlekeyFlag flag}) =>
+      _channel.invokeMethod('AGPS_FILE', {'flag': flag.name});
 
-  Future<dynamic> kFONT_FILE(
-          {required SelectedBlekeyFlag flag, String? path, String? url}) =>
-      _channel.invokeMethod(
-          'FONT_FILE', {'flag': flag.name, 'path': path, 'url': url});
+  Future<dynamic> kFONT_FILE({required SelectedBlekeyFlag flag}) =>
+      _channel.invokeMethod('FONT_FILE', {'flag': flag.name});
 
   Future<dynamic> kCONTACT(
           {required SelectedBlekeyFlag flag,
@@ -659,23 +648,17 @@ class SmartbleSdk {
       _channel.invokeMethod(
           'CONTACT', {'flag': flag.name, 'listContact': listContact});
 
-  Future<dynamic> kUI_FILE(
-          {required SelectedBlekeyFlag flag, String? path, String? url}) =>
-      _channel.invokeMethod(
-          'UI_FILE', {'flag': flag.name, 'path': path, 'url': url});
+  Future<dynamic> kUI_FILE({required SelectedBlekeyFlag flag}) =>
+      _channel.invokeMethod('UI_FILE', {'flag': flag.name});
 
   Future<dynamic> kDEVICE_FILE({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('DEVICE_FILE', {'flag': flag.name});
 
-  Future<dynamic> kLANGUAGE_FILE(
-          {required SelectedBlekeyFlag flag, String? path, String? url}) =>
-      _channel.invokeMethod(
-          'LANGUAGE_FILE', {'flag': flag.name, 'path': path, 'url': url});
+  Future<dynamic> kLANGUAGE_FILE({required SelectedBlekeyFlag flag}) =>
+      _channel.invokeMethod('LANGUAGE_FILE', {'flag': flag.name});
 
-  Future<dynamic> kBRAND_INFO_FILE(
-          {required SelectedBlekeyFlag flag, String? path, String? url}) =>
-      _channel.invokeMethod(
-          'BRAND_INFO_FILE', {'flag': flag.name, 'path': path, 'url': url});
+  Future<dynamic> kBRAND_INFO_FILE({required SelectedBlekeyFlag flag}) =>
+      _channel.invokeMethod('BRAND_INFO_FILE', {'flag': flag.name});
 
   static const EventChannel _scanChannel = EventChannel('smartble_sdk/scan');
 
@@ -1102,7 +1085,6 @@ class SmartbleSdk {
   static Stream<dynamic> get onBluetoothPairingStatus {
     return _onBluetoothPairingStatus.receiveBroadcastStream().cast();
   }
-}
 
 class BleNotificationCategory {
   static String categoryIncomingCall = "1";
