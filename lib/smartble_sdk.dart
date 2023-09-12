@@ -81,7 +81,6 @@ class SmartbleSdk {
   ///check apakah device sudah di pair
   Future<dynamic> checkIsPaired() => _channel.invokeMethod('isPaired');
 
-
   ///analyzeSleep
   Future<dynamic> analyzeSleep({required List listSleep}) {
     List<Map<String, int>> listSleepNew = [];
@@ -276,8 +275,13 @@ class SmartbleSdk {
   Future<dynamic> kFIND_PHONE({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('FIND_PHONE', {'flag': flag.name});
 
-  Future<dynamic> kNOTIFICATION_REMINDER({required SelectedBlekeyFlag flag}) =>
-      _channel.invokeMethod('NOTIFICATION_REMINDER', {'flag': flag.name});
+
+  Future<dynamic> kNOTIFICATION_REMINDER(
+          {required SelectedBlekeyFlag flag,
+          required List<Map<String, dynamic>> listApp}) =>
+      _channel.invokeMethod(
+          'NOTIFICATION_REMINDER', {'flag': flag.name, 'listApp': listApp});
+
 
   Future<dynamic> kANTI_LOST(
           {required SelectedBlekeyFlag flag, required bool isAntiLost}) =>
@@ -1075,7 +1079,12 @@ class SmartbleSdk {
   static Stream<dynamic> get onBleErrorStream {
     return _onBleErrorChannel.receiveBroadcastStream().cast();
   }
-}
+
+  static const EventChannel _onBluetoothPairingStatus =
+      EventChannel("onBluetoothPairingStatus");
+  static Stream<dynamic> get onBluetoothPairingStatus {
+    return _onBluetoothPairingStatus.receiveBroadcastStream().cast();
+  }
 
 class BleNotificationCategory {
   static String categoryIncomingCall = "1";
