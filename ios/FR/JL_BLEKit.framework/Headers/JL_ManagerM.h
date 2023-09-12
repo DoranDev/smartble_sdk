@@ -44,8 +44,10 @@
 #import <JL_BLEKit/JL_SystemTime.h>
 #import <JL_BLEKit/JL_SystemVolume.h>
 #import <JL_BLEKit/JL_CustomManager.h>
-#import <JL_BLEKit/JL_BatchManger.h>
+#import <JL_BLEKit/JL_BigDataManager.h>
 #import <JL_BLEKit/JL_DeviceLogs.h>
+#import <JL_BLEKit/JL_BatchManger.h>
+
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -95,7 +97,10 @@ extern NSString *kJL_MANAGER_KEY_OBJECT;    //KEY --> 对象
 @property(nonatomic,strong)JL_BatchManger           *mBatchManger;
 @property(nonatomic,strong)JL_DeviceLogs            *mDeviceLogs;
 
+@property(nonatomic,strong)JL_BigDataManager        *mBigDataManager;
 
+
+-(void)setPropertyUpdate:(BOOL)isUpdate;
 -(void)setBleUuid:(NSString*)uuid;
 -(void)setBleName:(NSString*)name;
 -(void)inputPKG:(JL_PKG*)pkg;
@@ -140,7 +145,12 @@ extern NSString *kJL_MANAGER_KEY_OBJECT;    //KEY --> 对象
 -(uint8_t)xmCommandSN;
 
 #pragma mark ---> 取出设备信息
+
+/// copy出来的原值
 -(JLModel_Device *)outputDeviceModel;
+
+/// 取出原本的值
+-(JLModel_Device *)getDeviceModel;
 
 #pragma mark ---> 获取设备信息
 extern NSString *kJL_MANAGER_TARGET_INFO;

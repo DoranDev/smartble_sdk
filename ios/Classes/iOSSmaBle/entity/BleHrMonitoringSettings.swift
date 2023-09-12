@@ -20,7 +20,7 @@ class BleHrMonitoringSettings: BleWritable {
     override func encode() {
         super.encode()
         writeObject(mBleTimeRange)
-        writeInt8(mInterval)
+        writeInt8(mInterval > 0 ? mInterval : 1)  // mInterval 设置的最小值为1
     }
 
     override func decode() {

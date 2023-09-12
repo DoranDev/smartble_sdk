@@ -6,6 +6,14 @@
 import UIKit
 import CoreBluetooth
 
+/// 连接类型, 因为客户有些是扫码链接, 有些客户是UUID连接, 这两个方式需要处理的方式不一样
+/// 如果是mac连接, 需要比对参照广播的自定义数据
+/// 如果是UUID连接, 那就是外设的UUID比对即可
+enum BleConnectorType {
+    case macAddress     // 通过MAC地址方式比对设备
+    case systemUUID     // 通过UUID地址方式比对设备
+}
+
 /**
  * CBPeripheral的包装类，代表与一个蓝牙设备的连接。
  * 1.在指定连接目标后会一直重连，直到连接成功。
@@ -32,7 +40,7 @@ class BaseBleConnector: NSObject {
     /**
      * 用于指定匹配规则为设备的地址是mTargetIdentifier。
      */
-    let mScanFilter = IdentifierFilter("")
+    let mScanFilter = IdentifierFilter("", .systemUUID)
 
     /**
      * 是否正在进行连接。
@@ -80,17 +88,28 @@ class BaseBleConnector: NSObject {
     /**
      * 设置连接目标。
      */
-    func setTargetIdentifier(_ identifier: String) {
+    func setTargetIdentifier(_ identifier: String, _ mConnecType: BleConnectorType) {
         mTargetIdentifier = identifier
         mScanFilter.mIdentifier = identifier
+        mScanFilter.mConnecType = mConnecType
     }
 
     /**
      * 设置连接目标。
      */
-    func setTargetDevice(_ bleDevice: BleDevice) {
-        setTargetIdentifier(bleDevice.mPeripheral.identifier.uuidString)
+    //func setTargetDevice(_ bleDevice: BleDevice, _ mConnecType: BleConnectorType = .systemUUID) {
+    func setTargetDevice(_ bleDevice: BleDevice, _ mConnecType: BleConnectorType) {
+        setTargetIdentifier(bleDevice.mPeripheral.identifier.uuidString, mConnecType)
     }
+    
+    /**
+     * 通过mac方式, 设置连接目标
+     */
+    /// 通过mac方式, 设置连接目标
+    func setTargetDevice(_ macAddrress: String, _ mConnecType: BleConnectorType) {
+        setTargetIdentifier(macAddrress, BleConnectorType.macAddress)
+    }
+
 
     /**
      * 开始或停止连接。
@@ -119,7 +138,7 @@ class BaseBleConnector: NSObject {
 //                bleLog("BaseBleConnector connectedPeripherals=\(connectedPeripherals)")
                 for peripheral in connectedPeripherals {
                     if peripheral.identifier.uuidString == self.mTargetIdentifier {
-                        bleLog("BaseBleConnector connect directly")
+                        bleLog("BaseBleConnector connect directly \(peripheral.description)")
                         self.connect(peripheral)
                         return
                     }
@@ -234,12 +253,12 @@ extension BaseBleConnector: CBCentralManagerDelegate {
     }
 
     func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
-        bleLog("BaseBleConnector didFailToConnect -> peripheral=\(peripheral)")
+        bleLog("BaseBleConnector didFailToConnect -> peripheral=\(peripheral), error:\(String(describing: error))")
     }
 
     func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral,
                         error: Error?) {
-        bleLog("BaseBleConnector -> didDisconnectPeripheral")
+        bleLog("BaseBleConnector -> didDisconnectPeripheral, error:\(String(describing: error))")
         mPeripheral = nil
         mBaseBleMessenger.reset()
         mBleParserDelegate.reset()
@@ -273,7 +292,7 @@ extension BaseBleConnector: CBPeripheralDelegate {
     }
 
     func peripheral(_ peripheral: CBPeripheral, didUpdateNotificationStateFor characteristic: CBCharacteristic, error: Error?) {
-        bleLog("BaseBleConnector didUpdateNotificationStateFor -> \(characteristic.uuid.uuidString)")
+        bleLog("BaseBleConnector didUpdateNotificationStateFor -> \(characteristic.uuid.uuidString) error:\(String(describing: error))")
         mBaseBleMessenger.dequeueMessage()
         mBleConnectorDelegate.didUpdateNotification(characteristic.uuid.uuidString)
     }
@@ -284,14 +303,18 @@ extension BaseBleConnector: CBPeripheralDelegate {
             if let value = characteristic.value {
                 #if DEBUG
                 bleLog("BaseBleConnector didCharacteristicChange -> \(characteristic.uuid.uuidString)"
-                    + ", \(value.mHexString)")
+                       + ", \(value.mHexString), error:\(String(describing: error))")
                 #else
                 /**
                  压缩log写入text日志，中间件升级UI包写入100M日志
                  */
                 if value.mHexString.count < 150 {
                     bleLog("BaseBleConnector didCharacteristicChange -> \(characteristic.uuid.uuidString)"
-                        + ", data=\(value.mHexString)")
+                           + ", data=\(value.mHexString)")
+                } else if value.count < 80 {
+                    // 为了方便知道哪个数据错误, 打印下日志
+                    bleLog("BaseBleConnector didCharacteristicChange -> uuidString:\(characteristic.uuid.uuidString)")
+                    bleLog("BaseBleConnector didCharacteristicChange -> data=\(value.mHexString)")
                 } else {
                     bleLog("BaseBleConnector didCharacteristicChange -> \(characteristic.uuid.uuidString)"
                         + ", dataCount=\(value.mHexString.count)")
@@ -349,6 +372,15 @@ extension BaseBleConnector: BleScanDelegate {
     }
 
     func onDeviceFound(_ device: BleDevice) {
+        
+        // 在iOS中, 最终都是使用UUID来连接设备的,
+        // 如果外界传入的是mac地址, 在连接时候, 需要更改下我们这里的配置,
+        // 更改为UUID连接, 目的就是为了下次重连设备, 否则已经绑定配对了设备, 再次使用mac地址连接, 那就连接不上的
+        if mScanFilter.mConnecType == .macAddress {
+            let uuid = device.mPeripheral.identifier.uuidString
+            setTargetIdentifier(uuid, .systemUUID)
+        }
+        
         mBleScanner.scan(false)
         connect(device.mPeripheral)
     }

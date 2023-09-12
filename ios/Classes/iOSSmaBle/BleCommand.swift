@@ -35,7 +35,10 @@ enum BleKey: Int, CaseIterable {
          BLE_ADDRESS = 0x0205, USER_PROFILE = 0x0206, STEP_GOAL = 0x0207, BACK_LIGHT = 0x0208,
          SEDENTARINESS = 0x0209, NO_DISTURB_RANGE = 0x020A, VIBRATION = 0x020B,
          GESTURE_WAKE = 0x020C, HR_ASSIST_SLEEP = 0x020D, HOUR_SYSTEM = 0x020E, LANGUAGE = 0x020F,
-         ALARM = 0x0210, COACHING = 0x0212,
+         ALARM = 0x0210
+    /// 单位设置, 公制英制设置 0: 公制  1: 英制
+    case UNIT_SETTIMG = 0x0211
+    case COACHING = 0x0212,
          FIND_PHONE = 0x0213, NOTIFICATION_REMINDER = 0x0214, ANTI_LOST = 0x0215, HR_MONITORING = 0x0216,
          UI_PACK_VERSION = 0x0217, LANGUAGE_PACK_VERSION = 0x0218, SLEEP_QUALITY = 0x0219, DRINKWATER = 0x0221 , HEALTH_CARE = 0x021A,
          TEMPERATURE_DETECTING = 0x021B, AEROBIC_EXERCISE = 0x021C, TEMPERATURE_UNIT = 0x021D, DATE_FORMAT = 0x021E,
@@ -47,11 +50,26 @@ enum BleKey: Int, CaseIterable {
          WATCHFACE_ID = 0x0227,
          IBEACON_SET = 0x0228,
          MAC_QRCODE = 0x0229,
+         /// 温度标定, 手机下发当前温度标定值至设备端
+         TEMPERATURE_VALUE = 0x0232,
          GAME_SET = 0x0233,
          FIND_WATCH = 0x0234,
          SET_WATCH_PASSWORD = 0x0235,
          REALTIME_MEASUREMENT = 0x0236,
-
+         /// 省电模式
+         POWER_SAVE_MODE = 0x0237,
+         /// 酒精数据
+         BAC = 0x0515,
+         /// 比赛记录2
+         MATCH_RECORD2 = 0x0516,
+         /// 平均心率, 天高专用
+         AVG_HEART_RATE = 0x0517,
+         /// 酒精浓度检测设置
+         BAC_SET = 0x0238,
+         /// 酒精测试结果, 固件会主动发送
+         BAC_RESULT = 0x0244,
+         /// 酒精测试结果提示设置
+         BAC_RESULT_SET = 0x0245,
          REALTIME_LOG = 0x02F9,
          GSENSOR_OUTPUT = 0x02FA, // G-Sensor原始数据，1开启，0关闭
          GSENSOR_RAW = 0x02FB, // G-Sensor原始数据，2^9为1g
@@ -59,28 +77,85 @@ enum BleKey: Int, CaseIterable {
          LOCATION_GGA = 0x02FD, // 设备定位GGA数据
          RAW_SLEEP = 0x02FE,
          NO_DISTURB_GLOBAL = 0x02FF
+    // Set
+    /// 卡路里目标设置
+    case CALORIES_GOAL = 0x0239
+    /// 卡路里目标设置
+    case DISTANCE_GOAL = 0x023A
+    /// 睡眠目标设置
+    case SLEEP_GOAL = 0x023B
+    /// 发送LoveTap 消息
+    case LOVE_TAP = 0x0608
+    /// LoveTap 联系人
+    case LOVE_TAP_USER = 0x023C
+    /// 吃药提醒设置
+    case MEDICATION_REMINDER = 0x023D
+    /// 精简的设备信息
+    case DEVICE_INFO2 = 0x023E
+    /// 推送, Newsfeed 消息
+    case NEWS_FEER = 0x040B
+    /// 目标完成进度
+    case TARGET_COMPLETION = 0x040F
+    /// 心率警报设置
+    case HR_WARNING_SET = 0x023F
+    /// 睡眠检测时间段
+    case SLEEP_DETECTION_PERIOC = 0x0240
+    /// 待机设置,  待机表盘
+    case STANDBY_SETTING = 0x0241
+    /// 吃药提醒设置2, 简化版本的吃药提醒, 类似闹钟
+    case MEDICATION_ALARM = 0x0246
+    /// 比赛设置
+    case MATCH_SET = 0x0247
+    /// 获取手表字库/UI/语言包状态信息
+    case PACKAGE_STATUS = 0x0249
+    /// 支付宝设置
+    case ALIPAY_SET = 0x024A
+    
 
     // CONNECT
     case IDENTITY = 0x0301, // 身份，代表绑定的意思
          SESSION = 0x0302, // 会话，代表登陆的意思
          PAIR = 0x0303 // 配对
+    
 
     // PUSH
-    case MUSIC_CONTROL = 0x0402,
-         SCHEDULE = 0x0403,
-         WEATHER_REALTIME = 0x0404,
-         WEATHER_FORECAST = 0x0405,
-         WORLD_CLOCK = 0x0407,
-         STOCK = 0x0408
+    case MUSIC_CONTROL = 0x0402, SCHEDULE = 0x0403
+    /// 推送实时天气
+    case WEATHER_REALTIME = 0x0404
+    /// 推送预报天气
+    case WEATHER_FORECAST = 0x0405
+    /// 推送实时天气 2
+    case WEATHER_REALTIME2 = 0x040C
+    /// 推送预报天气 2
+    case WEATHER_FORECAST2 = 0x040D
+    /// 在线天数
+    case LOGIN_DAYS = 0x040E
+         
+    case WORLD_CLOCK = 0x0407,
+         STOCK = 0x0408,
+         // 推送快捷回复内容. 安卓实现, iOS无需实现
+         SMS_QUICK_REPLY_CONTENT = 0x0409,
+         /// 推送消息(带有电话号码).  安卓实现, iOS无需实现
+         NOTIFICATION2 = 0x040A
 
     // DATA
     case DATA_ALL = 0x05ff, // 实际协议中并没有该指令，该指令只是用来同步所有数据 0x050C 固件原始数据,用于固件分析使用,保存到text文件即可
          ACTIVITY_REALTIME = 0x0501,
          ACTIVITY = 0x0502, HEART_RATE = 0x0503, BLOOD_PRESSURE = 0x0504, SLEEP = 0x0505,
-         WORKOUT = 0x0506, LOCATION = 0x0507, TEMPERATURE = 0x0508, BLOODOXYGEN = 0x0509, HRV = 0x050A, LOG = 0x050B, SLEEP_RAW_DATA = 0x050C, PRESSURE = 0x050D,WORKOUT2 = 0x050E,MATCH_RECORD = 0x050F
+         WORKOUT = 0x0506, LOCATION = 0x0507, TEMPERATURE = 0x0508, BLOODOXYGEN = 0x0509,
+         BLOOD_GLUCOSE = 0x0510,  /// 血糖指令
+         HRV = 0x050A, LOG = 0x050B, SLEEP_RAW_DATA = 0x050C, PRESSURE = 0x050D,WORKOUT2 = 0x050E,MATCH_RECORD = 0x050F
+    /// 身体状态
+    case BODY_STATUS = 0x0511
+    /// 心情状态
+    case MIND_STATUS = 0x0512
+    /// 摄入卡路里
+    case CALORIE_INTAKE = 0x0513
+    // 食物均衡, 饮食均衡
+    case FOOD_BALANCE = 0x0514
 
     // CONTROL
-    case CAMERA = 0x0601, PHONE_GPSSPORT = 0x0602, APP_SPORT_STATE = 0x0604,IBEACON_CONTROL = 0x0606
+    case CAMERA = 0x0601, PHONE_GPSSPORT = 0x0602, APP_SPORT_STATE = 0x0604,IBEACON_CONTROL = 0x0606, DEVICE_SMS_QUICK_REPLY = 0x0607
 
     // IO
     case WATCH_FACE = 0x0701
@@ -90,6 +165,12 @@ enum BleKey: Int, CaseIterable {
     case UI_FILE = 0x0705
     case MEDIA_FILE = 0x0706
     case LANGUAGE_FILE = 0x0707
+    /// BrandInfo传输协议(关联蓝牙名和logo)
+    case BRAND_INFO_FILE = 0x0708
+    /// 发送二维码到设备
+    case QRCode = 0x0709
+    /// 第三方应用的通信
+    case THIRD_PARTY_DATA = 0x070A
 
     case NONE = 0xffff
 
@@ -121,42 +202,55 @@ enum BleKey: Int, CaseIterable {
             // SET
         case .POWER, .FIRMWARE_VERSION, .BLE_ADDRESS, .UI_PACK_VERSION, .LANGUAGE_PACK_VERSION:
             return [.READ]
-        case .NOTIFICATION_REMINDER, .SLEEP_QUALITY, .HEALTH_CARE, .TEMPERATURE_DETECTING, .APP_SPORT_DATA, .REAL_TIME_HEART_RATE,.BLOOD_OXYGEN_SET,.WASH_SET,.GAME_SET,.SET_WATCH_PASSWORD,.REALTIME_MEASUREMENT:
+        case .NOTIFICATION_REMINDER, .SLEEP_QUALITY, .HEALTH_CARE, .TEMPERATURE_DETECTING, .APP_SPORT_DATA, .REAL_TIME_HEART_RATE,.BLOOD_OXYGEN_SET,.WASH_SET,.GAME_SET, .FIND_WATCH, .SET_WATCH_PASSWORD,.REALTIME_MEASUREMENT, .TEMPERATURE_VALUE, .STANDBY_SETTING:
             return [.UPDATE]
+        case .GESTURE_WAKE, .DRINKWATER: // 抬手亮屏  DRINKWATER: 喝水提醒不支持Read
+            return [.UPDATE] // 这个指令, 是可以接受设备的回调的, 设备设置抬手亮屏后, 会告诉APP设置的数据
         case .TIME, .TIME_ZONE, .USER_PROFILE, .STEP_GOAL, .BACK_LIGHT, .SEDENTARINESS,
-             .NO_DISTURB_RANGE, .WATCH_FACE_SWITCH, .NO_DISTURB_GLOBAL, .AEROBIC_EXERCISE, .VIBRATION, .GESTURE_WAKE, .HR_ASSIST_SLEEP, .TEMPERATURE_UNIT, .DATE_FORMAT,
-             .HOUR_SYSTEM, .LANGUAGE, .ANTI_LOST, .HR_MONITORING , .DRINKWATER, .WATCHFACE_ID,.IBEACON_SET,.MAC_QRCODE:
+             .NO_DISTURB_RANGE, .WATCH_FACE_SWITCH, .NO_DISTURB_GLOBAL, .AEROBIC_EXERCISE, .VIBRATION, .HR_ASSIST_SLEEP, .TEMPERATURE_UNIT, .DATE_FORMAT,
+             .HOUR_SYSTEM, .LANGUAGE, .ANTI_LOST, .HR_MONITORING, .WATCHFACE_ID,.IBEACON_SET,.MAC_QRCODE:
             return [.UPDATE, .READ]
-        case .RAW_SLEEP:
+        case .RAW_SLEEP, .DEVICE_INFO2, .PACKAGE_STATUS:
             return [.READ]
-        case .ALARM:
+        case .CALORIES_GOAL, .DISTANCE_GOAL, .SLEEP_GOAL:
+            return [.READ]
+        case .ALARM, .MEDICATION_REMINDER, .MEDICATION_ALARM:
             return [.CREATE, .DELETE, .UPDATE, .READ, .RESET]
         case .COACHING:
             return [.CREATE, .UPDATE, .READ]
             // CONNECT
-        case .IDENTITY:
+        case .IDENTITY, .DEVICE_SMS_QUICK_REPLY:
             return [.CREATE, .READ, .DELETE]
         case .PAIR:
             return [.UPDATE]
             // PUSH
         case .SCHEDULE:
             return [.CREATE, .DELETE, .UPDATE]
-        case .WEATHER_REALTIME, .WEATHER_FORECAST:
+        case .WEATHER_REALTIME, .WEATHER_FORECAST, .WEATHER_REALTIME2, .WEATHER_FORECAST2, .LOGIN_DAYS, .TARGET_COMPLETION, .HR_WARNING_SET:
             return [.UPDATE]
         case .WORLD_CLOCK, .STOCK:
-            return [.CREATE,.READ,.DELETE]
+            return [.CREATE, .UPDATE, .READ,.DELETE]
             // DATA
         case .DATA_ALL, .ACTIVITY_REALTIME:
             return [.READ]
-        case .ACTIVITY, .HEART_RATE, .BLOOD_PRESSURE, .SLEEP, .WORKOUT, .LOCATION, .TEMPERATURE, .BLOODOXYGEN, .HRV, .SLEEP_RAW_DATA, .PRESSURE, .WORKOUT2, .MATCH_RECORD:
+        case .ACTIVITY, .HEART_RATE, .BLOOD_PRESSURE, .SLEEP, .WORKOUT, .LOCATION, .TEMPERATURE, .BLOODOXYGEN, .HRV, .SLEEP_RAW_DATA, .PRESSURE, .WORKOUT2, .MATCH_RECORD, .BLOOD_GLUCOSE:
             return [.READ, .DELETE]
+        case .BODY_STATUS, .MIND_STATUS, .CALORIE_INTAKE, .FOOD_BALANCE:
+            return [.READ]
+            
             // CONTROL
         case .CAMERA, .APP_SPORT_STATE,.IBEACON_CONTROL:
             return [.UPDATE]
             // IO
         case .CONTACT:
             return [.UPDATE, .DELETE]
-        case .WATCH_FACE, .AGPS_FILE, .FONT_FILE, .UI_FILE, .LANGUAGE_FILE:
+        case .WATCH_FACE, .AGPS_FILE, .FONT_FILE, .UI_FILE, .LANGUAGE_FILE, .BRAND_INFO_FILE, .QRCode, .THIRD_PARTY_DATA:
+            return [.UPDATE]
+        case .POWER_SAVE_MODE: // 省电模式
+            return [.UPDATE, .READ]
+        case .BAC, .AVG_HEART_RATE: // 酒精数据
+            return [.READ]
+        case .BAC_SET, .BAC_RESULT_SET: // 酒精浓度检测设置
             return [.UPDATE]
         default:
             return []
@@ -164,7 +258,7 @@ enum BleKey: Int, CaseIterable {
     }
 
     func isIdObjectKey() -> Bool {
-        self == .ALARM || self == .SCHEDULE || self == .COACHING || self == .WORLD_CLOCK || self == .STOCK
+        self == .ALARM || self == .SCHEDULE || self == .COACHING || self == .WORLD_CLOCK || self == .STOCK || self == .LOVE_TAP_USER
     }
 }
 

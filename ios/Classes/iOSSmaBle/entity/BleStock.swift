@@ -73,7 +73,7 @@ class BleStock: BleIdObject {
         let location = vString.distance(from: vString.startIndex, to: range.upperBound)
         let newItem = vString.suffix(vString.count-location)//截取包含小数点string
         bleLog("getNumberOfDecimalPlaces - \(newItem)")
-        return newItem.count-1
+        return newItem.count
     }
 
     required init(from decoder: Decoder) throws {

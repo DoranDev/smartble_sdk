@@ -74,6 +74,8 @@ class BleDeviceInfo: BleReadable {
     static let PROTOTYPE_F1_NEW = "F1"
     static let PROTOTYPE_S4 = "S4"
     static let PROTOTYPE_R6_PRO_DK = "R6_PRO_DK"
+    static let PROTOTYPE_GB1 = "GB1" /// 这个设备有点特殊, 仅仅需要OTA即可, 其他都不要, 所以开发需要注意下
+    static let PROTOTYPE_SPORT4 = "Sport4"
     
     // Goodix
     static let PROTOTYPE_R3H = "R3H"
@@ -111,6 +113,12 @@ class BleDeviceInfo: BleReadable {
     static let PROTOTYPE_F6Pro = "F6Pro"
     static let PROTOTYPE_FT5 = "FT5"
     static let PROTOTYPE_R16 = "R16"
+    static let PROTOTYPE_A8_Ultra_Pro = "A8_Ultra_Pro"
+    static let PROTOTYPE_AM08 = "AM08"
+    static let PROTOTYPE_JX621D = "JX621D"
+    static let PROTOTYPE_V61 = "V61"
+    static let PROTOTYPE_AM11 = "AM11"
+    static let PROTOTYPE_AW37 = "AW37"
     
     
     static let AGPS_NONE = 0 // 无GPS芯片
@@ -144,6 +152,9 @@ class BleDeviceInfo: BleReadable {
     static let WATCH_FACE_REALTEK_SQUARE_240x295_21 = 21 //瑞昱240*295方形表盘BMP格式（双蓝牙）
     static let WATCH_FACE_SERVER  = 99 //服务器表盘标记位
     
+    /// 自定义蓝牙名后, 用于查找原始名称的分隔符
+    private let kRAW_NAME_SEPARATOR = "<>"
+    
     var mId: Int = 0
 
     /**
@@ -155,6 +166,10 @@ class BleDeviceInfo: BleReadable {
      * 设备蓝牙名。
      */
     var mBleName: String = ""
+    /**
+     * 用户自定义的蓝牙名
+     */
+    var mBleCustomName: String = ""
 
     /**
      * 设备蓝牙4.0地址。
@@ -290,13 +305,50 @@ class BleDeviceInfo: BleReadable {
     /**
      * 设备是否支持设置密码
      */
-    var mSupportSetPassWord : Int = 0
+    var mSupportSetWatchPassword : Int = 0
     /**
      * 设备是否支持实时测量心率、血压、血氧
      */
     var mSupportRealTimeMeasurement : Int = 0
+    /**
+     * 设备是否支持是否支持省电模式功能
+     */
+    var mSupportPowerSaveMode: Int = 0
     
-
+    /// 设备是否支持是否支持LoveTap功能
+    var mSupportLoveTap: Int = 0
+    
+    /// 设备是否支持是否支持Newsfeed功能
+    var mSupportNewsfeed: Int = 0
+    
+    /// 设备是否支持是否支持吃药提醒, [SUPPORT_MEDICATION_REMINDER_0], [SUPPORT_MEDICATION_REMINDER_1]
+    var mSupportMedicationReminder: Int = 0
+    /// 设备是否支持是否同步二维码, [SUPPORT_QRCODE_0], [SUPPORT_QRCODE_1]
+    var mSupportQrcode: Int = 0
+    /// 设备是否支持新的天气协议(支持7天)
+    var mSupportWeather2: Int = 0
+    /// 是否支持支付宝
+    var mSupportAliPay: Int = 0
+    /// 是否支持待机设置
+    var mSupportStandbySetting: Int = 0
+    /// 是否支持2D加速资源, 例如在线表盘, 自定义表盘之类的
+    var mSupport2DAcceleration: Int = 0
+    /// 是否支持涂鸦授权码修改
+    var mSupportDoodleAuthorizationCode: Int = 0
+    /// 是否支持药物提醒2简化版功能, 这个是简化版本的吃药提醒, 就类似闹钟
+    var mSupportMedicationAlarm: Int = 0
+    /// 是否支持读取获取手表字库/UI/语言包/信息
+    var mSupportReadPackageStatus: Int = 0
+    /// 支持的联系人数量, 如果返回0, 默认20条, 返回大于0, 则是size = value * 10
+    var mSupportContactSize: Int = 0
+    /// 是否支持语音助手（小度）
+    var mSupportVoiceAssistant_XiaoDu: Int = 0
+    /// 是否支持导航
+    var mSupportNavigation: Int = 0
+    /// 是否支持心率警报设置
+    var mSupportHeartRateAlarmSetting: Int = 0
+    
+    
     required init(_ data: Data?, _ byteOrder: ByteOrder) {
         super.init(data, byteOrder)
     }
@@ -315,6 +367,20 @@ class BleDeviceInfo: BleReadable {
         mPlatform = readStringUtil(0)
         mPrototype = readStringUtil(0)
         mFirmwareFlag = readStringUtil(0)
+
+        // 如果固件标记包含特殊分隔符
+        if mFirmwareFlag.contains(kRAW_NAME_SEPARATOR) {
+            
+            if let rawName = mFirmwareFlag.components(separatedBy: kRAW_NAME_SEPARATOR).last {
+                
+                // rawName不为空, 并且和mBleName一致, 就是用户修改了蓝牙名, 需要重新调整显示的蓝牙名
+                if rawName != mBleName {
+                    mBleCustomName = mBleName  // 保存自定义名称
+                    mBleName = rawName  // mBleName 始终都显示正确的蓝牙名
+                }
+            }
+        }
+        
         mAGpsType = Int(readInt8())
         mIOBufferSize = Int(readUInt16())
         mWatchFaceType = Int(readInt8())
@@ -341,8 +407,24 @@ class BleDeviceInfo: BleReadable {
         mSupportStock = Int(readInt8())
         mSupportSMSQuickReply = Int(readInt8())
         mSupportNoDisturbSet = Int(readInt8())
-        mSupportSetPassWord = Int(readInt8())
+        mSupportSetWatchPassword = Int(readInt8())
         mSupportRealTimeMeasurement = Int(readInt8())
+        mSupportPowerSaveMode = Int(readInt8())
+        mSupportLoveTap = Int(readInt8())
+        mSupportNewsfeed = Int(readInt8())
+        mSupportMedicationReminder = Int(readInt8())
+        mSupportQrcode = Int(readInt8())
+        mSupportWeather2 = Int(readInt8())
+        mSupportAliPay = Int(readInt8())
+        mSupportStandbySetting = Int(readInt8())
+        mSupport2DAcceleration = Int(readInt8())
+        mSupportDoodleAuthorizationCode = Int(readInt8())
+        mSupportMedicationAlarm = Int(readInt8())
+        mSupportReadPackageStatus = Int(readInt8())
+        mSupportContactSize = Int(readInt8()) * 10
+        mSupportVoiceAssistant_XiaoDu = Int(readInt8())
+        mSupportNavigation = Int(readInt8())
+        mSupportHeartRateAlarmSetting = Int(readInt8())
     }
 
     required init(from decoder: Decoder) throws {
@@ -351,6 +433,7 @@ class BleDeviceInfo: BleReadable {
         mId = try container.decode(Int.self, forKey: .mId)
         mDataKeys = try container.decode([Int].self, forKey: .mDataKeys)
         mBleName = try container.decode(String.self, forKey: .mBleName)
+        mBleCustomName = try container.decode(String.self, forKey: .mBleCustomName)
         mBleAddress = try container.decode(String.self, forKey: .mBleAddress)
         mPlatform = try container.decode(String.self, forKey: .mPlatform)
         mPrototype = try container.decode(String.self, forKey: .mPrototype)
@@ -381,8 +464,24 @@ class BleDeviceInfo: BleReadable {
         mSupportStock = try container.decodeIfPresent(Int.self, forKey: .mSupportStock) ?? 0
         mSupportSMSQuickReply = try container.decodeIfPresent(Int.self, forKey: .mSupportSMSQuickReply) ?? 0
         mSupportNoDisturbSet = try container.decodeIfPresent(Int.self, forKey: .mSupportNoDisturbSet) ?? 0
-        mSupportSetPassWord = try container.decodeIfPresent(Int.self, forKey: .mSupportSetPassWord) ?? 0
+        mSupportSetWatchPassword = try container.decodeIfPresent(Int.self, forKey: .mSupportSetWatchPassword) ?? 0
         mSupportRealTimeMeasurement = try container.decodeIfPresent(Int.self, forKey: .mSupportRealTimeMeasurement) ?? 0
+        mSupportPowerSaveMode = try container.decodeIfPresent(Int.self, forKey: .mSupportPowerSaveMode) ?? 0
+        mSupportLoveTap = try container.decodeIfPresent(Int.self, forKey: .mSupportLoveTap) ?? 0
+        mSupportNewsfeed = try container.decodeIfPresent(Int.self, forKey: .mSupportNewsfeed) ?? 0
+        mSupportMedicationReminder = try container.decodeIfPresent(Int.self, forKey: .mSupportMedicationReminder) ?? 0
+        mSupportQrcode = try container.decodeIfPresent(Int.self, forKey: .mSupportQrcode) ?? 0
+        mSupportWeather2 = try container.decodeIfPresent(Int.self, forKey: .mSupportWeather2) ?? 0
+        mSupportAliPay = try container.decodeIfPresent(Int.self, forKey: .mSupportAliPay) ?? 0
+        mSupportStandbySetting = try container.decodeIfPresent(Int.self, forKey: .mSupportStandbySetting) ?? 0
+        mSupport2DAcceleration = try container.decodeIfPresent(Int.self, forKey: .mSupport2DAcceleration) ?? 0
+        mSupportDoodleAuthorizationCode = try container.decodeIfPresent(Int.self, forKey: .mSupportDoodleAuthorizationCode) ?? 0
+        mSupportMedicationAlarm = try container.decodeIfPresent(Int.self, forKey: .mSupportMedicationAlarm) ?? 0
+        mSupportReadPackageStatus = try container.decodeIfPresent(Int.self, forKey: .mSupportReadPackageStatus) ?? 0
+        mSupportContactSize = try container.decodeIfPresent(Int.self, forKey: .mSupportContactSize) ?? 0
+        mSupportVoiceAssistant_XiaoDu = try container.decodeIfPresent(Int.self, forKey: .mSupportVoiceAssistant_XiaoDu) ?? 0
+        mSupportNavigation = try container.decodeIfPresent(Int.self, forKey: .mSupportNavigation) ?? 0
+        mSupportHeartRateAlarmSetting = try container.decodeIfPresent(Int.self, forKey: .mSupportHeartRateAlarmSetting) ?? 0
     }
 
     override func encode(to encoder: Encoder) throws {
@@ -390,6 +489,7 @@ class BleDeviceInfo: BleReadable {
         try container.encode(mId, forKey: .mId)
         try container.encode(mDataKeys, forKey: .mDataKeys)
         try container.encode(mBleName, forKey: .mBleName)
+        try container.encode(mBleCustomName, forKey: .mBleCustomName)
         try container.encode(mBleAddress, forKey: .mBleAddress)
         try container.encode(mPlatform, forKey: .mPlatform)
         try container.encode(mPrototype, forKey: .mPrototype)
@@ -420,24 +520,45 @@ class BleDeviceInfo: BleReadable {
         try container.encode(mSupportStock, forKey: .mSupportStock)
         try container.encode(mSupportSMSQuickReply, forKey: .mSupportSMSQuickReply)
         try container.encode(mSupportNoDisturbSet, forKey: .mSupportNoDisturbSet)
-        try container.encode(mSupportSetPassWord, forKey: .mSupportSetPassWord)
+        try container.encode(mSupportSetWatchPassword, forKey: .mSupportSetWatchPassword)
         try container.encode(mSupportRealTimeMeasurement, forKey: .mSupportRealTimeMeasurement)
+        try container.encode(mSupportPowerSaveMode, forKey: .mSupportPowerSaveMode)
+        try container.encode(mSupportLoveTap, forKey: .mSupportLoveTap)
+        try container.encode(mSupportNewsfeed, forKey: .mSupportNewsfeed)
+        try container.encode(mSupportMedicationReminder, forKey: .mSupportMedicationReminder)
+        try container.encode(mSupportQrcode, forKey: .mSupportQrcode)
+        try container.encode(mSupportWeather2, forKey: .mSupportWeather2)
+        try container.encode(mSupportAliPay, forKey: .mSupportAliPay)
+        try container.encode(mSupportStandbySetting, forKey: .mSupportStandbySetting)
+        try container.encode(mSupport2DAcceleration, forKey: .mSupport2DAcceleration)
+        try container.encode(mSupportDoodleAuthorizationCode, forKey: .mSupportDoodleAuthorizationCode)
+        try container.encode(mSupportMedicationAlarm, forKey: .mSupportMedicationAlarm)
+        try container.encode(mSupportReadPackageStatus, forKey: .mSupportReadPackageStatus)
+        try container.encode(mSupportContactSize, forKey: .mSupportContactSize)
+        try container.encode(mSupportVoiceAssistant_XiaoDu, forKey: .mSupportVoiceAssistant_XiaoDu)
+        try container.encode(mSupportNavigation, forKey: .mSupportNavigation)
+        try container.encode(mSupportHeartRateAlarmSetting, forKey: .mSupportHeartRateAlarmSetting)
     }
 
     private enum CodingKeys: String, CodingKey {
-        case mId, mDataKeys, mBleName, mBleAddress, mPlatform, mPrototype, mFirmwareFlag, mAGpsType
+        case mId, mDataKeys, mBleName, mBleCustomName, mBleAddress, mPlatform, mPrototype, mFirmwareFlag, mAGpsType
         case mIOBufferSize, mWatchFaceType, mClassicAddress, mHideDigitalPower, mAntiLostSwitch
         case mSleepAlgorithmType, mDateFormat, mSupportReadDeviceInfo, mTemperatureUnit,mDrinkWater,mChangeClassicBluetoothState,mAppSport,mBloodOxyGenSet,mWashSet,mDemandWeather,mSupportHID
         case miBeacon,mSupportWatchFaceId,mSupportNewTransportMode,mSupportJLWatchFace
-        case mSupportFindWatch,mSupportWorldClock,mSupportStock,mSupportSMSQuickReply,mSupportNoDisturbSet,mSupportSetPassWord
+        case mSupportFindWatch,mSupportWorldClock,mSupportStock,mSupportSMSQuickReply,mSupportNoDisturbSet,mSupportSetWatchPassword
         case mSupportRealTimeMeasurement
+        case mSupportPowerSaveMode
+        case mSupportLoveTap, mSupportNewsfeed, mSupportMedicationReminder, mSupportQrcode, mSupportWeather2
+        case mSupportAliPay, mSupportStandbySetting, mSupport2DAcceleration, mSupportDoodleAuthorizationCode, mSupportMedicationAlarm
+        case mSupportReadPackageStatus, mSupportContactSize, mSupportVoiceAssistant_XiaoDu, mSupportNavigation
+        case mSupportHeartRateAlarmSetting
     }
 
     override var description: String {
         "BleDeviceInfo("
             + "mId: \(String(format: "0x%08X", mId))"
             + ", mDataKeys: \(mDataKeys.map({ "\(BleKey(rawValue: $0) ?? BleKey.NONE)" }))"
-            + ", mBleName: \(mBleName), mBleAddress: \(mBleAddress), mPlatform: \(mPlatform)"
+            + ", mBleName: \(mBleName), mBleCustomName: \(mBleCustomName), mBleAddress: \(mBleAddress), mPlatform: \(mPlatform)"
             + ", mPrototype: \(mPrototype), mFirmwareFlag: \(mFirmwareFlag), mAGpsType: \(mAGpsType)"
             + ", mIOBufferSize: \(mIOBufferSize), mWatchFaceType: \(mWatchFaceType)"
             + ", mClassicAddress: \(mClassicAddress), mHideDigitalPower: \(mHideDigitalPower)"
@@ -449,47 +570,75 @@ class BleDeviceInfo: BleReadable {
             + ", mDemandWeather:\(mDemandWeather), mSupportHID:\(mSupportHID), miBeacon:\(miBeacon)"
         + ", mSupportWatchFaceId:\(mSupportWatchFaceId), mSupportNewTransportMode:\(mSupportNewTransportMode),mSupportJLWatchFace:\(mSupportJLWatchFace)"
         + ", mSupportFindWatch:\(mSupportFindWatch),mSupportWorldClock:\(mSupportWorldClock),mSupportStock:\(mSupportStock),mSupportSMSQuickReply:\(mSupportSMSQuickReply),mSupportNoDisturbSet:\(mSupportNoDisturbSet)"
-        + ", mSupportSetPassWord:\(mSupportSetPassWord), mSupportRealTimeMeasurement:\(mSupportRealTimeMeasurement)"
+        + ", mSupportSetWatchPassword:\(mSupportSetWatchPassword), mSupportRealTimeMeasurement:\(mSupportRealTimeMeasurement)"
+        + ", mSupportPowerSaveMode:\(mSupportPowerSaveMode), mSupportLoveTap:\(mSupportLoveTap)"
+        + ", mSupportNewsfeed:\(mSupportNewsfeed), mSupportMedicationReminder:\(mSupportMedicationReminder), mSupportQrcode:\(mSupportQrcode)"
+        + ", mSupportWeather2:\(mSupportWeather2)" + ", mSupportAliPay:\(mSupportAliPay)" + ", mSupportStandbySetting:\(mSupportStandbySetting)"
+        + ", mSupport2DAcceleration:\(mSupport2DAcceleration)" + ", mSupportDoodleAuthorizationCode:\(mSupportDoodleAuthorizationCode)"
+        + ", mSupportMedicationAlarm:\(mSupportMedicationAlarm), mSupportReadPackageStatus:\(mSupportReadPackageStatus)"
+        + ", mSupportContactSize:\(mSupportContactSize), mSupportVoiceAssistant_XiaoDu:\(mSupportVoiceAssistant_XiaoDu)"
+        + ", mSupportNavigation:\(mSupportNavigation), mSupportHeartRateAlarmSetting:\(mSupportHeartRateAlarmSetting)"
             + ")"
     }
     
+    
     func toDictionary(_ status:Bool)->[String:Any]{
-        let dic : [String : Any] = ["mId":mId,
-                                    "mDataKeys":mDataKeys.map({ "\(BleKey(rawValue: $0) ?? BleKey.NONE)" }),
-                                    "mBleName":mBleName,
-                                    "mBleAddress":mBleAddress,
-                                    "mPlatform":mPlatform,
-                                    "mPrototype":mPrototype,
-                                    "mFirmwareFlag":mFirmwareFlag,
-                                    "mAGpsType":mAGpsType,
-                                    "mIOBufferSize":mIOBufferSize,
-                                    "mWatchFaceType":mWatchFaceType,
-                                    "mClassicAddress":mClassicAddress,
-                                    "mHideDigitalPower":mHideDigitalPower,
-                                    "mShowAntiLostSwitch":mAntiLostSwitch,
-                                    "mSleepAlgorithmType":mSleepAlgorithmType,
-                                    "mSupportDateFormatSet":mDateFormat,
-                                    "mSupportReadDeviceInfo":mSupportReadDeviceInfo,
-                                    "mSupportTemperatureUnitSet":mTemperatureUnit,
-                                    "mSupportDrinkWaterSet":mDrinkWater,
-                                    "mSupportChangeClassicBluetoothState":mChangeClassicBluetoothState,
-                                    "mSupportAppSport":mAppSport,
-                                    "mSupportBloodOxyGenSet":mBloodOxyGenSet,
-                                    "mSupportWashSet":mWashSet,
-                                    "mSupportRequestRealtimeWeather":mDemandWeather,
-                                    "mSupportHID":mSupportHID,
-                                    "mSupportIBeaconSet":miBeacon,
-                                    "mSupportWatchFaceId":mSupportWatchFaceId,
-                                    "mSupportNewTransportMode":mSupportNewTransportMode,
-                                    "mSupportJLTransport":mSupportJLWatchFace,
-                                    "mSupportFindWatch":mSupportFindWatch,
-                                    "mSupportWorldClock":mSupportWorldClock,
-                                    "mSupportStock":mSupportStock,
-                                    "mSupportSMSQuickReply":mSupportSMSQuickReply,
-                                    "mSupportNoDisturbSet":mSupportNoDisturbSet,
-                                    "mSupportSetPassWord":mSupportSetPassWord,
-                                    "mSupportRealTimeMeasurement":mSupportRealTimeMeasurement,
-                                    "status":status]
+        
+        let dic : [String : Any] = [
+            "mId":mId,
+            "mDataKeys":mDataKeys,
+            "mBleName":mBleName,
+            "mBleCustomName":mBleCustomName,
+            "mBleAddress":mBleAddress,
+            "mPlatform":mPlatform,
+            "mPrototype":mPrototype,
+            "mFirmwareFlag":mFirmwareFlag,
+            "mAGpsType":mAGpsType,
+            "mIOBufferSize":mIOBufferSize,
+            "mWatchFaceType":mWatchFaceType,
+            "mClassicAddress":mClassicAddress,
+            "mHideDigitalPower":mHideDigitalPower,
+            "mShowAntiLostSwitch":mAntiLostSwitch,
+            "mSleepAlgorithmType":mSleepAlgorithmType,
+            "mSupportDateFormatSet":mDateFormat,
+            "mSupportReadDeviceInfo":mSupportReadDeviceInfo,
+            "mSupportTemperatureUnitSet":mTemperatureUnit,
+            "mSupportDrinkWaterSet":mDrinkWater,
+            "mSupportChangeClassicBluetoothState":mChangeClassicBluetoothState,
+            "mSupportAppSport":mAppSport,
+            "mSupportBloodOxyGenSet":mBloodOxyGenSet,
+            "mSupportWashSet":mWashSet,
+            "mSupportRequestRealtimeWeather":mDemandWeather,
+            "mSupportHID":mSupportHID,
+            "mSupportIBeaconSet":miBeacon,
+            "mSupportWatchFaceId":mSupportWatchFaceId,
+            "mSupportNewTransportMode":mSupportNewTransportMode,
+            "mSupportJLTransport":mSupportJLWatchFace,
+            "mSupportFindWatch":mSupportFindWatch,
+            "mSupportWorldClock":mSupportWorldClock,
+            "mSupportStock":mSupportStock,
+            "mSupportSMSQuickReply":mSupportSMSQuickReply,
+            "mSupportNoDisturbSet":mSupportNoDisturbSet,
+            "mSupportSetWatchPassword":mSupportSetWatchPassword,
+            "mSupportRealTimeMeasurement":mSupportRealTimeMeasurement,
+            "mSupportPowerSaveMode":mSupportPowerSaveMode,
+            "mSupportLoveTap":mSupportLoveTap,
+            "mSupportNewsfeed":mSupportNewsfeed,
+            "mSupportMedicationReminder":mSupportMedicationReminder,
+            "mSupportQrcode":mSupportQrcode,
+            "mSupportWeather2":mSupportWeather2,
+            "mSupportAliPay":mSupportAliPay,
+            "mSupportStandbySetting":mSupportStandbySetting,
+            "mSupport2DAcceleration":mSupport2DAcceleration,
+            "mSupportDoodleAuthorizationCode":mSupportDoodleAuthorizationCode,
+            "mSupportMedicationAlarm":mSupportMedicationAlarm,
+            "mSupportReadPackageStatus":mSupportReadPackageStatus,
+            "mSupportContactSize": mSupportContactSize,
+            "mSupportVoiceAssistant_XiaoDu":mSupportVoiceAssistant_XiaoDu,
+            "mSupportNavigation":mSupportNavigation,
+            "mSupportHeartRateAlarmSetting": mSupportHeartRateAlarmSetting,
+            "status":status
+        ]
         return dic
     }
 }

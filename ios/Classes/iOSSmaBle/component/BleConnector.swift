@@ -60,8 +60,16 @@ class BleConnector: BaseBleConnector {
 
     func launch() {
         if let identity = mBleCache.getDeviceIdentify() {
-            bleLog("BleConnector launch -> identity=\(identity)")
-            setTargetIdentifier(identity)
+            bleLog("BleConnector launch -> identity=\(identity) mLaunched:\(mLaunched)")
+            
+            // 初始化时候, 根据传入的identity 是什么, 来确定使用那个方式连接, 主要处理Flutter
+            // E9:7F:EA:F6:79:7D
+            if identity.count == 17 && identity.contains(":") {
+                setTargetIdentifier(identity, .macAddress)
+            } else {
+                setTargetIdentifier(identity, .systemUUID)
+            }
+            
             if mLaunched {
                 // 初始化时，会触发centralManagerDidUpdateState代理方法，该方法会调用connect()，所以无需手动调用
                 // 调用close之后再调用，需要手动调用connect
@@ -87,7 +95,8 @@ class BleConnector: BaseBleConnector {
     func removeBleHandleDelegate(_ tag: String) {
         bleLog("removeBleHandleDelegate: \(tag)")
         if mBleHandleDelegates[tag] == nil {
-            fatalError("Tag dose not exist")
+            bleLog("mBleHandleDelegates中取出来的tag:\(tag) 为nil")
+            //fatalError("Tag dose not exist")
         } else {
             mBleHandleDelegates[tag] = nil
         }
@@ -116,7 +125,10 @@ class BleConnector: BaseBleConnector {
             bleKey == .FONT_FILE ||
             bleKey == .CONTACT ||
             bleKey == .UI_FILE ||
-            bleKey == .LANGUAGE_FILE {
+            bleKey == .LANGUAGE_FILE ||
+            bleKey == .BRAND_INFO_FILE ||
+            bleKey == .QRCode ||
+            bleKey == .THIRD_PARTY_DATA {
             if self.mTransmissionSpeed < 946656000 {
                 self.mTransmissionSpeed = Int(Date().timeIntervalSince1970)
             }
@@ -206,19 +218,40 @@ class BleConnector: BaseBleConnector {
         if object is BleIdObject {
             idObjects = mBleCache.getArray(bleKey)
             if bleKeyFlag == .CREATE {
-                var ids = idObjects.map({ ($0 as! BleIdObject).mId }) // 本地缓存的id
-                if object is BleCoaching { // coaching除了本地有缓存，设备端也可能有缓存
-                    if let coachingIds: BleCoachingIds = mBleCache.getObject(.COACHING, .READ) {
-                        ids.append(contentsOf: coachingIds.mIds)
+                
+                if bleKey == .LOVE_TAP_USER {
+                    
+                    // 2023-05-04 这个指令客户要求, 自己来控制mId参数所以不需要再判断什么, 直接发送给设备即可
+                    idObjects.append(object!)
+                } else {
+                    // 2023-04-25 为了兼容Flutter和Swift交互, 处理Flutter调用时, SDK内部泛型类型不一致, 无法解析出mId值
+                    // 例如添加闹钟, mBleCache.getArray(bleKey) 无法解析出mId, 返回的mId全是等于0, 就导致无法添加多个闹钟数据
+                    var ids = [Int]()
+                    if bleKey.isIdObjectKey() {
+                        
+                        // 如果是Flutter调用, 这里返回的是真实的Swift 类型, 可以正确读取出mId
+                        let idObjRaw: [BleIdObject] = mBleCache.getIdObjects(bleKey)
+                        ids = idObjRaw.map({ $0.mId })
+                    } else {
+                        // 这个之前的代码, 获取添加的mId属性, 使用原生SDK Swift代码访问能够正常返回mId
+                        ids = idObjects.map({ ($0 as! BleIdObject).mId }) // 本地缓存的id
                     }
-                }
-                for i in 0..<ID_ALL { // 分配一个0～0xfe之间还未缓存的id
-                    if !ids.contains(i) {
-                        (object as! BleIdObject).mId = i
-                        break
+                    
+                    // 2023-04-25 注释之前的代码, 为了兼容Flutter和Swift交互
+                    //var ids = idObjects.map({ ($0 as! BleIdObject).mId }) // 本地缓存的id
+                    if object is BleCoaching { // coaching除了本地有缓存，设备端也可能有缓存
+                        if let coachingIds: BleCoachingIds = mBleCache.getObject(.COACHING, .READ) {
+                            ids.append(contentsOf: coachingIds.mIds)
+                        }
                     }
+                    for i in 0..<ID_ALL { // 分配一个0～0xfe之间还未缓存的id
+                        if !ids.contains(i) {
+                            (object as! BleIdObject).mId = i
+                            break
+                        }
+                    }
+                    idObjects.append(object!)
                 }
-                idObjects.append(object!)
             } else if bleKeyFlag == .UPDATE {
                 // 根据id查到本地缓存
                 if let index = idObjects.firstIndex(where: { ($0 as! BleIdObject).mId == (object as! BleIdObject).mId }) {
@@ -313,7 +346,9 @@ class BleConnector: BaseBleConnector {
                 bleKey == .FONT_FILE ||
                 bleKey == .CONTACT ||
                 bleKey == .UI_FILE ||
-                bleKey == .LANGUAGE_FILE) &&
+                bleKey == .LANGUAGE_FILE ||
+                bleKey == .QRCode ||
+                bleKey == .THIRD_PARTY_DATA) &&
                 BleCache.shared.mSupportNewTransportMode == 1 &&
                 BleCache.shared.mPlatform == BleDeviceInfo.PLATFORM_JL{
                 self.mDataResume = 0
@@ -528,6 +563,26 @@ class BleConnector: BaseBleConnector {
                 bleLog("BleConnector handleData onReadLanguagePackVersion -> \(languagePackVersion)")
                 notifyHandlers({ $0.onReadLanguagePackVersion?(languagePackVersion) })
             }
+        case .SLEEP_QUALITY: // 睡眠质量
+            if isReply {
+                if bleKeyFlag == .READ {
+                    if data.count < MessageFactory.LENGTH_BEFORE_DATA + BleSleepQuality.ITEM_LENGTH {
+                        return
+                    }
+                    
+                    let sleepQuality: BleSleepQuality = BleReadable.ofObject(data, MessageFactory.LENGTH_BEFORE_DATA)
+                    BleCache.shared.putObject(bleKey, sleepQuality)
+                    
+                    bleLog("BleConnector handleData onReadSleepQuality -> \(sleepQuality)")
+                    notifyHandlers({ $0.onReadSleepQuality?(sleepQuality) })
+                } else {
+                 
+                    bleLog("BleConnector handleData SLEEP_QUALITY onCommandReply -> \(bleKey), \(bleKeyFlag), true")
+                    notifyHandlers({ $0.onCommandReply?(bleKey.rawValue, bleKeyFlag.rawValue, true) })
+                    return // 注意一定要return, 否则会执行2次rawValue方法
+                }
+            }
+            
         case .LANGUAGE:
             if !isReply && (bleKeyFlag == .DELETE || bleKeyFlag == .READ) {
                 _ = sendData(bleKey, bleKeyFlag, nil, true)
@@ -571,7 +626,7 @@ class BleConnector: BaseBleConnector {
                 notifyHandlers({ $0.onReadAerobicSettings?(AerobicSettings) })
             }
             break
-        case .TEMPERATURE_UNIT:
+        case .TEMPERATURE_UNIT:  // 温度单位设置
             if isReply && bleKeyFlag == .READ {
                 let state = Int(data[MessageFactory.LENGTH_BEFORE_DATA])
                 bleLog("BleConnector handleData onReadTemperatureUnitSettings -> \(state)")
@@ -594,6 +649,44 @@ class BleConnector: BaseBleConnector {
             notifyHandlers({
                 $0.onReadBleAddress?(address)
             })
+        case .USER_PROFILE: // 用户信息
+            if bleKeyFlag == .READ {
+                let userProfile: BleUserProfile = BleReadable.ofObject(data, MessageFactory.LENGTH_BEFORE_DATA)
+                BleCache.shared.putObject(bleKey, userProfile)
+                
+                bleLog("BleConnector handleData onReadUserPorfile -> \(userProfile)")
+                notifyHandlers({ $0.onReadUserPorfile?(userProfile) })
+            } else {
+                if bleKeyFlag == .UPDATE {
+                    let status = true
+                    bleLog("BleConnector handleData USER_PROFILE onCommandReply -> \(bleKey), \(bleKeyFlag), true")
+                    notifyHandlers({ $0.onCommandReply?(bleKey.rawValue, bleKeyFlag.rawValue, status) })
+                    return
+                }
+            }
+            
+        case .STEP_GOAL:  // 目标步数
+            if bleKeyFlag == .READ {
+                
+                if !isReply {
+                    _ = sendData(bleKey, bleKeyFlag, nil, true)
+                }
+                if (data.count < MessageFactory.LENGTH_BEFORE_DATA + 4) {
+                    bleLog("READ STEP_GOAL返回的数据格式, 不合法")
+                    break
+                }
+                
+                // "0xAB, 0x11, 0x00, 0x07, 0x0A, 0xE3, 0x02, 0x07, 0x10, 0x00, 0x00, 0x03, 0xE8"
+                // 数据是 MessageFactory.LENGTH_BEFORE_DATA 后4个字节  0x00, 0x00, 0x03, 0xE8
+                let sufData: Data = Data(data.suffix(4))
+            
+                let value = sufData.hexToDecimal()
+                mBleCache.putInt(bleKey, value)
+
+                // 设备返回目标步数时触发
+                notifyHandlers({ $0.onReadStepGoal?(value)})
+            }
+            
         case .SEDENTARINESS:
             if isReply && bleKeyFlag == BleKeyFlag.READ {
                 let sedentariness: BleSedentarinessSettings = BleReadable.ofObject(data, MessageFactory.LENGTH_BEFORE_DATA)
@@ -617,7 +710,42 @@ class BleConnector: BaseBleConnector {
             }else if isReply && bleKeyFlag == .UPDATE {
                 notifyHandlers({ $0.onUpdateSettings?(bleKey.rawValue) })
             }
-        case .VIBRATION:
+        case .POWER_SAVE_MODE:  // 省电模式
+            if bleKeyFlag == .READ {
+                
+                if !isReply {
+                    _ = sendData(bleKey, bleKeyFlag, nil, true)
+                }
+                if (data.count < MessageFactory.LENGTH_BEFORE_DATA + 1) {
+                    bleLog("READ省电模式返回的数据格式, 不合法")
+                    break
+                }
+                // ab010004b671023700 01
+                let value = Int(data[MessageFactory.LENGTH_BEFORE_DATA])
+                //print("READ省电模式, 主动返回数据:\(value)")
+                mBleCache.putInt(bleKey, value)
+                
+                // 设备返回当前省电模式状态时触发。
+                notifyHandlers({ $0.onPowerSaveModeState?(value)})
+
+            } else if !isReply && bleKeyFlag == .UPDATE {
+                _ = sendData(bleKey, bleKeyFlag, nil, true)
+                
+                if (data.count < MessageFactory.LENGTH_BEFORE_DATA + 1) {
+                    bleLog("UPDATE省点模式返回的数据格式, 不合法")
+                    break
+                }
+                
+                let value = Int(data[MessageFactory.LENGTH_BEFORE_DATA])
+                //print("UPDATE省电模式, 主动返回数据:\(value)")
+                mBleCache.putInt(bleKey, value)
+                
+                // 设备的省电模式状态变化时触发
+                notifyHandlers({ $0.onPowerSaveModeStateChange?(value)})
+            }
+            
+        case .VIBRATION:  // 震动
+            
             if !isReply && bleKeyFlag == .UPDATE {
                 _ = sendData(bleKey, bleKeyFlag, nil, true)
                 if data.count < MessageFactory.LENGTH_BEFORE_DATA + 1 {
@@ -628,7 +756,7 @@ class BleConnector: BaseBleConnector {
                 notifyHandlers({ $0.onVibrationUpdate?(value) })
             }
             break
-        case .ALARM:
+        case .ALARM:  // 闹钟
             if isReply {
                 if bleKeyFlag == .READ {
                     let alarms: [BleAlarm] = BleReadable.ofArray(data, BleAlarm.ITEM_LENGTH,
@@ -636,6 +764,10 @@ class BleConnector: BaseBleConnector {
                     bleLog("BleConnector handleData onReadAlarm -> \(alarms)")
                     mBleCache.putArray(bleKey, alarms)
                     notifyHandlers({ $0.onReadAlarm?(alarms) })
+                } else {
+                    bleLog("BleConnector handleData ALARM onCommandReply -> \(bleKey), \(bleKeyFlag), true")
+                    notifyHandlers({ $0.onCommandReply?(bleKey.rawValue, bleKeyFlag.rawValue, true) })
+                    return // 注意一定要return, 否则会执行2次rawValue方法
                 }
             } else {
                 if bleKeyFlag == .UPDATE {
@@ -676,6 +808,58 @@ class BleConnector: BaseBleConnector {
                     notifyHandlers({ $0.onAlarmAdd?(alarm) })
                 }
             }
+        case .MEDICATION_ALARM:  // 简化版本的吃药提醒, 药物提醒, 功能和闹钟差不多
+            if isReply {
+                if bleKeyFlag == .READ {
+                    let alarms: [BleMedicationAlarm] = BleReadable.ofArray(data, BleMedicationAlarm.ITEM_LENGTH,
+                        MessageFactory.LENGTH_BEFORE_DATA)
+                    bleLog("BleConnector handleData onReadMedicationAlarm -> \(alarms)")
+                    mBleCache.putArray(bleKey, alarms)
+                    notifyHandlers({ $0.onReadMedicationAlarm?(alarms) })
+                } else {
+                    bleLog("BleConnector handleData MEDICATION_ALARM onCommandReply -> \(bleKey), \(bleKeyFlag), true")
+                    notifyHandlers({ $0.onCommandReply?(bleKey.rawValue, bleKeyFlag.rawValue, true) })
+                    return // 注意一定要return, 否则会执行2次rawValue方法
+                }
+            } else {
+                if bleKeyFlag == .UPDATE {
+                    _ = sendData(bleKey, bleKeyFlag, nil, true)
+                    let alarm: BleMedicationAlarm = BleReadable.ofObject(data, MessageFactory.LENGTH_BEFORE_DATA)
+                    bleLog("BleConnector handleData onMedicationAlarmUpdate -> \(alarm)")
+                    var alarms: [BleMedicationAlarm] = mBleCache.getArray(bleKey)
+                    if let index = alarms.firstIndex(where: { $0.mId == alarm.mId }) {
+                        alarms[index] = alarm
+                    }
+                    mBleCache.putArray(bleKey, alarms)
+                    notifyHandlers({ $0.onMedicationAlarmUpdate?(alarm) })
+                } else if bleKeyFlag == .DELETE {
+                    if data.count < MessageFactory.LENGTH_BEFORE_DATA + 1 {
+                        return
+                    }
+
+                    _ = sendData(bleKey, bleKeyFlag, nil, true)
+                    let id = Int(data.getUInt(MessageFactory.LENGTH_BEFORE_DATA, 1))
+                    var alarms: [BleMedicationAlarm] = mBleCache.getArray(bleKey)
+                    if id == ID_ALL {
+                        alarms.removeAll()
+                    } else {
+                        if let index = alarms.firstIndex(where: { $0.mId == id }) {
+                            alarms.remove(at: index)
+                        }
+                    }
+                    bleLog("BleConnector handleData onMedicationAlarmDelete -> \(id)")
+                    mBleCache.putArray(bleKey, alarms)
+                    notifyHandlers({ $0.onMedicationAlarmDelete?(id) })
+                } else if bleKeyFlag == .CREATE {
+                    _ = sendData(bleKey, bleKeyFlag, nil, true)
+                    let alarm: BleMedicationAlarm = BleReadable.ofObject(data, MessageFactory.LENGTH_BEFORE_DATA)
+                    bleLog("BleConnector handleData onMedicationAlarmAdd -> \(alarm)")
+                    var alarms: [BleMedicationAlarm] = mBleCache.getArray(bleKey)
+                    alarms.append(alarm)
+                    mBleCache.putArray(bleKey, alarms)
+                    notifyHandlers({ $0.onMedicationAlarmAdd?(alarm) })
+                }
+            }
         case .COACHING:
             if isReply {
                 if bleKeyFlag == .READ {
@@ -684,14 +868,20 @@ class BleConnector: BaseBleConnector {
                     mBleCache.putObject(bleKey, coachingIds, bleKeyFlag)
                     notifyHandlers({ $0.onReadCoachingIds?(coachingIds) })
                 } else if bleKeyFlag == .UPDATE {
-                    let status = data[MessageFactory.LENGTH_BEFORE_DATA] == BLE_OK
-                    notifyHandlers({
-                        $0.onCommandReply?(bleKey.rawValue, bleKeyFlag.rawValue, status)
-                    })
-                    bleLog("BleConnector handleData onCommandReply \(bleKey), \(bleKeyFlag) -> \(status)")
+                    bleLog("BleConnector handleData COACHING onCommandReply -> \(bleKey), \(bleKeyFlag), true")
+                    notifyHandlers({ $0.onCommandReply?(bleKey.rawValue, bleKeyFlag.rawValue, true) })
+                    return // 注意一定要return, 否则会执行2次rawValue方法
                 }
             }
             break
+        case .SCHEDULE:
+            if isReply {
+                if bleKeyFlag == .CREATE {
+                    bleLog("BleConnector handleData SCHEDULE onCommandReply -> \(bleKey), \(bleKeyFlag), true")
+                    notifyHandlers({ $0.onCommandReply?(bleKey.rawValue, bleKeyFlag.rawValue, true) })
+                    return // 注意一定要return, 否则会执行2次rawValue方法
+                }
+            }
         case .WORLD_CLOCK:
             if isReply {
                 if bleKeyFlag == .READ {
@@ -700,6 +890,10 @@ class BleConnector: BaseBleConnector {
                     bleLog("BleConnector handleData onReadWorldClock -> \(worldClocks)")
                     mBleCache.putArray(bleKey, worldClocks)
                     notifyHandlers({ $0.onReadWorldClock?(worldClocks) })
+                } else {
+                    bleLog("BleConnector handleData WORLD_CLOCK onCommandReply -> \(bleKey), \(bleKeyFlag), true")
+                    notifyHandlers({ $0.onCommandReply?(bleKey.rawValue, bleKeyFlag.rawValue, true) })
+                    return // 注意一定要return, 否则会执行2次rawValue方法
                 }
             }else{
                 if bleKeyFlag == .DELETE{
@@ -731,6 +925,10 @@ class BleConnector: BaseBleConnector {
                     bleLog("BleConnector handleData onReadStock -> \(stocks)")
                     mBleCache.putArray(bleKey, stocks)
                     notifyHandlers({ $0.onReadStock?(stocks) })
+                } else {
+                    bleLog("BleConnector handleData STOCK onCommandReply -> \(bleKey), \(bleKeyFlag), true")
+                    notifyHandlers({ $0.onCommandReply?(bleKey.rawValue, bleKeyFlag.rawValue, true) })
+                    return // 注意一定要return, 否则会执行2次rawValue方法
                 }
                 
             }else{
@@ -787,7 +985,7 @@ class BleConnector: BaseBleConnector {
                 bleLog("BleConnector handleData onUpdateRealTimeHR -> \(itemHR)")
                 notifyHandlers({ $0.onUpdateRealTimeHR?(itemHR) })
             }
-        case .REAL_TIME_TEMPERATURE:
+        case .REAL_TIME_TEMPERATURE:  // 体温
             if isReply == false {
                 _ = sendData(bleKey, bleKeyFlag, nil, true)
                 if data.count < MessageFactory.LENGTH_BEFORE_DATA + 1 {
@@ -809,7 +1007,7 @@ class BleConnector: BaseBleConnector {
                 notifyHandlers({ $0.onUpdateRealTimeBloodPressure?(itemBP) })
             }
             break
-        case .BLOOD_OXYGEN_SET:
+        case .BLOOD_OXYGEN_SET:  // 血氧
             if isReply && bleKeyFlag == BleKeyFlag.READ {
                 let bloodOxySet: BleBloodOxyGenSettings = BleReadable.ofObject(data, MessageFactory.LENGTH_BEFORE_DATA)
                 bleLog("BleConnector handleData onReadBloodOxyGenSettings -> \(bloodOxySet)")
@@ -868,7 +1066,7 @@ class BleConnector: BaseBleConnector {
             if bleKeyFlag == .CREATE {
                 if !status {
                     bleLog("BleConnector handleData onIdentityCreate -> false")
-                    notifyHandlers({ $0.onIdentityCreate?(false) })
+                    notifyHandlers({ $0.onIdentityCreate?(false, nil) })
                 }
             } else if bleKeyFlag == .UPDATE {
                 _ = sendData(bleKey, bleKeyFlag, nil, true)
@@ -878,12 +1076,16 @@ class BleConnector: BaseBleConnector {
                         bleLog("BleConnector handleData onIdentityCreate -> true, \(deviceInfo)")
                         mBleCache.putObject(bleKey, deviceInfo)
                         mBleCache.putDeviceIdentify(mTargetIdentifier)
-                        notifyHandlers({ $0.onIdentityCreate?(true) })
+                        notifyHandlers({ $0.onIdentityCreate?(true, deviceInfo) })
                         login(deviceInfo.mId)
                     }
                 } else {
+                    bleLog("The user clicks 'x' of the binding box to disconnect")
                     bleLog("BleConnector handleData onIdentityCreate -> false")
-                    notifyHandlers({ $0.onIdentityCreate?(false) })
+                    // 用户点击了设备绑定框的 'x', 由于iOS系统的原因, 这里需要执行下断开系统和设备的蓝牙连接操作
+                    closeConnection(true)
+                    
+                    notifyHandlers({ $0.onIdentityCreate?(false, nil) })
                 }
             } else if bleKeyFlag == .DELETE {
                 bleLog("BleConnector handleData onIdentityDelete -> \(status)")
@@ -894,6 +1096,7 @@ class BleConnector: BaseBleConnector {
                     notifyHandlers({ $0.onIdentityDelete?(status) })
                 } else {
                     //viewController make judgments ->unbind
+                    _ = sendData(bleKey, bleKeyFlag, nil, true)
                     notifyHandlers({ $0.onIdentityDeleteByDevice?(status) })
                 }
             } else if bleKeyFlag == .READ {
@@ -907,7 +1110,32 @@ class BleConnector: BaseBleConnector {
                     mBleCache.mDeviceInfo = deviceInfo
                     mBleCache.putObject(bleKey, deviceInfo)
                 }
+                
+                notifyHandlers({ $0.onReadDeviceInfo?(status, deviceInfo) })
             }
+        case .DEVICE_INFO2:  // 获取手表信息, 设备基础信息返回
+            
+            if bleKeyFlag == .READ {
+                
+                if data.count < MessageFactory.LENGTH_BEFORE_DATA + 1 {
+                    return
+                }
+                
+                
+                if data.count < MessageFactory.LENGTH_BEFORE_DATA + 17 { // 这里的17只是大概防呆一下
+                    return
+                }
+                
+                let deviceInfo2: BleDeviceInfo2 = BleReadable.ofObject(data, MessageFactory.LENGTH_BEFORE_DATA)
+                bleLog("BleConnector handleData onReadDeviceInfo2 -> \(deviceInfo2)")
+                //    if status {
+                //        mBleCache.mDeviceInfo = deviceInfo
+                //        mBleCache.putObject(bleKey, deviceInfo)
+                //    }
+                
+                notifyHandlers({ $0.onReadDeviceInfo2?(deviceInfo2) })
+            }
+            
         case .SESSION:
             if data.count < MessageFactory.LENGTH_BEFORE_DATA + 1 {
                 return
@@ -930,7 +1158,7 @@ class BleConnector: BaseBleConnector {
                 bleLog("BleConnector handleData onReadWeatherRealtime -> true")
                 notifyHandlers({ $0.onReadWeatherRealtime?(true) })
             }
-            // BleCommand.DATA
+
         case .ACTIVITY:
             if bleKeyFlag == .READ && isReply {
                 let activities: [BleActivity] = BleReadable.ofArray(data, BleActivity.ITEM_LENGTH,
@@ -1056,6 +1284,22 @@ class BleConnector: BaseBleConnector {
                     notifyHandlers({ $0.onReadBloodOxygen?(BloodOxys) })
                 }
             }
+        case .BLOOD_GLUCOSE:  //血糖
+            if isReply && bleKeyFlag == BleKeyFlag.READ {
+                
+                let bloodGlucoseArr: [BleBloodGlucose] = BleReadable.ofArray(data, BleBloodGlucose.ITEM_LENGTH, MessageFactory.LENGTH_BEFORE_DATA)
+                bleLog("BleConnector handleData onReadBloodGlucose -> \(bloodGlucoseArr)")
+                
+                dataCount = bloodGlucoseArr.count
+                if mSupportFilterEmpty {  // ab11000987db0510 102b0ade7d0041
+                    if !bloodGlucoseArr.isEmpty {
+                        notifyHandlers({ $0.onReadBloodGlucose?(bloodGlucoseArr) })
+                    }
+                } else {
+                    notifyHandlers({ $0.onReadBloodGlucose?(bloodGlucoseArr) })
+                }
+                //notifyHandlers({ $0.onReadBloodGlucose?(bloodGlucoseArr) })
+            }
         case .HRV:
             if bleKeyFlag == .READ && isReply {
                 let HRVs: [BleHeartRateVariability] = BleReadable.ofArray(data, BleHeartRateVariability.ITEM_LENGTH,
@@ -1124,8 +1368,76 @@ class BleConnector: BaseBleConnector {
                     notifyHandlers({ $0.onReadMatchRecord?(matchRecord) })
                 }
             }
-            break
-            // BleCommand.CONTROL
+        case .MATCH_RECORD2:
+            if bleKeyFlag == .READ && isReply {
+                let matchRecord2: [BleMatchRecord2] = BleReadable.ofArray(data, BleMatchRecord2.ITEM_LENGTH,MessageFactory.LENGTH_BEFORE_DATA)
+                dataCount = matchRecord2.count
+                bleLog("BleConnector handleData onReadMatchRecord2 -> \(matchRecord2)")
+                if mSupportFilterEmpty {
+                    if !matchRecord2.isEmpty {
+                        notifyHandlers({ $0.onReadMatchRecord2?(matchRecord2) })
+                    }
+                } else {
+                    notifyHandlers({ $0.onReadMatchRecord2?(matchRecord2) })
+                }
+            }
+            
+        case .BODY_STATUS:  // 身体状态
+            if bleKeyFlag == .READ && isReply {
+                
+                let bodyStatusArr: [BleBodyStatus] = BleReadable.ofArray(data, BleBodyStatus.ITEM_LENGTH, MessageFactory.LENGTH_BEFORE_DATA)
+                bleLog("BleConnector handleData onReadBodyStatus -> bodyStatusArr:\(bodyStatusArr.count)")
+                if mSupportFilterEmpty {
+                    if !bodyStatusArr.isEmpty {
+                        notifyHandlers({ $0.onReadBodyStatus?(bodyStatusArr) })
+                    }
+                } else {
+                    notifyHandlers({ $0.onReadBodyStatus?(bodyStatusArr) })
+                }
+            }
+            
+        case .MIND_STATUS:  // 心情状态
+            if bleKeyFlag == .READ && isReply {
+
+                let mindStatusArr: [BleMindStatus] = BleReadable.ofArray(data, BleMindStatus.ITEM_LENGTH, MessageFactory.LENGTH_BEFORE_DATA)
+                bleLog("BleConnector handleData onReadMindStatus -> mindStatusArr:\(mindStatusArr.count)")
+                if mSupportFilterEmpty {
+                    if !mindStatusArr.isEmpty {
+                        notifyHandlers({ $0.onReadMindStatus?(mindStatusArr) })
+                    }
+                } else {
+                    notifyHandlers({ $0.onReadMindStatus?(mindStatusArr) })
+                }
+            }
+        case .CALORIE_INTAKE:  // 摄入卡路里
+            if bleKeyFlag == .READ && isReply {
+
+                let calorieIntakeArr: [BleCalorieIntake] = BleReadable.ofArray(data, BleCalorieIntake.ITEM_LENGTH, MessageFactory.LENGTH_BEFORE_DATA)
+                bleLog("BleConnector handleData onReadCalorieIntake -> calorieIntakeArr:\(calorieIntakeArr.count)")
+                if mSupportFilterEmpty {
+                    if !calorieIntakeArr.isEmpty {
+                        notifyHandlers({ $0.onReadCalorieIntake?(calorieIntakeArr) })
+                    }
+                } else {
+                    notifyHandlers({ $0.onReadCalorieIntake?(calorieIntakeArr) })
+                }
+            }
+            
+        case .FOOD_BALANCE:  // 食物均衡, 饮食均衡
+            if bleKeyFlag == .READ && isReply {
+
+                let foodBalanceArr: [BleFoodBalance] = BleReadable.ofArray(data, BleFoodBalance.ITEM_LENGTH, MessageFactory.LENGTH_BEFORE_DATA)
+                bleLog("BleConnector handleData onReadFoodBalance -> foodBalanceArr:\(foodBalanceArr.count)")
+                if mSupportFilterEmpty {
+                    if !foodBalanceArr.isEmpty {
+                        notifyHandlers({ $0.onReadFoodBalance?(foodBalanceArr) })
+                    }
+                } else {
+                    notifyHandlers({ $0.onReadFoodBalance?(foodBalanceArr) })
+                }
+            }
+            
+            
         case .CAMERA:
             if isReply {
                 if data.count < MessageFactory.LENGTH_BEFORE_DATA + 2 {
@@ -1148,7 +1460,7 @@ class BleConnector: BaseBleConnector {
                 notifyHandlers({ $0.onCameraStateChange?(cameraState) })
             }
         case .PHONE_GPSSPORT:
-            if !isReply{
+            if !isReply && bleKeyFlag == .UPDATE {
                 if data.count < MessageFactory.LENGTH_BEFORE_DATA + 1 {
                     return
                 }
@@ -1172,7 +1484,7 @@ class BleConnector: BaseBleConnector {
             }
             break
             // BleCommand.IO
-        case .WATCH_FACE, .AGPS_FILE, .FONT_FILE, .CONTACT, .UI_FILE, .LANGUAGE_FILE:
+        case .WATCH_FACE, .AGPS_FILE, .FONT_FILE, .CONTACT, .UI_FILE, .LANGUAGE_FILE, .QRCode, .THIRD_PARTY_DATA:
             if isReply {
                 if bleKeyFlag == .UPDATE {
                     closeBreakpointResume()
@@ -1226,6 +1538,18 @@ class BleConnector: BaseBleConnector {
                     _ = sendData(bleKey, bleKeyFlag, nil, true)
                     bleLog("BleConnector onDeviceRequestAGpsFile -> \(mBleCache.mAGpsFileUrl)")
                     notifyHandlers({ $0.onDeviceRequestAGpsFile?(mBleCache.mAGpsFileUrl) })
+                } else if (bleKey == .THIRD_PARTY_DATA && bleKeyFlag == .UPDATE) {
+                    // 第三方应用数据, 这个也是流, 需要 mBleStream = nil 处理, 否则影响其他功能
+                    
+                    _ = sendData(bleKey, bleKeyFlag, nil, true)
+                    
+                    bleLog("THIRD_PARTY_DATA heandleData 接收到第三方, 支付宝大小:\(data.count) 原始数据\(data.mHexString)")
+                    
+                    let thirdPartyData: BleThirdPartyData = BleReadable.ofObject(data, MessageFactory.LENGTH_BEFORE_DATA)
+                    bleLog("THIRD_PARTY_DATA heandleData onBleThirdPartyDataUpdate:\(thirdPartyData)")
+                    
+                    BleCache.shared.putObject(bleKey, thirdPartyData)
+                    notifyHandlers({ $0.onBleThirdPartyDataUpdate?(thirdPartyData)})
                 }
             }
         case .MEDIA_FILE:
@@ -1235,6 +1559,368 @@ class BleConnector: BaseBleConnector {
                 notifyHandlers({ $0.onReadMediaFile?(mediaFile) })
             }
             break
+        case .GESTURE_WAKE:  // 抬手亮屏
+            
+            if bleKeyFlag == .READ {
+                
+                if !isReply {
+                    _ = sendData(bleKey, bleKeyFlag, nil, true)
+                }
+                if (data.count < MessageFactory.LENGTH_BEFORE_DATA + 1) {
+                    bleLog("READ 抬手亮屏 返回的数据格式, 不合法")
+                    //print("READ抬手亮屏返回的数据格式, 不合法")
+                    break
+                }
+                
+                let bleGes: BleGestureWake = BleReadable.ofObject(data, MessageFactory.LENGTH_BEFORE_DATA)
+                bleLog("BleConnector handleData READ 抬手亮屏收到通知 -> \(bleGes)")
+                mBleCache.putObject(bleKey, bleGes)
+                
+                // 设备返回当前抬手亮屏状态时触发。
+                notifyHandlers({ $0.onReadGestureWake?(bleGes) })
+
+            } else if !isReply && bleKeyFlag == .UPDATE {
+                _ = sendData(bleKey, bleKeyFlag, nil, true)
+                
+                if (data.count < MessageFactory.LENGTH_BEFORE_DATA + 1) {
+                    bleLog("UPDATE 抬手亮屏 返回的数据格式, 不合法")
+                    break
+                }
+                
+                let bleGes: BleGestureWake = BleReadable.ofObject(data, MessageFactory.LENGTH_BEFORE_DATA)
+                bleLog("BleConnector handleData update 抬手亮屏收到通知 -> \(bleGes)")
+                mBleCache.putObject(bleKey, bleGes)
+                
+                // 设备的抬手亮屏状态变化时触发
+                notifyHandlers({ $0.onGestureWakeUpdate?(bleGes) })
+            }
+        case .HOUR_SYSTEM: // 读取当前是否为24小时制
+            if bleKeyFlag == .READ {
+                
+                if !isReply {
+                    _ = sendData(bleKey, bleKeyFlag, nil, true)
+                }
+                if (data.count < MessageFactory.LENGTH_BEFORE_DATA + 1) {
+                    bleLog("READ 当前小时制 返回的数据格式, 不合法")
+                    break
+                }
+                
+                let value = Int(data[MessageFactory.LENGTH_BEFORE_DATA])
+                mBleCache.putInt(bleKey, value)
+
+                bleLog("BleConnector handleData onReadHourSystem -> value:\(value)")
+                // 设备的背光状态变化时触发
+                notifyHandlers({ $0.onReadHourSystem?(value) })
+            }
+            
+            
+        case .BACK_LIGHT:  // 背光
+            
+            if bleKeyFlag == .READ {
+                
+                if !isReply {
+                    _ = sendData(bleKey, bleKeyFlag, nil, true)
+                }
+                
+                if (data.count < MessageFactory.LENGTH_BEFORE_DATA + 1) {
+                    bleLog("READ 当前背光 返回的数据格式, 不合法")
+                    break
+                }
+                
+                let value = Int(data[MessageFactory.LENGTH_BEFORE_DATA])
+                mBleCache.putInt(bleKey, value)
+
+                bleLog("BleConnector handleData onReadBacklight -> value:\(value)")
+                // 设备的背光状态变化时触发
+                notifyHandlers({ $0.onReadBacklight?(value) })
+                
+            } else if !isReply && bleKeyFlag == .UPDATE {
+                _ = sendData(bleKey, bleKeyFlag, nil, true)
+                
+                if (data.count < MessageFactory.LENGTH_BEFORE_DATA + 1) {
+                    bleLog("UPDATE 背光 返回的数据格式, 不合法")
+                    break
+                }
+                
+                let value = Int(data[MessageFactory.LENGTH_BEFORE_DATA])
+                bleLog("BleConnector handleData update 背光收到通知value:\(value)")
+                mBleCache.putInt(bleKey, value)
+                
+                // 设备的背光状态变化时触发
+                notifyHandlers({ $0.onBacklightupdate?(value)})
+            }
+        
+        case .BAC:  // 酒精数据
+            
+            if isReply && bleKeyFlag == .READ {
+                
+                let bacs: [BleBAC] = BleReadable.ofArray(data, BleBAC.ITEM_LENGTH, MessageFactory.LENGTH_BEFORE_DATA)
+                bleLog("BleConnector handleData onReadBAC BAC -> bacs:\(bacs)")
+                dataCount = bacs.count
+                if mSupportFilterEmpty {
+                    if !bacs.isEmpty {
+                        notifyHandlers({ $0.onReadBAC?(bacs) })
+                    }
+                } else {
+                    notifyHandlers({ $0.onReadBAC?(bacs) })
+                }
+            }
+        case .BAC_SET:  // 酒精浓度检测设置
+            break
+            //if isReply && bleKeyFlag == .UPDATE {
+            //
+            //    let status = data[MessageFactory.LENGTH_BEFORE_DATA] == BLE_OK
+            //    #if DEBUG
+            //    let cameraState = Int(data[MessageFactory.LENGTH_BEFORE_DATA])
+            //    bleLog("BleConnector handleData onCommandReply BAC_SET -> cameraState:\(cameraState)")
+            //    #endif
+            //    notifyHandlers({ $0.onCommandReply?(bleKey.rawValue, bleKeyFlag.rawValue, status) })
+            //}
+        case .BAC_RESULT:  // 酒精测试结果, 固件会主动发送
+            
+            if !isReply && bleKeyFlag == .UPDATE {
+                _ = sendData(bleKey, bleKeyFlag, nil, true)
+                
+                let bacs: [BleBAC] = BleReadable.ofArray(data, BleBAC.ITEM_LENGTH, MessageFactory.LENGTH_BEFORE_DATA)
+                bleLog("BleConnector handleData onCameraResponse BAC_RESULT -> bacs:\(bacs)")
+                
+                notifyHandlers({ $0.onUpdateBAC?(bacs)})
+            }
+        case .AVG_HEART_RATE:
+            if bleKeyFlag == .READ && isReply {
+                
+                let avgHeartRates: [BleAvgHeartRate] = BleReadable.ofArray(data, BleAvgHeartRate.ITEM_LENGTH, MessageFactory.LENGTH_BEFORE_DATA)
+                
+                bleLog("BleConnector handleData onReadAvgHeartRate -> \(avgHeartRates)")
+                dataCount = avgHeartRates.count
+                if mSupportFilterEmpty {
+                    if !avgHeartRates.isEmpty {
+                        notifyHandlers({ $0.onReadAvgHeartRate?(avgHeartRates) })
+                    }
+                } else {
+                    notifyHandlers({ $0.onReadAvgHeartRate?(avgHeartRates) })
+                }
+            }
+            
+        case .LOVE_TAP:  // 发送LoveTap 消息
+            if (!isReply) {
+                if data.count < MessageFactory.LENGTH_BEFORE_DATA + 1 {
+                    return
+                }
+                
+                _ = sendData(bleKey, bleKeyFlag, nil, true)
+                let loveTap: BleLoveTap = BleReadable.ofObject(data, MessageFactory.LENGTH_BEFORE_DATA)
+                
+                bleLog("handleData onLoveTapUpdate -> \(loveTap)")
+                notifyHandlers({$0.onLoveTapUpdate?(loveTap)})
+            }
+        case .LOVE_TAP_USER:  //LoveTap 联系人
+            if isReply {
+                if bleKeyFlag == .READ {
+                    
+                    let loveTapUsers: [BleLoveTapUser] = BleReadable.ofArray(data, BleLoveTapUser.ITEM_LENGTH, MessageFactory.LENGTH_BEFORE_DATA)
+                    bleLog("handleData onReadLoveTapUser -> \(loveTapUsers)")
+                        
+                    //更加协议商定, 查的时候只支持查所有, 所以直接覆盖
+                    BleCache.shared.putArray(bleKey, loveTapUsers)
+                    notifyHandlers({$0.onReadLoveTapUser?(loveTapUsers)})
+                }
+            } else {
+                if bleKeyFlag == .UPDATE {
+                    _ = sendData(bleKey, bleKeyFlag, nil, true)
+                    
+                    let newLoveTapUser: BleLoveTapUser = BleReadable.ofObject(data, MessageFactory.LENGTH_BEFORE_DATA)
+                    
+                    var loveTapUsers: [BleLoveTapUser] = BleCache.shared.getArray(bleKey)
+                    if let index = loveTapUsers.firstIndex(where: { $0.mId == newLoveTapUser.mId }) {
+                        loveTapUsers[index] = newLoveTapUser
+                    }
+                    
+                    BleCache.shared.putArray(bleKey, loveTapUsers)
+                    bleLog("handleData onLoveTapUserUpdate -> \(newLoveTapUser)")
+                    notifyHandlers({$0.onLoveTapUserUpdate?(newLoveTapUser)})
+                } else if bleKeyFlag == .DELETE {
+                    if data.count < MessageFactory.LENGTH_BEFORE_DATA + 1 {
+                        return
+                    }
+                    
+                    _ = sendData(bleKey, bleKeyFlag, nil, true)
+                    
+                    let id = data.getUInt(MessageFactory.LENGTH_BEFORE_DATA, 1)
+                    var loveTapUsers: [BleLoveTapUser] = BleCache.shared.getArray(bleKey)
+                    if id == ID_ALL {
+                        loveTapUsers.removeAll()
+                    } else {
+                        if let index = loveTapUsers.firstIndex(where: { $0.mId == id }) {
+                            loveTapUsers.remove(at: index)
+                        }
+                    }
+                    
+                    BleCache.shared.putArray(bleKey, loveTapUsers)
+                    bleLog("handleData onLoveTapUserDelete -> \(id)")
+                    notifyHandlers({$0.onLoveTapUserDelete?(id)})
+                }
+            }
+            
+        case .MEDICATION_REMINDER:  // 吃药提醒设置
+            if isReply {
+                if bleKeyFlag == .READ {
+                    let medicationReminders: [BleMedicationReminder] = BleReadable.ofArray(data, BleMedicationReminder.ITEM_LENGTH, MessageFactory.LENGTH_BEFORE_DATA)
+                    bleLog("handleData onReadMedicationReminder -> \(medicationReminders.count)")
+                    
+                    //更加协议商定, 查的时候只支持查所有, 所以直接覆盖
+                    BleCache.shared.putArray(bleKey, medicationReminders)
+                    notifyHandlers({$0.onReadMedicationReminder?(medicationReminders)})
+                } else {
+                    bleLog("BleConnector handleData MEDICATION_REMINDER onCommandReply -> \(bleKey), \(bleKeyFlag), true")
+                    notifyHandlers({ $0.onCommandReply?(bleKey.rawValue, bleKeyFlag.rawValue, true) })
+                    return // 注意一定要return, 否则会执行2次rawValue方法
+                }
+            } else {
+                if bleKeyFlag == .UPDATE {
+                    _ = sendData(bleKey, bleKeyFlag, nil, true)
+                    
+                    let newMedicationReminder: BleMedicationReminder = BleReadable.ofObject(data, MessageFactory.LENGTH_BEFORE_DATA)
+                    
+                    var medicationReminders: [BleMedicationReminder] = BleCache.shared.getArray(bleKey)
+                    if let index = medicationReminders.firstIndex(where: { $0.mId == newMedicationReminder.mId }) {
+                        medicationReminders[index] = newMedicationReminder
+                    }
+                    
+                    BleCache.shared.putArray(bleKey, medicationReminders)
+                    bleLog("handleData onMedicationReminderUpdate -> \(newMedicationReminder)")
+                    notifyHandlers({$0.onMedicationReminderUpdate?(newMedicationReminder)})
+                } else if bleKeyFlag == .DELETE {
+                    if data.count < MessageFactory.LENGTH_BEFORE_DATA + 1 {
+                        return
+                    }
+                    
+                    _ = sendData(bleKey, bleKeyFlag, nil, true)
+                    
+                    let id = data.getUInt(MessageFactory.LENGTH_BEFORE_DATA, 1)
+                    var medicationReminders: [BleMedicationReminder] = BleCache.shared.getArray(bleKey)
+                    if id == ID_ALL {
+                        medicationReminders.removeAll()
+                    } else {
+                        if let index = medicationReminders.firstIndex(where: { $0.mId == id }) {
+                            medicationReminders.remove(at: index)
+                        }
+                    }
+                    
+                    BleCache.shared.putArray(bleKey, medicationReminders)
+                    bleLog("handleData onMedicationReminderDelete -> \(id)")
+                    notifyHandlers({$0.onMedicationReminderDelete?(id)})
+                }
+            }
+        case .HR_MONITORING:  // 定时心率设置
+
+            if isReply && bleKeyFlag == .READ {
+                
+                let hrMonitoringSet: BleHrMonitoringSettings = BleReadable.ofObject(data, MessageFactory.LENGTH_BEFORE_DATA)
+                bleLog("BleConnector handleData onReadHrMonitoringSettings -> \(hrMonitoringSet)")
+                mBleCache.putObject(bleKey, hrMonitoringSet)
+                
+                // 设备返回当前 定时心率设置状态时触发。
+                notifyHandlers({ $0.onReadHrMonitoringSettings?(hrMonitoringSet) })
+
+            }
+            //else if isReply && bleKeyFlag == .UPDATE {
+            //
+            //    if data.count <= MessageFactory.LENGTH_BEFORE_DATA {
+            //        bleLog("BleConnector handleData HR_MONITORING error  data.count = \(data.count)")
+            //        return
+            //    }
+            //
+            //    let status = data[MessageFactory.LENGTH_BEFORE_DATA] == BLE_OK
+            //    bleLog("nandleData onCommandReply -> bleKey:\(bleKey) bleKeyFlag:\(bleKeyFlag) status:\(status)")
+            //    notifyHandlers({ $0.onCommandReply?(bleKey.rawValue, bleKeyFlag.rawValue, status) })
+            //}
+            
+        case .UNIT_SETTIMG:  // 单位设置, 公制英制设置 0: 公制  1: 英制
+            
+            if isReply && bleKeyFlag == .READ {
+                
+                if (data.count < MessageFactory.LENGTH_BEFORE_DATA + 1) {
+                    bleLog("READ 单位设置 返回的数据格式, 不合法")
+                    break
+                }
+                
+                let value = Int(data[MessageFactory.LENGTH_BEFORE_DATA])
+                bleLog("BleConnector handleData onReadUnit 单位设置 收到通知value:\(value)")
+                mBleCache.putInt(bleKey, value)
+                
+                // 设备的单位设置
+                notifyHandlers({ $0.onReadUnit?(value)})
+            }
+        case .PACKAGE_STATUS:  // 获取手表字库/UI/语言包状态信息
+            if bleKeyFlag == .READ && isReply {
+                
+                let packageStatus: BlePackageStatus = BleReadable.ofObject(data, MessageFactory.LENGTH_BEFORE_DATA)
+                
+                bleLog("BleConnector handleData onReadPackageStatus -> \(packageStatus)")
+                
+                BleCache.shared.putObject(bleKey, packageStatus)
+                notifyHandlers({ $0.onReadPackageStatus?(packageStatus) })
+            }
+        case .ALIPAY_SET:  // 支付宝版本信息
+            if (isReply && bleKeyFlag == .READ) {
+                
+                let alipaySettings: BleAlipaySettings = BleReadable.ofObject(data, MessageFactory.LENGTH_BEFORE_DATA)
+                
+                bleLog("BleConnector handleData onReadAlipaySettings -> \(alipaySettings)")
+                BleCache.shared.putObject(bleKey, alipaySettings)
+                notifyHandlers({ $0.onReadAlipaySettings?(alipaySettings) })
+            }
+            //else if (isReply && bleKeyFlag == .UPDATE) {
+            //    
+            //    if data.count < MessageFactory.LENGTH_BEFORE_DATA + 1 {
+            //        return
+            //    }
+            //    
+            //    let status = Int(data[MessageFactory.LENGTH_BEFORE_DATA])
+            //    
+            //    bleLog("BleConnector handleData ALIPAY_SET status-> \(status)")
+            //    notifyHandlers({ $0.onCommandReply?(bleKey.rawValue, bleKeyFlag.rawValue, status) })
+            //}
+        case .CALORIES_GOAL:
+            if isReply && bleKeyFlag == .READ {
+                
+                if data.count < MessageFactory.LENGTH_BEFORE_DATA + 4 {
+                    return
+                }
+                
+                let calGoal = data.getUInt(MessageFactory.LENGTH_BEFORE_DATA, 4)
+                bleLog("BleConnector handleData onReadCaloriesGoal -> \(calGoal)")
+                
+                notifyHandlers({ $0.onReadCaloriesGoal?(calGoal) })
+            }
+            
+        case .DISTANCE_GOAL:
+            if isReply && bleKeyFlag == .READ {
+                
+                if data.count < MessageFactory.LENGTH_BEFORE_DATA + 4 {
+                    return
+                }
+                
+                let disGoal = data.getUInt(MessageFactory.LENGTH_BEFORE_DATA, 4)
+                bleLog("BleConnector handleData onReadDistanceGoal -> \(disGoal)")
+                
+                notifyHandlers({ $0.onReadDistanceGoal?(disGoal) })
+            }
+        case .SLEEP_GOAL:
+            if isReply && bleKeyFlag == .READ {
+                
+                if data.count < MessageFactory.LENGTH_BEFORE_DATA + 2 {
+                    return
+                }
+                
+                let sleepGoal = data.getUInt(MessageFactory.LENGTH_BEFORE_DATA, 2)
+                bleLog("BleConnector handleData onReadSleepGoal -> \(sleepGoal)")
+                
+                notifyHandlers({ $0.onReadSleepGoal?(sleepGoal) })
+            }
+            
+            
         default:
             if !isReply {
                 _ = sendData(bleKey, bleKeyFlag, nil, true)
@@ -1246,7 +1932,10 @@ class BleConnector: BaseBleConnector {
             if dataCount > 0 {
                 _ = sendData(bleKey, .DELETE)
             }
-            if dataCount <= 1 { // 该类型数据已同步完成
+            
+            // 比赛记录一条数据比较大, 读一次只能返回一条
+            let completedCount = (bleKey == BleKey.MATCH_RECORD2) ? 0:1
+            if dataCount <= completedCount { // 该类型数据已同步完成
                 if !mDataKeys.isEmpty {
                     mDataKeys.remove(at: 0)
                 }
@@ -1266,6 +1955,13 @@ class BleConnector: BaseBleConnector {
                     postDelaySyncTimeout()
                 }
             }
+        } else if bleKeyFlag == .UPDATE {
+            
+            // 统一返回UPDATE指令状态, 之前调用这个方法的处理, 注释掉. 一些特殊处理需要调用onCommandReply的方法需要注意, 记得加上return
+            // Uniformly return the status of the UPDATE command, before calling this method, comment it out. Some special processing needs to call the method of onCommandReply, you need to pay attention, remember to add return
+            notifyHandlers({
+                $0.onCommandReply?(bleKey.rawValue, bleKeyFlag.rawValue, true)
+            })
         }
     }
 
@@ -1417,15 +2113,19 @@ class BleConnector: BaseBleConnector {
 }
 
 extension BleConnector: BleConnectorDelegate {
+    
     func didConnectionChange(_ connected: Bool) {
         if connected {
             bleLog("BleConnector onDeviceConnected -> \(mPeripheral?.identifier.uuidString ?? "")")
             mBleState = BleState.CONNECTED
-            notifyHandlers({ $0.onDeviceConnected?(mPeripheral!) })
+            
+            if let tempPer = self.mPeripheral {
+                notifyHandlers({ $0.onDeviceConnected?(tempPer) })
+            }
             mStreamProgressTotal = -1
             mStreamProgressCompleted = -1
         } else {
-            bleLog("BleConnector onSessionStateChange -> false")
+            bleLog("flage = 001, BleConnector onSessionStateChange -> false")
             mBleState = BleState.DISCONNECTED
             notifyHandlers({ $0.onSessionStateChange?(false) })
             if !mDataKeys.isEmpty {
@@ -1434,6 +2134,7 @@ extension BleConnector: BleConnectorDelegate {
                 removeSyncTimeout()
             }
             if mBleStream != nil {
+                bleLog("告知用户, 断开连接")
                 notifyHandlers({ $0.onStreamProgress?(false, -1, 0, 0) })
             }
             mBleMessenger.reset()
@@ -1472,6 +2173,7 @@ extension BleConnector: BleConnectorDelegate {
         handleData(data)
     }
 
+    // 这里发送绑定指令
     func didUpdateNotification(_ characteristicUuid: String) {
         mBleState = BleState.READY
         if let deviceInfo = mBleCache.mDeviceInfo {

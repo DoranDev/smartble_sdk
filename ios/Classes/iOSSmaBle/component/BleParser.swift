@@ -21,7 +21,7 @@ class BleParser: BleParserDelegate {
          */
         if mReceived == -1 {
             if data[0] != 0xAB {
-                //杰里平台需要此判断,第一包不是AB则抛弃不坐处理
+                //杰里平台需要此判断,第一包不是AB则抛弃不做处理
                 bleLog("onReceive != 0xAB data = \(data.mHexString)")
                 return nil
             }
@@ -29,10 +29,12 @@ class BleParser: BleParserDelegate {
             mData = Data(count: MessageFactory.LENGTH_BEFORE_CMD + contentLength)
             mReceived = 0
         }
+        
+        bleLog("flag = 004, BleParser onReceive -> total=\(mData.count), received=\(mReceived), data:\(data.count)")
         if mReceived < mData.count {
             mData[mReceived..<mReceived + data.count] = data
             mReceived += data.count
-            bleLog("BleParser onReceive -> total=\(mData.count), received=\(mReceived)")
+            bleLog("flag = 005, BleParser onReceive -> total=\(mData.count), received=\(mReceived)")
 
             if mReceived >= mData.count {
                 mReceived = -1

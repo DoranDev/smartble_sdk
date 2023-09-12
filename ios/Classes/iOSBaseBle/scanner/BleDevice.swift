@@ -56,14 +56,28 @@ class BleDevice: NSObject {
     }
 
     override var description: String {
-        "BleDevice(name: \(name), identifier: \(identifier), mRssi: \(mRssi)), mAdvertisementData: \(mAdvertisementData))"
+        "BleDevice(name: \(name), identifier: \(identifier), address:\(address), mRssi: \(mRssi)), mAdvertisementData: \(mAdvertisementData))"
     }
     
+    
+    // 这个是之前的方法, 注意返回的 mAddress 值
+    //func toDictionary()->[String:Any]{
+    //    let dic : [String : Any] = [
+    //        "mName":name,
+    //        "mAddress":identifier,
+    //        "mRssi":mRssi,
+    //        "mMac":self.address
+    //    ]
+    //    return dic
+    //}
+    /// 返回JSON数据, 这里一定需要注意mAddress 有些客户是根据mac地址连接, 有些客户要求使用uuid连接, 这里需要作区分返回不同的数据
     func toDictionary()->[String:Any]{
-        let dic : [String : Any] = ["mName":name,
-                                    "mAddress":identifier,
-                                    "mRssi":mRssi,
-                                    "mMac":self.address]
+        let dic : [String : Any] = [
+            "mName":name,
+            "mAddress":self.address,  // 千万注意这个数据值
+            "identifier":identifier,
+            "mRssi":mRssi
+        ]
         return dic
     }
 }

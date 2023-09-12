@@ -1,6 +1,0 @@
-framework module GRDFUSDK {
-  umbrella header "GRDFUSDK-umbrella.h"
-
-  export *
-  module * { export * }
-}

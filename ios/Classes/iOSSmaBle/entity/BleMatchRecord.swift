@@ -15,7 +15,7 @@ class BleMatchRecord :BleReadable{
     var mType :Int = 0
     var mPeriodListSize :Int = 0
     var mLogListSize :Int = 0
-    var mUndefined : Int = 0
+    var mUndefined : Int = 0  // 保留数据, 1字节
     var mPeriod :BleMatchPeriod = BleMatchPeriod()
     var mPeriodArray : [BleMatchPeriod] = []
     var mLogArray :[BleMatchLog] = []

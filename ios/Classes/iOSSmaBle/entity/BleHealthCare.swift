@@ -16,7 +16,7 @@ class BleHealthCare: BleWritable {
     static let defaultDate = Date()
 
     var mEnabled = 1//默认开
-    var mReminderHour = 20 // 提醒时间
+    var mReminderHour = 20 // 提醒小时
     var mReminderMinute = 0
     var mMenstruationReminderAdvance = 1 // 生理期提醒提前天数
     var mOvulationReminderAdvance = 3 // 排卵期提醒提前天数

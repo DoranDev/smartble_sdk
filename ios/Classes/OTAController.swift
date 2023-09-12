@@ -1,11 +1,3 @@
-//
-//  OTAController.swift
-//  blesdk3
-//
-//  Created by SMA on 2020/8/31.
-//  Copyright © 2020 szabh. All rights reserved.
-//
-
 import Foundation
 import UIKit
 import CoreBluetooth
@@ -17,7 +9,7 @@ class OTAController {
     let dataSoure :[String] = ["Realtek","MTK","Goodix","Nordic","JL(杰里)"]
 
     var filePath : String = "" //升级文件路径
-    let ROTA = RealtekOTA.sharedInstance()
+//    let ROTA = RealtekOTA.sharedInstance()
     var isReadyROTA :Bool = false //wait for the Bluetooth connection to complete
     var refreshUI : Bool = false  //mark upgrade file type
     var upgradeType : Int = -1
@@ -67,69 +59,69 @@ extension OTAController {
     }
 
     func readyRealtekOTA(){
-        /*
-          1. refreshUI -> true  upgrade firmware bin
-             refreshUI -> false upgrade UI or font bin
-          2.up to 3 files at once
-          3.when multiple files are upgraded at the same time, please upgrade the firmware first.
-         */
-        mBleConnector.closeConnection(true)//turn off Bluetooth connection
-        ROTA?.isUpgradeError = 0 //reset upgrade failure flag
-        ROTA?.imageNumber = 1 //number of upgrade files in this round
-
-        if self.isReadyROTA {
-            bleLog("check if the file is available")
-            realtekFileCheck()
-            return
-        }
-        ROTA?.haveSelectedPeripheral(peripheral)
-        ROTA!.refBlock = ({ [weak self](type:Int?,connected:Bool?,progress:CGFloat) in
-            if type == 0 {
-                if  connected! {
-//                  if self?.ROTA?.imageNumber == (isupgrade){
-                    bleLog("The firmware upgrade is successful, the device restarts, and judges whether to continue to upgrade the next one")
-//                  }else{
-                    bleLog("check file")
-                    self?.isRealteOTA = true
-                    self?.realtekFileCheck()
-//                  }
-                } else {
-                    bleLog("ConnectState -- false")
-                }
-            }else{
-                if progress == 1 {
-//                    if (isupgrade) {//determine whether the upgrade of all files in this upgrade is complete
-                        bleLog("readyRealtekOTA - OTA done")
-                    DispatchQueue.main.asyncAfter(deadline: .now()+2.0) {
-                        self?.reconnectDevice()
-                    }
-                        self?.ROTA?.imageNumber = 0
-
-//                    }else{
-//                        bleLog("readyRealtekOTA - next one ")
+//        /*
+//          1. refreshUI -> true  upgrade firmware bin
+//             refreshUI -> false upgrade UI or font bin
+//          2.up to 3 files at once
+//          3.when multiple files are upgraded at the same time, please upgrade the firmware first.
+//         */
+//        mBleConnector.closeConnection(true)//turn off Bluetooth connection
+//        ROTA?.isUpgradeError = 0 //reset upgrade failure flag
+//        ROTA?.imageNumber = 1 //number of upgrade files in this round
+//
+//        if self.isReadyROTA {
+//            bleLog("check if the file is available")
+//            realtekFileCheck()
+//            return
+//        }
+//        ROTA?.haveSelectedPeripheral(peripheral)
+//        ROTA!.refBlock = ({ [weak self](type:Int?,connected:Bool?,progress:CGFloat) in
+//            if type == 0 {
+//                if  connected! {
+////                  if self?.ROTA?.imageNumber == (isupgrade){
+//                    bleLog("The firmware upgrade is successful, the device restarts, and judges whether to continue to upgrade the next one")
+////                  }else{
+//                    bleLog("check file")
+//                    self?.isRealteOTA = true
+//                    self?.realtekFileCheck()
+////                  }
+//                } else {
+//                    bleLog("ConnectState -- false")
+//                }
+//            }else{
+//                if progress == 1 {
+////                    if (isupgrade) {//determine whether the upgrade of all files in this upgrade is complete
+//                        bleLog("readyRealtekOTA - OTA done")
+//                    DispatchQueue.main.asyncAfter(deadline: .now()+2.0) {
+//                        self?.reconnectDevice()
 //                    }
-
-                }else if progress == -1 {
-                    bleLog("readyRealtekOTA - failed")
-
-                }else{
-                    bleLog("readyRealtekOTA -\(progress)")
-                    if (self?.ROTA!.isUpgradeError)! > 0{
-                        bleLog("readyRealtekOTA - failed - prompt the user to try again")
-                    }
-                }
-            }
-        })
+//                        self?.ROTA?.imageNumber = 0
+//
+////                    }else{
+////                        bleLog("readyRealtekOTA - next one ")
+////                    }
+//
+//                }else if progress == -1 {
+//                    bleLog("readyRealtekOTA - failed")
+//
+//                }else{
+//                    bleLog("readyRealtekOTA -\(progress)")
+//                    if (self?.ROTA!.isUpgradeError)! > 0{
+//                        bleLog("readyRealtekOTA - failed - prompt the user to try again")
+//                    }
+//                }
+//            }
+//        })
     }
 
     func realtekFileCheck(){
-        let fileTrue = self.ROTA?.onFileHasSelected(filePath)
-        if fileTrue!{
-            self.isReadyROTA = true
-            ROTA?.clickStart(self.refreshUI)
-        }else{
-            bleLog("readyRealtekOTA -- File corruption is not available")
-        }
+//        let fileTrue = self.ROTA?.onFileHasSelected(filePath)
+//        if fileTrue!{
+//            self.isReadyROTA = true
+//            ROTA?.clickStart(self.refreshUI)
+//        }else{
+//            bleLog("readyRealtekOTA -- File corruption is not available")
+//        }
     }
 
     func readyMTKOTA(){
@@ -270,11 +262,11 @@ extension OTAController: BleHandleDelegate,LoggerDelegate,DFUServiceDelegate,DFU
 
     func onOTA(_ status: Bool) {
         if status {
-            mBleScanner.mBleScanDelegate = self
-            mBleScanner.mBleScanFilter = nil
-            mBleConnector.mBleScanner.mCentralManager.stopScan()
-            mBleConnector.setTargetIdentifier("698A6B2A-6939-270B-CD48-79B5236DD923")
-            mBleScanner.mCentralManager.scanForPeripherals(withServices: [CBUUID.init(string: "FE59")], options: nil)
+//            mBleScanner.mBleScanDelegate = self
+//            mBleScanner.mBleScanFilter = nil
+//            mBleConnector.mBleScanner.mCentralManager.stopScan()
+////            mBleConnector.setTargetIdentifier("698A6B2A-6939-270B-CD48-79B5236DD923")
+//            mBleScanner.mCentralManager.scanForPeripherals(withServices: [CBUUID.init(string: "FE59")], options: nil)
         }
     }
 
@@ -302,7 +294,7 @@ extension OTAController: BleHandleDelegate,LoggerDelegate,DFUServiceDelegate,DFU
     func dfuStateDidChange(to state: DFUState) {
      
         if state == .completed {
-            mBleConnector.setTargetIdentifier(mBleCache.getDeviceIdentify()!)
+           // mBleConnector.setTargetIdentifier(mBleCache.getDeviceIdentify()!)
             bleLog("Nordic Back To view")
         }
     }

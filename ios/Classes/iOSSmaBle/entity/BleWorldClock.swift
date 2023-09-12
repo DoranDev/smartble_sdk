@@ -46,7 +46,7 @@ class BleWorldClock: BleIdObject {
         super.decode()
         mLocal = Int(readUIntN(1))
         mId = Int(readUIntN(7))
-        mTimeZoneOffset = Int(readUInt8())
+        mTimeZoneOffset = Int(readInt8())
         mReversed = Int(readUInt16())
         mCityName = readString(BleWorldClock.BLE_CITY_NAME_MAX,.utf16LittleEndian)
     }
@@ -73,7 +73,7 @@ class BleWorldClock: BleIdObject {
     }
 
     override var description: String {
-        "BleWorldClock(mId: \(mId), mLocal: \(mLocal), mTimeZoneOffset: \(mTimeZoneOffset), mCityName: \(mCityName)"
+        "BleWorldClock(mId: \(mId), mLocal: \(mLocal), mTimeZoneOffset: \(mTimeZoneOffset), mCityName: \(mCityName))"
     }
     
     func toDictionary()->[String:Any]{
