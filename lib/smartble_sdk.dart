@@ -655,8 +655,10 @@ class SmartbleSdk {
       _channel.invokeMethod(
           'CONTACT', {'flag': flag.name, 'listContact': listContact});
 
-  Future<dynamic> kUI_FILE({required SelectedBlekeyFlag flag}) =>
-      _channel.invokeMethod('UI_FILE', {'flag': flag.name});
+  Future<dynamic> kUI_FILE(
+          {required SelectedBlekeyFlag flag, String? path, String? url}) =>
+      _channel.invokeMethod(
+          'UI_FILE', {'flag': flag.name, 'path': path, 'url': url});
 
   Future<dynamic> kDEVICE_FILE({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('DEVICE_FILE', {'flag': flag.name});
