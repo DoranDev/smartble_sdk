@@ -275,13 +275,11 @@ class SmartbleSdk {
   Future<dynamic> kFIND_PHONE({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('FIND_PHONE', {'flag': flag.name});
 
-
   Future<dynamic> kNOTIFICATION_REMINDER(
           {required SelectedBlekeyFlag flag,
           required List<Map<String, dynamic>> listApp}) =>
       _channel.invokeMethod(
           'NOTIFICATION_REMINDER', {'flag': flag.name, 'listApp': listApp});
-
 
   Future<dynamic> kANTI_LOST(
           {required SelectedBlekeyFlag flag, required bool isAntiLost}) =>
@@ -1069,31 +1067,37 @@ class SmartbleSdk {
 
   static const EventChannel _onWorldClockDeleteChannel =
       EventChannel("onWorldClockDelete");
+
   static Stream<dynamic> get onWorldClockDeleteStream {
     return _onWorldClockDeleteChannel.receiveBroadcastStream().cast();
   }
 
   static const EventChannel _onStockReadChannel = EventChannel("onStockRead");
+
   static Stream<dynamic> get onStockReadStream {
     return _onStockReadChannel.receiveBroadcastStream().cast();
   }
 
   static const EventChannel _onStockDeleteChannel =
       EventChannel("onStockDelete");
+
   static Stream<dynamic> get onStockDeleteStream {
     return _onStockDeleteChannel.receiveBroadcastStream().cast();
   }
 
   static const EventChannel _onBleErrorChannel = EventChannel("onBleError");
+
   static Stream<dynamic> get onBleErrorStream {
     return _onBleErrorChannel.receiveBroadcastStream().cast();
   }
 
   static const EventChannel _onBluetoothPairingStatus =
       EventChannel("onBluetoothPairingStatus");
+
   static Stream<dynamic> get onBluetoothPairingStatus {
     return _onBluetoothPairingStatus.receiveBroadcastStream().cast();
   }
+}
 
 class BleNotificationCategory {
   static String categoryIncomingCall = "1";
