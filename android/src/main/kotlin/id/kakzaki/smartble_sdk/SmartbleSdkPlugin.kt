@@ -228,7 +228,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private var blueDevice: BluetoothDevice? = null
 
     private var bluetoothPairingReceiver: MyBluetoohthPairingReceiver? = null
-
+    private var isWhatsapp: Boolean = false;
 
     private var mResult: Result? = null
     private val mDevices = mutableListOf<Any>()
@@ -682,6 +682,11 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 if (status == 0) {
                     //angkat telepon
                     try {
+                        if(isWhatsapp){
+                            val eventCallUp = KeyEvent(KeyEvent.ACTION_DOWN,KeyEvent.KEYCODE_CALL)
+                            mActivity?.dispatchKeyEvent(eventCallUp)
+                        }
+
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
 
@@ -708,6 +713,12 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     }
                 } else {
                     //reject telepon
+
+//                    if(isWhatsapp){
+//                        val eventCallUp = KeyEvent(KeyEvent.ACTION_DOWN,KeyEvent.KEYCODE_ENDCALL)
+//                        mActivity?.dispatchKeyEvent(eventCallUp)
+//                    }
+
                     if (Build.VERSION.SDK_INT < 28) {
                         try {
                             val telephonyClass = Class.forName("com.android.internal.telephony.ITelephony")
@@ -3488,6 +3499,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             }
         }
 
+//        var isWhatsapp: Boolean = false
         if (mContext != null) {
             if(BleConnector.isAvailable()){
                 when (bleKey) {
@@ -3539,6 +3551,14 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                             BleKeyFlag.UPDATE -> {
                                 BleNotification(
                                     mCategory = if (mCategory == "1") {
+                                        if(mPackage!=null){
+                                            if (mPackage.contains("whatsapp") && mContent != null) {
+                                                if(mContent.contains("incomingvoicecall")||mContent.contains("panggilansuaramasuk"))
+                                                    isWhatsapp = true
+                                            }else{
+                                                isWhatsapp = false;
+                                            }
+                                        }
                                         BleNotification.CATEGORY_INCOMING_CALL
                                     } else {
                                         BleNotification.CATEGORY_MESSAGE
@@ -3588,6 +3608,15 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                             BleKeyFlag.UPDATE -> {
                                 BleNotification2(
                                     mCategory = if (mCategory == "1") {
+                                        if(mPackage!=null){
+                                            if (mPackage.contains("whatsapp") && mContent != null) {
+                                                if(mContent.contains("incomingvoicecall")||mContent.contains("panggilansuaramasuk"))
+                                                    isWhatsapp = true
+                                            }else{
+                                                isWhatsapp = false;
+                                            }
+                                        }
+
                                         BleNotification.CATEGORY_INCOMING_CALL
                                     } else {
                                         BleNotification.CATEGORY_MESSAGE
@@ -5672,7 +5701,10 @@ class DownloadTaskOTA(val bleKey: BleKey) : AsyncTask<String, Int, ByteArray>() 
 class MyCallService : InCallService(){
 
     fun acceptCall(){
-        calls[0].answer(0)
+//        calls[0].answer(0)
+        if(calls.isNotEmpty()){
+            calls[0].answer(0);
+        }
     }
 
     fun rejectCall(){
