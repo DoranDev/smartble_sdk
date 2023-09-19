@@ -682,10 +682,10 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 if (status == 0) {
                     //angkat telepon
                     try {
-                        if(isWhatsapp){
-                            val eventCallUp = KeyEvent(KeyEvent.ACTION_DOWN,KeyEvent.KEYCODE_CALL)
-                            mActivity?.dispatchKeyEvent(eventCallUp)
-                        }
+//                        if(isWhatsapp){
+//                            val eventCallUp = KeyEvent(KeyEvent.ACTION_DOWN,KeyEvent.KEYCODE_CALL)
+//                            mActivity?.dispatchKeyEvent(eventCallUp)
+//                        }
 
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
