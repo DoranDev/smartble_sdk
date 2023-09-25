@@ -2141,11 +2141,25 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         item["deviceMacAddress"] = device.address
         item["deviceIdentifier"] = device.identifier
         item["rssi"] = String(device.mRssi)
-        if !mDevices.contains(item) {
-            mDevices.append(item)
-//            let newIndexPath = IndexPath(row: mDevices.count - 1, section: 0)
-//            tableView.insertRows(at: [newIndexPath], with: BleKey.automatic)
-        }
+        
+
+        if let existingIndex = self.mDevices.firstIndex(where: { ($0 as [String: Any])["deviceMacAddress"] as? String == item["deviceMacAddress"] }) {
+                self.mDevices[existingIndex] = item
+            } else {
+                self.mDevices.append(item)
+            }
+
+            self.mDevices.sort { (dict1, dict2) -> Bool in
+                let rssi1 = (dict1 as [String: Any])["rssi"] as? Int ?? -100
+                let rssi2 = (dict2 as [String: Any])["rssi"] as? Int ?? -100
+                return rssi1 > rssi2
+            }
+        
+//        if !mDevices.contains(item) {
+//            mDevices.append(item)
+////            let newIndexPath = IndexPath(row: mDevices.count - 1, section: 0)
+////            tableView.insertRows(at: [newIndexPath], with: BleKey.automatic)
+//        }
         if let scanSink = scanSink {
             // Use the unwrapped value of `sink` here
             scanSink(mDevices)
