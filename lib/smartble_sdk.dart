@@ -674,191 +674,243 @@ class SmartbleSdk {
   static const EventChannel _scanChannel = EventChannel('smartble_sdk/scan');
 
   static Stream<dynamic> get getDeviceListStream {
-    return _scanChannel.receiveBroadcastStream().cast();
+    return _scanChannel.receiveBroadcastStream(_scanChannel.name).cast();
   }
 
   static const EventChannel _onDeviceConnectedChannel =
       EventChannel('onDeviceConnected');
 
   static Stream<dynamic> get onDeviceConnectedStream {
-    return _onDeviceConnectedChannel.receiveBroadcastStream().cast();
+    return _onDeviceConnectedChannel
+        .receiveBroadcastStream(_onDeviceConnectedChannel.name)
+        .cast();
   }
 
   static const EventChannel _onIdentityCreateChannel =
       EventChannel('onIdentityCreate');
 
   static Stream<dynamic> get onIdentityCreateStream {
-    return _onIdentityCreateChannel.receiveBroadcastStream().cast();
+    return _onIdentityCreateChannel
+        .receiveBroadcastStream(_onIdentityCreateChannel.name)
+        .cast();
   }
 
   static const EventChannel _onCommandReplyChannel =
       EventChannel('onCommandReply');
 
   static Stream<dynamic> get onCommandReplyStream {
-    return _onCommandReplyChannel.receiveBroadcastStream().cast();
+    return _onCommandReplyChannel
+        .receiveBroadcastStream(_onCommandReplyChannel.name)
+        .cast();
   }
 
   static const EventChannel _onOTAChannel = EventChannel('onOTA');
 
   static Stream<dynamic> get onOTAStream {
-    return _onOTAChannel.receiveBroadcastStream().cast();
+    return _onOTAChannel.receiveBroadcastStream(_onOTAChannel.name).cast();
   }
 
   static const EventChannel _onReadPowerChannel = EventChannel('onReadPower');
 
   static Stream<dynamic> get onReadPowerStream {
-    return _onReadPowerChannel.receiveBroadcastStream().cast();
+    return _onReadPowerChannel
+        .receiveBroadcastStream(_onReadPowerChannel.name)
+        .cast();
   }
 
   static const EventChannel _onReadFirmwareVersionChannel =
       EventChannel('onReadFirmwareVersion');
 
   static Stream<dynamic> get onReadFirmwareVersionStream {
-    return _onReadFirmwareVersionChannel.receiveBroadcastStream().cast();
+    return _onReadFirmwareVersionChannel
+        .receiveBroadcastStream(_onReadFirmwareVersionChannel.name)
+        .cast();
   }
 
   static const EventChannel _onReadBleAddressChannel =
       EventChannel('onReadBleAddress');
 
   static Stream<dynamic> get onReadBleAddressStream {
-    return _onReadBleAddressChannel.receiveBroadcastStream().cast();
+    return _onReadBleAddressChannel
+        .receiveBroadcastStream(_onReadBleAddressChannel.name)
+        .cast();
   }
 
   static const EventChannel _onReadSedentarinessChannel =
       EventChannel('onReadSedentariness');
 
   static Stream<dynamic> get onReadSedentarinessStream {
-    return _onReadSedentarinessChannel.receiveBroadcastStream().cast();
+    return _onReadSedentarinessChannel
+        .receiveBroadcastStream(_onReadSedentarinessChannel.name)
+        .cast();
   }
 
   static const EventChannel _onReadNoDisturbChannel =
       EventChannel('onReadNoDisturb');
 
   static Stream<dynamic> get onReadNoDisturbStream {
-    return _onReadNoDisturbChannel.receiveBroadcastStream().cast();
+    return _onReadNoDisturbChannel
+        .receiveBroadcastStream(_onReadNoDisturbChannel.name)
+        .cast();
   }
 
   static const EventChannel _onReadAlarmChannel = EventChannel('onReadAlarm');
 
   static Stream<dynamic> get onReadAlarmStream {
-    return _onReadAlarmChannel.receiveBroadcastStream().cast();
+    return _onReadAlarmChannel
+        .receiveBroadcastStream(_onReadAlarmChannel.name)
+        .cast();
   }
 
   static const EventChannel _onReadCoachingIdsChannel =
       EventChannel('onReadCoachingIds');
 
   static Stream<dynamic> get onReadCoachingIdsStream {
-    return _onReadCoachingIdsChannel.receiveBroadcastStream().cast();
+    return _onReadCoachingIdsChannel
+        .receiveBroadcastStream(_onReadCoachingIdsChannel.name)
+        .cast();
   }
 
   static const EventChannel _onReadUiPackVersionChannel =
       EventChannel('onReadUiPackVersion');
 
   static Stream<dynamic> get onReadUiPackVersionStream {
-    return _onReadUiPackVersionChannel.receiveBroadcastStream().cast();
+    return _onReadUiPackVersionChannel
+        .receiveBroadcastStream(_onReadUiPackVersionChannel.name)
+        .cast();
   }
 
   static const EventChannel _onReadLanguagePackVersionChannel =
       EventChannel('onReadLanguagePackVersion');
 
   static Stream<dynamic> get onReadLanguagePackVersionStream {
-    return _onReadLanguagePackVersionChannel.receiveBroadcastStream().cast();
+    return _onReadLanguagePackVersionChannel
+        .receiveBroadcastStream(_onReadLanguagePackVersionChannel.name)
+        .cast();
   }
 
   static const EventChannel _onIdentityDeleteByDeviceChannel =
       EventChannel('onIdentityDeleteByDevice');
 
   static Stream<dynamic> get onIdentityDeleteByDeviceStream {
-    return _onIdentityDeleteByDeviceChannel.receiveBroadcastStream().cast();
+    return _onIdentityDeleteByDeviceChannel
+        .receiveBroadcastStream(_onIdentityDeleteByDeviceChannel.name)
+        .cast();
   }
 
   static const EventChannel _onCameraStateChangeChannel =
       EventChannel('onCameraStateChange');
 
   static Stream<dynamic> get onCameraStateChangeStream {
-    return _onCameraStateChangeChannel.receiveBroadcastStream().cast();
+    return _onCameraStateChangeChannel
+        .receiveBroadcastStream(_onCameraStateChangeChannel.name)
+        .cast();
   }
 
   static const EventChannel _onCameraResponseChannel =
       EventChannel('onCameraResponse');
 
   static Stream<dynamic> get onCameraResponseStream {
-    return _onCameraResponseChannel.receiveBroadcastStream().cast();
+    return _onCameraResponseChannel
+        .receiveBroadcastStream(_onCameraResponseChannel.name)
+        .cast();
   }
 
   static const EventChannel _onSyncDataChannel = EventChannel('onSyncData');
 
   static Stream<dynamic> get onSyncDataStream {
-    return _onSyncDataChannel.receiveBroadcastStream().cast();
+    return _onSyncDataChannel
+        .receiveBroadcastStream(_onSyncDataChannel.name)
+        .cast();
   }
 
   static const EventChannel _onReadActivityChannel =
       EventChannel('onReadActivity');
 
   static Stream<dynamic> get onReadActivityStream {
-    return _onReadActivityChannel.receiveBroadcastStream().cast();
+    return _onReadActivityChannel
+        .receiveBroadcastStream(_onReadActivityChannel.name)
+        .cast();
   }
 
   static const EventChannel _onReadHeartRateChannel =
       EventChannel('onReadHeartRate');
 
   static Stream<dynamic> get onReadHeartRateStream {
-    return _onReadHeartRateChannel.receiveBroadcastStream().cast();
+    return _onReadHeartRateChannel
+        .receiveBroadcastStream(_onReadHeartRateChannel.name)
+        .cast();
   }
 
   static const EventChannel _onUpdateHeartRateChannel =
       EventChannel('onUpdateHeartRate');
 
   static Stream<dynamic> get onUpdateHeartRateStream {
-    return _onUpdateHeartRateChannel.receiveBroadcastStream().cast();
+    return _onUpdateHeartRateChannel
+        .receiveBroadcastStream(_onUpdateHeartRateChannel.name)
+        .cast();
   }
 
   static const EventChannel _onReadBloodPressureChannel =
       EventChannel('onReadBloodPressure');
 
   static Stream<dynamic> get onReadBloodPressureStream {
-    return _onReadBloodPressureChannel.receiveBroadcastStream().cast();
+    return _onReadBloodPressureChannel
+        .receiveBroadcastStream(_onReadBloodPressureChannel.name)
+        .cast();
   }
 
   static const EventChannel _onReadSleepChannel = EventChannel('onReadSleep');
 
   static Stream<dynamic> get onReadSleepStream {
-    return _onReadSleepChannel.receiveBroadcastStream().cast();
+    return _onReadSleepChannel
+        .receiveBroadcastStream(_onReadSleepChannel.name)
+        .cast();
   }
 
   static const EventChannel _onReadLocationChannel =
       EventChannel('onReadLocation');
 
   static Stream<dynamic> get onReadLocationStream {
-    return _onReadLocationChannel.receiveBroadcastStream().cast();
+    return _onReadLocationChannel
+        .receiveBroadcastStream(_onReadLocationChannel.name)
+        .cast();
   }
 
   static const EventChannel _onReadTemperatureChannel =
       EventChannel('onReadTemperature');
 
   static Stream<dynamic> get onReadTemperatureStream {
-    return _onReadTemperatureChannel.receiveBroadcastStream().cast();
+    return _onReadTemperatureChannel
+        .receiveBroadcastStream(_onReadTemperatureChannel.name)
+        .cast();
   }
 
   static const EventChannel _onReadWorkout2Channel =
       EventChannel('onReadWorkout2');
 
   static Stream<dynamic> get onReadWorkout2Stream {
-    return _onReadWorkout2Channel.receiveBroadcastStream().cast();
+    return _onReadWorkout2Channel
+        .receiveBroadcastStream(_onReadWorkout2Channel.name)
+        .cast();
   }
 
   static const EventChannel _onStreamProgressChannel =
       EventChannel('onStreamProgress');
 
   static Stream<dynamic> get onStreamProgressStream {
-    return _onStreamProgressChannel.receiveBroadcastStream().cast();
+    return _onStreamProgressChannel
+        .receiveBroadcastStream(_onStreamProgressChannel.name)
+        .cast();
   }
 
   static const EventChannel _onUpdateAppSportStateChannel =
       EventChannel('onUpdateAppSportState');
 
   static Stream<dynamic> get onUpdateAppSportStateStream {
-    return _onUpdateAppSportStateChannel.receiveBroadcastStream().cast();
+    return _onUpdateAppSportStateChannel
+        .receiveBroadcastStream(_onUpdateAppSportStateChannel.name)
+        .cast();
   }
 
   static const EventChannel _onClassicBluetoothStateChangeChannel =
@@ -866,7 +918,7 @@ class SmartbleSdk {
 
   static Stream<dynamic> get onClassicBluetoothStateChangeStream {
     return _onClassicBluetoothStateChangeChannel
-        .receiveBroadcastStream()
+        .receiveBroadcastStream(_onClassicBluetoothStateChangeChannel.name)
         .cast();
   }
 
@@ -874,232 +926,300 @@ class SmartbleSdk {
       EventChannel('onDeviceFileUpdate');
 
   static Stream<dynamic> get onDeviceFileUpdateStream {
-    return _onDeviceFileUpdateChannel.receiveBroadcastStream().cast();
+    return _onDeviceFileUpdateChannel
+        .receiveBroadcastStream(_onDeviceFileUpdateChannel.name)
+        .cast();
   }
 
   static const EventChannel _onReadDeviceFileChannel =
       EventChannel('onReadDeviceFile');
 
   static Stream<dynamic> get onReadDeviceFileStream {
-    return _onReadDeviceFileChannel.receiveBroadcastStream().cast();
+    return _onReadDeviceFileChannel
+        .receiveBroadcastStream(_onReadDeviceFileChannel.name)
+        .cast();
   }
 
   static const EventChannel _onReadTemperatureUnitChannel =
       EventChannel('onReadTemperatureUnit');
 
   static Stream<dynamic> get onReadTemperatureUnitStream {
-    return _onReadTemperatureUnitChannel.receiveBroadcastStream().cast();
+    return _onReadTemperatureUnitChannel
+        .receiveBroadcastStream(_onReadTemperatureUnitChannel.name)
+        .cast();
   }
 
   static const EventChannel _onReadDateFormatChannel =
       EventChannel('onReadDateFormat');
 
   static Stream<dynamic> get onReadDateFormatStream {
-    return _onReadDateFormatChannel.receiveBroadcastStream().cast();
+    return _onReadDateFormatChannel
+        .receiveBroadcastStream(_onReadDateFormatChannel.name)
+        .cast();
   }
 
   static const EventChannel _onReadWatchFaceSwitchChannel =
       EventChannel('onReadWatchFaceSwitch');
 
   static Stream<dynamic> get onReadWatchFaceSwitchStream {
-    return _onReadWatchFaceSwitchChannel.receiveBroadcastStream().cast();
+    return _onReadWatchFaceSwitchChannel
+        .receiveBroadcastStream(_onReadWatchFaceSwitchChannel.name)
+        .cast();
   }
 
   static const EventChannel _onUpdateWatchFaceSwitchChannel =
       EventChannel('onUpdateWatchFaceSwitch');
 
   static Stream<dynamic> get onUpdateWatchFaceSwitchStream {
-    return _onUpdateWatchFaceSwitchChannel.receiveBroadcastStream().cast();
+    return _onUpdateWatchFaceSwitchChannel
+        .receiveBroadcastStream(_onUpdateWatchFaceSwitchChannel.name)
+        .cast();
   }
 
   static const EventChannel _onAppSportDataResponseChannel =
       EventChannel('onAppSportDataResponse');
 
   static Stream<dynamic> get onAppSportDataResponseStream {
-    return _onAppSportDataResponseChannel.receiveBroadcastStream().cast();
+    return _onAppSportDataResponseChannel
+        .receiveBroadcastStream(_onAppSportDataResponseChannel.name)
+        .cast();
   }
 
   static const EventChannel _onReadWatchFaceIdChannel =
       EventChannel('onReadWatchFaceId');
 
   static Stream<dynamic> get onReadWatchFaceIdStream {
-    return _onReadWatchFaceIdChannel.receiveBroadcastStream().cast();
+    return _onReadWatchFaceIdChannel
+        .receiveBroadcastStream(_onReadWatchFaceIdChannel.name)
+        .cast();
   }
 
   static const EventChannel _onWatchFaceIdUpdateChannel =
       EventChannel('onWatchFaceIdUpdate');
 
   static Stream<dynamic> get onWatchFaceIdUpdateStream {
-    return _onWatchFaceIdUpdateChannel.receiveBroadcastStream().cast();
+    return _onWatchFaceIdUpdateChannel
+        .receiveBroadcastStream(_onWatchFaceIdUpdateChannel.name)
+        .cast();
   }
 
   static const EventChannel _onHIDStateChannel = EventChannel('onHIDState');
 
   static Stream<dynamic> get onHIDStateStream {
-    return _onHIDStateChannel.receiveBroadcastStream().cast();
+    return _onHIDStateChannel
+        .receiveBroadcastStream(_onHIDStateChannel.name)
+        .cast();
   }
 
   static const EventChannel _onHIDValueChangeChannel =
       EventChannel('onHIDValueChange');
 
   static Stream<dynamic> get onHIDValueChangeStream {
-    return _onHIDValueChangeChannel.receiveBroadcastStream().cast();
+    return _onHIDValueChangeChannel
+        .receiveBroadcastStream(_onHIDValueChangeChannel.name)
+        .cast();
   }
 
   static const EventChannel _onDeviceSMSQuickReplyChannel =
       EventChannel('onDeviceSMSQuickReply');
 
   static Stream<dynamic> get onDeviceSMSQuickReplyStream {
-    return _onDeviceSMSQuickReplyChannel.receiveBroadcastStream().cast();
+    return _onDeviceSMSQuickReplyChannel
+        .receiveBroadcastStream(_onDeviceSMSQuickReplyChannel.name)
+        .cast();
   }
 
   static const EventChannel _onReadDeviceInfoChannel =
       EventChannel('onReadDeviceInfo');
 
   static Stream<dynamic> get onReadDeviceInfoStream {
-    return _onReadDeviceInfoChannel.receiveBroadcastStream().cast();
+    return _onReadDeviceInfoChannel
+        .receiveBroadcastStream(_onReadDeviceInfoChannel.name)
+        .cast();
   }
 
   static const EventChannel _onSessionStateChangeChannel =
       EventChannel('onSessionStateChange');
 
   static Stream<dynamic> get onSessionStateChangeStream {
-    return _onSessionStateChangeChannel.receiveBroadcastStream().cast();
+    return _onSessionStateChangeChannel
+        .receiveBroadcastStream(_onSessionStateChangeChannel.name)
+        .cast();
   }
 
   static const EventChannel _onNoDisturbUpdateChannel =
       EventChannel('onNoDisturbUpdate');
 
   static Stream<dynamic> get onNoDisturbUpdateStream {
-    return _onNoDisturbUpdateChannel.receiveBroadcastStream().cast();
+    return _onNoDisturbUpdateChannel
+        .receiveBroadcastStream(_onNoDisturbUpdateChannel.name)
+        .cast();
   }
 
   static const EventChannel _onAlarmUpdateChannel =
       EventChannel('onAlarmUpdate');
 
   static Stream<dynamic> get onAlarmUpdateStream {
-    return _onAlarmUpdateChannel.receiveBroadcastStream().cast();
+    return _onAlarmUpdateChannel
+        .receiveBroadcastStream(_onAlarmUpdateChannel.name)
+        .cast();
   }
 
   static const EventChannel _onAlarmDeleteChannel =
       EventChannel('onAlarmDelete');
 
   static Stream<dynamic> get onAlarmDeleteStream {
-    return _onAlarmDeleteChannel.receiveBroadcastStream().cast();
+    return _onAlarmDeleteChannel
+        .receiveBroadcastStream(_onAlarmDeleteChannel.name)
+        .cast();
   }
 
   static const EventChannel _onAlarmAddChannel = EventChannel('onAlarmAdd');
 
   static Stream<dynamic> get onAlarmAddStream {
-    return _onAlarmAddChannel.receiveBroadcastStream().cast();
+    return _onAlarmAddChannel
+        .receiveBroadcastStream(_onAlarmAddChannel.name)
+        .cast();
   }
 
   static const EventChannel _onFindPhoneChannel = EventChannel('onFindPhone');
 
   static Stream<dynamic> get onFindPhoneStream {
-    return _onFindPhoneChannel.receiveBroadcastStream().cast();
+    return _onFindPhoneChannel
+        .receiveBroadcastStream(_onFindPhoneChannel.name)
+        .cast();
   }
 
   static const EventChannel _onRequestLocationChannel =
       EventChannel('onRequestLocation');
 
   static Stream<dynamic> get onRequestLocationStream {
-    return _onRequestLocationChannel.receiveBroadcastStream().cast();
+    return _onRequestLocationChannel
+        .receiveBroadcastStream(_onRequestLocationChannel.name)
+        .cast();
   }
 
   static const EventChannel _onDeviceRequestAGpsFileChannel =
       EventChannel('onDeviceRequestAGpsFile');
 
   static Stream<dynamic> get onDeviceRequestAGpsFileStream {
-    return _onDeviceRequestAGpsFileChannel.receiveBroadcastStream().cast();
+    return _onDeviceRequestAGpsFileChannel
+        .receiveBroadcastStream(_onDeviceRequestAGpsFileChannel.name)
+        .cast();
   }
 
   static const EventChannel _onReadWorkoutChannel =
       EventChannel('onReadWorkout');
 
   static Stream<dynamic> get onReadWorkoutStream {
-    return _onReadWorkoutChannel.receiveBroadcastStream().cast();
+    return _onReadWorkoutChannel
+        .receiveBroadcastStream(_onReadWorkoutChannel.name)
+        .cast();
   }
 
   static const EventChannel _onReadBloodOxygenChannel =
       EventChannel('onReadBloodOxygen');
 
   static Stream<dynamic> get onReadBloodOxygenStream {
-    return _onReadBloodOxygenChannel.receiveBroadcastStream().cast();
+    return _onReadBloodOxygenChannel
+        .receiveBroadcastStream(_onReadBloodOxygenChannel.name)
+        .cast();
   }
 
   static const EventChannel _onReadBleHrvChannel = EventChannel('onReadBleHrv');
 
   static Stream<dynamic> get onReadBleHrvStream {
-    return _onReadBleHrvChannel.receiveBroadcastStream().cast();
+    return _onReadBleHrvChannel
+        .receiveBroadcastStream(_onReadBleHrvChannel.name)
+        .cast();
   }
 
   static const EventChannel _onReadPressureChannel =
       EventChannel('onReadPressure');
 
   static Stream<dynamic> get onReadPressureStream {
-    return _onReadPressureChannel.receiveBroadcastStream().cast();
+    return _onReadPressureChannel
+        .receiveBroadcastStream(_onReadPressureChannel.name)
+        .cast();
   }
 
   static const EventChannel _onDeviceConnectingChannel =
       EventChannel('onDeviceConnecting');
 
   static Stream<dynamic> get onDeviceConnectingStream {
-    return _onDeviceConnectingChannel.receiveBroadcastStream().cast();
+    return _onDeviceConnectingChannel
+        .receiveBroadcastStream(_onDeviceConnectingChannel.name)
+        .cast();
   }
 
   static const EventChannel _onIncomingCallStatusChannel =
       EventChannel('onIncomingCallStatus');
 
   static Stream<dynamic> get onIncomingCallStatusStream {
-    return _onIncomingCallStatusChannel.receiveBroadcastStream().cast();
+    return _onIncomingCallStatusChannel
+        .receiveBroadcastStream(_onIncomingCallStatusChannel.name)
+        .cast();
   }
 
   static const EventChannel _onReceiveMusicCommandChannel =
       EventChannel("onReceiveMusicCommand");
 
   static Stream<dynamic> get onReceiveMusicCommandStream {
-    return _onReceiveMusicCommandChannel.receiveBroadcastStream().cast();
+    return _onReceiveMusicCommandChannel
+        .receiveBroadcastStream(_onReceiveMusicCommandChannel.name)
+        .cast();
   }
 
   static const EventChannel _onReadWorldClockChannel =
       EventChannel("onReadWorldClock");
 
   static Stream<dynamic> get onReadWorldClockStream {
-    return _onReadWorldClockChannel.receiveBroadcastStream().cast();
+    return _onReadWorldClockChannel
+        .receiveBroadcastStream(_onReadWorldClockChannel.name)
+        .cast();
   }
 
   static const EventChannel _onWorldClockDeleteChannel =
       EventChannel("onWorldClockDelete");
 
   static Stream<dynamic> get onWorldClockDeleteStream {
-    return _onWorldClockDeleteChannel.receiveBroadcastStream().cast();
+    return _onWorldClockDeleteChannel
+        .receiveBroadcastStream(_onWorldClockDeleteChannel.name)
+        .cast();
   }
 
   static const EventChannel _onStockReadChannel = EventChannel("onStockRead");
 
   static Stream<dynamic> get onStockReadStream {
-    return _onStockReadChannel.receiveBroadcastStream().cast();
+    return _onStockReadChannel
+        .receiveBroadcastStream(_onStockReadChannel.name)
+        .cast();
   }
 
   static const EventChannel _onStockDeleteChannel =
       EventChannel("onStockDelete");
 
   static Stream<dynamic> get onStockDeleteStream {
-    return _onStockDeleteChannel.receiveBroadcastStream().cast();
+    return _onStockDeleteChannel
+        .receiveBroadcastStream(_onStockDeleteChannel.name)
+        .cast();
   }
 
   static const EventChannel _onBleErrorChannel = EventChannel("onBleError");
 
   static Stream<dynamic> get onBleErrorStream {
-    return _onBleErrorChannel.receiveBroadcastStream().cast();
+    return _onBleErrorChannel
+        .receiveBroadcastStream(_onBleErrorChannel.name)
+        .cast();
   }
 
   static const EventChannel _onBluetoothPairingStatus =
       EventChannel("onBluetoothPairingStatus");
 
   static Stream<dynamic> get onBluetoothPairingStatus {
-    return _onBluetoothPairingStatus.receiveBroadcastStream().cast();
+    return _onBluetoothPairingStatus
+        .receiveBroadcastStream(_onBluetoothPairingStatus.name)
+        .cast();
   }
 }
 
