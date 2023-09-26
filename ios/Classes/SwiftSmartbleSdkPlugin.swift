@@ -2137,24 +2137,25 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
 
     func onDeviceFound(_ device: BleDevice) {
         var item = [String : String]();
+        if(device.name.isEmpty){return}
         item["deviceName"] = device.name
         item["deviceMacAddress"] = device.address
         item["deviceIdentifier"] = device.identifier
         item["rssi"] = String(device.mRssi)
-        
+
 
         if let existingIndex = self.mDevices.firstIndex(where: { ($0 as [String: Any])["deviceMacAddress"] as? String == item["deviceMacAddress"] }) {
                 self.mDevices[existingIndex] = item
-            } else {
-                self.mDevices.append(item)
-            }
+           } else {
+        self.mDevices.append(item)
+           }
 
             self.mDevices.sort { (dict1, dict2) -> Bool in
-                let rssi1 = (dict1 as [String: Any])["rssi"] as? Int ?? -100
-                let rssi2 = (dict2 as [String: Any])["rssi"] as? Int ?? -100
+                let rssi1 = Int(dict1["rssi"] ?? "-100") ?? -100
+                let rssi2 = Int(dict2["rssi"] ?? "-100") ?? -100
                 return rssi1 > rssi2
             }
-        
+
 //        if !mDevices.contains(item) {
 //            mDevices.append(item)
 ////            let newIndexPath = IndexPath(row: mDevices.count - 1, section: 0)
@@ -2170,7 +2171,8 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
 
 
     func match(_ device: BleDevice) -> Bool {
-        device.mRssi > -82
+       // device.mRssi > -890
+        true
     }
 
     func onDeviceConnected(_ peripheral: CBPeripheral) {
