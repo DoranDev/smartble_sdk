@@ -1,3 +1,7 @@
+## 0.8.9
+
+* Device filter IOS
+
 ## 0.8.8
 
 * IOS
