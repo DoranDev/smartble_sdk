@@ -73,7 +73,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private var mActivity: Activity? = null
     private var pluginBinding: FlutterPluginBinding? = null
     private var activityBinding: ActivityPluginBinding? = null
-    private var statusState=false;
+    private var statusState = false;
     private val ID_ALL = 0xff
     private lateinit var mBleKey: BleKey
     private lateinit var mBleKeyFlag: BleKeyFlag
@@ -86,7 +86,6 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
     private var isTo8565 =
         BleCache.mPlatform == BleDeviceInfo.PLATFORM_JL && !isSupport2DAcceleration
-
 
 
     data class Contact(var name: String, var phone: String)
@@ -264,15 +263,18 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 //                    if (!(mDevices.contains(item))) {
 //                        mDevices.add(item)
 //                    }
-                    val existingIndex =  mDevices.indexOfFirst { (it as? Map<String, Any>)?.get("deviceMacAddress") == item["deviceMacAddress"] }
+                    val existingIndex =
+                        mDevices.indexOfFirst { (it as? Map<String, Any>)?.get("deviceMacAddress") == item["deviceMacAddress"] }
 
-                    if(existingIndex != -1){
+                    if (existingIndex != -1) {
                         mDevices[existingIndex] = item
-                    }else{
+                    } else {
                         mDevices.add(item)
                     }
 
-                    mDevices.sortWith(compareByDescending { (it as? Map<String, Any>)?.get("rssi") as? Int ?: -100 })
+                    mDevices.sortWith(compareByDescending {
+                        (it as? Map<String, Any>)?.get("rssi") as? Int ?: -100
+                    })
 //         Handler(Looper.getMainLooper()).post {
                     scanSink.success(mDevices)
 //          }
@@ -288,7 +290,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
 
             override fun onDeviceConnected(device: BluetoothDevice) {
-                blueDevice=device
+                blueDevice = device
                 if (BuildConfig.DEBUG) {
                     Log.d("onDeviceConnected", "$device")
                 }
@@ -688,22 +690,24 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 //                        }
 
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
 
 
                                 val callService = MyCallService()
                                 callService.acceptCall()
 
 
-                            }else{
-                                val manager = mContext?.getSystemService(Context.TELECOM_SERVICE) as TelecomManager?
+                            } else {
+                                val manager =
+                                    mContext?.getSystemService(Context.TELECOM_SERVICE) as TelecomManager?
                                 manager?.acceptRingingCall()
                             }
 
                         } else {
                             val audioManager =
                                 mContext?.getSystemService(Context.AUDIO_SERVICE) as AudioManager?
-                            val eventDown = KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_HEADSETHOOK)
+                            val eventDown =
+                                KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_HEADSETHOOK)
                             val eventUp = KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_HEADSETHOOK)
                             audioManager?.dispatchMediaKeyEvent(eventDown)
                             audioManager?.dispatchMediaKeyEvent(eventUp)
@@ -721,7 +725,8 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
                     if (Build.VERSION.SDK_INT < 28) {
                         try {
-                            val telephonyClass = Class.forName("com.android.internal.telephony.ITelephony")
+                            val telephonyClass =
+                                Class.forName("com.android.internal.telephony.ITelephony")
                             val telephonyStubClass = telephonyClass.classes[0]
                             val serviceManagerClass = Class.forName("android.os.ServiceManager")
                             val serviceManagerNativeClass =
@@ -751,12 +756,13 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                             .request2 {
                                 if (it == PermissionStatus.GRANTED) {
                                     LogUtils.d("hang up OK")
-                                    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                                         val callService = MyCallService()
                                         callService.rejectCall()
 
-                                    }else{
-                                        val manager = mContext?.getSystemService(Context.TELECOM_SERVICE) as TelecomManager
+                                    } else {
+                                        val manager =
+                                            mContext?.getSystemService(Context.TELECOM_SERVICE) as TelecomManager
                                         manager.endCall()
                                     }
 
@@ -1066,22 +1072,22 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             }
 
             override fun onReadWorldClock(clocks: List<BleWorldClock>) {
-                if(BuildConfig.DEBUG){
+                if (BuildConfig.DEBUG) {
                     Log.d("onReadWorldClock", "$clocks")
                 }
                 val item: MutableMap<String, Any> = HashMap()
                 item["clocks"] = gson.toJson(clocks)
-                if(onReadWorldClockSink!=null)
+                if (onReadWorldClockSink != null)
                     onReadWorldClockSink!!.success(item)
             }
 
             override fun onWorldClockDelete(id: Int) {
-                if(BuildConfig.DEBUG){
+                if (BuildConfig.DEBUG) {
                     Log.d("onWorldClockDelete", "$id")
                 }
-                val item: MutableMap<String,Any> = HashMap()
+                val item: MutableMap<String, Any> = HashMap()
                 item["id"] = gson.toJson(id)
-                if(onWorldClockDeleteSink!=null){
+                if (onWorldClockDeleteSink != null) {
                     onWorldClockDeleteSink!!.success(item)
                 }
             }
@@ -1152,6 +1158,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                         }
 
                     }
+
                     MusicCommand.PLAY -> {
                         val eventPlay = KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PLAY)
                         val musicControlPlay = BleMusicControl(
@@ -1166,6 +1173,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                         )
                         mAudioManager.dispatchMediaKeyEvent(eventPlay)
                     }
+
                     MusicCommand.PAUSE -> {
                         val eventPause =
                             KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PAUSE)
@@ -1185,8 +1193,10 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     //fungsi next dan previous di putar ke flutter dulu agar tidak ter repeat 2 kali
                     MusicCommand.NEXT -> {
                     }
+
                     MusicCommand.PRE -> {
                     }
+
                     MusicCommand.VOLUME_UP -> {
                         if (currentVolume < maxVolume) {
                             currentVolume += 1
@@ -1223,6 +1233,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 //                            musicControlPlay
 //                        )
                     }
+
                     MusicCommand.VOLUME_DOWN -> {
                         if (currentVolume > 0) {
                             currentVolume -= 1
@@ -1256,6 +1267,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 //                            musicControlPlay
 //                        )
                     }
+
                     MusicCommand.UNKNOWN -> {}
                     else -> {}
                 }
@@ -1268,6 +1280,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 }
 
             }
+
             fun currentVolumeSmartWarch(currentVolume: Int): Double {
                 var smartWatchValue = (currentVolume.toDouble() / maxVolume.toDouble()) * 1.0
                 return smartWatchValue
@@ -1275,8 +1288,6 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
         }
     }
-
-
 
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPluginBinding) {
@@ -1430,9 +1441,11 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         onReadBleHrvChannel!!.setStreamHandler(onReadBleHrvResultsHandler)
         onReadPressureChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onReadPressure")
         onReadPressureChannel!!.setStreamHandler(onReadPressureResultsHandler)
-        onReadWorldClockChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onReadWorldClock")
+        onReadWorldClockChannel =
+            EventChannel(flutterPluginBinding.binaryMessenger, "onReadWorldClock")
         onReadWorldClockChannel!!.setStreamHandler(onReadWorldClockResultHandler)
-        onWorldClockDeleteChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onWorldClockDelete")
+        onWorldClockDeleteChannel =
+            EventChannel(flutterPluginBinding.binaryMessenger, "onWorldClockDelete")
         onWorldClockDeleteChannel!!.setStreamHandler(onWorldClockDeleteResultHandler)
         onDeviceConnectingChannel =
             EventChannel(flutterPluginBinding.binaryMessenger, "onDeviceConnecting")
@@ -1449,7 +1462,8 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         onStockDeleteChannel!!.setStreamHandler(onStockDeleteResultHandler)
         onBleErrorChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onBleError")
         onBleErrorChannel!!.setStreamHandler(onBleErrorResultHandler)
-        onBluetoothPairingStatusChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onBluetoothPairingStatus")
+        onBluetoothPairingStatusChannel =
+            EventChannel(flutterPluginBinding.binaryMessenger, "onBluetoothPairingStatus")
         onBluetoothPairingStatusChannel!!.setStreamHandler(onBluetoothPairingResultHandler)
 
         val connector = BleConnector.Builder(flutterPluginBinding.applicationContext)
@@ -1473,7 +1487,11 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 //                        statusState=true
                     connector.sendData(BleKey.POWER, BleKeyFlag.READ)
 //          connector.sendData(BleKey.FIRMWARE_VERSION, BleKeyFlag.READ)
-                    connector.sendInt8(BleKey.LANGUAGE, BleKeyFlag.UPDATE, Languages.languageToCode())
+                    connector.sendInt8(
+                        BleKey.LANGUAGE,
+                        BleKeyFlag.UPDATE,
+                        Languages.languageToCode()
+                    )
 //                    connector.sendData(BleKey.MUSIC_CONTROL, BleKeyFlag.READ)
 //                    }
 
@@ -1561,6 +1579,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     var screenPreviewHeight = 0 //The actual preview size of the device screen - height
     var digiLeft = 0
     var digiTop = 0
+
     //控件相关
     private var stepValueCenterX = 0f
     private var stepValueCenterY = 0f
@@ -1737,7 +1756,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         return getFinalBgBitmap(bgBitMap)
     }
 
-    private fun getPointer(type: Int, dir: String, ) {
+    private fun getPointer(type: Int, dir: String) {
         val pointerHour = ArrayList<ByteArray>()
         val tmpBitmap =
             ImageUtils.getBitmap(mContext!!.assets.open("$POINTER_DIR/${dir}/${pointerSelectNumber}.${fileFormat}"))
@@ -1768,7 +1787,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         elements.add(elementAmPm)
     }
 
-    private fun getPointer2(type: Int, dir: String, ) {
+    private fun getPointer2(type: Int, dir: String) {
         val pointerHour = ArrayList<ByteArray>()
         val pointerFileName = "$POINTER_DIR/${dir}/${pointerSelectNumber}.${fileFormat}"
         val tmpBitmap =
@@ -2100,7 +2119,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
     }
 
-    fun pngTo8565(bytes: ByteArray, w: Int, h:Int) :ByteArray {
+    fun pngTo8565(bytes: ByteArray, w: Int, h: Int): ByteArray {
         val tmpBitmap =
             ImageUtils.getBitmap(bytes, 0)
         val pixels = IntArray(tmpBitmap.height * tmpBitmap.width)
@@ -2399,6 +2418,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         )
         elements.add(elementWeek)
     }
+
     private fun getSymbol(
         dir: String,
         type: Int,
@@ -2630,6 +2650,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         }
         return Triple(w, h, valueByte)
     }
+
     private fun getNumberBuffers2(
         dir: String,
         range: Int = 9
@@ -2730,6 +2751,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         LogUtils.d("convertPng outFileBytes=${outFileBytes.size}, bytes=${bytes.size}")
         return bytes
     }
+
     fun argb8888To8565(argb: Int): Int {
         val b = argb and 255
         val g = argb shr 8 and 255
@@ -2781,6 +2803,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                         }
                 }
             }
+
             "setAddress" -> {
                 mBleScanner.scan(false)
                 val bmac: String? = call.argument<String>("bmac")
@@ -2788,39 +2811,51 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     BleConnector.setAddress(bmac)
                 }
             }
+
             "connect" -> {
                 BleConnector.connect(true)
             }
+
             "isConnecting" -> {
                 result.success(BleConnector.isConnecting)
             }
+
             "isNeedBind" -> {
                 result.success(BleConnector.isNeedBind)
             }
+
             "isBound" -> {
                 result.success(BleConnector.isBound())
             }
+
             "connectHID" -> {
                 result.success(BleConnector.connectHID())
             }
+
             "isAvailable" -> {
                 result.success(BleConnector.isAvailable())
             }
+
             "disconnect" -> {
                 BleConnector.connect(false)
             }
+
             "launch" -> {
                 BleConnector.launch();
             }
+
             "connectClassic" -> {
                 BleConnector.connectClassic();
             }
+
             "closeConnection" -> {
                 BleConnector.closeConnection(stopReconnecting = true);
             }
+
             "unbind" -> {
                 BleConnector.unbind();
             }
+
             "analyzeSleep" -> {
                 val listSleep = call.argument<String>("listSleep")
                 if (listSleep != null) {
@@ -2857,6 +2892,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     result.success(mapSleep);
                 }
             }
+
             "customDials" -> {
                 elements.clear()
                 timeDigitalView = call.argument<Boolean>("isDigital")!!
@@ -2939,6 +2975,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
                 val bglength = bgBytes!!.size
                 val bgBitmapX = BitmapFactory.decodeByteArray(bgBytes, offset, bglength)
+
                 /**
                  *8565 is a pixel format with an alpha channel.
                  * Whether to convert png to 8565 format, when it is equal to true, png files must be used, currently only some non-2d devices support it.
@@ -2980,7 +3017,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     //获取时间相关内容
                     if (timeDigitalView) {
                         getTimeDigital2()
-                    }else{
+                    } else {
                         getPointer2(WatchFaceBuilder.ELEMENT_NEEDLE_HOUR, POINTER_HOUR)
                         getPointer2(WatchFaceBuilder.ELEMENT_NEEDLE_MIN, POINTER_MINUTE)
                         getPointer2(WatchFaceBuilder.ELEMENT_NEEDLE_SEC, POINTER_SECOND)
@@ -3029,7 +3066,12 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     imageFormat
                 )
 
-                FileIOUtils.writeFileFromBytesByStream(File(PathUtils.getExternalAppDataPath(), "dial.bin"), bytes)
+                FileIOUtils.writeFileFromBytesByStream(
+                    File(
+                        PathUtils.getExternalAppDataPath(),
+                        "dial.bin"
+                    ), bytes
+                )
 
                 LogUtils.d("customize dial bytes size  ${bytes.size}")
                 BleConnector.sendStream(
@@ -3038,6 +3080,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 )
 
             }
+
             "musicCommand" /*"MUSIC_CONTROL"*/ -> {
                 val musicControls = arrayOf(
                     BleMusicControl(MusicEntity.PLAYER, MusicAttr.PLAYER_NAME, "Music Player"),
@@ -3107,6 +3150,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 mAudioManager.dispatchMediaKeyEvent(eventNext)
                 mAudioManager.dispatchMediaKeyEvent(eventNext2)
             }
+
             "musicPrev" -> {
 
                 val eventPrev =
@@ -3128,6 +3172,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 mAudioManager.dispatchMediaKeyEvent(eventPrev)
                 mAudioManager.dispatchMediaKeyEvent(eventPrev2)
             }
+
             "isPaired" -> {
                 val blueToothAdapter: BluetoothAdapter? = BluetoothAdapter.getDefaultAdapter()
                 val targetDeviceAddress = blueDevice?.address
@@ -3137,9 +3182,9 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     val pairedDevices: Set<BluetoothDevice> = blueToothAdapter.bondedDevices
                     pairedDevices.contains(it)
                 } ?: false
-                if(isPaired){
+                if (isPaired) {
                     result.success(true)
-                }else{
+                } else {
                     result.success(false)
                 }
             }
@@ -3148,310 +3193,409 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 //            }
 
 
-
             else -> {
                 when (call.method) {
                     "OTA" -> {
                         mBleKey = BleKey.OTA
                     }
+
                     "XMODEM" -> {
                         mBleKey = BleKey.XMODEM
                     }
+
                     "TIME" -> {
                         mBleKey = BleKey.TIME
                     }
+
                     "TIME_ZONE" -> {
                         mBleKey = BleKey.TIME_ZONE
                     }
+
                     "POWER" -> {
                         mBleKey = BleKey.POWER
                     }
+
                     "FIRMWARE_VERSION" -> {
                         mBleKey = BleKey.FIRMWARE_VERSION
                     }
+
                     "BLE_ADDRESS" -> {
                         mBleKey = BleKey.BLE_ADDRESS
                     }
+
                     "USER_PROFILE" -> {
                         mBleKey = BleKey.USER_PROFILE
                     }
+
                     "STEP_GOAL" -> {
                         mBleKey = BleKey.STEP_GOAL
                     }
+
                     "BACK_LIGHT" -> {
                         mBleKey = BleKey.BACK_LIGHT
                     }
+
                     "SEDENTARINESS" -> {
                         mBleKey = BleKey.SEDENTARINESS
                     }
+
                     "NO_DISTURB_RANGE" -> {
                         mBleKey = BleKey.NO_DISTURB_RANGE
                     }
+
                     "VIBRATION" -> {
                         mBleKey = BleKey.VIBRATION
                     }
+
                     "GESTURE_WAKE" -> {
                         mBleKey = BleKey.GESTURE_WAKE
                     }
+
                     "HR_ASSIST_SLEEP" -> {
                         mBleKey = BleKey.HR_ASSIST_SLEEP
                     }
+
                     "HOUR_SYSTEM" -> {
                         mBleKey = BleKey.HOUR_SYSTEM
                     }
+
                     "LANGUAGE" -> {
                         mBleKey = BleKey.LANGUAGE
                     }
+
                     "ALARM" -> {
                         mBleKey = BleKey.ALARM
                     }
+
                     "COACHING" -> {
                         mBleKey = BleKey.COACHING
                     }
+
                     "FIND_PHONE" -> {
                         mBleKey = BleKey.FIND_PHONE
                     }
+
                     "NOTIFICATION_REMINDER" -> {
                         mBleKey = BleKey.NOTIFICATION_REMINDER
                     }
+
                     "ANTI_LOST" -> {
                         mBleKey = BleKey.ANTI_LOST
                     }
+
                     "HR_MONITORING" -> {
                         mBleKey = BleKey.HR_MONITORING
                     }
+
                     "HR_WARNING" -> {
                         mBleKey = BleKey.HR_WARNING_SET
                     }
+
                     "UI_PACK_VERSION" -> {
                         mBleKey = BleKey.UI_PACK_VERSION
                     }
+
                     "LANGUAGE_PACK_VERSION" -> {
                         mBleKey = BleKey.LANGUAGE_PACK_VERSION
                     }
+
                     "SLEEP_QUALITY" -> {
                         mBleKey = BleKey.SLEEP_QUALITY
                     }
+
                     "GIRL_CARE" -> {
                         mBleKey = BleKey.GIRL_CARE
                     }
+
                     "TEMPERATURE_DETECTING" -> {
                         mBleKey = BleKey.TEMPERATURE_DETECTING
                     }
+
                     "AEROBIC_EXERCISE" -> {
                         mBleKey = BleKey.AEROBIC_EXERCISE
                     }
+
                     "TEMPERATURE_UNIT" -> {
                         mBleKey = BleKey.TEMPERATURE_UNIT
                     }
+
                     "DATE_FORMAT" -> {
                         mBleKey = BleKey.DATE_FORMAT
                     }
+
                     "WATCH_FACE_SWITCH" -> {
                         mBleKey = BleKey.WATCH_FACE_SWITCH
                     }
+
                     "AGPS_PREREQUISITE" -> {
                         mBleKey = BleKey.AGPS_PREREQUISITE
                     }
+
                     "DRINK_WATER" -> {
                         mBleKey = BleKey.DRINK_WATER
                     }
+
                     "SHUTDOWN" -> {
                         mBleKey = BleKey.SHUTDOWN
                     }
+
                     "APP_SPORT_DATA" -> {
                         mBleKey = BleKey.APP_SPORT_DATA
                     }
+
                     "REAL_TIME_HEART_RATE" -> {
                         mBleKey = BleKey.REAL_TIME_HEART_RATE
                     }
+
                     "BLOOD_OXYGEN_SET" -> {
                         mBleKey = BleKey.BLOOD_OXYGEN_SET
                     }
+
                     "WASH_SET" -> {
                         mBleKey = BleKey.WASH_SET
                     }
+
                     "WATCHFACE_ID" -> {
                         mBleKey = BleKey.WATCHFACE_ID
                     }
+
                     "IBEACON_SET" -> {
                         mBleKey = BleKey.IBEACON_SET
                     }
+
                     "MAC_QRCODE" -> {
                         mBleKey = BleKey.MAC_QRCODE
                     }
+
                     "REAL_TIME_TEMPERATURE" -> {
                         mBleKey = BleKey.REAL_TIME_TEMPERATURE
                     }
+
                     "REAL_TIME_BLOOD_PRESSURE" -> {
                         mBleKey = BleKey.REAL_TIME_BLOOD_PRESSURE
                     }
+
                     "TEMPERATURE_VALUE" -> {
                         mBleKey = BleKey.TEMPERATURE_VALUE
                     }
+
                     "GAME_SET" -> {
                         mBleKey = BleKey.GAME_SET
                     }
+
                     "FIND_WATCH" -> {
                         mBleKey = BleKey.FIND_WATCH
                     }
+
                     "SET_WATCH_PASSWORD" -> {
                         mBleKey = BleKey.SET_WATCH_PASSWORD
                     }
+
                     "REALTIME_MEASUREMENT" -> {
                         mBleKey = BleKey.REALTIME_MEASUREMENT
                     }
+
                     "LOCATION_GSV" -> {
                         mBleKey = BleKey.LOCATION_GSV
                     }
+
                     "HR_RAW" -> {
                         mBleKey = BleKey.HR_RAW
                     }
+
                     "REALTIME_LOG" -> {
                         mBleKey = BleKey.REALTIME_LOG
                     }
+
                     "GSENSOR_OUTPUT" -> {
                         mBleKey = BleKey.GSENSOR_OUTPUT
                     }
+
                     "GSENSOR_RAW" -> {
                         mBleKey = BleKey.GSENSOR_RAW
                     }
+
                     "MOTION_DETECT" -> {
                         mBleKey = BleKey.MOTION_DETECT
                     }
+
                     "LOCATION_GGA" -> {
                         mBleKey = BleKey.LOCATION_GGA
                     }
+
                     "RAW_SLEEP" -> {
                         mBleKey = BleKey.RAW_SLEEP
                     }
+
                     "NO_DISTURB_GLOBAL" -> {
                         mBleKey = BleKey.NO_DISTURB_GLOBAL
                     }
+
                     "IDENTITY" -> {
                         mBleKey = BleKey.IDENTITY
                     }
+
                     "SESSION" -> {
                         mBleKey = BleKey.SESSION
                     }
+
                     "NOTIFICATION" -> {
                         mBleKey = BleKey.NOTIFICATION
                     }
+
                     "MUSIC_CONTROL" -> {
                         mBleKey = BleKey.MUSIC_CONTROL
                     }
+
                     "SCHEDULE" -> {
                         mBleKey = BleKey.SCHEDULE
                     }
+
                     "WEATHER_REALTIME" -> {
                         mBleKey = BleKey.WEATHER_REALTIME
                     }
+
                     "WEATHER_FORECAST" -> {
                         mBleKey = BleKey.WEATHER_FORECAST
                     }
+
                     "HID" -> {
                         mBleKey = BleKey.HID
                     }
+
                     "WORLD_CLOCK" -> {
                         mBleKey = BleKey.WORLD_CLOCK
                     }
+
                     "STOCK" -> {
                         mBleKey = BleKey.STOCK
                     }
+
                     "SMS_QUICK_REPLY_CONTENT" -> {
                         mBleKey = BleKey.SMS_QUICK_REPLY_CONTENT
                     }
+
                     "NOTIFICATION2" -> {
                         mBleKey = BleKey.NOTIFICATION2
                     }
+
                     "DATA_ALL" -> {
                         mBleKey = BleKey.DATA_ALL
                     }
+
                     "ACTIVITY_REALTIME" -> {
                         mBleKey = BleKey.ACTIVITY_REALTIME
                     }
+
                     "ACTIVITY" -> {
                         mBleKey = BleKey.ACTIVITY
                     }
+
                     "HEART_RATE" -> {
                         mBleKey = BleKey.HEART_RATE
                     }
+
                     "SLEEP" -> {
                         mBleKey = BleKey.SLEEP
                     }
+
                     "LOCATION" -> {
                         mBleKey = BleKey.LOCATION
                     }
+
                     "TEMPERATURE" -> {
                         mBleKey = BleKey.TEMPERATURE
                     }
+
                     "BLOOD_OXYGEN" -> {
                         mBleKey = BleKey.BLOOD_OXYGEN
                     }
+
                     "HRV" -> {
                         LogUtils.d("HRV get at line 2450")
                         mBleKey = BleKey.HRV
                     }
+
                     "LOG" -> {
                         mBleKey = BleKey.LOG
                     }
+
                     "SLEEP_RAW_DATA" -> {
                         mBleKey = BleKey.SLEEP_RAW_DATA
                     }
+
                     "PRESSURE" -> {
                         mBleKey = BleKey.PRESSURE
                     }
+
                     "WORKOUT2" -> {
                         mBleKey = BleKey.WORKOUT2
                     }
+
                     "MATCH_RECORD" -> {
                         mBleKey = BleKey.MATCH_RECORD
                     }
+
                     "CAMERA" -> {
                         mBleKey = BleKey.CAMERA
                     }
+
                     "REQUEST_LOCATION" -> {
                         mBleKey = BleKey.REQUEST_LOCATION
                     }
+
                     "INCOMING_CALL" -> {
                         mBleKey = BleKey.INCOMING_CALL
                     }
+
                     "APP_SPORT_STATE" -> {
                         mBleKey = BleKey.APP_SPORT_STATE
                     }
+
                     "CLASSIC_BLUETOOTH_STATE" -> {
                         mBleKey = BleKey.CLASSIC_BLUETOOTH_STATE
                     }
+
                     "DEVICE_SMS_QUICK_REPLY" -> {
                         mBleKey = BleKey.DEVICE_SMS_QUICK_REPLY
                     }
+
                     "WATCH_FACE" -> {
                         mBleKey = BleKey.WATCH_FACE
                     }
+
                     "AGPS_FILE" -> {
                         mBleKey = BleKey.AGPS_FILE
                     }
+
                     "FONT_FILE" -> {
                         mBleKey = BleKey.FONT_FILE
                     }
+
                     "CONTACT" -> {
                         mBleKey = BleKey.CONTACT
                     }
+
                     "UI_FILE" -> {
                         mBleKey = BleKey.UI_FILE
                     }
+
                     "DEVICE_FILE" -> {
                         mBleKey = BleKey.DEVICE_FILE
                     }
+
                     "LANGUAGE_FILE" -> {
                         mBleKey = BleKey.LANGUAGE_FILE
                     }
+
                     "BRAND_INFO_FILE" -> {
                         mBleKey = BleKey.BRAND_INFO_FILE
                     }
+
                     "BLOOD_PRESSURE" -> {
                         mBleKey = BleKey.BLOOD_PRESSURE
                     }
+
                     else -> {
                         mBleKey = BleKey.NONE
                     }
@@ -3460,21 +3604,27 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     "UPDATE" -> {
                         mBleKeyFlag = BleKeyFlag.UPDATE
                     }
+
                     "READ" -> {
                         mBleKeyFlag = BleKeyFlag.READ
                     }
+
                     "CREATE" -> {
                         mBleKeyFlag = BleKeyFlag.CREATE
                     }
+
                     "DELETE" -> {
                         mBleKeyFlag = BleKeyFlag.DELETE
                     }
+
                     "READ_CONTINUE" -> {
                         mBleKeyFlag = BleKeyFlag.READ_CONTINUE
                     }
+
                     "RESET" -> {
                         mBleKeyFlag = BleKeyFlag.RESET
                     }
+
                     else -> {
                         mBleKeyFlag = BleKeyFlag.NONE
                     }
@@ -3501,7 +3651,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
 //        var isWhatsapp: Boolean = false
         if (mContext != null) {
-            if(BleConnector.isAvailable()){
+            if (BleConnector.isAvailable()) {
                 when (bleKey) {
                     // BleCommand.UPDATE
                     BleKey.OTA -> {
@@ -3509,7 +3659,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                             // 发送文件
                             val url: String? = call.argument<String>("url")
                             if (url != null) {
-                                DownloadOTA(mContext!!,bleKey, blueDevice!!).execute(url)
+                                DownloadOTA(mContext!!, bleKey, blueDevice!!).execute(url)
                                 // DownloadTaskOTA(bleKey).execute(url)
                             }
                         }
@@ -3551,11 +3701,14 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                             BleKeyFlag.UPDATE -> {
                                 BleNotification(
                                     mCategory = if (mCategory == "1") {
-                                        if(mPackage!=null){
+                                        if (mPackage != null) {
                                             if (mPackage.contains("whatsapp") && mContent != null) {
-                                                if(mContent.contains("incomingvoicecall")||mContent.contains("panggilansuaramasuk"))
+                                                if (mContent.contains("incomingvoicecall") || mContent.contains(
+                                                        "panggilansuaramasuk"
+                                                    )
+                                                )
                                                     isWhatsapp = true
-                                            }else{
+                                            } else {
                                                 isWhatsapp = false;
                                             }
                                         }
@@ -3575,9 +3728,11 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                                     )
                                 }
                             }
+
                             BleKeyFlag.READ -> {
                                 BleConnector.sendData(bleKey, bleKeyFlag)
                             }
+
                             BleKeyFlag.DELETE -> {
                                 BleNotification(
                                     mCategory = if (mCategory == "1") {
@@ -3593,11 +3748,13 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                                     )
                                 }
                             }
+
                             else -> {
                                 Log.i("No Flag", "")
                             }
                         }
                     }
+
                     BleKey.NOTIFICATION2 -> {
                         val mTitle: String? = call.argument<String>("mTitle")
                         val mContent: String? = call.argument<String>("mContent")
@@ -3608,11 +3765,14 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                             BleKeyFlag.UPDATE -> {
                                 BleNotification2(
                                     mCategory = if (mCategory == "1") {
-                                        if(mPackage!=null){
+                                        if (mPackage != null) {
                                             if (mPackage.contains("whatsapp") && mContent != null) {
-                                                if(mContent.contains("incomingvoicecall")||mContent.contains("panggilansuaramasuk"))
+                                                if (mContent.contains("incomingvoicecall") || mContent.contains(
+                                                        "panggilansuaramasuk"
+                                                    )
+                                                )
                                                     isWhatsapp = true
-                                            }else{
+                                            } else {
                                                 isWhatsapp = false;
                                             }
                                         }
@@ -3634,9 +3794,11 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                                     )
                                 }
                             }
+
                             BleKeyFlag.READ -> {
                                 BleConnector.sendData(bleKey, bleKeyFlag)
                             }
+
                             BleKeyFlag.DELETE -> {
                                 BleNotification2(
                                     mCategory = if (mCategory == "1") {
@@ -3652,6 +3814,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                                     )
                                 }
                             }
+
                             else -> {
                                 Log.i("No Flag", "")
                             }
@@ -3666,6 +3829,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                             BleConnector.sendData(bleKey, bleKeyFlag)
                         }
                     }
+
                     BleKey.TIME_ZONE -> {
                         if (bleKeyFlag == BleKeyFlag.UPDATE) {
                             // 设置时区
@@ -3674,6 +3838,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                             BleConnector.sendData(bleKey, bleKeyFlag)
                         }
                     }
+
                     BleKey.POWER -> BleConnector.sendData(bleKey, bleKeyFlag) // 读取电量
                     BleKey.FIRMWARE_VERSION -> BleConnector.sendData(bleKey, bleKeyFlag) // 读取固件版本
                     BleKey.BLE_ADDRESS -> BleConnector.sendData(bleKey, bleKeyFlag) // 读取BLE蓝牙地址
@@ -3692,6 +3857,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                             BleConnector.sendData(bleKey, bleKeyFlag)
                         }
                     }
+
                     BleKey.STEP_GOAL -> {
                         if (bleKeyFlag == BleKeyFlag.UPDATE) {
                             // 设置目标步数
@@ -3700,6 +3866,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                             BleConnector.sendData(bleKey, bleKeyFlag)
                         }
                     }
+
                     BleKey.BACK_LIGHT -> {
                         if (bleKeyFlag == BleKeyFlag.UPDATE) {
                             // 设置背光时长
@@ -3711,6 +3878,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                             BleConnector.sendData(bleKey, bleKeyFlag)
                         }
                     }
+
                     BleKey.SEDENTARINESS -> {
                         if (bleKeyFlag == BleKeyFlag.UPDATE) {
                             val mEnabled: Int? = call.argument<Int>("mEnabled")
@@ -3731,30 +3899,39 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                                         "MONDAY" -> {
                                             itemRepeat = BleRepeat.MONDAY
                                         }
+
                                         "TUESDAY" -> {
                                             itemRepeat = BleRepeat.TUESDAY
                                         }
+
                                         "THURSDAY" -> {
                                             itemRepeat = BleRepeat.THURSDAY
                                         }
+
                                         "FRIDAY" -> {
                                             itemRepeat = BleRepeat.FRIDAY
                                         }
+
                                         "SATURDAY" -> {
                                             itemRepeat = BleRepeat.SATURDAY
                                         }
+
                                         "SUNDAY" -> {
                                             itemRepeat = BleRepeat.SUNDAY
                                         }
+
                                         "ONCE" -> {
                                             itemRepeat = BleRepeat.ONCE
                                         }
+
                                         "WORKDAY" -> {
                                             itemRepeat = BleRepeat.WORKDAY
                                         }
+
                                         "WEEKEND" -> {
                                             itemRepeat = BleRepeat.WEEKEND
                                         }
+
                                         "EVERYDAY" -> {
                                             itemRepeat = BleRepeat.EVERYDAY
                                         }
@@ -3814,6 +3991,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                             BleConnector.sendData(bleKey, bleKeyFlag)
                         }
                     }
+
                     BleKey.NO_DISTURB_RANGE -> {
                         if (bleKeyFlag == BleKeyFlag.UPDATE) {
                             val enable: Int? = call.argument<Int>("disturbSetting")
@@ -3827,6 +4005,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                             BleConnector.sendData(bleKey, bleKeyFlag)
                         }
                     }
+
                     BleKey.NO_DISTURB_GLOBAL -> {
                         val isDoNotDistrub: Boolean? = call.argument<Boolean>("isDoNotDistrub")
                         if (isDoNotDistrub != null) {
@@ -3837,6 +4016,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                             )
                         }
                     }
+
                     BleKey.VIBRATION -> {
                         val frequency: Int? = call.argument<Int>("frequency")
                         if (bleKeyFlag == BleKeyFlag.UPDATE) {
@@ -3848,6 +4028,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                             BleConnector.sendData(bleKey, bleKeyFlag)
                         }
                     }
+
                     BleKey.GESTURE_WAKE -> {
                         if (bleKeyFlag == BleKeyFlag.UPDATE) {
                             // 设置抬手亮
@@ -3883,6 +4064,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                         bleKeyFlag,
                         Languages.languageToCode()
                     )
+
                     BleKey.ALARM -> {
                         // 创建一个1分钟后的闹钟
                         val index: Int? = call.argument<Int>("index")
@@ -3904,30 +4086,39 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                                     "MONDAY" -> {
                                         itemRepeat = BleRepeat.MONDAY
                                     }
+
                                     "TUESDAY" -> {
                                         itemRepeat = BleRepeat.TUESDAY
                                     }
+
                                     "THURSDAY" -> {
                                         itemRepeat = BleRepeat.THURSDAY
                                     }
+
                                     "FRIDAY" -> {
                                         itemRepeat = BleRepeat.FRIDAY
                                     }
+
                                     "SATURDAY" -> {
                                         itemRepeat = BleRepeat.SATURDAY
                                     }
+
                                     "SUNDAY" -> {
                                         itemRepeat = BleRepeat.SUNDAY
                                     }
+
                                     "ONCE" -> {
                                         itemRepeat = BleRepeat.ONCE
                                     }
+
                                     "WORKDAY" -> {
                                         itemRepeat = BleRepeat.WORKDAY
                                     }
+
                                     "WEEKEND" -> {
                                         itemRepeat = BleRepeat.WEEKEND
                                     }
+
                                     "EVERYDAY" -> {
                                         itemRepeat = BleRepeat.EVERYDAY
                                     }
@@ -3940,30 +4131,39 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                                 "MONDAY" -> {
                                     bleRepeat = BleRepeat.MONDAY
                                 }
+
                                 "TUESDAY" -> {
                                     bleRepeat = BleRepeat.TUESDAY
                                 }
+
                                 "THURSDAY" -> {
                                     bleRepeat = BleRepeat.THURSDAY
                                 }
+
                                 "FRIDAY" -> {
                                     bleRepeat = BleRepeat.FRIDAY
                                 }
+
                                 "SATURDAY" -> {
                                     bleRepeat = BleRepeat.SATURDAY
                                 }
+
                                 "SUNDAY" -> {
                                     bleRepeat = BleRepeat.SUNDAY
                                 }
+
                                 "ONCE" -> {
                                     bleRepeat = BleRepeat.ONCE
                                 }
+
                                 "WORKDAY" -> {
                                     bleRepeat = BleRepeat.WORKDAY
                                 }
+
                                 "WEEKEND" -> {
                                     bleRepeat = BleRepeat.WEEKEND
                                 }
+
                                 "EVERYDAY" -> {
                                     bleRepeat = BleRepeat.EVERYDAY
                                 }
@@ -4052,6 +4252,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                             })
                         }
                     }
+
                     BleKey.COACHING -> {
                         if (bleKeyFlag == BleKeyFlag.CREATE) {
                             BleConnector.sendObject(
@@ -4129,8 +4330,9 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                             BleConnector.sendData(bleKey, bleKeyFlag)
                         }
                     }
+
                     BleKey.HR_WARNING_SET -> {
-                        if(bleKeyFlag == BleKeyFlag.UPDATE){
+                        if (bleKeyFlag == BleKeyFlag.UPDATE) {
                             val mEnabled: Int? = call.argument<Int>("mEnabled")
                             BleConnector.sendObject(
                                 bleKey,
@@ -4214,6 +4416,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                             BleConnector.sendInt8(bleKey, bleKeyFlag, format)
                         }
                     }
+
                     BleKey.RAW_SLEEP ->
                         BleConnector.sendData(bleKey, bleKeyFlag)
 
@@ -4305,6 +4508,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                             )
                         }
                     }
+
                     BleKey.SCHEDULE -> {
                         if (bleKeyFlag == BleKeyFlag.CREATE) {
                             // 创建一个1分钟后的日程
@@ -4344,25 +4548,74 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     // 发送实时天气
                     BleKey.WEATHER_REALTIME -> {
                         val weatherRealTime = call.argument<String>("realTime")
+                        val bleWeaType: String?  = call.argument<String>("type")
                         val realTime = JSONObject(weatherRealTime)
-//                        LogUtils.dTag("dataREaltime",realTime)
+                        val weaType = bleWeaType.toString().toInt()
+
+
+                        LogUtils.dTag("dataREaltime", realTime)
+
+                        LogUtils.dTag("bleWeaType", bleWeaType)
+//                        LogUtils.dTag("weaType", weaType)
+
+
                         if (bleKeyFlag == BleKeyFlag.UPDATE) {
-                            BleConnector.sendObject(
-                                BleKey.WEATHER_REALTIME, bleKeyFlag, BleWeatherRealtime(
-                                    mTime = (Date().time / 1000L).toInt(), /*realTime["mTime"].toString().toInt(),*/
-                                    mWeather = BleWeather(
-                                        mCurrentTemperature = realTime["mCurrentTemperature"].toString().toInt(),
-                                        mMaxTemperature = realTime["mMaxTemperature"].toString().toInt(),
-                                        mMinTemperature = realTime["mMinTemperature"].toString().toInt(),
-                                        mWeatherCode = realTime["mWeatherCode"].toString().toInt(),
-                                        mWindSpeed = 1,
-                                        mHumidity = 1,
-                                        mVisibility = 1,
-                                        mUltraVioletIntensity = 1,
-                                        mPrecipitation = 1
+                            if(weaType==1){
+                                var bleWea = BleWeather(
+                                    mCurrentTemperature =
+                                    realTime["mCurrentTemperature"].toString().toInt(),
+                                    mMaxTemperature = realTime["mMaxTemperature"].toString().toInt(),
+                                    mMinTemperature = realTime["mMinTemperature"].toString().toInt(),
+                                    mWeatherCode = realTime["mWeatherCode"].toString().toInt(),
+                                    mWindSpeed =
+                                    realTime["mWindSpeed"].toString().split(".").first().toInt(),
+                                    mHumidity = realTime["mHumidity"].toString().split(".").first()
+                                        .toInt(),
+                                    mVisibility =
+                                    realTime["mVisibility"].toString().split(".").first().toInt(),
+                                    mUltraVioletIntensity =
+                                    realTime["mUltraViolet"].toString().split(".").first().toInt(),
+                                    mPrecipitation =
+                                    realTime["mPrecipitation"].toString().split(".").first().toInt()
+                                )
+
+                                BleConnector.sendObject(
+                                    BleKey.WEATHER_REALTIME, bleKeyFlag, BleWeatherRealtime(
+                                        mTime = (Date().time / 1000L).toInt(), /*realTime["mTime"].toString().toInt(),*/
+                                        mWeather = bleWea
+
                                     )
                                 )
-                            )
+                            }else{
+                                var bleWea2 = BleWeather2(
+                                    mCurrentTemperature =
+                                    realTime["mCurrentTemperature"].toString().toInt(),
+                                    mMaxTemperature = realTime["mMaxTemperature"].toString().toInt(),
+                                    mMinTemperature = realTime["mMinTemperature"].toString().toInt(),
+                                    mWeatherCode = realTime["mWeatherCode"].toString().toInt(),
+                                    mWindSpeed =
+                                    realTime["mWindSpeed"].toString().split(".").first().toInt(),
+                                    mHumidity = realTime["mHumidity"].toString().split(".").first()
+                                        .toInt(),
+                                    mVisibility =
+                                    realTime["mVisibility"].toString().split(".").first().toInt(),
+                                    mUltraVioletIntensity =
+                                    realTime["mUltraViolet"].toString().split(".").first().toInt(),
+                                    mPrecipitation =
+                                    realTime["mPrecipitation"].toString().split(".").first().toInt()
+                                )
+
+
+
+                                BleConnector.sendObject(
+                                    BleKey.WEATHER_REALTIME2, bleKeyFlag, BleWeatherRealtime2(
+                                        mTime = (Date().time / 1000L).toInt(), /*realTime["mTime"].toString().toInt(),*/
+                                        mWeather = bleWea2
+                                    )
+                                )
+                            }
+
+
                         }
                     }
                     // 发送天气预备
@@ -4370,9 +4623,11 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                         val weatherForecast1 = call.argument<String>("forecast1")
                         val weatherForecast2 = call.argument<String>("forecast2")
                         val weatherForecast3 = call.argument<String>("forecast3")
+                        val bleWeaType: String?  = call.argument<String>("type")
                         val forecast1 = JSONObject(weatherForecast1)
                         val forecast2 = JSONObject(weatherForecast2)
                         val forecast3 = JSONObject(weatherForecast3)
+                        val weaType = bleWeaType.toString().toInt()
 //                        LogUtils.dTag("forecast1",forecast1)
 //                        LogUtils.dTag("forecast2",forecast2)
 //                        LogUtils.dTag("forecast3",forecast3)
@@ -4381,44 +4636,105 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                             val oneDayInMillis = 24 * 60 * 60 * 1000 // milliseconds in a day
                             val tomorrowTime = currentTime + oneDayInMillis
                             val tomorrowDate = Date(tomorrowTime)
-                            BleConnector.sendObject(
-                                BleKey.WEATHER_FORECAST, bleKeyFlag, BleWeatherForecast(
-                                    mTime = (Date().time / 1000L).toInt(),
-                                    mWeather1 = BleWeather(
-                                        mCurrentTemperature = forecast1["mCurrentTemperature"].toString().toInt(),
-                                        mMaxTemperature = forecast1["mMaxTemperature"].toString().toInt(),
-                                        mMinTemperature = forecast1["mMinTemperature"].toString().toInt(),
-                                        mWeatherCode = forecast1["mWeatherCode"].toString().toInt(),
-                                        mWindSpeed = 2,
-                                        mHumidity = 2,
-                                        mVisibility = 2,
-                                        mUltraVioletIntensity = 2,
-                                        mPrecipitation = 2
-                                    ),
-                                    mWeather2 = BleWeather(
-                                        mCurrentTemperature = forecast2["mCurrentTemperature"].toString().toInt(),
-                                        mMaxTemperature = forecast2["mMaxTemperature"].toString().toInt(),
-                                        mMinTemperature = forecast2["mMinTemperature"].toString().toInt(),
-                                        mWeatherCode = forecast2["mWeatherCode"].toString().toInt(),
-                                        mWindSpeed = 3,
-                                        mHumidity = 3,
-                                        mVisibility = 3,
-                                        mUltraVioletIntensity = 3,
-                                        mPrecipitation = 3
-                                    ),
-                                    mWeather3 = BleWeather(
-                                        mCurrentTemperature = forecast3["mCurrentTemperature"].toString().toInt(),
-                                        mMaxTemperature = forecast3["mMaxTemperature"].toString().toInt(),
-                                        mMinTemperature = forecast3["mMinTemperature"].toString().toInt(),
-                                        mWeatherCode = forecast3["mWeatherCode"].toString().toInt(),
-                                        mWindSpeed = 4,
-                                        mHumidity = 4,
-                                        mVisibility = 4,
-                                        mUltraVioletIntensity = 4,
-                                        mPrecipitation = 4
+
+                            if(weaType==1){
+                                BleConnector.sendObject(
+                                    BleKey.WEATHER_FORECAST, bleKeyFlag, BleWeatherForecast(
+                                        mTime = (Date().time / 1000L).toInt(),
+                                        mWeather1 = BleWeather(
+                                            mCurrentTemperature = forecast1["mCurrentTemperature"].toString()
+                                                .toInt(),
+                                            mMaxTemperature = forecast1["mMaxTemperature"].toString()
+                                                .toInt(),
+                                            mMinTemperature = forecast1["mMinTemperature"].toString()
+                                                .toInt(),
+                                            mWeatherCode = forecast1["mWeatherCode"].toString().toInt(),
+                                            mWindSpeed = 2,
+                                            mHumidity = 2,
+                                            mVisibility = 2,
+                                            mUltraVioletIntensity = 2,
+                                            mPrecipitation = 2
+                                        ),
+                                        mWeather2 = BleWeather(
+                                            mCurrentTemperature = forecast2["mCurrentTemperature"].toString()
+                                                .toInt(),
+                                            mMaxTemperature = forecast2["mMaxTemperature"].toString()
+                                                .toInt(),
+                                            mMinTemperature = forecast2["mMinTemperature"].toString()
+                                                .toInt(),
+                                            mWeatherCode = forecast2["mWeatherCode"].toString().toInt(),
+                                            mWindSpeed = 3,
+                                            mHumidity = 3,
+                                            mVisibility = 3,
+                                            mUltraVioletIntensity = 3,
+                                            mPrecipitation = 3
+                                        ),
+                                        mWeather3 = BleWeather(
+                                            mCurrentTemperature = forecast3["mCurrentTemperature"].toString()
+                                                .toInt(),
+                                            mMaxTemperature = forecast3["mMaxTemperature"].toString()
+                                                .toInt(),
+                                            mMinTemperature = forecast3["mMinTemperature"].toString()
+                                                .toInt(),
+                                            mWeatherCode = forecast3["mWeatherCode"].toString().toInt(),
+                                            mWindSpeed = 4,
+                                            mHumidity = 4,
+                                            mVisibility = 4,
+                                            mUltraVioletIntensity = 4,
+                                            mPrecipitation = 4
+                                        )
                                     )
                                 )
-                            )
+                            }else{
+                                BleConnector.sendObject(
+                                    BleKey.WEATHER_FORECAST, bleKeyFlag, BleWeatherForecast2(
+                                        mTime = (Date().time / 1000L).toInt(),
+                                        mWeather1 = BleWeather2(
+                                            mCurrentTemperature = forecast1["mCurrentTemperature"].toString()
+                                                .toInt(),
+                                            mMaxTemperature = forecast1["mMaxTemperature"].toString()
+                                                .toInt(),
+                                            mMinTemperature = forecast1["mMinTemperature"].toString()
+                                                .toInt(),
+                                            mWeatherCode = forecast1["mWeatherCode"].toString().toInt(),
+                                            mWindSpeed = 2,
+                                            mHumidity = 2,
+                                            mVisibility = 2,
+                                            mUltraVioletIntensity = 2,
+                                            mPrecipitation = 2
+                                        ),
+                                        mWeather2 = BleWeather2(
+                                            mCurrentTemperature = forecast2["mCurrentTemperature"].toString()
+                                                .toInt(),
+                                            mMaxTemperature = forecast2["mMaxTemperature"].toString()
+                                                .toInt(),
+                                            mMinTemperature = forecast2["mMinTemperature"].toString()
+                                                .toInt(),
+                                            mWeatherCode = forecast2["mWeatherCode"].toString().toInt(),
+                                            mWindSpeed = 3,
+                                            mHumidity = 3,
+                                            mVisibility = 3,
+                                            mUltraVioletIntensity = 3,
+                                            mPrecipitation = 3
+                                        ),
+                                        mWeather3 = BleWeather2(
+                                            mCurrentTemperature = forecast3["mCurrentTemperature"].toString()
+                                                .toInt(),
+                                            mMaxTemperature = forecast3["mMaxTemperature"].toString()
+                                                .toInt(),
+                                            mMinTemperature = forecast3["mMinTemperature"].toString()
+                                                .toInt(),
+                                            mWeatherCode = forecast3["mWeatherCode"].toString().toInt(),
+                                            mWindSpeed = 4,
+                                            mHumidity = 4,
+                                            mVisibility = 4,
+                                            mUltraVioletIntensity = 4,
+                                            mPrecipitation = 4
+                                        )
+                                    )
+                                )
+                            }
+
                         }
                     }
                     // HID
@@ -4434,15 +4750,21 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                         val reversed: Int? = call.argument<Int>("reversed")
                         val mCityName: String? = call.argument<String>("mCityName")
 
-                        Log.d("dataWClock","index: $index, isLocal: $isLocal, timeZoneOffset: $mTimeZoneOffset, reversed: $reversed, city: $mCityName")
-                        Log.d("timeZone.getdefault.raw", "${TimeZone.getDefault().rawOffset} | ${TimeZone.getDefault().rawOffset / 1000 / 60 / 15}")
+                        Log.d(
+                            "dataWClock",
+                            "index: $index, isLocal: $isLocal, timeZoneOffset: $mTimeZoneOffset, reversed: $reversed, city: $mCityName"
+                        )
+                        Log.d(
+                            "timeZone.getdefault.raw",
+                            "${TimeZone.getDefault().rawOffset} | ${TimeZone.getDefault().rawOffset / 1000 / 60 / 15}"
+                        )
 
                         if (bleKeyFlag == BleKeyFlag.CREATE) {
                             BleConnector.sendObject(
                                 bleKey, bleKeyFlag,
                                 BleWorldClock(
                                     isLocal = isLocal!!,
-                                    mTimeZoneOffset =  mTimeZoneOffset!! / 1000 / 60 / 15  /*TimeZone.getDefault().rawOffset / 1000 / 60 / 15 */,
+                                    mTimeZoneOffset = mTimeZoneOffset!! / 1000 / 60 / 15  /*TimeZone.getDefault().rawOffset / 1000 / 60 / 15 */,
                                     reversed = reversed!!,
                                     mCityName = mCityName!!
                                 )
@@ -4477,9 +4799,9 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                         var open = convertStock["open"].toString().toFloat()
                         var close = convertStock["close"].toString().toFloat()
                         var volume = convertStock["volume"].toString().toFloat()
-                        var byPoint = close -open
-                        var byPercent = ((close-open)/open)*100
-                        var marketCap = close*volume
+                        var byPoint = close - open
+                        var byPercent = ((close - open) / open) * 100
+                        var marketCap = close * volume
                         // 创建一个股票
                         if (bleKeyFlag == BleKeyFlag.CREATE) {
                             BleConnector.sendObject(
@@ -4496,7 +4818,8 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                         } else if (bleKeyFlag == BleKeyFlag.DELETE) {
                             // 如果缓存中有股票的话，删除第一个
                             val stocks = BleCache.getList(BleKey.STOCK, BleStock::class.java)
-                            val stockIndex = stocks.indexOfFirst { it.mStockCode == convertStock["ticker"].toString()}
+                            val stockIndex =
+                                stocks.indexOfFirst { it.mStockCode == convertStock["ticker"].toString() }
                             if (stocks.isNotEmpty()) {
                                 BleConnector.sendInt8(bleKey, bleKeyFlag, stocks[stockIndex].mId)
                             }
@@ -4542,7 +4865,8 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                             )
                             if (smsQuickReply.isNotEmpty()) {
                                 smsQuickReply[0].let { smsQuickReply ->
-                                    smsQuickReply.mContent = "我正在会议中，${Random.nextInt(10)}请稍后再联系我"
+                                    smsQuickReply.mContent =
+                                        "我正在会议中，${Random.nextInt(10)}请稍后再联系我"
                                     BleConnector.sendObject(bleKey, bleKeyFlag, smsQuickReply)
                                 }
                             }
@@ -4589,10 +4913,11 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                             BleConnector.sendInt8(bleKey, bleKeyFlag, CameraState.EXIT)
                         }
                     }
+
                     BleKey.REQUEST_LOCATION -> {
                         val speed: String = call.argument<String>("mSpeed")!!
                         val totalDistance: String = call.argument<String>("mTotalDistance")!!
-                        val altitude :Int = call.argument<Int>("mAltitude")!!
+                        val altitude: Int = call.argument<Int>("mAltitude")!!
                         // reply location information
                         val reply = BleLocationReply(
                             mSpeed = speed.toFloat(),
@@ -4605,6 +4930,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 //            mLocationTimes++
 //            if (mLocationTimes > 10) mLocationTimes = 1
                     }
+
                     BleKey.APP_SPORT_STATE -> {
                         // App-led movement, sending movement state changes
                         sportState = when (call.argument<Int>("sportState")!!) {
@@ -4629,9 +4955,11 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                         print("$reply")
                         LogUtils.d(reply)
                     }
+
                     BleKey.INCOMING_CALL -> {
                         BleConnector.sendData(bleKey, bleKeyFlag /*null, true*/)
                     }
+
                     BleKey.CLASSIC_BLUETOOTH_STATE -> {
                         // 3.0 开关
                         when (mClassicBluetoothState) {
@@ -4639,10 +4967,12 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                                 mClassicBluetoothState = ClassicBluetoothState.OPEN
                                 BleConnector.sendInt8(bleKey, bleKeyFlag, mClassicBluetoothState)
                             }
+
                             ClassicBluetoothState.OPEN_SUCCESSFULLY -> {
                                 mClassicBluetoothState = ClassicBluetoothState.CLOSE
                                 BleConnector.sendInt8(bleKey, bleKeyFlag, mClassicBluetoothState)
                             }
+
                             else -> {
                                 //3.0状态正在切换中，请稍等
                                 print("3.0 status is switching, please wait")
@@ -4665,6 +4995,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                         }
 
                     }
+
                     BleKey.CONTACT -> {
                         val listContact: List<Map<String, String>>? =
                             call.argument<List<Map<String, String>>>("listContact")
@@ -4696,6 +5027,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                             LogUtils.d("contact is empty")
                         }
                     }
+
                     BleKey.DEVICE_FILE -> {
                         if (bleKeyFlag == BleKeyFlag.READ) {
                             BleConnector.sendData(bleKey, bleKeyFlag)
@@ -4706,7 +5038,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                         print("$bleKey")
                     }
                 }
-            }else{
+            } else {
                 if (onBleErrorSink != null)
                     onBleErrorSink!!.success(true)
             }
@@ -5395,20 +5727,21 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         }
 
     private val onReadWorldClockResultHandler: EventChannel.StreamHandler =
-        object :EventChannel.StreamHandler{
+        object : EventChannel.StreamHandler {
             override fun onListen(arguments: Any?, eventSink: EventSink?) {
-                if (eventSink != null){
+                if (eventSink != null) {
                     onReadWorldClockSink = eventSink
                 }
             }
+
             override fun onCancel(arguments: Any?) {
             }
         }
 
     private val onWorldClockDeleteResultHandler: EventChannel.StreamHandler =
-        object : EventChannel.StreamHandler{
+        object : EventChannel.StreamHandler {
             override fun onListen(arguments: Any?, eventSink: EventSink?) {
-                if(eventSink != null){
+                if (eventSink != null) {
                     onWorldClockDeleteSink = eventSink
                 }
             }
@@ -5489,9 +5822,9 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         }
 
     private val onBluetoothPairingResultHandler: EventChannel.StreamHandler =
-        object : EventChannel.StreamHandler{
+        object : EventChannel.StreamHandler {
             override fun onListen(arguments: Any?, eventSink: EventSink?) {
-                if(eventSink != null){
+                if (eventSink != null) {
                     bluetoothPairingReceiver = MyBluetoohthPairingReceiver(eventSink, blueDevice)
                     val filter = IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED)
                     mContext?.registerReceiver(bluetoothPairingReceiver, filter)
@@ -5526,23 +5859,25 @@ class DownloadTask(val bleKey: BleKey) : AsyncTask<String, Int, ByteArray>() {
 }
 
 
-class DownloadOTA(val context: Context,val bleKey: BleKey, val device: BluetoothDevice) : AsyncTask<String, Int, ByteArray>() {
+class DownloadOTA(val context: Context, val bleKey: BleKey, val device: BluetoothDevice) :
+    AsyncTask<String, Int, ByteArray>() {
     private var mOTAManager: OTAManager? = null
     private var mJLUpgradeStatus = JLUpgradeStatus.NONE
     private var mBluetoothHelper = BluetoothHelper.getInstance(Utils.getApp())
     private val REQUEST_CODE_UPGRADE_J = 0x01
-    private var resultByte: ByteArray?=null
+    private var resultByte: ByteArray? = null
     private fun updateUpgradeStatus(status: JLUpgradeStatus) {
         LogUtils.d("updateUpgradeStatus status = $status")
         mJLUpgradeStatus = status
     }
+
     private fun canOTA(status: JLUpgradeStatus): Boolean {
         return !isOTAError(status) && status != JLUpgradeStatus.UPGRADE_STOP
     }
 
     private fun isOTAError(status: JLUpgradeStatus): Boolean {
-        return when(status){
-            JLUpgradeStatus.UPGRADE_SCANNING_TIMEOUT, JLUpgradeStatus.UPGRADE_FAILED, JLUpgradeStatus.UPGRADE_PREPARE_FAILED-> true
+        return when (status) {
+            JLUpgradeStatus.UPGRADE_SCANNING_TIMEOUT, JLUpgradeStatus.UPGRADE_FAILED, JLUpgradeStatus.UPGRADE_PREPARE_FAILED -> true
             else -> false
         }
     }
@@ -5554,20 +5889,21 @@ class DownloadOTA(val context: Context,val bleKey: BleKey, val device: Bluetooth
             if (!mOTAManager!!.isOTA) {//非ota状态
                 if (status == StateCode.CONNECTION_OK) {
                     //避免升级完成后这里还执行一次
-                    if(canOTA(mJLUpgradeStatus)) {
-                        if(resultByte!=null) {
+                    if (canOTA(mJLUpgradeStatus)) {
+                        if (resultByte != null) {
                             BleConnector.sendStream(BleKey.of(REQUEST_CODE_UPGRADE_J), resultByte!!)
                         }
                     }
                 } else if (status == StateCode.CONNECTION_DISCONNECT) {
                     LogUtils.d("ota onConnection -> device disconnected")
-                    if(mJLUpgradeStatus == JLUpgradeStatus.UPGRADE_PREPARE) {
+                    if (mJLUpgradeStatus == JLUpgradeStatus.UPGRADE_PREPARE) {
                         updateUpgradeStatus(JLUpgradeStatus.UPGRADE_PREPARE_FAILED)
                     }
                 }
             }
         }
     }
+
     private enum class JLUpgradeStatus {
         NONE, //未升级未开始
         UPGRADE_SCANNING_START,//扫描开始
@@ -5581,9 +5917,10 @@ class DownloadOTA(val context: Context,val bleKey: BleKey, val device: Bluetooth
         UPGRADE_STOP,//升级完成
         UPGRADE_FAILED, //升级失败
     }
+
     override fun onPreExecute() {
         mBluetoothHelper = BluetoothHelper.getInstance(Utils.getApp())
-        mOTAManager= null
+        mOTAManager = null
         mJLUpgradeStatus = JLUpgradeStatus.NONE
         mBluetoothHelper.connectDevice(device)
         mOTAManager = OTAManager(context)
@@ -5619,17 +5956,21 @@ class DownloadOTA(val context: Context,val bleKey: BleKey, val device: Bluetooth
 //    }
 
     override fun onPostExecute(result: ByteArray) {
-        resultByte=result
+        resultByte = result
         when (BleCache.mPlatform) {
             BleDeviceInfo.PLATFORM_NORDIC ->
                 Log.d("PLATFORM", "PLATFORM_NORDIC")
+
             BleDeviceInfo.PLATFORM_REALTEK ->
                 Log.d("PLATFORM", "PLATFORM_REALTEK")
+
             BleDeviceInfo.PLATFORM_MTK ->
                 Log.d("PLATFORM", "PLATFORM_MTK")
+
             BleDeviceInfo.PLATFORM_GOODIX ->
                 Log.d("PLATFORM", "PLATFORM_GOODIX")
-            BleDeviceInfo.PLATFORM_JL ->{
+
+            BleDeviceInfo.PLATFORM_JL -> {
                 Log.d("PLATFORM", "PLATFORM_JL")
                 startOTA(result)
             }
@@ -5638,7 +5979,7 @@ class DownloadOTA(val context: Context,val bleKey: BleKey, val device: Bluetooth
 
     private fun startOTA(result: ByteArray) {
         LogUtils.d("startOTA ::")
-        mOTAManager?.bluetoothOption?.firmwareFileData= result
+        mOTAManager?.bluetoothOption?.firmwareFileData = result
         mOTAManager?.startOTA(object : IUpgradeCallback {
             override fun onError(p0: BaseError?) {
                 LogUtils.d("onError -> $p0")
@@ -5698,30 +6039,33 @@ class DownloadTaskOTA(val bleKey: BleKey) : AsyncTask<String, Int, ByteArray>() 
 }
 
 @RequiresApi(Build.VERSION_CODES.R)
-class MyCallService : InCallService(){
+class MyCallService : InCallService() {
 
-    fun acceptCall(){
+    fun acceptCall() {
 //        calls[0].answer(0)
-        if(calls.isNotEmpty()){
+        if (calls.isNotEmpty()) {
             calls[0].answer(0);
         }
     }
 
-    fun rejectCall(){
+    fun rejectCall() {
         calls[0].reject(Call.REJECT_REASON_DECLINED)
     }
 }
 
-class MyBluetoohthPairingReceiver(private val eventSink: EventSink, private val targetDevice: BluetoothDevice?): BroadcastReceiver(){
+class MyBluetoohthPairingReceiver(
+    private val eventSink: EventSink,
+    private val targetDevice: BluetoothDevice?
+) : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
         val action = intent?.action
-        if(BluetoothDevice.ACTION_BOND_STATE_CHANGED == action && targetDevice!=null){
+        if (BluetoothDevice.ACTION_BOND_STATE_CHANGED == action && targetDevice != null) {
             val device: BluetoothDevice? = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
-            if(device == targetDevice){
+            if (device == targetDevice) {
                 val bondState = device?.bondState
-                if(bondState == BluetoothDevice.BOND_BONDED){
+                if (bondState == BluetoothDevice.BOND_BONDED) {
                     eventSink.success(true)
-                }else{
+                } else {
                     eventSink.success(false)
                 }
             }
