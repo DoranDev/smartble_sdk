@@ -1,10 +1,6 @@
-## 0.8.9
+## 1.0.0
 
-* Device filter IOS
-
-## 0.8.8
-
-* IOS
+* stable release
 
 ## 0.8.7
 
