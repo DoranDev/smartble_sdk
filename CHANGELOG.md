@@ -1,3 +1,7 @@
+## 1.0.0
+
+* stable release
+
 ## 0.8.7
 
 * clock sync
