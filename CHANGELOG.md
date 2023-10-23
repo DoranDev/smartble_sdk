@@ -1,3 +1,7 @@
+## 1.0.4
+
+* fix watchface bundle ios
+
 ## 1.0.3
 
 * ios 17
