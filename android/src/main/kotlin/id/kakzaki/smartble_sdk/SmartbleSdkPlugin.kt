@@ -8,6 +8,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.res.AssetManager
 import android.graphics.*
 import android.media.AudioManager
 import android.os.*
@@ -1580,6 +1581,10 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     var digiLeft = 0
     var digiTop = 0
 
+    private var isColor = false
+
+    private var pickedColor :HashMap<String, Int>? = null
+
     //控件相关
     private var stepValueCenterX = 0f
     private var stepValueCenterY = 0f
@@ -1644,6 +1649,33 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     val POINTER_HOUR = "pointer/hour"
     val POINTER_MINUTE = "pointer/minute"
     val POINTER_SECOND = "pointer/second"
+
+    fun changeImageColor(assetManager: AssetManager, assetFileName: String, color: Int): Bitmap? {
+        var inputStream: InputStream? = null
+        var bitmap: Bitmap? = null
+        try {
+            inputStream = assetManager.open(assetFileName)
+            bitmap = BitmapFactory.decodeStream(inputStream)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            inputStream?.close()
+        }
+
+        bitmap?.let {
+            val coloredBitmap = Bitmap.createBitmap(it.width, it.height, Bitmap.Config.ARGB_8888)
+            val canvas = Canvas(coloredBitmap)
+            val paint = Paint()
+            val colorFilter = PorterDuffColorFilter(color, PorterDuff.Mode.SRC_ATOP)
+            paint.colorFilter = colorFilter
+
+            canvas.drawBitmap(it, Rect(0, 0, it.width, it.height), Rect(0, 0, it.width, it.height), paint)
+
+            return coloredBitmap
+        }
+
+        return null
+    }
 
     private fun getBgBitmap(isCanvasValue: Boolean, isRound: Boolean, bgBitmapx: Bitmap): Bitmap {
         val bgBitmap = if (isRound) {
@@ -2923,6 +2955,12 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 controlViewHr = call.argument<Boolean>("controlViewHr")!!
                 controlViewHrX = call.argument<Int>("controlViewHrX")!!
                 controlViewHrY = call.argument<Int>("controlViewHrY")!!
+
+                isColor = call.argument<Boolean>("isColor")!!
+
+                if(isColor){
+                    pickedColor = call.argument<HashMap<String, Int>>("pickedColor")!!
+                }
 
                 controlValueInterval = 1
                 //ignoreBlack = 1
