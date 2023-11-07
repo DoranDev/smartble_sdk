@@ -4687,11 +4687,12 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                                             mMinTemperature = forecast1["mMinTemperature"].toString()
                                                 .toInt(),
                                             mWeatherCode = forecast1["mWeatherCode"].toString().toInt(),
-                                            mWindSpeed = 2,
-                                            mHumidity = 2,
-                                            mVisibility = 2,
-                                            mUltraVioletIntensity = 2,
-                                            mPrecipitation = 2
+                                            mWindSpeed = forecast1["mWindSpeed"].toString().split(".").first().toInt(),
+                                            mHumidity = forecast1["mHumidity"].toString().split(".").first()
+                                                .toInt(),
+                                            mVisibility = forecast1["mVisibility"].toString().split(".").first().toInt(),
+                                            mUltraVioletIntensity = forecast1["mUltraViolet"].toString().split(".").first().toInt(),
+                                            mPrecipitation = forecast1["mPrecipitation"].toString().split(".").first().toInt()
                                         ),
                                         mWeather2 = BleWeather(
                                             mCurrentTemperature = forecast2["mCurrentTemperature"].toString()
@@ -4701,11 +4702,12 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                                             mMinTemperature = forecast2["mMinTemperature"].toString()
                                                 .toInt(),
                                             mWeatherCode = forecast2["mWeatherCode"].toString().toInt(),
-                                            mWindSpeed = 3,
-                                            mHumidity = 3,
-                                            mVisibility = 3,
-                                            mUltraVioletIntensity = 3,
-                                            mPrecipitation = 3
+                                            mWindSpeed = forecast2["mWindSpeed"].toString().split(".").first().toInt(),
+                                            mHumidity = forecast2["mHumidity"].toString().split(".").first()
+                                                .toInt(),
+                                            mVisibility = forecast2["mVisibility"].toString().split(".").first().toInt(),
+                                            mUltraVioletIntensity = forecast2["mUltraViolet"].toString().split(".").first().toInt(),
+                                            mPrecipitation = forecast2["mPrecipitation"].toString().split(".").first().toInt()
                                         ),
                                         mWeather3 = BleWeather(
                                             mCurrentTemperature = forecast3["mCurrentTemperature"].toString()
@@ -4715,11 +4717,12 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                                             mMinTemperature = forecast3["mMinTemperature"].toString()
                                                 .toInt(),
                                             mWeatherCode = forecast3["mWeatherCode"].toString().toInt(),
-                                            mWindSpeed = 4,
-                                            mHumidity = 4,
-                                            mVisibility = 4,
-                                            mUltraVioletIntensity = 4,
-                                            mPrecipitation = 4
+                                            mWindSpeed = forecast3["mWindSpeed"].toString().split(".").first().toInt(),
+                                            mHumidity = forecast3["mHumidity"].toString().split(".").first()
+                                                .toInt(),
+                                            mVisibility = forecast3["mVisibility"].toString().split(".").first().toInt(),
+                                            mUltraVioletIntensity = forecast3["mUltraViolet"].toString().split(".").first().toInt(),
+                                            mPrecipitation = forecast3["mPrecipitation"].toString().split(".").first().toInt()
                                         )
                                     )
                                 )
@@ -4735,11 +4738,12 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                                             mMinTemperature = forecast1["mMinTemperature"].toString()
                                                 .toInt(),
                                             mWeatherCode = forecast1["mWeatherCode"].toString().toInt(),
-                                            mWindSpeed = 2,
-                                            mHumidity = 2,
-                                            mVisibility = 2,
-                                            mUltraVioletIntensity = 2,
-                                            mPrecipitation = 2
+                                            mWindSpeed = forecast1["mWindSpeed"].toString().split(".").first().toInt(),
+                                            mHumidity = forecast1["mHumidity"].toString().split(".").first()
+                                                .toInt(),
+                                            mVisibility = forecast1["mVisibility"].toString().split(".").first().toInt(),
+                                            mUltraVioletIntensity = forecast1["mUltraViolet"].toString().split(".").first().toInt(),
+                                            mPrecipitation = forecast1["mPrecipitation"].toString().split(".").first().toInt()
                                         ),
                                         mWeather2 = BleWeather2(
                                             mCurrentTemperature = forecast2["mCurrentTemperature"].toString()
@@ -4749,11 +4753,12 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                                             mMinTemperature = forecast2["mMinTemperature"].toString()
                                                 .toInt(),
                                             mWeatherCode = forecast2["mWeatherCode"].toString().toInt(),
-                                            mWindSpeed = 3,
-                                            mHumidity = 3,
-                                            mVisibility = 3,
-                                            mUltraVioletIntensity = 3,
-                                            mPrecipitation = 3
+                                            mWindSpeed = forecast2["mWindSpeed"].toString().split(".").first().toInt(),
+                                            mHumidity = forecast2["mHumidity"].toString().split(".").first()
+                                                .toInt(),
+                                            mVisibility = forecast2["mVisibility"].toString().split(".").first().toInt(),
+                                            mUltraVioletIntensity = forecast2["mUltraViolet"].toString().split(".").first().toInt(),
+                                            mPrecipitation = forecast2["mPrecipitation"].toString().split(".").first().toInt()
                                         ),
                                         mWeather3 = BleWeather2(
                                             mCurrentTemperature = forecast3["mCurrentTemperature"].toString()
@@ -4763,11 +4768,12 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                                             mMinTemperature = forecast3["mMinTemperature"].toString()
                                                 .toInt(),
                                             mWeatherCode = forecast3["mWeatherCode"].toString().toInt(),
-                                            mWindSpeed = 4,
-                                            mHumidity = 4,
-                                            mVisibility = 4,
-                                            mUltraVioletIntensity = 4,
-                                            mPrecipitation = 4
+                                            mWindSpeed = forecast3["mWindSpeed"].toString().split(".").first().toInt(),
+                                            mHumidity = forecast3["mHumidity"].toString().split(".").first()
+                                                .toInt(),
+                                            mVisibility = forecast3["mVisibility"].toString().split(".").first().toInt(),
+                                            mUltraVioletIntensity = forecast3["mUltraViolet"].toString().split(".").first().toInt(),
+                                            mPrecipitation = forecast3["mPrecipitation"].toString().split(".").first().toInt()
                                         )
                                     )
                                 )
