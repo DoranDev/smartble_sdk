@@ -100,32 +100,34 @@ class SmartbleSdk {
   }
 
   ///customDials
-  Future<dynamic> customDials(
-      {required Uint8List bgPreviewBytes,
-      required Uint8List bgBytes,
-      required int custom,
-      required bool isDigital,
-      required bool isRound,
-      required int screenWidth,
-      required int screenHeight,
-      required int screenPreviewWidth,
-      required int screenPreviewHeight,
-      required bool controlViewStep,
-      required int controlViewStepX,
-      required int controlViewStepY,
-      required bool controlViewCa,
-      required int controlViewCaX,
-      required int controlViewCaY,
-      required bool controlViewDis,
-      required int controlViewDisX,
-      required int controlViewDisY,
-      required bool controlViewHr,
-      required int controlViewHrX,
-      required int controlViewHrY,
-      int? digiLeft,
-      int? digiTop,
-      required bool isColor,
-      required Color pickedColor}) {
+  Future<dynamic> customDials({
+    required Uint8List bgPreviewBytes,
+    required Uint8List bgBytes,
+    required int custom,
+    required bool isDigital,
+    required bool isRound,
+    required int screenWidth,
+    required int screenHeight,
+    required int screenPreviewWidth,
+    required int screenPreviewHeight,
+    required bool controlViewStep,
+    required int controlViewStepX,
+    required int controlViewStepY,
+    required bool controlViewCa,
+    required int controlViewCaX,
+    required int controlViewCaY,
+    required bool controlViewDis,
+    required int controlViewDisX,
+    required int controlViewDisY,
+    required bool controlViewHr,
+    required int controlViewHrX,
+    required int controlViewHrY,
+    int? digiLeft,
+    int? digiTop,
+    required bool isColor,
+    required Color pickedColor,
+    required int idPointer,
+  }) {
     return _channel.invokeMethod('customDials', {
       'bgPreviewBytes': bgPreviewBytes,
       'bgBytes': bgBytes,
@@ -155,7 +157,8 @@ class SmartbleSdk {
         "red": pickedColor.red,
         "green": pickedColor.green,
         "blue": pickedColor.blue
-      }
+      },
+      'idPointer': idPointer,
     });
   }
 
