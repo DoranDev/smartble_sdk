@@ -1650,9 +1650,9 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     val DIGITAL_WEEK_DIR = "week"
 
     //pointer_parameter
-    val POINTER_HOUR = "pointer/hour"
-    val POINTER_MINUTE = "pointer/minute"
-    val POINTER_SECOND = "pointer/second"
+    var POINTER_HOUR = "pointer_0/hour"
+    var POINTER_MINUTE = "pointer_0/minute"
+    var POINTER_SECOND = "pointer_0/second"
 
     fun changeImageColor(assetManager: AssetManager, assetFileName: String, color: Int): Bitmap? {
         var inputStream: InputStream? = null
@@ -2232,15 +2232,15 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         w = hourMinute.first
         h = hourMinute.second
         var valueBuffers = hourMinute.third.toTypedArray()
-        if(isColor) {
-            LogUtils.d("isColor $isColor")
-            pickedColor?.let {
-                val replacementColorRGB: Triple<Int, Int, Int> =
-                    Triple(it["red"]!!, it["green"]!!, it["blue"]!!)
-                valueBuffers = changeWhiteToColor(valueBuffers, replacementColorRGB)
-                LogUtils.d("changeWhiteToColor $valueBuffers")
-            }
-        }
+//        if(isColor) {
+//            LogUtils.d("isColor $isColor")
+//            pickedColor?.let {
+//                val replacementColorRGB: Triple<Int, Int, Int> =
+//                    Triple(it["red"]!!, it["green"]!!, it["blue"]!!)
+//                valueBuffers = changeWhiteToColor(valueBuffers, replacementColorRGB)
+//                LogUtils.d("changeWhiteToColor $valueBuffers")
+//            }
+//        }
 
 
 
@@ -2282,15 +2282,6 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         w = date.first
         h = date.second
         valueBuffers = date.third.toTypedArray()
-        if(isColor) {
-            LogUtils.d("isColor $isColor")
-            pickedColor?.let {
-                val replacementColorRGB: Triple<Int, Int, Int> =
-                    Triple(it["red"]!!, it["green"]!!, it["blue"]!!)
-                valueBuffers = changeWhiteToColor(valueBuffers, replacementColorRGB)
-                LogUtils.d("changeWhiteToColor $valueBuffers")
-            }
-        }
         val elementMonth = Element(
             type = WatchFaceBuilder.ELEMENT_DIGITAL_MONTH,
             hasAlpha = isTo8565.toInt(),
@@ -2404,15 +2395,6 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         w = hourMinute.first
         h = hourMinute.second
         var valueBuffers = hourMinute.third.toTypedArray()
-        if(isColor) {
-            LogUtils.d("isColor $isColor")
-            pickedColor?.let {
-                val replacementColorRGB: Triple<Int, Int, Int> =
-                    Triple(it["red"]!!, it["green"]!!, it["blue"]!!)
-                valueBuffers = changeWhiteToColor(valueBuffers, replacementColorRGB)
-                LogUtils.d("changeWhiteToColor $valueBuffers")
-            }
-        }
         val elementHour = Element(
             type = WatchFaceBuilder.ELEMENT_DIGITAL_HOUR,
             hasAlpha = 1,
@@ -2452,15 +2434,6 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         w = date.first
         h = date.second
         valueBuffers = date.third.toTypedArray()
-        if(isColor) {
-            LogUtils.d("isColor $isColor")
-            pickedColor?.let {
-                val replacementColorRGB: Triple<Int, Int, Int> =
-                    Triple(it["red"]!!, it["green"]!!, it["blue"]!!)
-                valueBuffers = changeWhiteToColor(valueBuffers, replacementColorRGB)
-                LogUtils.d("changeWhiteToColor $valueBuffers")
-            }
-        }
         val elementMonth = Element(
             type = WatchFaceBuilder.ELEMENT_DIGITAL_MONTH,
             hasAlpha = 1,
@@ -2500,15 +2473,6 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         w = week.first
         h = week.second
         valueBuffers = week.third.toTypedArray()
-        if(isColor) {
-            LogUtils.d("isColor $isColor")
-            pickedColor?.let {
-                val replacementColorRGB: Triple<Int, Int, Int> =
-                    Triple(it["red"]!!, it["green"]!!, it["blue"]!!)
-                valueBuffers = changeWhiteToColor(valueBuffers, replacementColorRGB)
-                LogUtils.d("changeWhiteToColor $replacementColorRGB")
-            }
-        }
         val elementWeek = Element(
             type = WatchFaceBuilder.ELEMENT_DIGITAL_WEEKDAY,
             hasAlpha = 1,
@@ -3032,6 +2996,10 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
                 pointerModel = call.argument<Int>("pointerModel")!!
                 pointerNumberModel = call.argument<Int>("pointerNumberModel")!!
+
+                 POINTER_HOUR = "pointer_$pointerModel/hour"
+                 POINTER_MINUTE = "pointer_$pointerModel/minute"
+                 POINTER_SECOND = "pointer_$pointerModel/second"
 
                 if(isColor){
                     pickedColor = call.argument<HashMap<String, Int>>("pickedColor")!!
