@@ -126,7 +126,8 @@ class SmartbleSdk {
     int? digiTop,
     required bool isColor,
     required Color pickedColor,
-    required int idPointer,
+    required int pointerModel,
+    required int pointerNumberModel
   }) {
     return _channel.invokeMethod('customDials', {
       'bgPreviewBytes': bgPreviewBytes,
@@ -158,7 +159,8 @@ class SmartbleSdk {
         "green": pickedColor.green,
         "blue": pickedColor.blue
       },
-      'idPointer': idPointer,
+      'pointerModel': pointerModel,
+      'pointerNumberModel': pointerNumberModel
     });
   }
 

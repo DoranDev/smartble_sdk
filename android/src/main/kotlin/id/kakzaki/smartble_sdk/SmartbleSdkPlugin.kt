@@ -1586,6 +1586,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private var pickedColor :HashMap<String, Int>? = null
 
     private var pointerModel = 0
+    private var pointerNumberModel = 0
 
 
     //控件相关
@@ -3030,6 +3031,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 isColor = call.argument<Boolean>("isColor")!!
 
                 pointerModel = call.argument<Int>("pointerModel")!!
+                pointerNumberModel = call.argument<Int>("pointerNumberModel")!!
 
                 if(isColor){
                     pickedColor = call.argument<HashMap<String, Int>>("pickedColor")!!
