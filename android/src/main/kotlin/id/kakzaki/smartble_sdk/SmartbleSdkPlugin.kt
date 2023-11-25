@@ -1580,6 +1580,8 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     var screenPreviewHeight = 0 //The actual preview size of the device screen - height
     var digiLeft = 0
     var digiTop = 0
+      var digiDateLeft = 0
+    var digiDateTop = 0
 
     private var isColor = false
 
@@ -1962,7 +1964,10 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 //        val timeTop = (screenHeight / 3) * scaleHeight
         val timeLeft = digiLeft * scaleWidth
         val timeTop = digiTop * scaleHeight
-        LogUtils.d("test timeLeft=$timeLeft,  timeTop=$timeTop, timeDigitalView.width=${timeDigitalViewWidth} ,scaleWidth =$scaleWidth")
+
+        val dateLeft = digiDateLeft * scaleWidth
+        val dateTop = digiDateTop * scaleHeight
+        LogUtils.d("test timeLeft=$timeLeft,  timeTop=$timeTop,dateLeft=$dateLeft,  dateTop=$dateTop, timeDigitalView.width=${timeDigitalViewWidth} ,scaleWidth =$scaleWidth")
         //获取AM原始资源.此处涉及到预览，所以强制使用PNG图片，避免透明色不显示
         val amBitmap =
             ImageUtils.getBitmap(mContext!!.assets.open("$digitalDir$DIGITAL_AM_DIR/pm.png"))
@@ -1987,7 +1992,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             hourMinuteTop,
             hourMinuteBitmap.height,
             canvas,
-            timeLeft,
+            dateLeft,
             isCanvasValue
         )
         //时间主体绘制完毕后,即可确认位置,然后就可以绘制其他的从属元素了
@@ -2972,6 +2977,9 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
                 digiLeft = call.argument<Int>("digiLeft")!!
                 digiTop = call.argument<Int>("digiTop")!!
+
+                digiDateLeft = call.argument<Int>("digiDateLeft")!!
+                digiDateTop = call.argument<Int>("digiDateTop")!!
 
                 screenPreviewWidth = call.argument<Int>("screenPreviewWidth")!!
                 screenPreviewHeight = call.argument<Int>("screenPreviewHeight")!!
