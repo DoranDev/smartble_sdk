@@ -1580,7 +1580,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     var screenPreviewHeight = 0 //The actual preview size of the device screen - height
     var digiLeft = 0
     var digiTop = 0
-      var digiDateLeft = 0
+    var digiDateLeft = 0
     var digiDateTop = 0
 
     private var isColor = false
@@ -1965,7 +1965,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         val timeLeft = digiLeft * scaleWidth
         val timeTop = digiTop * scaleHeight
 
-        val dateLeft = digiDateLeft * scaleWidth
+        val dateLeft = digiDateLeft * scaleWidth + 2
         val dateTop = digiDateTop * scaleHeight
         LogUtils.d("test timeLeft=$timeLeft,  timeTop=$timeTop,dateLeft=$dateLeft,  dateTop=$dateTop, timeDigitalView.width=${timeDigitalViewWidth} ,scaleWidth =$scaleWidth")
         //获取AM原始资源.此处涉及到预览，所以强制使用PNG图片，避免透明色不显示
@@ -1985,11 +1985,14 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         )
         //日期
         val tempDate = "07/08"
+//        val date = getNumberBuffers("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_DATE_DIR/")
+//        val dateBitmap =
+//            ImageUtils.getBitmap(mContext!!.assets.open("$digitalDir$DIGITAL_AM_DIR/pm.png"))
         val (_, dateAndWeekTop) = addDigitalTimeParam(
             digitalDir,
             DIGITAL_DATE_DIR,
             tempDate,
-            hourMinuteTop,
+            dateTop-17,
             hourMinuteBitmap.height,
             canvas,
             dateLeft,
@@ -2018,7 +2021,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 null
             )
         }
-        digitalWeekLeftX = digitalTimeMinuteRightX - weekBitmap.width
+        digitalWeekLeftX = digitalDateDayLeftX + weekBitmap.width - 15
         digitalWeekTopY = dateAndWeekTop
     }
 
@@ -3005,9 +3008,9 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 pointerModel = call.argument<Int>("pointerModel")!!
                 pointerNumberModel = call.argument<Int>("pointerNumberModel")!!
 
-                 POINTER_HOUR = "pointer_$pointerModel/hour"
-                 POINTER_MINUTE = "pointer_$pointerModel/minute"
-                 POINTER_SECOND = "pointer_$pointerModel/second"
+                POINTER_HOUR = "pointer_$pointerModel/hour"
+                POINTER_MINUTE = "pointer_$pointerModel/minute"
+                POINTER_SECOND = "pointer_$pointerModel/second"
 
                 if(isColor){
                     pickedColor = call.argument<HashMap<String, Int>>("pickedColor")!!
