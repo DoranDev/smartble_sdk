@@ -1988,11 +1988,16 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 //        val date = getNumberBuffers("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_DATE_DIR/")
 //        val dateBitmap =
 //            ImageUtils.getBitmap(mContext!!.assets.open("$digitalDir$DIGITAL_AM_DIR/pm.png"))
+
+        var difTop :Int = 17
+        if(custom == 2){
+            difTop = 22
+        }
         val (_, dateAndWeekTop) = addDigitalTimeParam(
             digitalDir,
             DIGITAL_DATE_DIR,
             tempDate,
-            dateTop-17,
+            dateTop-difTop,
             hourMinuteBitmap.height,
             canvas,
             dateLeft,
@@ -2021,7 +2026,11 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 null
             )
         }
-        digitalWeekLeftX = digitalDateDayLeftX + weekBitmap.width - 15
+        var difLeft :Int = 15
+        if(custom == 2){
+            difLeft = 25
+        }
+        digitalWeekLeftX = digitalDateDayLeftX + weekBitmap.width - difLeft
         digitalWeekTopY = dateAndWeekTop
     }
 
