@@ -8,6 +8,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.res.AssetManager
 import android.graphics.*
 import android.media.AudioManager
 import android.os.*
@@ -1579,6 +1580,16 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     var screenPreviewHeight = 0 //The actual preview size of the device screen - height
     var digiLeft = 0
     var digiTop = 0
+    var digiDateLeft = 0
+    var digiDateTop = 0
+
+    private var isColor = false
+
+    private var pickedColor :HashMap<String, Int>? = null
+
+    private var pointerModel = 0
+    private var pointerNumberModel = 0
+
 
     //控件相关
     private var stepValueCenterX = 0f
@@ -1641,9 +1652,36 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     val DIGITAL_WEEK_DIR = "week"
 
     //pointer_parameter
-    val POINTER_HOUR = "pointer/hour"
-    val POINTER_MINUTE = "pointer/minute"
-    val POINTER_SECOND = "pointer/second"
+    var POINTER_HOUR = "pointer_0/hour"
+    var POINTER_MINUTE = "pointer_0/minute"
+    var POINTER_SECOND = "pointer_0/second"
+
+    fun changeImageColor(assetManager: AssetManager, assetFileName: String, color: Int): Bitmap? {
+        var inputStream: InputStream? = null
+        var bitmap: Bitmap? = null
+        try {
+            inputStream = assetManager.open(assetFileName)
+            bitmap = BitmapFactory.decodeStream(inputStream)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            inputStream?.close()
+        }
+
+        bitmap?.let {
+            val coloredBitmap = Bitmap.createBitmap(it.width, it.height, Bitmap.Config.ARGB_8888)
+            val canvas = Canvas(coloredBitmap)
+            val paint = Paint()
+            val colorFilter = PorterDuffColorFilter(color, PorterDuff.Mode.SRC_ATOP)
+            paint.colorFilter = colorFilter
+
+            canvas.drawBitmap(it, Rect(0, 0, it.width, it.height), Rect(0, 0, it.width, it.height), paint)
+
+            return coloredBitmap
+        }
+
+        return null
+    }
 
     private fun getBgBitmap(isCanvasValue: Boolean, isRound: Boolean, bgBitmapx: Bitmap): Bitmap {
         val bgBitmap = if (isRound) {
@@ -1926,7 +1964,10 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 //        val timeTop = (screenHeight / 3) * scaleHeight
         val timeLeft = digiLeft * scaleWidth
         val timeTop = digiTop * scaleHeight
-        LogUtils.d("test timeLeft=$timeLeft,  timeTop=$timeTop, timeDigitalView.width=${timeDigitalViewWidth} ,scaleWidth =$scaleWidth")
+
+        val dateLeft = digiDateLeft * scaleWidth + 2
+        val dateTop = digiDateTop * scaleHeight
+        LogUtils.d("test timeLeft=$timeLeft,  timeTop=$timeTop,dateLeft=$dateLeft,  dateTop=$dateTop, timeDigitalView.width=${timeDigitalViewWidth} ,scaleWidth =$scaleWidth")
         //获取AM原始资源.此处涉及到预览，所以强制使用PNG图片，避免透明色不显示
         val amBitmap =
             ImageUtils.getBitmap(mContext!!.assets.open("$digitalDir$DIGITAL_AM_DIR/pm.png"))
@@ -1944,14 +1985,17 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         )
         //日期
         val tempDate = "07/08"
+//        val date = getNumberBuffers("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_DATE_DIR/")
+//        val dateBitmap =
+//            ImageUtils.getBitmap(mContext!!.assets.open("$digitalDir$DIGITAL_AM_DIR/pm.png"))
         val (_, dateAndWeekTop) = addDigitalTimeParam(
             digitalDir,
             DIGITAL_DATE_DIR,
             tempDate,
-            hourMinuteTop,
+            dateTop-17,
             hourMinuteBitmap.height,
             canvas,
-            timeLeft,
+            dateLeft,
             isCanvasValue
         )
         //时间主体绘制完毕后,即可确认位置,然后就可以绘制其他的从属元素了
@@ -1977,7 +2021,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 null
             )
         }
-        digitalWeekLeftX = digitalTimeMinuteRightX - weekBitmap.width
+        digitalWeekLeftX = digitalDateDayLeftX + weekBitmap.width - 15
         digitalWeekTopY = dateAndWeekTop
     }
 
@@ -2143,6 +2187,26 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         return data
     }
 
+    private fun changeWhiteToColor(originalImage: Array<ByteArray>, replacementColorRGB: Triple<Int, Int, Int>): Array<ByteArray> {
+        val replacementColor: ByteArray = byteArrayOf(
+            replacementColorRGB.first.toByte(),
+            replacementColorRGB.second.toByte(),
+            replacementColorRGB.third.toByte()
+        )
+
+        return originalImage.map { pixel ->
+            if (isWhite(pixel)) {
+                replacementColor
+            } else {
+                pixel
+            }
+        }.toTypedArray()
+    }
+
+    private fun isWhite(pixel: ByteArray): Boolean {
+        // Check if the pixel is white (255, 255, 255)
+        return pixel[0] == 255.toByte() && pixel[1] == 255.toByte() && pixel[2] == 255.toByte()
+    }
     private fun getTimeDigital() {
         //AM PM
         val amPmValue = ArrayList<ByteArray>()
@@ -2176,6 +2240,18 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         w = hourMinute.first
         h = hourMinute.second
         var valueBuffers = hourMinute.third.toTypedArray()
+//        if(isColor) {
+//            LogUtils.d("isColor $isColor")
+//            pickedColor?.let {
+//                val replacementColorRGB: Triple<Int, Int, Int> =
+//                    Triple(it["red"]!!, it["green"]!!, it["blue"]!!)
+//                valueBuffers = changeWhiteToColor(valueBuffers, replacementColorRGB)
+//                LogUtils.d("changeWhiteToColor $valueBuffers")
+//            }
+//        }
+
+
+
         val elementHour = Element(
             type = WatchFaceBuilder.ELEMENT_DIGITAL_HOUR,
             hasAlpha = isTo8565.toInt(),
@@ -2905,6 +2981,9 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 digiLeft = call.argument<Int>("digiLeft")!!
                 digiTop = call.argument<Int>("digiTop")!!
 
+                digiDateLeft = call.argument<Int>("digiDateLeft")!!
+                digiDateTop = call.argument<Int>("digiDateTop")!!
+
                 screenPreviewWidth = call.argument<Int>("screenPreviewWidth")!!
                 screenPreviewHeight = call.argument<Int>("screenPreviewHeight")!!
 
@@ -2923,6 +3002,19 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 controlViewHr = call.argument<Boolean>("controlViewHr")!!
                 controlViewHrX = call.argument<Int>("controlViewHrX")!!
                 controlViewHrY = call.argument<Int>("controlViewHrY")!!
+
+                isColor = call.argument<Boolean>("isColor")!!
+
+                pointerModel = call.argument<Int>("pointerModel")!!
+                pointerNumberModel = call.argument<Int>("pointerNumberModel")!!
+
+                POINTER_HOUR = "pointer_$pointerModel/hour"
+                POINTER_MINUTE = "pointer_$pointerModel/minute"
+                POINTER_SECOND = "pointer_$pointerModel/second"
+
+                if(isColor){
+                    pickedColor = call.argument<HashMap<String, Int>>("pickedColor")!!
+                }
 
                 controlValueInterval = 1
                 //ignoreBlack = 1
