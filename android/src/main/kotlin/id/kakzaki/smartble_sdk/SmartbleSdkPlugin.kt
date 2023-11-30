@@ -3131,6 +3131,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                         gravity = X_CENTER or Y_CENTER,
                         x = screenWidth / 2,
                         y = screenHeight / 2 + 2,
+                        ignoreBlack = ignoreBlack,
                         imageBuffers = arrayOf(bgPreviewBytesNew!!)
                     )
                     elements.add(elementPreview)
@@ -3142,6 +3143,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                         gravity = X_CENTER or Y_CENTER,
                         x = screenWidth / 2,
                         y = screenHeight / 2,
+                        ignoreBlack = ignoreBlack,
                         imageBuffers = arrayOf(bgBytesNew!!)
                     )
                     elements.add(elementBg)
