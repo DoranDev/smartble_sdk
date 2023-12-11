@@ -1656,32 +1656,6 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     var POINTER_MINUTE = "pointer_0/minute"
     var POINTER_SECOND = "pointer_0/second"
 
-    fun changeImageColor(assetManager: AssetManager, assetFileName: String, color: Int): Bitmap? {
-        var inputStream: InputStream? = null
-        var bitmap: Bitmap? = null
-        try {
-            inputStream = assetManager.open(assetFileName)
-            bitmap = BitmapFactory.decodeStream(inputStream)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        } finally {
-            inputStream?.close()
-        }
-
-        bitmap?.let {
-            val coloredBitmap = Bitmap.createBitmap(it.width, it.height, Bitmap.Config.ARGB_8888)
-            val canvas = Canvas(coloredBitmap)
-            val paint = Paint()
-            val colorFilter = PorterDuffColorFilter(color, PorterDuff.Mode.SRC_ATOP)
-            paint.colorFilter = colorFilter
-
-            canvas.drawBitmap(it, Rect(0, 0, it.width, it.height), Rect(0, 0, it.width, it.height), paint)
-
-            return coloredBitmap
-        }
-
-        return null
-    }
 
     private fun getBgBitmap(isCanvasValue: Boolean, isRound: Boolean, bgBitmapx: Bitmap): Bitmap {
         val bgBitmap = if (isRound) {
@@ -2249,17 +2223,6 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         w = hourMinute.first
         h = hourMinute.second
         var valueBuffers = hourMinute.third.toTypedArray()
-//        if(isColor) {
-//            LogUtils.d("isColor $isColor")
-//            pickedColor?.let {
-//                val replacementColorRGB: Triple<Int, Int, Int> =
-//                    Triple(it["red"]!!, it["green"]!!, it["blue"]!!)
-//                valueBuffers = changeWhiteToColor(valueBuffers, replacementColorRGB)
-//                LogUtils.d("changeWhiteToColor $valueBuffers")
-//            }
-//        }
-
-
 
         val elementHour = Element(
             type = WatchFaceBuilder.ELEMENT_DIGITAL_HOUR,
@@ -2716,7 +2679,8 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
     private fun getNumberBuffers(
         dir: String,
-        range: Int = 9
+        range: Int = 9,
+        fromFlutter:Boolean=false
     ): Triple<Int, Int, ArrayList<ByteArray>> {
         var w = 0
         var h = 0
@@ -2738,7 +2702,8 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
     private fun getNumberBuffers2(
         dir: String,
-        range: Int = 9
+        range: Int = 9,
+        fromFlutter:Boolean=false
     ): Triple<Int, Int, ArrayList<ByteArray>> {
         var w = 0
         var h = 0
@@ -2897,6 +2862,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 }
             }
 
+
             "connect" -> {
                 BleConnector.connect(true)
             }
@@ -2940,6 +2906,15 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             "unbind" -> {
                 BleConnector.unbind();
             }
+
+            "isSupport2DAcceleration" -> {
+                mResult?.success(isSupport2DAcceleration)
+            }
+
+            "isTo8565" -> {
+                mResult?.success(isTo8565);
+            }
+
 
             "analyzeSleep" -> {
                 val listSleep = call.argument<String>("listSleep")
