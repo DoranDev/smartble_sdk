@@ -36,42 +36,42 @@ class DigitalDial {
     digitalDir = "$timeDir/digital";
   }
 
-  Future<Map> processAssets(Color toColor) async {
-    Map result = {};
+  Future<Map<String, Uint8List>> processAssets(Color toColor) async {
+    Map<String, Uint8List> result = {};
     final amDir = "$digitalDir/$digitalValueColor/$digitalAmDir/am.$fileFormat";
-    result[amDir] = await changeColor(amDir, toColor);
+    result[amDir] = (await changeColor(amDir, toColor))!;
 
     final pmDir = "$digitalDir/$digitalValueColor/$digitalAmDir/pm.$fileFormat";
-    result[pmDir] = await changeColor(pmDir, toColor);
+    result[pmDir] = (await changeColor(pmDir, toColor))!;
 
     final hourMinuteDirInit =
         "$digitalDir/$digitalValueColor/$digitalHourMinuteDir/";
     for (var i = 0; i < 9; i++) {
       final filename = "$hourMinuteDirInit$i.$fileFormat";
-      result[filename] = await changeColor(filename, toColor);
+      result[filename] = (await changeColor(filename, toColor))!;
     }
 
     final dateDirInit = "$digitalDir/$digitalValueColor/$digitalDateDir/";
     for (var i = 0; i < 9; i++) {
       final filename = "$dateDirInit$i.$fileFormat";
-      result[filename] = await changeColor(filename, toColor);
+      result[filename] = (await changeColor(filename, toColor))!;
     }
 
     final weekDirInit = "$digitalDir/$digitalValueColor/$digitalWeekDir/";
     for (var i = 0; i < 6; i++) {
       final filename = "$weekDirInit$i.$fileFormat";
-      result[filename] = await changeColor(filename, toColor);
+      result[filename] = (await changeColor(filename, toColor))!;
     }
 
     final divHourDir =
         "$digitalDir/$digitalValueColor/$digitalHourMinuteDir/symbol.$fileFormat";
 
-    result[divHourDir] = await changeColor(divHourDir, toColor);
+    result[divHourDir] = (await changeColor(divHourDir, toColor))!;
 
     final divDateDir =
         "$digitalDir/$digitalValueColor/$digitalDateDir/symbol.$fileFormat";
 
-    result[divDateDir] = await changeColor(divDateDir, toColor);
+    result[divDateDir] = (await changeColor(divDateDir, toColor))!;
 
     return result;
   }

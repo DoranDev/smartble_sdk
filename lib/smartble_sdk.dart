@@ -130,7 +130,7 @@ class SmartbleSdk {
       required Color pickedColor,
       required int pointerModel,
       required int pointerNumberModel,
-      required Map assets}) {
+      required Map<String, Uint8List> assets}) {
     return _channel.invokeMethod('customDials', {
       'bgPreviewBytes': bgPreviewBytes,
       'bgBytes': bgBytes,
