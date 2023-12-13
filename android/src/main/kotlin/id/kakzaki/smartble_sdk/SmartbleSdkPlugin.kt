@@ -1586,6 +1586,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private var isColor = false
 
     private var pickedColor :HashMap<String, Int>? = null
+    private var dialAssetsFromFlutter :HashMap<String, ByteArray>? = null
 
     private var pointerModel = 0
     private var pointerNumberModel = 0
@@ -2170,26 +2171,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         return data
     }
 
-    private fun changeWhiteToColor(originalImage: Array<ByteArray>, replacementColorRGB: Triple<Int, Int, Int>): Array<ByteArray> {
-        val replacementColor: ByteArray = byteArrayOf(
-            replacementColorRGB.first.toByte(),
-            replacementColorRGB.second.toByte(),
-            replacementColorRGB.third.toByte()
-        )
 
-        return originalImage.map { pixel ->
-            if (isWhite(pixel)) {
-                replacementColor
-            } else {
-                pixel
-            }
-        }.toTypedArray()
-    }
-
-    private fun isWhite(pixel: ByteArray): Boolean {
-        // Check if the pixel is white (255, 255, 255)
-        return pixel[0] == 255.toByte() && pixel[1] == 255.toByte() && pixel[2] == 255.toByte()
-    }
     private fun getTimeDigital() {
         //AM PM
         val amPmValue = ArrayList<ByteArray>()
@@ -2197,14 +2179,18 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             ImageUtils.getBitmap(mContext!!.assets.open("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_AM_DIR/am.${fileFormat}"))
         var w = tmpBitmap.width
         var h = tmpBitmap.height
-        val amValue =
-            mContext!!.assets.open("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_AM_DIR/am.${fileFormat}")
-                .use { it.readBytes() }
-        val pmValue =
-            mContext!!.assets.open("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_AM_DIR/pm.${fileFormat}")
-                .use { it.readBytes() }
-        amPmValue.add(defaultConversion(fileFormat, amValue, w))
-        amPmValue.add(defaultConversion(fileFormat, pmValue, w))
+//        var amValue =
+//            mContext!!.assets.open("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_AM_DIR/am.${fileFormat}")
+//                .use { it.readBytes() }
+//        val pmValue =
+//            mContext!!.assets.open("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_AM_DIR/pm.${fileFormat}")
+//                .use { it.readBytes() }
+
+        val amValue = dialAssetsFromFlutter?.get("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_AM_DIR/am.${fileFormat}")
+        val pmValue = dialAssetsFromFlutter?.get("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_AM_DIR/pm.${fileFormat}")
+
+        amPmValue.add(defaultConversion(fileFormat, amValue!!, w))
+        amPmValue.add(defaultConversion(fileFormat, pmValue!!, w))
         val elementAmPm = Element(
             type = WatchFaceBuilder.ELEMENT_DIGITAL_AMPM,
             hasAlpha = isTo8565.toInt(),
@@ -2324,12 +2310,15 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             ImageUtils.getBitmap(mContext!!.assets.open(amFileName))
         var w = tmpBitmap.width
         var h = tmpBitmap.height
-        val amValue =
-            mContext!!.assets.open(amFileName)
-                .use { it.readBytes() }
-        val pmValue =
-            mContext!!.assets.open(pmFileName)
-                .use { it.readBytes() }
+//        val amValue =
+//            mContext!!.assets.open(amFileName)
+//                .use { it.readBytes() }
+//        val pmValue =
+//            mContext!!.assets.open(pmFileName)
+//                .use { it.readBytes() }
+
+        val amValue = dialAssetsFromFlutter?.get(amFileName)
+        val pmValue = dialAssetsFromFlutter?.get(pmFileName)
 
         val amFile = File(
             PathUtils.getExternalAppDataPath(),
@@ -2471,18 +2460,23 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         dir: String,
         type: Int,
         x: Int, y: Int,
-
+        fromFlutter:Boolean=false
         ) {
         val symbolValue = ArrayList<ByteArray>()
         val symbolBitmap =
             ImageUtils.getBitmap(mContext!!.assets.open("${dir}/symbol.${fileFormat}"))
         val w = symbolBitmap.width
         val h = symbolBitmap.height
+
+        val value = if(fromFlutter){
+            dialAssetsFromFlutter?.get("${dir}/symbol.${fileFormat}")
+        }else{mContext!!.assets.open("${dir}/symbol.${fileFormat}")
+            .use { it.readBytes() }}
+
         symbolValue.add(
             defaultConversion(
                 fileFormat,
-                mContext!!.assets.open("${dir}/symbol.${fileFormat}")
-                    .use { it.readBytes() }, w
+                value!!, w
             )
         )
         val valueBuffers = symbolValue.toTypedArray()
@@ -2504,7 +2498,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         dir: String,
         type: Int,
         x: Int, y: Int,
-
+        fromFlutter:Boolean=false
         ) {
         val symbolFileName = "${dir}/symbol.${fileFormat}"
         val symbolValue = ArrayList<ByteArray>()
@@ -2513,8 +2507,14 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         val w = symbolBitmap.width
         val h = symbolBitmap.height
 
-        val symbolBytes = mContext!!.assets.open(symbolFileName)
-            .use { it.readBytes() }
+//        val symbolBytes = mContext!!.assets.open(symbolFileName)
+//            .use { it.readBytes() }
+
+        val symbolBytes = if(fromFlutter){
+            dialAssetsFromFlutter?.get(symbolFileName)
+        }else{mContext!!.assets.open(symbolFileName)
+            .use { it.readBytes() }}
+
         val symbolFile = File(
             PathUtils.getExternalAppDataPath(),
             symbolFileName
@@ -2693,9 +2693,14 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 h = tmpBitmap.height
             }
             val value =
-                mContext!!.assets.open("$dir${index}.${fileFormat}")
-                    .use { it.readBytes() }
-            valueByte.add(defaultConversion(fileFormat, value, w))
+                if(fromFlutter){
+                    dialAssetsFromFlutter?.get("$dir${index}.${fileFormat}")
+                }else{
+                    mContext!!.assets.open("$dir${index}.${fileFormat}")
+                        .use { it.readBytes() }
+                }
+
+            valueByte.add(defaultConversion(fileFormat, value!!, w))
         }
         return Triple(w, h, valueByte)
     }
@@ -2718,8 +2723,12 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             }
 
             val value =
-                mContext!!.assets.open(fileName)
-                    .use { it.readBytes() }
+                if(fromFlutter){
+                    dialAssetsFromFlutter?.get(fileName)
+                }else{
+                    mContext!!.assets.open(fileName)
+                        .use { it.readBytes() }
+                }
 
             val pngFile = File(
                 PathUtils.getExternalAppDataPath(),
@@ -3000,6 +3009,8 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     pickedColor = call.argument<HashMap<String, Int>>("pickedColor")!!
                 }
 
+                dialAssetsFromFlutter = call.argument<HashMap<String, ByteArray>>("assets")!!
+
                 controlValueInterval = 1
                 //ignoreBlack = 1
                 controlValueRange = 10
@@ -3015,12 +3026,12 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 Y_CENTER = WatchFaceBuilder.GRAVITY_Y_CENTER_R
 
                 //初始资源路径
-                if (custom == 2) {
-                    DIAL_CUSTOMIZE_DIR = "dial_customize_454"
+                DIAL_CUSTOMIZE_DIR = if (custom == 2) {
+                    "dial_customize_454"
                 } else if (custom == 3) {
-                    DIAL_CUSTOMIZE_DIR = "dial_customize_240"
+                    "dial_customize_240"
                 } else {
-                    DIAL_CUSTOMIZE_DIR = "dial_customize_240"
+                    "dial_customize_240"
                 }
                 CONTROL_DIR = "$DIAL_CUSTOMIZE_DIR/control"
                 STEP_DIR = "$CONTROL_DIR/step"

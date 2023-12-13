@@ -10,6 +10,7 @@ class DigitalDial {
   String digitalHourMinuteDir = "hour_minute";
   String digitalWeekDir = "week";
   String fileFormat = "";
+  String digitalValueColor = "0";
   //time
   String timeDir = "";
   //digital
@@ -18,7 +19,7 @@ class DigitalDial {
   bool isTo8565 = false;
   SmartbleSdk ble = SmartbleSdk();
 
-  init(int custom) async {
+  void init(int custom) async {
     isSupport2DAcceleration = await ble.isSupport2DAcceleration();
     isTo8565 = await ble.isTo8565();
     fileFormat = (isSupport2DAcceleration || isTo8565) ? "png" : "bmp";
@@ -33,6 +34,46 @@ class DigitalDial {
     timeDir = "$dialCustomizeDir/time";
     //digital
     digitalDir = "$timeDir/digital";
+  }
+
+  Future<Map> processAssets(Color toColor) async {
+    Map result = {};
+    final amDir = "$digitalDir/$digitalValueColor/$digitalAmDir/am.$fileFormat";
+    result[amDir] = await changeColor(amDir, toColor);
+
+    final pmDir = "$digitalDir/$digitalValueColor/$digitalAmDir/pm.$fileFormat";
+    result[pmDir] = await changeColor(pmDir, toColor);
+
+    final hourMinuteDirInit =
+        "$digitalDir/$digitalValueColor/$digitalHourMinuteDir/";
+    for (var i = 0; i < 9; i++) {
+      final filename = "$hourMinuteDirInit$i.$fileFormat";
+      result[filename] = await changeColor(filename, toColor);
+    }
+
+    final dateDirInit = "$digitalDir/$digitalValueColor/$digitalDateDir/";
+    for (var i = 0; i < 9; i++) {
+      final filename = "$dateDirInit$i.$fileFormat";
+      result[filename] = await changeColor(filename, toColor);
+    }
+
+    final weekDirInit = "$digitalDir/$digitalValueColor/$digitalWeekDir/";
+    for (var i = 0; i < 6; i++) {
+      final filename = "$weekDirInit$i.$fileFormat";
+      result[filename] = await changeColor(filename, toColor);
+    }
+
+    final divHourDir =
+        "$digitalDir/$digitalValueColor/$digitalHourMinuteDir/symbol.$fileFormat";
+
+    result[divHourDir] = await changeColor(divHourDir, toColor);
+
+    final divDateDir =
+        "$digitalDir/$digitalValueColor/$digitalDateDir/symbol.$fileFormat";
+
+    result[divDateDir] = await changeColor(divDateDir, toColor);
+
+    return result;
   }
 
   Future<img.Image?> decodeAsset(String path) async {
