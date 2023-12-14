@@ -77,7 +77,7 @@ class DigitalDial {
   }
 
   Future<img.Image?> decodeAsset(String path) async {
-    final data = await rootBundle.load(path);
+    final data = await rootBundle.load("assets/$path");
 
     final buffer =
         await ui.ImmutableBuffer.fromUint8List(data.buffer.asUint8List());
