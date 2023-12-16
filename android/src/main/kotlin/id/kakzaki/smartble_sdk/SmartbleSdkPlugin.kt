@@ -2179,15 +2179,20 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             ImageUtils.getBitmap(mContext!!.assets.open("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_AM_DIR/am.${fileFormat}"))
         var w = tmpBitmap.width
         var h = tmpBitmap.height
-//        var amValue =
-//            mContext!!.assets.open("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_AM_DIR/am.${fileFormat}")
-//                .use { it.readBytes() }
-//        val pmValue =
-//            mContext!!.assets.open("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_AM_DIR/pm.${fileFormat}")
-//                .use { it.readBytes() }
-
-        val amValue = dialAssetsFromFlutter?.get("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_AM_DIR/am.${fileFormat}")
-        val pmValue = dialAssetsFromFlutter?.get("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_AM_DIR/pm.${fileFormat}")
+        val amValue =
+            if(isColor) {
+                mContext!!.assets.open("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_AM_DIR/am.${fileFormat}")
+                    .use { it.readBytes() }
+            }else{
+                dialAssetsFromFlutter?.get("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_AM_DIR/am.${fileFormat}")
+            }
+        val pmValue =
+            if(isColor) {
+            mContext!!.assets.open("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_AM_DIR/pm.${fileFormat}")
+                .use { it.readBytes() }
+            }else{
+                dialAssetsFromFlutter?.get("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_AM_DIR/pm.${fileFormat}")
+            }
 
         amPmValue.add(defaultConversion(fileFormat, amValue!!, w))
         amPmValue.add(defaultConversion(fileFormat, pmValue!!, w))
@@ -2205,7 +2210,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         elements.add(elementAmPm)
         //数字时间
         val hourMinute =
-            getNumberBuffers("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_HOUR_MINUTE_DIR/")
+            getNumberBuffers("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_HOUR_MINUTE_DIR/", fromFlutter = isColor)
         w = hourMinute.first
         h = hourMinute.second
         var valueBuffers = hourMinute.third.toTypedArray()
@@ -2241,10 +2246,11 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 WatchFaceBuilder.ELEMENT_DIGITAL_DIV_HOUR,
                 digitalTimeSymbolLeftX.toInt(),
                 digitalTimeSymbolTopY.toInt(),
+                fromFlutter = isColor
             )
         }
         //日期
-        val date = getNumberBuffers("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_DATE_DIR/")
+        val date = getNumberBuffers("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_DATE_DIR/", fromFlutter = isColor)
         w = date.first
         h = date.second
         valueBuffers = date.third.toTypedArray()
@@ -2279,10 +2285,11 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 WatchFaceBuilder.ELEMENT_DIGITAL_DIV_MONTH,
                 digitalDateSymbolLeftX.toInt(),
                 digitalDateSymbolTopY.toInt(),
+                fromFlutter = isColor
             )
         }
         //week
-        val week = getNumberBuffers("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_WEEK_DIR/", 6)
+        val week = getNumberBuffers("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_WEEK_DIR/", 6, fromFlutter = isColor)
         w = week.first
         h = week.second
         valueBuffers = week.third.toTypedArray()
@@ -2310,15 +2317,19 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             ImageUtils.getBitmap(mContext!!.assets.open(amFileName))
         var w = tmpBitmap.width
         var h = tmpBitmap.height
-//        val amValue =
-//            mContext!!.assets.open(amFileName)
-//                .use { it.readBytes() }
-//        val pmValue =
-//            mContext!!.assets.open(pmFileName)
-//                .use { it.readBytes() }
-
-        val amValue = dialAssetsFromFlutter?.get(amFileName)
-        val pmValue = dialAssetsFromFlutter?.get(pmFileName)
+        val amValue =
+            if(isColor) {
+                mContext!!.assets.open(amFileName)
+                    .use { it.readBytes() }
+            }else{
+                dialAssetsFromFlutter?.get(amFileName)
+            }
+        val pmValue = if(isColor) {
+            mContext!!.assets.open(pmFileName)
+                .use { it.readBytes() }
+        }else{
+            dialAssetsFromFlutter?.get(pmFileName)
+        }
 
         val amFile = File(
             PathUtils.getExternalAppDataPath(),
@@ -2360,7 +2371,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
         //数字时间
         val hourMinute =
-            getNumberBuffers2("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_HOUR_MINUTE_DIR/")
+            getNumberBuffers2("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_HOUR_MINUTE_DIR/", fromFlutter = isColor)
         w = hourMinute.first
         h = hourMinute.second
         var valueBuffers = hourMinute.third.toTypedArray()
@@ -2394,12 +2405,13 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 "$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_HOUR_MINUTE_DIR",
                 WatchFaceBuilder.ELEMENT_DIGITAL_DIV_HOUR,
                 digitalTimeSymbolLeftX.toInt(),
-                digitalTimeSymbolTopY.toInt()
+                digitalTimeSymbolTopY.toInt(),
+                fromFlutter = isColor
             )
         }
 
         //日期
-        val date = getNumberBuffers2("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_DATE_DIR/")
+        val date = getNumberBuffers2("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_DATE_DIR/", fromFlutter = isColor)
         w = date.first
         h = date.second
         valueBuffers = date.third.toTypedArray()
@@ -2433,12 +2445,13 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 "$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_DATE_DIR",
                 WatchFaceBuilder.ELEMENT_DIGITAL_DIV_MONTH,
                 digitalDateSymbolLeftX.toInt(),
-                digitalDateSymbolTopY.toInt()
+                digitalDateSymbolTopY.toInt(),
+                fromFlutter = isColor
             )
         }
 
         //week
-        val week = getNumberBuffers2("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_WEEK_DIR/", 6)
+        val week = getNumberBuffers2("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_WEEK_DIR/", 6, fromFlutter = isColor)
         w = week.first
         h = week.second
         valueBuffers = week.third.toTypedArray()
@@ -2461,7 +2474,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         type: Int,
         x: Int, y: Int,
         fromFlutter:Boolean=false
-        ) {
+    ) {
         val symbolValue = ArrayList<ByteArray>()
         val symbolBitmap =
             ImageUtils.getBitmap(mContext!!.assets.open("${dir}/symbol.${fileFormat}"))
@@ -2470,8 +2483,10 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
         val value = if(fromFlutter){
             dialAssetsFromFlutter?.get("${dir}/symbol.${fileFormat}")
-        }else{mContext!!.assets.open("${dir}/symbol.${fileFormat}")
-            .use { it.readBytes() }}
+        }else{
+            mContext!!.assets.open("${dir}/symbol.${fileFormat}")
+            .use { it.readBytes() }
+        }
 
         symbolValue.add(
             defaultConversion(
@@ -2499,7 +2514,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         type: Int,
         x: Int, y: Int,
         fromFlutter:Boolean=false
-        ) {
+    ) {
         val symbolFileName = "${dir}/symbol.${fileFormat}"
         val symbolValue = ArrayList<ByteArray>()
         val symbolBitmap =
@@ -2512,8 +2527,10 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
         val symbolBytes = if(fromFlutter){
             dialAssetsFromFlutter?.get(symbolFileName)
-        }else{mContext!!.assets.open(symbolFileName)
-            .use { it.readBytes() }}
+        }else{
+            mContext!!.assets.open(symbolFileName)
+            .use { it.readBytes() }
+        }
 
         val symbolFile = File(
             PathUtils.getExternalAppDataPath(),

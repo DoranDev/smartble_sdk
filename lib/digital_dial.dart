@@ -46,19 +46,19 @@ class DigitalDial {
 
     final hourMinuteDirInit =
         "$digitalDir/$digitalValueColor/$digitalHourMinuteDir/";
-    for (var i = 0; i < 9; i++) {
+    for (var i = 0; i <= 9; i++) {
       final filename = "$hourMinuteDirInit$i.$fileFormat";
       result[filename] = (await changeColor(filename, toColor))!;
     }
 
     final dateDirInit = "$digitalDir/$digitalValueColor/$digitalDateDir/";
-    for (var i = 0; i < 9; i++) {
+    for (var i = 0; i <= 9; i++) {
       final filename = "$dateDirInit$i.$fileFormat";
       result[filename] = (await changeColor(filename, toColor))!;
     }
 
     final weekDirInit = "$digitalDir/$digitalValueColor/$digitalWeekDir/";
-    for (var i = 0; i < 6; i++) {
+    for (var i = 0; i <= 6; i++) {
       final filename = "$weekDirInit$i.$fileFormat";
       result[filename] = (await changeColor(filename, toColor))!;
     }
