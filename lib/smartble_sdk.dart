@@ -129,7 +129,8 @@ class SmartbleSdk {
       required bool isColor,
       required Color pickedColor,
       required int pointerModel,
-      required int pointerNumberModel}) {
+      required int pointerNumberModel,
+      required Map<String, Uint8List> assets}) {
     return _channel.invokeMethod('customDials', {
       'bgPreviewBytes': bgPreviewBytes,
       'bgBytes': bgBytes,
@@ -163,7 +164,8 @@ class SmartbleSdk {
         "blue": pickedColor.blue
       },
       'pointerModel': pointerModel,
-      'pointerNumberModel': pointerNumberModel
+      'pointerNumberModel': pointerNumberModel,
+      'assets': assets
     });
   }
 
@@ -199,6 +201,17 @@ class SmartbleSdk {
   Future<dynamic> kBACK_LIGHT(
           {required SelectedBlekeyFlag flag, required int times}) =>
       _channel.invokeMethod('BACK_LIGHT', {'flag': flag.name, 'times': times});
+
+  Future<bool> isSupport2DAcceleration() async {
+    bool result =
+        await _channel.invokeMethod('isSupport2DAcceleration') ?? false;
+    return result;
+  }
+
+  Future<bool> isTo8565() async {
+    bool result = await _channel.invokeMethod('isTo8565') ?? false;
+    return result;
+  }
 
   Future<dynamic> kSEDENTARINESS({
     required SelectedBlekeyFlag flag,
