@@ -114,7 +114,9 @@ class DigitalDial {
           pixel.b = toColor.blue;
         }
       }
-      return Uint8List.fromList(img.encodePng(image));
+      return Uint8List.fromList((isSupport2DAcceleration || isTo8565)
+          ? img.encodePng(image)
+          : img.encodeBmp(image));
     }
     return null;
   }
