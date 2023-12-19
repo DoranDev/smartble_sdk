@@ -1,6 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:image/image.dart' as img;
-// import 'dart:ui' as ui;
+import 'dart:ui' as ui;
 import 'package:smartble_sdk/smartble_sdk.dart';
 
 class DigitalDial {
@@ -78,25 +78,25 @@ class DigitalDial {
 
   Future<img.Image?> decodeAsset(String path) async {
     final data = await rootBundle.load("assets/$path");
-    final image = (isSupport2DAcceleration || isTo8565)
-        ? img.decodePng(data.buffer.asUint8List())
-        : img.decodeBmp(data.buffer.asUint8List());
-    return image;
-    // final buffer =
-    //     await ui.ImmutableBuffer.fromUint8List(data.buffer.asUint8List());
-    //
-    // final id = await ui.ImageDescriptor.encoded(buffer);
-    // final codec = await id.instantiateCodec(
-    //     targetHeight: id.height, targetWidth: id.width);
-    //
-    // final fi = await codec.getNextFrame();
-    //
-    // final uiImage = fi.image;
-    // final uiBytes = await uiImage.toByteData();
-    //
-    // final image = img.Image.fromBytes(
-    //     width: id.width, height: id.height, bytes: uiBytes!.buffer);
+    // final image = (isSupport2DAcceleration || isTo8565)
+    //     ? img.decodePng(data.buffer.asUint8List())
+    //     : img.decodeBmp(data.buffer.asUint8List());
     // return image;
+    final buffer =
+        await ui.ImmutableBuffer.fromUint8List(data.buffer.asUint8List());
+
+    final id = await ui.ImageDescriptor.encoded(buffer);
+    final codec = await id.instantiateCodec(
+        targetHeight: id.height, targetWidth: id.width);
+
+    final fi = await codec.getNextFrame();
+
+    final uiImage = fi.image;
+    final uiBytes = await uiImage.toByteData();
+
+    final image = img.Image.fromBytes(
+        width: id.width, height: id.height, bytes: uiBytes!.buffer);
+    return image;
   }
 
   Future<Uint8List?> changeColor(String assets, Color toColor) async {
