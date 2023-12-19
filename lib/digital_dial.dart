@@ -78,6 +78,7 @@ class DigitalDial {
 
   Future<img.Image?> decodeAsset(String path) async {
     final data = await rootBundle.load("assets/$path");
+
     final buffer =
         await ui.ImmutableBuffer.fromUint8List(data.buffer.asUint8List());
 
@@ -91,7 +92,11 @@ class DigitalDial {
     final uiBytes = await uiImage.toByteData();
 
     final image = img.Image.fromBytes(
-        width: id.width, height: id.height, bytes: uiBytes!.buffer);
+        width: id.width,
+        height: id.height,
+        bytes: uiBytes!.buffer,
+        numChannels: 4);
+
     return image;
   }
 
@@ -108,10 +113,10 @@ class DigitalDial {
         if (pixel.b > 150) {
           pixel.b = toColor.blue;
         }
-        return Uint8List.fromList((isSupport2DAcceleration || isTo8565)
-            ? img.encodePng(image)
-            : img.encodeBmp(image));
       }
+      return Uint8List.fromList((isSupport2DAcceleration || isTo8565)
+          ? img.encodePng(image)
+          : img.encodeBmp(image));
     }
     return null;
   }
