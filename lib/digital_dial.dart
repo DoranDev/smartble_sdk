@@ -78,10 +78,6 @@ class DigitalDial {
 
   Future<img.Image?> decodeAsset(String path) async {
     final data = await rootBundle.load("assets/$path");
-    // final image = (isSupport2DAcceleration || isTo8565)
-    //     ? img.decodePng(data.buffer.asUint8List())
-    //     : img.decodeBmp(data.buffer.asUint8List());
-    // return image;
     final buffer =
         await ui.ImmutableBuffer.fromUint8List(data.buffer.asUint8List());
 
