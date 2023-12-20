@@ -1846,7 +1846,12 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     ): Pair<Bitmap, Float> {
         //特殊符号处理-即使是瑞昱系列，也使用bng格式的特殊符号，因为特殊符号会被嵌入背景中，如果无法嵌入，需要单独做处理
         val symbolBitmap =
-            ImageUtils.getBitmap(mContext!!.assets.open("$digitalDir$digitalSecondaryDir/symbol.png"))
+            if(isColor){
+                val data = dialAssetsFromFlutter?.get("$digitalDir$digitalSecondaryDir/symbol.png")!!
+                BitmapFactory.decodeByteArray(data, 0, data.size)
+            }else{
+                ImageUtils.getBitmap(mContext!!.assets.open("$digitalDir$digitalSecondaryDir/symbol.png"))
+            }
         //此处涉及到预览，所以强制使用PNG图片，避免透明色不显示
         val valueBitmap =
             ImageUtils.getBitmap(mContext!!.assets.open("$digitalDir$digitalSecondaryDir/${tempValue[0]}.png"))
