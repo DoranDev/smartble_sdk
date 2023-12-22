@@ -100,31 +100,37 @@ class SmartbleSdk {
   }
 
   ///customDials
-  Future<dynamic> customDials({
-    required Uint8List bgPreviewBytes,
-    required Uint8List bgBytes,
-    required int custom,
-    required bool isDigital,
-    required bool isRound,
-    required int screenWidth,
-    required int screenHeight,
-    required int screenPreviewWidth,
-    required int screenPreviewHeight,
-    required bool controlViewStep,
-    required int controlViewStepX,
-    required int controlViewStepY,
-    required bool controlViewCa,
-    required int controlViewCaX,
-    required int controlViewCaY,
-    required bool controlViewDis,
-    required int controlViewDisX,
-    required int controlViewDisY,
-    required bool controlViewHr,
-    required int controlViewHrX,
-    required int controlViewHrY,
-    int? digiLeft,
-    int? digiTop,
-  }) {
+  Future<dynamic> customDials(
+      {required Uint8List bgPreviewBytes,
+      required Uint8List bgBytes,
+      required int custom,
+      required bool isDigital,
+      required bool isRound,
+      required int screenWidth,
+      required int screenHeight,
+      required int screenPreviewWidth,
+      required int screenPreviewHeight,
+      required bool controlViewStep,
+      required int controlViewStepX,
+      required int controlViewStepY,
+      required bool controlViewCa,
+      required int controlViewCaX,
+      required int controlViewCaY,
+      required bool controlViewDis,
+      required int controlViewDisX,
+      required int controlViewDisY,
+      required bool controlViewHr,
+      required int controlViewHrX,
+      required int controlViewHrY,
+      int? digiLeft,
+      int? digiTop,
+      int? digiDateLeft,
+      int? digiDateTop,
+      required bool isColor,
+      required Color pickedColor,
+      required int pointerModel,
+      required int pointerNumberModel,
+      required Map<String, Uint8List> assets}) {
     return _channel.invokeMethod('customDials', {
       'bgPreviewBytes': bgPreviewBytes,
       'bgBytes': bgBytes,
@@ -148,7 +154,18 @@ class SmartbleSdk {
       'controlViewHrX': controlViewHrX,
       'controlViewHrY': controlViewHrY,
       'digiLeft': digiLeft ?? screenWidth ~/ 3.5,
-      'digiTop': digiTop ?? screenHeight ~/ 3
+      'digiTop': digiTop ?? screenHeight ~/ 3,
+      'digiDateLeft': digiDateLeft ?? screenWidth ~/ 3.5,
+      'digiDateTop': digiDateTop ?? screenHeight ~/ 3 + 70,
+      'isColor': isColor,
+      'pickedColor': {
+        "red": pickedColor.red,
+        "green": pickedColor.green,
+        "blue": pickedColor.blue
+      },
+      'pointerModel': pointerModel,
+      'pointerNumberModel': pointerNumberModel,
+      'assets': assets
     });
   }
 
@@ -184,6 +201,17 @@ class SmartbleSdk {
   Future<dynamic> kBACK_LIGHT(
           {required SelectedBlekeyFlag flag, required int times}) =>
       _channel.invokeMethod('BACK_LIGHT', {'flag': flag.name, 'times': times});
+
+  Future<bool> isSupport2DAcceleration() async {
+    bool result =
+        await _channel.invokeMethod('isSupport2DAcceleration') ?? false;
+    return result;
+  }
+
+  Future<bool> isTo8565() async {
+    bool result = await _channel.invokeMethod('isTo8565') ?? false;
+    return result;
+  }
 
   Future<dynamic> kSEDENTARINESS({
     required SelectedBlekeyFlag flag,
@@ -508,22 +536,21 @@ class SmartbleSdk {
     required String realTime,
     required String type,
   }) =>
-      _channel.invokeMethod(
-          'WEATHER_REALTIME', {'flag': flag.name, 'realTime': realTime,'type':type});
+      _channel.invokeMethod('WEATHER_REALTIME',
+          {'flag': flag.name, 'realTime': realTime, 'type': type});
 
-  Future<dynamic> kWEATHER_FORECAST({
-    required SelectedBlekeyFlag flag,
-    required String forecast1,
-    required String forecast2,
-    required String forecast3,
-    required String type
-  }) =>
+  Future<dynamic> kWEATHER_FORECAST(
+          {required SelectedBlekeyFlag flag,
+          required String forecast1,
+          required String forecast2,
+          required String forecast3,
+          required String type}) =>
       _channel.invokeMethod('WEATHER_FORECAST', {
         'flag': flag.name,
         'forecast1': forecast1,
         'forecast2': forecast2,
         'forecast3': forecast3,
-        'type':type,
+        'type': type,
       });
 
   Future<dynamic> kHID({required SelectedBlekeyFlag flag}) =>

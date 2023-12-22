@@ -8,6 +8,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.res.AssetManager
 import android.graphics.*
 import android.media.AudioManager
 import android.os.*
@@ -1579,6 +1580,17 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     var screenPreviewHeight = 0 //The actual preview size of the device screen - height
     var digiLeft = 0
     var digiTop = 0
+    var digiDateLeft = 0
+    var digiDateTop = 0
+
+    private var isColor = false
+
+    private var pickedColor :HashMap<String, Int>? = null
+    private var dialAssetsFromFlutter :HashMap<String, ByteArray>? = null
+
+    private var pointerModel = 0
+    private var pointerNumberModel = 0
+
 
     //控件相关
     private var stepValueCenterX = 0f
@@ -1641,9 +1653,10 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     val DIGITAL_WEEK_DIR = "week"
 
     //pointer_parameter
-    val POINTER_HOUR = "pointer/hour"
-    val POINTER_MINUTE = "pointer/minute"
-    val POINTER_SECOND = "pointer/second"
+    var POINTER_HOUR = "pointer_0/hour"
+    var POINTER_MINUTE = "pointer_0/minute"
+    var POINTER_SECOND = "pointer_0/second"
+
 
     private fun getBgBitmap(isCanvasValue: Boolean, isRound: Boolean, bgBitmapx: Bitmap): Bitmap {
         val bgBitmap = if (isRound) {
@@ -1833,7 +1846,12 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     ): Pair<Bitmap, Float> {
         //特殊符号处理-即使是瑞昱系列，也使用bng格式的特殊符号，因为特殊符号会被嵌入背景中，如果无法嵌入，需要单独做处理
         val symbolBitmap =
-            ImageUtils.getBitmap(mContext!!.assets.open("$digitalDir$digitalSecondaryDir/symbol.png"))
+            if(isColor){
+                val data = dialAssetsFromFlutter?.get("$digitalDir$digitalSecondaryDir/symbol.png")!!
+                BitmapFactory.decodeByteArray(data, 0, data.size)
+            }else{
+                ImageUtils.getBitmap(mContext!!.assets.open("$digitalDir$digitalSecondaryDir/symbol.png"))
+            }
         //此处涉及到预览，所以强制使用PNG图片，避免透明色不显示
         val valueBitmap =
             ImageUtils.getBitmap(mContext!!.assets.open("$digitalDir$digitalSecondaryDir/${tempValue[0]}.png"))
@@ -1926,7 +1944,10 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 //        val timeTop = (screenHeight / 3) * scaleHeight
         val timeLeft = digiLeft * scaleWidth
         val timeTop = digiTop * scaleHeight
-        LogUtils.d("test timeLeft=$timeLeft,  timeTop=$timeTop, timeDigitalView.width=${timeDigitalViewWidth} ,scaleWidth =$scaleWidth")
+
+        val dateLeft = digiDateLeft * scaleWidth + 2
+        val dateTop = digiDateTop * scaleHeight
+        LogUtils.d("test timeLeft=$timeLeft,  timeTop=$timeTop,dateLeft=$dateLeft,  dateTop=$dateTop, timeDigitalView.width=${timeDigitalViewWidth} ,scaleWidth =$scaleWidth")
         //获取AM原始资源.此处涉及到预览，所以强制使用PNG图片，避免透明色不显示
         val amBitmap =
             ImageUtils.getBitmap(mContext!!.assets.open("$digitalDir$DIGITAL_AM_DIR/pm.png"))
@@ -1944,14 +1965,22 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         )
         //日期
         val tempDate = "07/08"
+//        val date = getNumberBuffers("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_DATE_DIR/")
+//        val dateBitmap =
+//            ImageUtils.getBitmap(mContext!!.assets.open("$digitalDir$DIGITAL_AM_DIR/pm.png"))
+
+        var difTop :Int = 17
+        if(custom == 2){
+            difTop = 22
+        }
         val (_, dateAndWeekTop) = addDigitalTimeParam(
             digitalDir,
             DIGITAL_DATE_DIR,
             tempDate,
-            hourMinuteTop,
+            dateTop-difTop,
             hourMinuteBitmap.height,
             canvas,
-            timeLeft,
+            dateLeft,
             isCanvasValue
         )
         //时间主体绘制完毕后,即可确认位置,然后就可以绘制其他的从属元素了
@@ -1977,7 +2006,11 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 null
             )
         }
-        digitalWeekLeftX = digitalTimeMinuteRightX - weekBitmap.width
+        var difLeft :Int = 15
+        if(custom == 2){
+            difLeft = 25
+        }
+        digitalWeekLeftX = digitalDateDayLeftX + weekBitmap.width - difLeft
         digitalWeekTopY = dateAndWeekTop
     }
 
@@ -2143,6 +2176,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         return data
     }
 
+
     private fun getTimeDigital() {
         //AM PM
         val amPmValue = ArrayList<ByteArray>()
@@ -2151,13 +2185,22 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         var w = tmpBitmap.width
         var h = tmpBitmap.height
         val amValue =
-            mContext!!.assets.open("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_AM_DIR/am.${fileFormat}")
-                .use { it.readBytes() }
+            if(isColor) {
+                mContext!!.assets.open("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_AM_DIR/am.${fileFormat}")
+                    .use { it.readBytes() }
+            }else{
+                dialAssetsFromFlutter?.get("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_AM_DIR/am.${fileFormat}")
+            }
         val pmValue =
+            if(isColor) {
             mContext!!.assets.open("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_AM_DIR/pm.${fileFormat}")
                 .use { it.readBytes() }
-        amPmValue.add(defaultConversion(fileFormat, amValue, w))
-        amPmValue.add(defaultConversion(fileFormat, pmValue, w))
+            }else{
+                dialAssetsFromFlutter?.get("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_AM_DIR/pm.${fileFormat}")
+            }
+
+        amPmValue.add(defaultConversion(fileFormat, amValue!!, w))
+        amPmValue.add(defaultConversion(fileFormat, pmValue!!, w))
         val elementAmPm = Element(
             type = WatchFaceBuilder.ELEMENT_DIGITAL_AMPM,
             hasAlpha = isTo8565.toInt(),
@@ -2172,10 +2215,11 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         elements.add(elementAmPm)
         //数字时间
         val hourMinute =
-            getNumberBuffers("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_HOUR_MINUTE_DIR/")
+            getNumberBuffers("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_HOUR_MINUTE_DIR/", fromFlutter = isColor)
         w = hourMinute.first
         h = hourMinute.second
         var valueBuffers = hourMinute.third.toTypedArray()
+
         val elementHour = Element(
             type = WatchFaceBuilder.ELEMENT_DIGITAL_HOUR,
             hasAlpha = isTo8565.toInt(),
@@ -2207,10 +2251,11 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 WatchFaceBuilder.ELEMENT_DIGITAL_DIV_HOUR,
                 digitalTimeSymbolLeftX.toInt(),
                 digitalTimeSymbolTopY.toInt(),
+                fromFlutter = isColor
             )
         }
         //日期
-        val date = getNumberBuffers("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_DATE_DIR/")
+        val date = getNumberBuffers("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_DATE_DIR/", fromFlutter = isColor)
         w = date.first
         h = date.second
         valueBuffers = date.third.toTypedArray()
@@ -2245,10 +2290,11 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 WatchFaceBuilder.ELEMENT_DIGITAL_DIV_MONTH,
                 digitalDateSymbolLeftX.toInt(),
                 digitalDateSymbolTopY.toInt(),
+                fromFlutter = isColor
             )
         }
         //week
-        val week = getNumberBuffers("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_WEEK_DIR/", 6)
+        val week = getNumberBuffers("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_WEEK_DIR/", 6, fromFlutter = isColor)
         w = week.first
         h = week.second
         valueBuffers = week.third.toTypedArray()
@@ -2277,11 +2323,18 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         var w = tmpBitmap.width
         var h = tmpBitmap.height
         val amValue =
-            mContext!!.assets.open(amFileName)
-                .use { it.readBytes() }
-        val pmValue =
+            if(isColor) {
+                mContext!!.assets.open(amFileName)
+                    .use { it.readBytes() }
+            }else{
+                dialAssetsFromFlutter?.get(amFileName)
+            }
+        val pmValue = if(isColor) {
             mContext!!.assets.open(pmFileName)
                 .use { it.readBytes() }
+        }else{
+            dialAssetsFromFlutter?.get(pmFileName)
+        }
 
         val amFile = File(
             PathUtils.getExternalAppDataPath(),
@@ -2323,7 +2376,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
         //数字时间
         val hourMinute =
-            getNumberBuffers2("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_HOUR_MINUTE_DIR/")
+            getNumberBuffers2("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_HOUR_MINUTE_DIR/", fromFlutter = isColor)
         w = hourMinute.first
         h = hourMinute.second
         var valueBuffers = hourMinute.third.toTypedArray()
@@ -2357,12 +2410,13 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 "$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_HOUR_MINUTE_DIR",
                 WatchFaceBuilder.ELEMENT_DIGITAL_DIV_HOUR,
                 digitalTimeSymbolLeftX.toInt(),
-                digitalTimeSymbolTopY.toInt()
+                digitalTimeSymbolTopY.toInt(),
+                fromFlutter = isColor
             )
         }
 
         //日期
-        val date = getNumberBuffers2("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_DATE_DIR/")
+        val date = getNumberBuffers2("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_DATE_DIR/", fromFlutter = isColor)
         w = date.first
         h = date.second
         valueBuffers = date.third.toTypedArray()
@@ -2396,12 +2450,13 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 "$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_DATE_DIR",
                 WatchFaceBuilder.ELEMENT_DIGITAL_DIV_MONTH,
                 digitalDateSymbolLeftX.toInt(),
-                digitalDateSymbolTopY.toInt()
+                digitalDateSymbolTopY.toInt(),
+                fromFlutter = isColor
             )
         }
 
         //week
-        val week = getNumberBuffers2("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_WEEK_DIR/", 6)
+        val week = getNumberBuffers2("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_WEEK_DIR/", 6, fromFlutter = isColor)
         w = week.first
         h = week.second
         valueBuffers = week.third.toTypedArray()
@@ -2423,18 +2478,25 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         dir: String,
         type: Int,
         x: Int, y: Int,
-
-        ) {
+        fromFlutter:Boolean=false
+    ) {
         val symbolValue = ArrayList<ByteArray>()
         val symbolBitmap =
             ImageUtils.getBitmap(mContext!!.assets.open("${dir}/symbol.${fileFormat}"))
         val w = symbolBitmap.width
         val h = symbolBitmap.height
+
+        val value = if(fromFlutter){
+            dialAssetsFromFlutter?.get("${dir}/symbol.${fileFormat}")
+        }else{
+            mContext!!.assets.open("${dir}/symbol.${fileFormat}")
+            .use { it.readBytes() }
+        }
+
         symbolValue.add(
             defaultConversion(
                 fileFormat,
-                mContext!!.assets.open("${dir}/symbol.${fileFormat}")
-                    .use { it.readBytes() }, w
+                value!!, w
             )
         )
         val valueBuffers = symbolValue.toTypedArray()
@@ -2456,8 +2518,8 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         dir: String,
         type: Int,
         x: Int, y: Int,
-
-        ) {
+        fromFlutter:Boolean=false
+    ) {
         val symbolFileName = "${dir}/symbol.${fileFormat}"
         val symbolValue = ArrayList<ByteArray>()
         val symbolBitmap =
@@ -2465,8 +2527,16 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         val w = symbolBitmap.width
         val h = symbolBitmap.height
 
-        val symbolBytes = mContext!!.assets.open(symbolFileName)
+//        val symbolBytes = mContext!!.assets.open(symbolFileName)
+//            .use { it.readBytes() }
+
+        val symbolBytes = if(fromFlutter){
+            dialAssetsFromFlutter?.get(symbolFileName)
+        }else{
+            mContext!!.assets.open(symbolFileName)
             .use { it.readBytes() }
+        }
+
         val symbolFile = File(
             PathUtils.getExternalAppDataPath(),
             symbolFileName
@@ -2631,7 +2701,8 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
     private fun getNumberBuffers(
         dir: String,
-        range: Int = 9
+        range: Int = 9,
+        fromFlutter:Boolean=false
     ): Triple<Int, Int, ArrayList<ByteArray>> {
         var w = 0
         var h = 0
@@ -2644,16 +2715,22 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 h = tmpBitmap.height
             }
             val value =
-                mContext!!.assets.open("$dir${index}.${fileFormat}")
-                    .use { it.readBytes() }
-            valueByte.add(defaultConversion(fileFormat, value, w))
+                if(fromFlutter){
+                    dialAssetsFromFlutter?.get("$dir${index}.${fileFormat}")
+                }else{
+                    mContext!!.assets.open("$dir${index}.${fileFormat}")
+                        .use { it.readBytes() }
+                }
+
+            valueByte.add(defaultConversion(fileFormat, value!!, w))
         }
         return Triple(w, h, valueByte)
     }
 
     private fun getNumberBuffers2(
         dir: String,
-        range: Int = 9
+        range: Int = 9,
+        fromFlutter:Boolean=false
     ): Triple<Int, Int, ArrayList<ByteArray>> {
         var w = 0
         var h = 0
@@ -2668,8 +2745,12 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             }
 
             val value =
-                mContext!!.assets.open(fileName)
-                    .use { it.readBytes() }
+                if(fromFlutter){
+                    dialAssetsFromFlutter?.get(fileName)
+                }else{
+                    mContext!!.assets.open(fileName)
+                        .use { it.readBytes() }
+                }
 
             val pngFile = File(
                 PathUtils.getExternalAppDataPath(),
@@ -2812,6 +2893,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 }
             }
 
+
             "connect" -> {
                 BleConnector.connect(true)
             }
@@ -2855,6 +2937,15 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             "unbind" -> {
                 BleConnector.unbind();
             }
+
+            "isSupport2DAcceleration" -> {
+                mResult?.success(isSupport2DAcceleration)
+            }
+
+            "isTo8565" -> {
+                mResult?.success(isTo8565);
+            }
+
 
             "analyzeSleep" -> {
                 val listSleep = call.argument<String>("listSleep")
@@ -2905,6 +2996,9 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 digiLeft = call.argument<Int>("digiLeft")!!
                 digiTop = call.argument<Int>("digiTop")!!
 
+                digiDateLeft = call.argument<Int>("digiDateLeft")!!
+                digiDateTop = call.argument<Int>("digiDateTop")!!
+
                 screenPreviewWidth = call.argument<Int>("screenPreviewWidth")!!
                 screenPreviewHeight = call.argument<Int>("screenPreviewHeight")!!
 
@@ -2924,6 +3018,21 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 controlViewHrX = call.argument<Int>("controlViewHrX")!!
                 controlViewHrY = call.argument<Int>("controlViewHrY")!!
 
+                isColor = call.argument<Boolean>("isColor")!!
+
+                pointerModel = call.argument<Int>("pointerModel")!!
+                pointerNumberModel = call.argument<Int>("pointerNumberModel")!!
+
+                POINTER_HOUR = "pointer_$pointerModel/hour"
+                POINTER_MINUTE = "pointer_$pointerModel/minute"
+                POINTER_SECOND = "pointer_$pointerModel/second"
+
+                if(isColor){
+                    pickedColor = call.argument<HashMap<String, Int>>("pickedColor")!!
+                }
+
+                dialAssetsFromFlutter = call.argument<HashMap<String, ByteArray>>("assets")!!
+
                 controlValueInterval = 1
                 //ignoreBlack = 1
                 controlValueRange = 10
@@ -2939,12 +3048,12 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 Y_CENTER = WatchFaceBuilder.GRAVITY_Y_CENTER_R
 
                 //初始资源路径
-                if (custom == 2) {
-                    DIAL_CUSTOMIZE_DIR = "dial_customize_454"
+                DIAL_CUSTOMIZE_DIR = if (custom == 2) {
+                    "dial_customize_454"
                 } else if (custom == 3) {
-                    DIAL_CUSTOMIZE_DIR = "dial_customize_240"
+                    "dial_customize_240"
                 } else {
-                    DIAL_CUSTOMIZE_DIR = "dial_customize_240"
+                    "dial_customize_240"
                 }
                 CONTROL_DIR = "$DIAL_CUSTOMIZE_DIR/control"
                 STEP_DIR = "$CONTROL_DIR/step"
@@ -3030,6 +3139,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                         gravity = X_CENTER or Y_CENTER,
                         x = screenWidth / 2,
                         y = screenHeight / 2 + 2,
+                        ignoreBlack = ignoreBlack,
                         imageBuffers = arrayOf(bgPreviewBytesNew!!)
                     )
                     elements.add(elementPreview)
@@ -3041,6 +3151,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                         gravity = X_CENTER or Y_CENTER,
                         x = screenWidth / 2,
                         y = screenHeight / 2,
+                        ignoreBlack = ignoreBlack,
                         imageBuffers = arrayOf(bgBytesNew!!)
                     )
                     elements.add(elementBg)
