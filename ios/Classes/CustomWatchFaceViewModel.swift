@@ -110,16 +110,16 @@ class CustomWatchFaceViewModel {
     /// - Parameters:
     ///   - number: 颜色索引, 这个需要开发者注意必要取到没有的路径, Color index, this requires developers to pay attention to the path that does not have to be taken
     ///   - isPNG: 是否使用PNG图片资源, Whether to use PNG image resources
-    func getPointerImage(_ number: Int, isPNG: Bool) -> (hourRes: WatchElementResult, minRes: WatchElementResult, secRes: WatchElementResult)? {
-        
+    func getPointerImage(_ number: Int, isPNG: Bool, pointerModel: Int) -> (hourRes: WatchElementResult, minRes: WatchElementResult, secRes: WatchElementResult)? {
+
         // 指针资源的后缀名, 包含. 点
         var assSuffix = ".bmp"
         if isPNG {
             assSuffix = ".png"
         }
-        
+
         // 获取3个指针的路径
-        let kPointRootPath = getImageDeviceType_2() + "time/pointer/pointer"
+        let kPointRootPath = getImageDeviceType_2() + "time/pointer_\(pointerModel)pointer"
         let pHour = kPointRootPath + "/hour/" + "\(number)" + assSuffix
         let pMinutes = kPointRootPath + "/minute/" + "\(number)" + assSuffix
         let pSeconds = kPointRootPath + "/second/" + "\(number)" + assSuffix

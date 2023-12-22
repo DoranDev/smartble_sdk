@@ -754,7 +754,10 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
 //    var valueColor = 0
    var custom = 0
 
-
+    var isColor = false
+    var dialAssetsFromFlutter = Dictionary<String, [UInt8]>()
+    var pointerModel = 0
+    var pointerNumberModel = 0
 
     func showImageDialog(image: UIImage) {
         let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
@@ -777,7 +780,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
 
     var bgImage: [UInt8]? = nil
     var thumbImage: [UInt8]? = nil
-    
+
     var image150 :UIImage?//预览图
     var image240 :UIImage?//背景图
 
@@ -846,7 +849,9 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
             controlViewHr = args?["controlViewHr"] as! Bool
             controlViewHrX = args?["controlViewHrX"] as! Int
             controlViewHrY = args?["controlViewHrY"] as! Int
-
+            isColor = args?["isColor"] as! Bool
+            pointerModel = args?["pointerModel"] as! Int
+            pointerNumberModel = args?["pointerNumberModel"] as! Int
 
             if let data = args?["bgBytes"] as? FlutterStandardTypedData {
                 bgImage = [UInt8](data.data)
@@ -1306,7 +1311,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                   let weatherRealTime = args?["realTime"] as? String
               let bleWeaType = args?["type"] as? String
               let weaType = Int(bleWeaType ?? "1")
-              
+
               print("weatherRealTime \(String(describing: weatherRealTime))")
               let realTime = try? JSONSerialization.jsonObject(with: weatherRealTime?.data(using: .utf8) ?? Data(), options: []) as? [String:Any]
                       if bleKeyFlag == .UPDATE {
@@ -1358,7 +1363,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
           case BleKey.WEATHER_FORECAST:
               let bleWeaType = args?["type"] as? String
               let weaType = Int(bleWeaType ?? "1")
-              
+
                   let weatherForecast1 = args?["forecast1"] as? String
                   let weatherForecast2 = args?["forecast2"] as? String
                   let weatherForecast3 = args?["forecast3"] as? String
@@ -1467,7 +1472,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                                   bleWeatherForecast
                               )
                           }
-              
+
                       }
 
               break
@@ -2995,7 +3000,7 @@ extension UIImage {
 
 
 extension SwiftSmartbleSdkPlugin {
-    
+
     func convertToPNG(image: UIImage) -> UIImage? {
         guard let pngData = image.pngData() else {
             return nil
@@ -3003,7 +3008,7 @@ extension SwiftSmartbleSdkPlugin {
 
         return UIImage(data: pngData)
     }
-    
+
     func getMainBgImage()->UIImage{
         let image = UIImage(data: Data(bgImage!))!
         return convertToPNG(image: image)!
@@ -3015,7 +3020,7 @@ extension SwiftSmartbleSdkPlugin {
         return convertToPNG(image: image)!
     }
 
-   
+
     // MARK: - create watchFile
     func startCreateBinFile(){
         isBmpResoure = false
@@ -3558,7 +3563,7 @@ extension SwiftSmartbleSdkPlugin {
                     index = 0
                 }
 
-                guard let pinitGroup = self.viewModel.getPointerImage(index, isPNG: true) else {
+                guard let pinitGroup = self.viewModel.getPointerImage(index, isPNG: true,pointerModel: pointerModel) else {
 
                     // 这里代表获取指针失败, 需要提示用户
                     bleLog("获取指针数据失败, 需要提示用户")
@@ -3939,7 +3944,7 @@ extension SwiftSmartbleSdkPlugin {
                     index = 0
                 }
 
-                guard let pinitGroup = self.viewModel.getPointerImage(index, isPNG: true) else {
+                guard let pinitGroup = self.viewModel.getPointerImage(index, isPNG: true,pointerModel: pointerModel) else {
 
                     // 这里代表获取指针失败, 需要提示用户
                     bleLog("获取指针数据失败, 需要提示用户")
@@ -4351,7 +4356,7 @@ extension SwiftSmartbleSdkPlugin {
                     index = 0
                 }
 
-                guard let pinitGroup = self.viewModel.getPointerImage(index, isPNG: false) else {
+                guard let pinitGroup = self.viewModel.getPointerImage(index, isPNG: false,pointerModel: pointerModel) else {
 
                     // 这里代表获取指针失败, 需要提示用户
                     bleLog("获取指针数据失败, 需要提示用户")
