@@ -821,6 +821,12 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         case "unbind":
             mBleConnector.unbind()
              break;
+        case "isSupport2DAcceleration":
+            result(isSupp2D)
+             break;
+        case "isTo8565":
+            result(isSupp2D)
+             break;
         case "customDials":
             timeDigitalView = args?["isDigital"] as! Bool
             isRound = args?["isRound"] as! Bool
