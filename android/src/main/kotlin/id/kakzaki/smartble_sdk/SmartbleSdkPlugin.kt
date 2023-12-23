@@ -2186,17 +2186,17 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         var h = tmpBitmap.height
         val amValue =
             if(isColor) {
+                dialAssetsFromFlutter?.get("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_AM_DIR/am.${fileFormat}")
+            }else{
                 mContext!!.assets.open("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_AM_DIR/am.${fileFormat}")
                     .use { it.readBytes() }
-            }else{
-                dialAssetsFromFlutter?.get("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_AM_DIR/am.${fileFormat}")
             }
         val pmValue =
             if(isColor) {
-            mContext!!.assets.open("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_AM_DIR/pm.${fileFormat}")
-                .use { it.readBytes() }
-            }else{
                 dialAssetsFromFlutter?.get("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_AM_DIR/pm.${fileFormat}")
+            }else{
+                mContext!!.assets.open("$DIGITAL_DIR/${digitalValueColor}/$DIGITAL_AM_DIR/pm.${fileFormat}")
+                    .use { it.readBytes() }
             }
 
         amPmValue.add(defaultConversion(fileFormat, amValue!!, w))
@@ -2324,16 +2324,16 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         var h = tmpBitmap.height
         val amValue =
             if(isColor) {
+                dialAssetsFromFlutter?.get(amFileName)
+            }else{
                 mContext!!.assets.open(amFileName)
                     .use { it.readBytes() }
-            }else{
-                dialAssetsFromFlutter?.get(amFileName)
             }
         val pmValue = if(isColor) {
+            dialAssetsFromFlutter?.get(pmFileName)
+        }else{
             mContext!!.assets.open(pmFileName)
                 .use { it.readBytes() }
-        }else{
-            dialAssetsFromFlutter?.get(pmFileName)
         }
 
         val amFile = File(
