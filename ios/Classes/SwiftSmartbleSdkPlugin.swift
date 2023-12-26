@@ -785,7 +785,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
     var image240 :UIImage?//背景图
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        result("iOS " + UIDevice.current.systemVersion)
+       // result("iOS " + UIDevice.current.systemVersion)
         let args = call.arguments as? Dictionary<String, Any>
         let flag = args?["flag"] as? String
         let mtd = call.method
@@ -4352,7 +4352,7 @@ extension SwiftSmartbleSdkPlugin {
                 let selNum :String = dataSourceArray["PointerNumber"] as! String
 
                 guard var index = Int(selNum) else {
-                    bleLog("获取指针转换失败")
+                    bleLog("Get pointer conversion failed")
                     return
                 }
 
@@ -4365,7 +4365,7 @@ extension SwiftSmartbleSdkPlugin {
                 guard let pinitGroup = self.viewModel.getPointerImage(index, isPNG: false,pointerModel: pointerModel) else {
 
                     // 这里代表获取指针失败, 需要提示用户
-                    bleLog("获取指针数据失败, 需要提示用户")
+                    bleLog("Failed to obtain pointer data, user needs to be prompted")
                     return
                 }
 
