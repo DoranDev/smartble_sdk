@@ -3559,7 +3559,7 @@ extension SwiftSmartbleSdkPlugin {
                 let tempNum = dataSourceArray["PointerNumber"] as! String
 
                 guard var index = Int(tempNum) else {
-                    bleLog("获取指针转换失败")
+                    bleLog("Get pointer conversion failed 2")
                     return
                 }
 
@@ -3572,7 +3572,7 @@ extension SwiftSmartbleSdkPlugin {
                 guard let pinitGroup = self.viewModel.getPointerImage(index, isPNG: true,pointerModel: pointerModel) else {
 
                     // 这里代表获取指针失败, 需要提示用户
-                    bleLog("获取指针数据失败, 需要提示用户")
+                    bleLog("Failed to obtain pointer data, user needs to be prompted 2")
                     return
                 }
 
@@ -3940,7 +3940,7 @@ extension SwiftSmartbleSdkPlugin {
                 let tempNum = dataSourceArray["PointerNumber"] as! String
 
                 guard var index = Int(tempNum) else {
-                    bleLog("获取指针转换失败")
+                    bleLog("Get pointer conversion failed 3")
                     return
                 }
 
@@ -3953,7 +3953,7 @@ extension SwiftSmartbleSdkPlugin {
                 guard let pinitGroup = self.viewModel.getPointerImage(index, isPNG: true,pointerModel: pointerModel) else {
 
                     // 这里代表获取指针失败, 需要提示用户
-                    bleLog("获取指针数据失败, 需要提示用户")
+                    bleLog("Failed to obtain pointer data, user needs to be prompted 3")
                     return
                 }
 
@@ -4352,7 +4352,7 @@ extension SwiftSmartbleSdkPlugin {
                 let selNum :String = dataSourceArray["PointerNumber"] as! String
 
                 guard var index = Int(selNum) else {
-                    bleLog("Get pointer conversion failed")
+                    bleLog("Get pointer conversion failed 1")
                     return
                 }
 
@@ -4365,7 +4365,7 @@ extension SwiftSmartbleSdkPlugin {
                 guard let pinitGroup = self.viewModel.getPointerImage(index, isPNG: false,pointerModel: pointerModel) else {
 
                     // 这里代表获取指针失败, 需要提示用户
-                    bleLog("Failed to obtain pointer data, user needs to be prompted")
+                    bleLog("Failed to obtain pointer data, user needs to be prompted 1")
                     return
                 }
 
