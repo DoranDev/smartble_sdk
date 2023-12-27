@@ -119,15 +119,17 @@ class CustomWatchFaceViewModel {
         }
 
         // 获取3个指针的路径
-        let kPointRootPath = getImageDeviceType_2() + "time/pointer_\(pointerModel)pointer"
+        let kPointRootPath = getImageDeviceType_2() + "time/pointer/pointer\(pointerModel)"
         let pHour = kPointRootPath + "/hour/" + "\(number)" + assSuffix
         let pMinutes = kPointRootPath + "/minute/" + "\(number)" + assSuffix
         let pSeconds = kPointRootPath + "/second/" + "\(number)" + assSuffix
-        
+
+        bleLog(pHour)
+
         // 获取三个指针的图片
         let pointResGroup = self.getWatchPointPNG(pHour: pHour, pMinutes: pMinutes, pSeconds: pSeconds)
         guard pointResGroup.isOK else {
-            bleLog("获取表盘指针文件失败")
+            bleLog("Failed to obtain dial pointer file x")
             return nil
         }
         
