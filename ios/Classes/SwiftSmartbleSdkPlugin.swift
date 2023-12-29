@@ -750,6 +750,8 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
     var screenPreviewHeight = 0 // The actual preview size of the device screen - height
     var digiLeft = 0
     var digiTop = 0
+    var digiDateLeft = 0
+    var digiDateTop = 0
 
 //    var valueColor = 0
    var custom = 0
@@ -843,6 +845,9 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
 
             digiLeft = args?["digiLeft"] as! Int
             digiTop = args?["digiTop"] as! Int
+
+            digiDateLeft = args?["digiDateLeft"] as! Int
+            digiDateTop = args?["digiDateTop"] as! Int
 
             screenPreviewWidth = args?["screenPreviewWidth"] as! Int
             screenPreviewHeight = args?["screenPreviewHeight"] as! Int
@@ -3333,7 +3338,7 @@ extension SwiftSmartbleSdkPlugin {
                 // 在资源文件中, 颜色的索引
                 let colorNum = getColorNumber(timeColor)
                 let point :CGPoint = dataSourceArray["TimeAM"] as! CGPoint
-
+                let pointDate  = CGPoint(x:digiDateLeft+Int(screenWidth/2), y: digiDateTop)
 
                 //am
                 let ampmRes = self.viewModel.getImageBufferArray(.AMPM, true, colorNum)
@@ -3364,7 +3369,7 @@ extension SwiftSmartbleSdkPlugin {
 
                 //point
                 let hourY = point.y+ampmRes.imageSize.height+2
-                let weekY = point.y+ampmRes.imageSize.height+hourRes.imageSize.height+4
+                let weekY = pointDate.y+ampmRes.imageSize.height+hourRes.imageSize.height+4
                 let hourPoint = CGPoint(x: point.x-((hourRes.imageSize.width*2)+(minRes.imageSize.width*2)+dateSySize.width+4), y: hourY)
                 let dateSyPoint = CGPoint(x: point.x-((minRes.imageSize.width*2)+dateSySize.width+2), y: hourY)
                 let minPoint = CGPoint(x: point.x-(minRes.imageSize.width*2), y: hourY)
@@ -3372,14 +3377,13 @@ extension SwiftSmartbleSdkPlugin {
 
                 // 月 / 日, 数据增加偏移值, 在F11上面周一, 周三, 周日出现日期和星期太靠近
                 let monthEleOffset:CGFloat = 10
-                let monthPoint = CGPoint(x: point.x-((timeWeekMonthSize.width*2)+(timeWeekDaySize.width*2)+timeWeekSize.width+weekSymSize.width+6) - monthEleOffset, y: weekY)
-                let monthSyPoint = CGPoint(x: point.x-((timeWeekDaySize.width*2)+timeWeekSize.width+weekSymSize.width+4) - monthEleOffset, y: weekY)
-                let dayPoint = CGPoint(x: point.x-((timeWeekDaySize.width*2)+timeWeekSize.width+2) - monthEleOffset, y: weekY)
-
-                var weekPoint = CGPoint(x: point.x-timeWeekSize.width, y: weekY)
+                let monthPoint = CGPoint(x: pointDate.x-((timeWeekMonthSize.width*2)+(timeWeekDaySize.width*2)+timeWeekSize.width+weekSymSize.width+6) - monthEleOffset, y: weekY)
+                let monthSyPoint = CGPoint(x: pointDate.x-((timeWeekDaySize.width*2)+timeWeekSize.width+weekSymSize.width+4) - monthEleOffset, y: weekY)
+                let dayPoint = CGPoint(x: pointDate.x-((timeWeekDaySize.width*2)+timeWeekSize.width+2) - monthEleOffset, y: weekY)
+                var weekPoint = CGPoint(x: pointDate.x-timeWeekSize.width, y: weekY)
                 let imageWidth :CGFloat = isBmpResoure ? 1.0:2.0
                 if isFixCoordinate {
-                    weekPoint = CGPoint(x: point.x-(timeWeekSize.width*0.5), y: weekY)
+                    weekPoint = CGPoint(x: pointDate.x-(timeWeekSize.width*0.5), y: weekY)
                 }
 
 
@@ -4160,6 +4164,7 @@ extension SwiftSmartbleSdkPlugin {
                 bleLog("TimeAM is \(value)")
 
                 let point :CGPoint = dataSourceArray["TimeAM"] as! CGPoint
+                let pointDate  = CGPoint(x:digiDateLeft+Int(screenWidth/2), y: digiDateTop)
 
                 //am
                 let ampmRes = self.viewModel.getImageBmpBufferArray(.AMPM, colorNum)
@@ -4189,7 +4194,7 @@ extension SwiftSmartbleSdkPlugin {
 
                 //point
                 let hourY = point.y+ampmRes.imageSize.height+2
-                let weekY = point.y+ampmRes.imageSize.height+hourRes.imageSize.height+4
+                let weekY = pointDate.y+ampmRes.imageSize.height+hourRes.imageSize.height+4
                 let hourPoint = CGPoint(x: point.x-((hourRes.imageSize.width*2)+(minRes.imageSize.width*2)+dateSySize.width+4), y: hourY)
                 let dateSyPoint = CGPoint(x: point.x-((minRes.imageSize.width*2)+dateSySize.width+2), y: hourY)
                 let minPoint = CGPoint(x: point.x-(minRes.imageSize.width*2), y: hourY)
@@ -4197,14 +4202,14 @@ extension SwiftSmartbleSdkPlugin {
 
                 // 月 / 日, 数据增加偏移值, 在F11上面周一, 周三, 周日出现日期和星期太靠近
                 let monthEleOffset:CGFloat = 10
-                let monthPoint = CGPoint(x: point.x-((timeWeekMonthSize.width*2)+(timeWeekDaySize.width*2)+timeWeekSize.width+weekSymSize.width+6) - monthEleOffset, y: weekY)
-                let monthSyPoint = CGPoint(x: point.x-((timeWeekDaySize.width*2)+timeWeekSize.width+weekSymSize.width+4) - monthEleOffset, y: weekY)
-                let dayPoint = CGPoint(x: point.x-((timeWeekDaySize.width*2)+timeWeekSize.width+2) - monthEleOffset, y: weekY)
+                let monthPoint = CGPoint(x: pointDate.x-((timeWeekMonthSize.width*2)+(timeWeekDaySize.width*2)+timeWeekSize.width+weekSymSize.width+6) - monthEleOffset, y: weekY)
+                let monthSyPoint = CGPoint(x: pointDate.x-((timeWeekDaySize.width*2)+timeWeekSize.width+weekSymSize.width+4) - monthEleOffset, y: weekY)
+                let dayPoint = CGPoint(x: pointDate.x-((timeWeekDaySize.width*2)+timeWeekSize.width+2) - monthEleOffset, y: weekY)
 
-                var weekPoint = CGPoint(x: point.x-timeWeekSize.width, y: weekY)
+                var weekPoint = CGPoint(x: pointDate.x-timeWeekSize.width, y: weekY)
                 let imageWidth :CGFloat = isBmpResoure ? 1.0:2.0
                 if isFixCoordinate {
-                    weekPoint = CGPoint(x: point.x-(timeWeekSize.width*0.5), y: weekY)
+                    weekPoint = CGPoint(x: pointDate.x-(timeWeekSize.width*0.5), y: weekY)
                 }
 
 
