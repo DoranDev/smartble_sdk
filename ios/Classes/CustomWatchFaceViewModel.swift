@@ -214,22 +214,32 @@ class CustomWatchFaceViewModel {
     ///   - isSupp2D: 是否支持2D, Whether to support 2D
     ///   - colorNum: 颜色索引
     /// - Returns: WatchElementResult
-    func getImageBufferArray(_ type: WatchElementType, _ isSupp2D: Bool, _ colorNum: Int) -> WatchElementResult {
-        
+    func getImageBufferArray(_ type: WatchElementType, _ isSupp2D: Bool, _ colorNum: Int, _ isFromFlutter: Bool, _ dialAssetsFromFlutter: Dictionary<String, [UInt8]>) -> WatchElementResult {
+
         let imageType = "png"
         // 获取图片路径
         let imageArray = self.identifyItemsColor(type, colorNum)
-        
+
         if type == .AMPM {
-            
+
             var ampmImgSize = CGSize(width: 0, height: 0)
             var ampmBuffer = Data()
             var ampmImageDataSize = [UInt32]()
             for pngPath in imageArray {
-                
+
                 let path = watchBundle?.path(forResource: pngPath, ofType: imageType)
-                let newImage = UIImage(contentsOfFile: path!)
-                
+                //let newImage = UIImage(contentsOfFile: path!)
+                let newImage = if (isFromFlutter==true) {
+                    if let asset = dialAssetsFromFlutter["\(pngPath.replacingOccurrences(of: "360", with: "454")).\(imageType)"]{
+                        UIImage(data: Data(asset))
+                    }else{
+                        UIImage(contentsOfFile: path!)
+                    }
+                }else{
+                    UIImage(contentsOfFile: path!)
+                }
+
+
                 #warning("To convert the image format, it is necessary to distinguish whether it supports 2D")
                 // 根据是否支持2D, 转换不同的图片格式
                 // Depending on whether 2D is supported, convert different image formats
@@ -243,22 +253,33 @@ class CustomWatchFaceViewModel {
                         imageData = pixData
                     }
                 }
-                
+
                 ampmImgSize = CGSize(width: newImage!.size.width, height: newImage!.size.height)
                 ampmBuffer.append(imageData)
                 ampmImageDataSize.append(UInt32(imageData.count))
             }
             return WatchElementResult(rawImageSize: CGSize(width: 0, height: 0), imageSize: ampmImgSize, imageData: ampmBuffer, imageCount: UInt8(imageArray.count), imageDataSize: ampmImageDataSize)
         } else {
-         
+
             var hourImgSize = CGSize(width: 0, height: 0)
             var hourBuffer = Data()
             var hourImageDataSize = [UInt32]()
             for pngPath in imageArray {
-                
+
                 let path = watchBundle?.path(forResource: pngPath, ofType: imageType)
-                let newImage = UIImage(contentsOfFile: path!)
-                
+               // let newImage = UIImage(contentsOfFile: path!)
+                bleLog("watchBundle  \(pngPath.replacingOccurrences(of: "360", with: "454")).\(imageType)")
+                let newImage = if (isFromFlutter==true) {
+                    if let asset = dialAssetsFromFlutter["\(pngPath.replacingOccurrences(of: "360", with: "454")).\(imageType)"]{
+                        UIImage(data: Data(asset))
+                    }else{
+                        UIImage(contentsOfFile: path!)
+                    }
+                }else{
+                    UIImage(contentsOfFile: path!)
+                }
+
+
                 #warning("To convert the image format, it is necessary to distinguish whether it supports 2D")
                 // 根据是否支持2D, 转换不同的图片格式
                 // Depending on whether 2D is supported, convert different image formats
@@ -272,7 +293,7 @@ class CustomWatchFaceViewModel {
                         imageData = pixData
                     }
                 }
-                
+
                 hourImgSize = CGSize(width: newImage!.size.width, height: newImage!.size.height)
                 hourBuffer.append(imageData)
                 hourImageDataSize.append(UInt32(imageData.count))
@@ -280,16 +301,16 @@ class CustomWatchFaceViewModel {
             return WatchElementResult(rawImageSize: CGSize(width: 0, height: 0), imageSize: hourImgSize, imageData: hourBuffer, imageCount: UInt8(imageArray.count), imageDataSize: hourImageDataSize)
         }
     }
-    
+
     private func identifyItemsColor(_ type: WatchElementType, _ colorNum: Int) -> [String] {
 
         var imagArray = [String]()
-        
+
         if type == .AMPM {
             imagArray.append(getImageDeviceType_2() + "time/digital/" + "\(colorNum)/" + "am_pm/am")
             imagArray.append(getImageDeviceType_2() + "time/digital/" + "\(colorNum)/" + "am_pm/pm")
         } else if type == .HOUR || type == .MINUTES {
-            
+
             // 小时和分钟, 应该有10个图片, 0到9
             for index in 0..<10 {
                 imagArray.append(getImageDeviceType_2() + "time/digital/" + "\(colorNum)/" + "hour_minute/" + "\(index)")
@@ -324,47 +345,47 @@ class CustomWatchFaceViewModel {
 
         return imagArray
     }
-    
-    
+
+
     /// 不支持2D加速设备需要使用BMP图片资源
     func getImageBmpBufferArray(_ type: WatchElementType, _ colorNum: Int) -> WatchElementResult {
-        
+
         let imageType = "bmp"
         // 获取图片路径
         let imageArray = self.identifyItemsColor(type, colorNum)
-        
+
         if type == .AMPM {
-            
+
             var ampmImgSize = CGSize(width: 0, height: 0)
             var ampmBuffer = Data()
             var ampmImageDataSize = [UInt32]()
             for bmpPath in imageArray {
-                
+
                 let path = watchBundle?.path(forResource: bmpPath, ofType: imageType)
                 let newImage = UIImage(contentsOfFile: path!)
-                
+
                 // 转换图片
                 let imageData = self.getImagePathToData(imagePath: path!, ofType: imageType)
-                
+
                 ampmImgSize = CGSize(width: newImage!.size.width, height: newImage!.size.height)
                 ampmBuffer.append(imageData)
                 ampmImageDataSize.append(UInt32(imageData.count))
             }
-            
+
             return WatchElementResult(rawImageSize: CGSize(width: 0, height: 0), imageSize: ampmImgSize, imageData: ampmBuffer, imageCount: UInt8(imageArray.count), imageDataSize: ampmImageDataSize)
         } else {
-         
+
             var hourImgSize = CGSize(width: 0, height: 0)
             var hourBuffer = Data()
             var hourImageDataSize = [UInt32]()
             for pngPath in imageArray {
-                
+
                 let path = watchBundle?.path(forResource: pngPath, ofType: imageType)
                 let newImage = UIImage(contentsOfFile: path!)
-                
+
                 // 转换图片
                 let imageData = self.getImagePathToData(imagePath: path!, ofType: imageType)
-                
+
                 hourImgSize = CGSize(width: newImage!.size.width, height: newImage!.size.height)
                 hourBuffer.append(imageData)
                 hourImageDataSize.append(UInt32(imageData.count))
@@ -372,7 +393,7 @@ class CustomWatchFaceViewModel {
             return WatchElementResult(rawImageSize: CGSize(width: 0, height: 0), imageSize: hourImgSize, imageData: hourBuffer, imageCount: UInt8(imageArray.count), imageDataSize: hourImageDataSize)
         }
     }
-    
+
     private func getImagePathToData(imagePath: String, ofType:String)-> Data{
 
         var newData :Data = Data()
@@ -432,7 +453,7 @@ class CustomWatchFaceViewModel {
         }
         return newData
     }
-    
+
     func getImageDeviceType()-> String{
         var imageSize = "device_"
         switch BleCache.shared.mWatchFaceType {
@@ -475,9 +496,10 @@ class CustomWatchFaceViewModel {
         }
         return imageSize
     }
-    
+
     /// 根据设备类型, 获取指定的图片资源
     private func getImageDeviceType_2()-> String{
+
         
         var imageSize = "dial_customize_240/"
         switch BleCache.shared.mWatchFaceType {

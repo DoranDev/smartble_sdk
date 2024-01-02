@@ -871,6 +871,14 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
             pointerModel = args?["pointerModel"] as! Int
             pointerNumberModel = args?["pointerNumberModel"] as! Int
 
+           dialAssetsFromFlutter = Dictionary<String, [UInt8]>()
+            let assets = args?["assets"] as! Dictionary<String, Any>
+            for (key, value) in assets {
+                if let data = value as? FlutterStandardTypedData {
+                    dialAssetsFromFlutter[key] = [UInt8](data.data)
+                }
+            }
+
             if let data = args?["bgBytes"] as? FlutterStandardTypedData {
                 bgImage = [UInt8](data.data)
                 // Use the 'bytes' array here
@@ -3341,30 +3349,30 @@ extension SwiftSmartbleSdkPlugin {
                 let pointDate  = CGPoint(x:digiDateLeft+Int(screenWidth/2), y: digiDateTop)
 
                 //am
-                let ampmRes = self.viewModel.getImageBufferArray(.AMPM, true, colorNum)
+                let ampmRes = self.viewModel.getImageBufferArray(.AMPM, true, colorNum, true, dialAssetsFromFlutter)
 
                 // hour
-                let hourRes = self.viewModel.getImageBufferArray(.HOUR, true, colorNum)
+                let hourRes = self.viewModel.getImageBufferArray(.HOUR, true, colorNum, true, dialAssetsFromFlutter)
                 // min
-                let minRes = self.viewModel.getImageBufferArray(.MINUTES, true, colorNum)
+                let minRes = self.viewModel.getImageBufferArray(.MINUTES, true, colorNum, true, dialAssetsFromFlutter)
 
 
                 // month
-                let monthRes = self.viewModel.getImageBufferArray(.MONTH, true, colorNum)
+                let monthRes = self.viewModel.getImageBufferArray(.MONTH, true, colorNum, true, dialAssetsFromFlutter)
                 let timeWeekMonthSize = monthRes.imageSize
                 // day
-                let dayRes = self.viewModel.getImageBufferArray(.DAY, true, colorNum)
+                let dayRes = self.viewModel.getImageBufferArray(.DAY, true, colorNum, true, dialAssetsFromFlutter)
                 let timeWeekDaySize = dayRes.imageSize
                 // week
-                let weekRes = self.viewModel.getImageBufferArray(.WEAK, true, colorNum)
+                let weekRes = self.viewModel.getImageBufferArray(.WEAK, true, colorNum, true, dialAssetsFromFlutter)
                 let timeWeekSize = weekRes.imageSize
 
 
                 // 日期之间的分割线
-                let dateSymbolRes = self.viewModel.getImageBufferArray(.dateSymbol, true, colorNum)
+                let dateSymbolRes = self.viewModel.getImageBufferArray(.dateSymbol, true, colorNum, true, dialAssetsFromFlutter)
                 let dateSySize = dateSymbolRes.imageSize
                 // 星期之间的分割线
-                let weekSymbolRes = self.viewModel.getImageBufferArray(.weakSymbol, true, colorNum)
+                let weekSymbolRes = self.viewModel.getImageBufferArray(.weakSymbol, true, colorNum, true, dialAssetsFromFlutter)
                 let weekSymSize = weekSymbolRes.imageSize
 
                 //point
@@ -3496,7 +3504,7 @@ extension SwiftSmartbleSdkPlugin {
                 let point :CGPoint = dataSourceArray["Step"] as! CGPoint
 
                 // 脚步  支持2D  ignoreBlack使用4;
-                let stepRes = self.viewModel.getImageBufferArray(.STEP, true, colorNum)
+                let stepRes = self.viewModel.getImageBufferArray(.STEP, true, colorNum, false, dialAssetsFromFlutter)
 
                 var elementStep = Element(type: faceBuilder.ELEMENT_DIGITAL_STEP, isAlpha: 1)
                 elementStep.setElementData(point: point, size: stepRes.imageSize, ignoreBlack: 4, watchRes: stepRes)
@@ -3511,7 +3519,7 @@ extension SwiftSmartbleSdkPlugin {
                 let point :CGPoint = dataSourceArray["HR"] as! CGPoint
 
                 // 心率  支持2D  ignoreBlack使用4;
-                let hrRes = self.viewModel.getImageBufferArray(.HEART_RATE, true, colorNum)
+                let hrRes = self.viewModel.getImageBufferArray(.HEART_RATE, true, colorNum, false, dialAssetsFromFlutter)
 
                 var elementHR = Element(type: faceBuilder.ELEMENT_DIGITAL_HEART, isAlpha: 1)
                 elementHR.setElementData(point: point, size: hrRes.imageSize, ignoreBlack: 4, watchRes: hrRes)
@@ -3526,7 +3534,7 @@ extension SwiftSmartbleSdkPlugin {
                 bleLog("表盘元素rawDisPoint:\(rawDisPoint)")
 
                 // 距离  支持2D  ignoreBlack使用4;
-                let disRes = self.viewModel.getImageBufferArray(.DISTANCE, true, colorNum)
+                let disRes = self.viewModel.getImageBufferArray(.DISTANCE, true, colorNum, false, dialAssetsFromFlutter)
                 let disPoint = CGPoint(x: rawDisPoint.x-disRes.imageSize.width, y: rawDisPoint.y)
                 bleLog("表盘元素disPoint:\(disPoint)")
 
@@ -3560,7 +3568,7 @@ extension SwiftSmartbleSdkPlugin {
                 let point :CGPoint = dataSourceArray["Cal"] as! CGPoint
 
                 // 卡路里  支持2D  ignoreBlack使用4;
-                let calRes = self.viewModel.getImageBufferArray(.CALORIES, true, colorNum)
+                let calRes = self.viewModel.getImageBufferArray(.CALORIES, true, colorNum, false, dialAssetsFromFlutter)
 
                 var elementCal = Element(type: faceBuilder.ELEMENT_DIGITAL_CALORIE, isAlpha: 1)
                 elementCal.setElementData(point: point, size: calRes.imageSize, ignoreBlack: 4, watchRes: calRes)
