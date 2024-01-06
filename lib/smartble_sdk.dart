@@ -351,8 +351,32 @@ class SmartbleSdk {
   Future<dynamic> kSLEEP_QUALITY({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('SLEEP_QUALITY', {'flag': flag.name});
 
-  Future<dynamic> kGIRL_CARE({required SelectedBlekeyFlag flag}) =>
-      _channel.invokeMethod('GIRL_CARE', {'flag': flag.name});
+  Future<dynamic> kGIRL_CARE({
+    required SelectedBlekeyFlag flag,
+    required int mEnabled,
+    required int mReminderHour,
+    required int mReminderMinute,
+    required int mMenstruationReminderAdvance,
+    required int mOvulationReminderAdvance,
+    required int mLatestYear,
+    required int mLatestMonth,
+    required int mLatestDay,
+    required int mMenstruationDuration,
+    required int mMenstruationPeriod,
+  }) =>
+      _channel.invokeMethod('GIRL_CARE', {
+        'flag': flag.name,
+        'mEnabled': mEnabled,
+        'mReminderHour': mReminderHour,
+        'mReminderMinute': mReminderMinute,
+        'mMenstruationReminderAdvance': mMenstruationReminderAdvance,
+        'mOvulationReminderAdvance': mOvulationReminderAdvance,
+        'mLatestYear': mLatestYear,
+        'mLatestMonth': mLatestMonth,
+        'mLatestDay': mLatestDay,
+        'mMenstruationDuration': mMenstruationDuration,
+        'mMenstruationPeriod': mMenstruationPeriod
+      });
 
   Future<dynamic> kTEMPERATURE_DETECTING({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('TEMPERATURE_DETECTING', {'flag': flag.name});
@@ -539,17 +563,24 @@ class SmartbleSdk {
       _channel.invokeMethod('WEATHER_REALTIME',
           {'flag': flag.name, 'realTime': realTime, 'type': type});
 
-  Future<dynamic> kWEATHER_FORECAST(
-          {required SelectedBlekeyFlag flag,
-          required String forecast1,
-          required String forecast2,
-          required String forecast3,
-          required String type}) =>
+  Future<dynamic> kWEATHER_FORECAST({required SelectedBlekeyFlag flag,
+    required String forecast1,
+    required String forecast2,
+    required String forecast3,
+    required String forecast4,
+    required String forecast5,
+    required String forecast6,
+    required String forecast7,
+    required String type}) =>
       _channel.invokeMethod('WEATHER_FORECAST', {
         'flag': flag.name,
         'forecast1': forecast1,
         'forecast2': forecast2,
         'forecast3': forecast3,
+        'forecast4': forecast4,
+        'forecast5': forecast5,
+        'forecast6': forecast6,
+        'forecast7': forecast7,
         'type': type,
       });
 
