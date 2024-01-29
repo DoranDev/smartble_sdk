@@ -750,6 +750,8 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
     var screenPreviewHeight = 0 // The actual preview size of the device screen - height
     var digiLeft = 0
     var digiTop = 0
+    var digiDateLeft = 0
+    var digiDateTop = 0
 
 //    var valueColor = 0
    var custom = 0
@@ -784,8 +786,14 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
     var image150 :UIImage?//预览图
     var image240 :UIImage?//背景图
 
+    private func is24HourFormat() -> Bool{
+        let formatter = DateFormatter()
+        formatter.dateFormat = DateFormatter.dateFormat(fromTemplate: "j", options: 0, locale: Locale.current)
+        return !(formatter.dateFormat.contains("a")||formatter.dateFormat.contains("p"))
+    }
+
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        result("iOS " + UIDevice.current.systemVersion)
+       // result("iOS " + UIDevice.current.systemVersion)
         let args = call.arguments as? Dictionary<String, Any>
         let flag = args?["flag"] as? String
         let mtd = call.method
@@ -811,6 +819,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
              break;
         case "disconnect":
             mBleConnector.connect(false)
+            BleCache.shared.clear()
             break;
         case "isAvailable":
             result(mBleConnector.isAvailable())
@@ -821,6 +830,12 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         case "unbind":
             mBleConnector.unbind()
              break;
+        case "isSupport2DAcceleration":
+            result(isSupp2D)
+             break;
+        case "isTo8565":
+            result(isSupp2D)
+             break;
         case "customDials":
             timeDigitalView = args?["isDigital"] as! Bool
             isRound = args?["isRound"] as! Bool
@@ -830,6 +845,9 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
 
             digiLeft = args?["digiLeft"] as! Int
             digiTop = args?["digiTop"] as! Int
+
+            digiDateLeft = args?["digiDateLeft"] as! Int
+            digiDateTop = args?["digiDateTop"] as! Int
 
             screenPreviewWidth = args?["screenPreviewWidth"] as! Int
             screenPreviewHeight = args?["screenPreviewHeight"] as! Int
@@ -852,6 +870,14 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
             isColor = args?["isColor"] as! Bool
             pointerModel = args?["pointerModel"] as! Int
             pointerNumberModel = args?["pointerNumberModel"] as! Int
+
+           dialAssetsFromFlutter = Dictionary<String, [UInt8]>()
+            let assets = args?["assets"] as! Dictionary<String, Any>
+            for (key, value) in assets {
+                if let data = value as? FlutterStandardTypedData {
+                    dialAssetsFromFlutter[key] = [UInt8](data.data)
+                }
+            }
 
             if let data = args?["bgBytes"] as? FlutterStandardTypedData {
                 bgImage = [UInt8](data.data)
@@ -2617,7 +2643,8 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
             if status {
                 _ = BleConnector.shared.sendObject(BleKey.TIME_ZONE, BleKeyFlag.UPDATE, BleTimeZone())
                 _ = BleConnector.shared.sendObject(BleKey.TIME, BleKeyFlag.UPDATE, BleTime.local())
-//                _ = BleConnector.shared.sendData(BleKey.POWER, BleKeyFlag.READ)
+                _ = BleConnector.shared.sendInt8(BleKey.HOUR_SYSTEM, BleKeyFlag.UPDATE, is24HourFormat() ? 0 : 1)
+                _ = BleConnector.shared.sendData(BleKey.DEVICE_INFO2, BleKeyFlag.READ)
 //                _ = BleConnector.shared.sendData(BleKey.FIRMWARE_VERSION, BleKeyFlag.READ)
             }
             var item = [String: Any]()
@@ -3207,6 +3234,7 @@ extension SwiftSmartbleSdkPlugin {
             let bgFrame = WatchFaceRect(x: bgX, y: bgY, width: bgWidth, height: bgHeight)
             let pvFrame = WatchFaceRect(x: pvX, y: pvY, width: pvWidth, height: pvHeight)
             bleLog("isSupp2D is \(isSupp2D)")
+            bleLog("dataSourceArray is \(dataSourceArray)")
             self.createBinForSupport2DWatchFace(dataSourceArray, isFixCoordinate: isFixCoordinate, bgFrame: bgFrame, pvFrame: pvFrame)
         } else {
             bleLog("isSupp2D is \(isSupp2D)")
@@ -3282,7 +3310,7 @@ extension SwiftSmartbleSdkPlugin {
 
         // 预览图, 虽然使用了使用的是 image150?.pngData()! 带透明的资源, 但是经过 .getImgWith(UIImage(data: pvPngData!)!, isAlpha: false) 方法转换, 就是不带透明度的资源了, 所以isAlpha应该设置为0
         // Although the preview image uses image150?.pngData()! resources with transparency, but after conversion with the .getImgWith(UIImage(data: pvPngData!), isAlpha: false) method, it is a resource without transparency. So isAlpha should be set to 0
-        var elementPrevie = Element(type: faceBuilder.ELEMENT_PREVIEW_2D, isAlpha: 0)
+        var elementPrevie = Element(type: faceBuilder.ELEMENT_PREVIEW, isAlpha: 0)
         elementPrevie.w = pvFrame.width
         elementPrevie.h = pvFrame.height
         elementPrevie.gravity = ylGravity
@@ -3318,38 +3346,38 @@ extension SwiftSmartbleSdkPlugin {
                 // 在资源文件中, 颜色的索引
                 let colorNum = getColorNumber(timeColor)
                 let point :CGPoint = dataSourceArray["TimeAM"] as! CGPoint
-
+                let pointDate  = CGPoint(x:digiDateLeft+Int(screenWidth/2), y: digiDateTop)
 
                 //am
-                let ampmRes = self.viewModel.getImageBufferArray(.AMPM, true, colorNum)
+                let ampmRes = self.viewModel.getImageBufferArray(.AMPM, true, colorNum, true, dialAssetsFromFlutter)
 
                 // hour
-                let hourRes = self.viewModel.getImageBufferArray(.HOUR, true, colorNum)
+                let hourRes = self.viewModel.getImageBufferArray(.HOUR, true, colorNum, true, dialAssetsFromFlutter)
                 // min
-                let minRes = self.viewModel.getImageBufferArray(.MINUTES, true, colorNum)
+                let minRes = self.viewModel.getImageBufferArray(.MINUTES, true, colorNum, true, dialAssetsFromFlutter)
 
 
                 // month
-                let monthRes = self.viewModel.getImageBufferArray(.MONTH, true, colorNum)
+                let monthRes = self.viewModel.getImageBufferArray(.MONTH, true, colorNum, true, dialAssetsFromFlutter)
                 let timeWeekMonthSize = monthRes.imageSize
                 // day
-                let dayRes = self.viewModel.getImageBufferArray(.DAY, true, colorNum)
+                let dayRes = self.viewModel.getImageBufferArray(.DAY, true, colorNum, true, dialAssetsFromFlutter)
                 let timeWeekDaySize = dayRes.imageSize
                 // week
-                let weekRes = self.viewModel.getImageBufferArray(.WEAK, true, colorNum)
+                let weekRes = self.viewModel.getImageBufferArray(.WEAK, true, colorNum, true, dialAssetsFromFlutter)
                 let timeWeekSize = weekRes.imageSize
 
 
                 // 日期之间的分割线
-                let dateSymbolRes = self.viewModel.getImageBufferArray(.dateSymbol, true, colorNum)
+                let dateSymbolRes = self.viewModel.getImageBufferArray(.dateSymbol, true, colorNum, true, dialAssetsFromFlutter)
                 let dateSySize = dateSymbolRes.imageSize
                 // 星期之间的分割线
-                let weekSymbolRes = self.viewModel.getImageBufferArray(.weakSymbol, true, colorNum)
+                let weekSymbolRes = self.viewModel.getImageBufferArray(.weakSymbol, true, colorNum, true, dialAssetsFromFlutter)
                 let weekSymSize = weekSymbolRes.imageSize
 
                 //point
                 let hourY = point.y+ampmRes.imageSize.height+2
-                let weekY = point.y+ampmRes.imageSize.height+hourRes.imageSize.height+4
+                let weekY = pointDate.y+ampmRes.imageSize.height+hourRes.imageSize.height+4
                 let hourPoint = CGPoint(x: point.x-((hourRes.imageSize.width*2)+(minRes.imageSize.width*2)+dateSySize.width+4), y: hourY)
                 let dateSyPoint = CGPoint(x: point.x-((minRes.imageSize.width*2)+dateSySize.width+2), y: hourY)
                 let minPoint = CGPoint(x: point.x-(minRes.imageSize.width*2), y: hourY)
@@ -3357,14 +3385,13 @@ extension SwiftSmartbleSdkPlugin {
 
                 // 月 / 日, 数据增加偏移值, 在F11上面周一, 周三, 周日出现日期和星期太靠近
                 let monthEleOffset:CGFloat = 10
-                let monthPoint = CGPoint(x: point.x-((timeWeekMonthSize.width*2)+(timeWeekDaySize.width*2)+timeWeekSize.width+weekSymSize.width+6) - monthEleOffset, y: weekY)
-                let monthSyPoint = CGPoint(x: point.x-((timeWeekDaySize.width*2)+timeWeekSize.width+weekSymSize.width+4) - monthEleOffset, y: weekY)
-                let dayPoint = CGPoint(x: point.x-((timeWeekDaySize.width*2)+timeWeekSize.width+2) - monthEleOffset, y: weekY)
-
-                var weekPoint = CGPoint(x: point.x-timeWeekSize.width, y: weekY)
+                let monthPoint = CGPoint(x: pointDate.x-((timeWeekMonthSize.width*2)+(timeWeekDaySize.width*2)+timeWeekSize.width+weekSymSize.width+6) - monthEleOffset, y: weekY)
+                let monthSyPoint = CGPoint(x: pointDate.x-((timeWeekDaySize.width*2)+timeWeekSize.width+weekSymSize.width+4) - monthEleOffset, y: weekY)
+                let dayPoint = CGPoint(x: pointDate.x-((timeWeekDaySize.width*2)+timeWeekSize.width+2) - monthEleOffset, y: weekY)
+                var weekPoint = CGPoint(x: pointDate.x-timeWeekSize.width, y: weekY)
                 let imageWidth :CGFloat = isBmpResoure ? 1.0:2.0
                 if isFixCoordinate {
-                    weekPoint = CGPoint(x: point.x-(timeWeekSize.width*0.5), y: weekY)
+                    weekPoint = CGPoint(x: pointDate.x-(timeWeekSize.width*0.5), y: weekY)
                 }
 
 
@@ -3477,7 +3504,7 @@ extension SwiftSmartbleSdkPlugin {
                 let point :CGPoint = dataSourceArray["Step"] as! CGPoint
 
                 // 脚步  支持2D  ignoreBlack使用4;
-                let stepRes = self.viewModel.getImageBufferArray(.STEP, true, colorNum)
+                let stepRes = self.viewModel.getImageBufferArray(.STEP, true, colorNum, false, dialAssetsFromFlutter)
 
                 var elementStep = Element(type: faceBuilder.ELEMENT_DIGITAL_STEP, isAlpha: 1)
                 elementStep.setElementData(point: point, size: stepRes.imageSize, ignoreBlack: 4, watchRes: stepRes)
@@ -3492,7 +3519,7 @@ extension SwiftSmartbleSdkPlugin {
                 let point :CGPoint = dataSourceArray["HR"] as! CGPoint
 
                 // 心率  支持2D  ignoreBlack使用4;
-                let hrRes = self.viewModel.getImageBufferArray(.HEART_RATE, true, colorNum)
+                let hrRes = self.viewModel.getImageBufferArray(.HEART_RATE, true, colorNum, false, dialAssetsFromFlutter)
 
                 var elementHR = Element(type: faceBuilder.ELEMENT_DIGITAL_HEART, isAlpha: 1)
                 elementHR.setElementData(point: point, size: hrRes.imageSize, ignoreBlack: 4, watchRes: hrRes)
@@ -3507,7 +3534,7 @@ extension SwiftSmartbleSdkPlugin {
                 bleLog("表盘元素rawDisPoint:\(rawDisPoint)")
 
                 // 距离  支持2D  ignoreBlack使用4;
-                let disRes = self.viewModel.getImageBufferArray(.DISTANCE, true, colorNum)
+                let disRes = self.viewModel.getImageBufferArray(.DISTANCE, true, colorNum, false, dialAssetsFromFlutter)
                 let disPoint = CGPoint(x: rawDisPoint.x-disRes.imageSize.width, y: rawDisPoint.y)
                 bleLog("表盘元素disPoint:\(disPoint)")
 
@@ -3541,7 +3568,7 @@ extension SwiftSmartbleSdkPlugin {
                 let point :CGPoint = dataSourceArray["Cal"] as! CGPoint
 
                 // 卡路里  支持2D  ignoreBlack使用4;
-                let calRes = self.viewModel.getImageBufferArray(.CALORIES, true, colorNum)
+                let calRes = self.viewModel.getImageBufferArray(.CALORIES, true, colorNum, false, dialAssetsFromFlutter)
 
                 var elementCal = Element(type: faceBuilder.ELEMENT_DIGITAL_CALORIE, isAlpha: 1)
                 elementCal.setElementData(point: point, size: calRes.imageSize, ignoreBlack: 4, watchRes: calRes)
@@ -3553,7 +3580,7 @@ extension SwiftSmartbleSdkPlugin {
                 let tempNum = dataSourceArray["PointerNumber"] as! String
 
                 guard var index = Int(tempNum) else {
-                    bleLog("获取指针转换失败")
+                    bleLog("Get pointer conversion failed 2")
                     return
                 }
 
@@ -3566,7 +3593,7 @@ extension SwiftSmartbleSdkPlugin {
                 guard let pinitGroup = self.viewModel.getPointerImage(index, isPNG: true,pointerModel: pointerModel) else {
 
                     // 这里代表获取指针失败, 需要提示用户
-                    bleLog("获取指针数据失败, 需要提示用户")
+                    bleLog("Failed to obtain pointer data, user needs to be prompted 2")
                     return
                 }
 
@@ -3606,7 +3633,8 @@ extension SwiftSmartbleSdkPlugin {
             #warning("For devices that support 2D, you must use faceBuilder.PNG_ARGB_8888")
             // 支持2D的设备, 必须使用faceBuilder.PNG_ARGB_8888
             let sendData = buildWatchFace(watchFaceElements, watchFaceElements.count, Int32(faceBuilder.PNG_ARGB_8888))
-            bleLog("支持2d表盘bin文件大小 - \(sendData.toData().count)")
+            bleLog("watchFaceElements.count - \(watchFaceElements.count)")
+            bleLog("watchFaceElements.count - \(watchFaceElements)")
             //if timeAuto == nil{
             //    timeAuto = Timer.scheduledTimer(withTimeInterval: TimeInterval(10), repeats: true, block: { _ in
             //        self.timeAutoCount += 10
@@ -3625,390 +3653,390 @@ extension SwiftSmartbleSdkPlugin {
 
 
     /// 不支持2D表盘的处理
-    private func createBinForNotSupport2DWatchFace(_ dataSourceArray: [String:Any], isFixCoordinate: Bool, bgFrame: WatchFaceRect, pvFrame: WatchFaceRect) {
-
-        //固件坐标
-        var bkGravity = UInt8(faceBuilder.GRAVITY_X_CENTER|faceBuilder.GRAVITY_Y_CENTER)//背景图
-        var ylGravity = UInt8(faceBuilder.GRAVITY_X_CENTER|faceBuilder.GRAVITY_Y_CENTER)//预览图
-        let apmGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)//am pm
-        let hourGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)//hour
-        let dayGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)//Day
-        let minGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)//min
-        let monthGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)//month
-        let weekSymGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)//weekSym
-        let weekDayGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)//weekDay
-        var weekGravity = UInt8(faceBuilder.GRAVITY_X_CENTER|faceBuilder.GRAVITY_Y_TOP)//week
-        var stepGravity = UInt8(faceBuilder.GRAVITY_X_CENTER|faceBuilder.GRAVITY_Y_CENTER)//step
-        var hrGravity = UInt8(faceBuilder.GRAVITY_X_CENTER|faceBuilder.GRAVITY_Y_CENTER)
-        var disGravity = UInt8(faceBuilder.GRAVITY_X_CENTER|faceBuilder.GRAVITY_Y_CENTER)
-        var calGravity = UInt8(faceBuilder.GRAVITY_X_CENTER|faceBuilder.GRAVITY_Y_CENTER)
-        let pointGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)
-
-
-        //Realtek需要修正坐标参数
-        if isFixCoordinate {
-            bkGravity = UInt8(faceBuilder.GRAVITY_X_CENTER_R|faceBuilder.GRAVITY_Y_CENTER_R)
-            ylGravity = UInt8(faceBuilder.GRAVITY_X_CENTER_R|faceBuilder.GRAVITY_Y_CENTER_R)
-            weekGravity = UInt8(faceBuilder.GRAVITY_X_CENTER_R|faceBuilder.GRAVITY_Y_TOP)
-            stepGravity = UInt8(faceBuilder.GRAVITY_X_CENTER_R|faceBuilder.GRAVITY_Y_CENTER_R)
-            hrGravity = UInt8(faceBuilder.GRAVITY_X_CENTER_R|faceBuilder.GRAVITY_Y_CENTER_R)
-            disGravity = UInt8(faceBuilder.GRAVITY_X_CENTER_R|faceBuilder.GRAVITY_Y_CENTER_R)
-            calGravity = UInt8(faceBuilder.GRAVITY_X_CENTER_R|faceBuilder.GRAVITY_Y_CENTER_R)
-        }
-
-        // 这个背景问题, 有疑问, 参考安卓修改为这个值
-        if isSupp2D {
-            bkGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)//背景图
-        }
-
-        // 存储表盘的所有元素数据
-        var watchFaceElements :[Element] = []
-
-        // 不支持2D设备, 背景图片, 由于调用了rearrangePixels(1.0).pixData得出的是8565带透明度的图片, 所以isAlpha需要传递1
-        // 2D devices and background images are not supported, and the result of calling rearrangePixels(1.0).pixData is 8565 images with transparency, so isAlpha needs to pass 1
-        var elementBg = Element(type: faceBuilder.ELEMENT_BACKGROUND, isAlpha: 1)
-        elementBg.w = bgFrame.width
-        elementBg.h = bgFrame.height
-        elementBg.gravity = bkGravity
-        elementBg.ignoreBlack = 0 // 2D is not supported, 0 should be used
-        // 不支持2D的设备, 传递背景图片的x,y值需要注意
-        elementBg.x = bgFrame.x
-        elementBg.y = bgFrame.y
-        elementBg.imageCount = UInt8(1)
-        // 不支持2D的背景二进制数据
-        let bgPngData = image240?.pngData()!
-        let bgByte = UIImage(data: bgPngData!)?.rearrangePixels(1.0).pixData
-
-        elementBg.imageSizes = [UInt32(bgByte!.count)]
-        elementBg.imageBuffer = bgByte!
-
-        watchFaceElements.append(elementBg)
-
-
-        // 不支持2D设备, 预览图片, 由于调用了rearrangePixels(1.0).pixData得出的是8565带透明度的图片, 所以isAlpha需要传递1
-        // Does not support 2D devices, preview pictures, because rearrangePixels(1.0).pixData is called to get 8565 pictures with transparency, so isAlpha needs to pass 1
-        var elementPrevie = Element(type: faceBuilder.ELEMENT_PREVIEW, isAlpha: 1)
-        elementPrevie.w = pvFrame.width
-        elementPrevie.h = pvFrame.height
-        elementPrevie.gravity = ylGravity
-        elementPrevie.ignoreBlack = 0 // 2D is not supported, 0 should be used
-        elementPrevie.imageCount = UInt8(1)
-
-        // 预览图二进制数据
-        let pvPngData = image150?.pngData()!
-        let pvByte = UIImage(data: pvPngData!)?.rearrangePixels(1.0).pixData
-
-        elementPrevie.imageSizes = [UInt32(pvByte!.count)] //buffer每个元素大小
-        elementPrevie.imageBuffer = pvByte!
-        watchFaceElements.append(elementPrevie)
-
-        //处理其他元素
-        var timeColor = dial_select_color1
-        var itemColor = dial_select_color1
-        if dataSourceArray.keys.contains("ItemsColor"){
-            itemColor = dataSourceArray["ItemsColor"] as! UIColor
-        }
-        if dataSourceArray.keys.contains("TimeColor"){
-            timeColor = dataSourceArray["TimeColor"] as! UIColor
-        }
-
-
-        #warning("The 2D ignoreBlack parameter is not supported to use a fixed value of 0")
-        // 不支持2D ignoreBlack参数使用固定值0
-        // The 2D ignoreBlack parameter is not supported to use a fixed value of 0
-        let kNotSupport2D_IgnoreBlack = 0
-
-        for (key,value) in dataSourceArray {
-
-            if key.elementsEqual("TimeAM"){
-                bleLog("TimeAM is \(value)")
-
-                // 在资源文件中, 颜色的索引
-                let colorNum = getColorNumber(timeColor)
-                let point :CGPoint = dataSourceArray["TimeAM"] as! CGPoint
-
-
-                //am  支持2D  ignoreBlack使用4;
-                let ampmRes = self.viewModel.getImageBufferArray(.AMPM, false, colorNum)
-
-                // hour  支持2D  ignoreBlack使用4;
-                let hourRes = self.viewModel.getImageBufferArray(.HOUR, false, colorNum)
-                // min  支持2D  ignoreBlack使用4;
-                let minRes = self.viewModel.getImageBufferArray(.MINUTES, false, colorNum)
-
-
-                // month  支持2D  ignoreBlack使用4;
-                let monthRes = self.viewModel.getImageBufferArray(.MONTH, false, colorNum)
-                let timeWeekMonthSize = monthRes.imageSize
-                // day  支持2D  ignoreBlack使用4;
-                let dayRes = self.viewModel.getImageBufferArray(.DAY, false, colorNum)
-                let timeWeekDaySize = dayRes.imageSize
-                // week  支持2D  ignoreBlack使用4;
-                let weekRes = self.viewModel.getImageBufferArray(.WEAK, false, colorNum)
-                let timeWeekSize = weekRes.imageSize
-
-
-                // 日期之间的分割线  支持2D  ignoreBlack使用4;
-                let dateSymbolRes = self.viewModel.getImageBufferArray(.dateSymbol, false, colorNum)
-                let dateSySize = dateSymbolRes.imageSize
-                // 星期之间的分割线  支持2D  ignoreBlack使用4;
-                let weekSymbolRes = self.viewModel.getImageBufferArray(.weakSymbol, false, colorNum)
-                let weekSymSize = weekSymbolRes.imageSize
-
-                //point
-                let hourY = point.y+ampmRes.imageSize.height+2
-                let weekY = point.y+ampmRes.imageSize.height+hourRes.imageSize.height+4
-                let hourPoint = CGPoint(x: point.x-((hourRes.imageSize.width*2)+(minRes.imageSize.width*2)+dateSySize.width+4), y: hourY)
-                let dateSyPoint = CGPoint(x: point.x-((minRes.imageSize.width*2)+dateSySize.width+2), y: hourY)
-                let minPoint = CGPoint(x: point.x-(minRes.imageSize.width*2), y: hourY)
-
-
-                // 月 / 日, 数据增加偏移值, 在F11上面周一, 周三, 周日出现日期和星期太靠近
-                let monthEleOffset:CGFloat = 10
-                let monthPoint = CGPoint(x: point.x-((timeWeekMonthSize.width*2)+(timeWeekDaySize.width*2)+timeWeekSize.width+weekSymSize.width+6) - monthEleOffset, y: weekY)
-                let monthSyPoint = CGPoint(x: point.x-((timeWeekDaySize.width*2)+timeWeekSize.width+weekSymSize.width+4) - monthEleOffset, y: weekY)
-                let dayPoint = CGPoint(x: point.x-((timeWeekDaySize.width*2)+timeWeekSize.width+2) - monthEleOffset, y: weekY)
-
-                var weekPoint = CGPoint(x: point.x-timeWeekSize.width, y: weekY)
-                let imageWidth :CGFloat = isBmpResoure ? 1.0:2.0
-                if isFixCoordinate {
-                    weekPoint = CGPoint(x: point.x-(timeWeekSize.width*0.5), y: weekY)
-                }
-
-
-
-                // am pm  支持2D  ignoreBlack使用1, 否则使用0
-                let tempAmPmPoint = CGPoint(x: point.x-ampmRes.imageSize.width, y: point.y)
-
-                var amElement = Element(type: faceBuilder.ELEMENT_DIGITAL_AMPM, isAlpha: 1)
-                amElement.setElementData(point: tempAmPmPoint, size: ampmRes.imageSize, ignoreBlack: kNotSupport2D_IgnoreBlack, watchRes: ampmRes)
-                amElement.gravity = apmGravity
-
-                watchFaceElements.append(amElement)
-
-
-                // hour  支持2D  ignoreBlack使用1, 否则使用0
-                let tempHourSize = CGSize(width: hourRes.imageSize.width * imageWidth, height: hourRes.imageSize.height)
-
-                var hourElement = Element(type: faceBuilder.ELEMENT_DIGITAL_HOUR, isAlpha: 1)
-                hourElement.setElementData(point: hourPoint, size: tempHourSize, ignoreBlack: kNotSupport2D_IgnoreBlack, watchRes: hourRes)
-                hourElement.gravity = hourGravity
-
-                watchFaceElements.append(hourElement)
-
-
-                // 日期之间的分割线  ignoreBlack使用1, 否则使用0
-                //let dateSymbolImgArray = self.viewModel.identifyItemsColor(.dateSymbol, colorNum)
-                //let dateSymbolRes = self.viewModel.getImageBufferArray(dateSymbolImgArray, .dateSymbol)
-
-                let tempdateSySize = CGSize(width: dateSymbolRes.imageSize.width * imageWidth, height: dateSymbolRes.imageSize.height)
-
-                var dateSyElement = Element(type: faceBuilder.ELEMENT_BACKGROUND, isAlpha: 1)
-                dateSyElement.setElementData(point: dateSyPoint, size: tempdateSySize, ignoreBlack: kNotSupport2D_IgnoreBlack, watchRes: dateSymbolRes)
-                dateSyElement.gravity = dayGravity
-
-                watchFaceElements.append(dateSyElement)
-
-
-
-                // min  支持2D  ignoreBlack使用1, 否则使用0
-                //let minImgArray = self.viewModel.identifyItemsColor(.MINUTES, colorNum)
-                //let minRes = self.viewModel.getImageBufferArray(minImgArray, .MINUTES)
-
-                let tempMinSySize = CGSize(width: minRes.imageSize.width * imageWidth, height: minRes.imageSize.height)
-
-                var minElement = Element(type: faceBuilder.ELEMENT_DIGITAL_MIN, isAlpha: 1)
-                minElement.setElementData(point: minPoint, size: tempMinSySize, ignoreBlack: kNotSupport2D_IgnoreBlack, watchRes: minRes)
-                minElement.gravity = minGravity
-                watchFaceElements.append(minElement)
-
-
-
-                // month  支持2D  ignoreBlack使用1, 否则使用0
-                //let monthImgArray = self.viewModel.identifyItemsColor(.MONTH, colorNum)
-                //let monthRes = self.viewModel.getImageBufferArray(monthImgArray, .MONTH)
-
-                let tempMonthSize = CGSize(width: monthRes.imageSize.width * imageWidth, height: monthRes.imageSize.height)
-
-                var monthElement = Element(type: faceBuilder.ELEMENT_DIGITAL_MONTH, isAlpha: 1)
-                monthElement.setElementData(point: monthPoint, size: tempMonthSize, ignoreBlack: kNotSupport2D_IgnoreBlack, watchRes: monthRes)
-                monthElement.gravity = monthGravity
-                watchFaceElements.append(monthElement)
-
-
-
-                // 日期之间的分割线  支持2D  ignoreBlack使用1, 否则使用0
-                //let weekSymbolImgArray = self.viewModel.identifyItemsColor(.weakSymbol, colorNum)
-                //let weekSymbolRes = self.viewModel.getImageBufferArray(weekSymbolImgArray, .weakSymbol)
-
-                var weekSymElement = Element(type: faceBuilder.ELEMENT_BACKGROUND, isAlpha: 1)
-                weekSymElement.setElementData(point: monthSyPoint, size: weekSymbolRes.imageSize, ignoreBlack: kNotSupport2D_IgnoreBlack, watchRes: weekSymbolRes)
-                weekSymElement.gravity = weekSymGravity
-
-                watchFaceElements.append(weekSymElement)
-
-
-
-                // day  支持2D  ignoreBlack使用1, 否则使用0
-                //let dayImgArray = self.viewModel.identifyItemsColor(.DAY, colorNum)
-                //let dayRes = self.viewModel.getImageBufferArray(dayImgArray, .DAY)
-
-                let tempDaySize = CGSize(width: dayRes.imageSize.width * imageWidth, height: dayRes.imageSize.height)
-
-                var dayElement = Element(type: faceBuilder.ELEMENT_DIGITAL_DAY, isAlpha: 1)
-                dayElement.setElementData(point: dayPoint, size: tempDaySize, ignoreBlack: kNotSupport2D_IgnoreBlack, watchRes: dayRes)
-                dayElement.gravity = weekDayGravity
-                watchFaceElements.append(dayElement)
-
-
-
-                // week  支持2D  ignoreBlack使用1, 否则使用0
-                //let weekImgArray = self.viewModel.identifyItemsColor(.WEAK, colorNum)
-                //let weekRes = self.viewModel.getImageBufferArray(weekImgArray, .DAY)
-
-                var weekElement = Element(type: faceBuilder.ELEMENT_DIGITAL_WEEKDAY, isAlpha: 1)
-                weekElement.setElementData(point: weekPoint, size: weekRes.imageSize, ignoreBlack: kNotSupport2D_IgnoreBlack, watchRes: weekRes)
-
-                weekElement.gravity = weekGravity
-                watchFaceElements.append(weekElement)
-            }else if key.elementsEqual("Step"){
-                bleLog("Step is \(value)")
-                // 在资源文件中, 颜色的索引
-                let colorNum = getColorNumber(itemColor)
-                let point :CGPoint = dataSourceArray["Step"] as! CGPoint
-
-                // 脚步  支持2D  ignoreBlack使用1, 否则使用0
-                let stepRes = self.viewModel.getImageBufferArray(.STEP, false, colorNum)
-
-                var elementStep = Element(type: faceBuilder.ELEMENT_DIGITAL_STEP, isAlpha: 1)
-                elementStep.setElementData(point: point, size: stepRes.imageSize, ignoreBlack: kNotSupport2D_IgnoreBlack, watchRes: stepRes)
-
-                elementStep.gravity = stepGravity
-                watchFaceElements.append(elementStep)
-            }else if key.elementsEqual("HR"){
-                bleLog("HR is \(value)")
-                // 在资源文件中, 颜色的索引
-                let colorNum = getColorNumber(itemColor)
-                let point :CGPoint = dataSourceArray["HR"] as! CGPoint
-
-                // 心率  支持2D  ignoreBlack使用1, 否则使用0
-                let hrRes = self.viewModel.getImageBufferArray(.HEART_RATE, false, colorNum)
-
-                var elementHR = Element(type: faceBuilder.ELEMENT_DIGITAL_HEART, isAlpha: 1)
-                elementHR.setElementData(point: point, size: hrRes.imageSize, ignoreBlack: kNotSupport2D_IgnoreBlack, watchRes: hrRes)
-                elementHR.gravity = hrGravity
-                watchFaceElements.append(elementHR)
-            }else if key.elementsEqual("Dis"){
-                bleLog("Dis is \(value)")
-                // 在资源文件中, 颜色的索引
-                let colorNum = getColorNumber(itemColor)
-                let rawDisPoint = dataSourceArray["Dis"] as! CGPoint
-                bleLog("表盘元素rawDisPoint:\(rawDisPoint)")
-
-                // 距离  支持2D  ignoreBlack使用1, 否则使用0
-                let disRes = self.viewModel.getImageBufferArray(.DISTANCE, false, colorNum)
-                let disPoint = CGPoint(x: rawDisPoint.x-disRes.imageSize.width, y: rawDisPoint.y)
-                bleLog("表盘元素disPoint:\(disPoint)")
-
-                var elementDis = Element(type: faceBuilder.ELEMENT_DIGITAL_DISTANCE, isAlpha: 1)
-                elementDis.setElementData(point: disPoint, size: disRes.imageSize, ignoreBlack: kNotSupport2D_IgnoreBlack, watchRes: disRes)
-                elementDis.gravity = disGravity
-
-                watchFaceElements.append(elementDis)
-            }else if key.elementsEqual("Cal"){
-                bleLog("Cal is \(value)")
-                // 在资源文件中, 颜色的索引
-                let colorNum = getColorNumber(itemColor)
-                let point :CGPoint = dataSourceArray["Cal"] as! CGPoint
-
-                // 卡路里  支持2D  ignoreBlack使用1, 否则使用0
-                let calRes = self.viewModel.getImageBufferArray(.CALORIES, false, colorNum)
-
-                var elementCal = Element(type: faceBuilder.ELEMENT_DIGITAL_CALORIE, isAlpha: 1)
-                elementCal.setElementData(point: point, size: calRes.imageSize, ignoreBlack: kNotSupport2D_IgnoreBlack, watchRes: calRes)
-                elementCal.gravity = calGravity
-                watchFaceElements.append(elementCal)
-
-            }else if key.elementsEqual("PointerNumber"){
-                bleLog("PointerNumber is \(value)")
-                let tempNum = dataSourceArray["PointerNumber"] as! String
-
-                guard var index = Int(tempNum) else {
-                    bleLog("获取指针转换失败")
-                    return
-                }
-
-                // 支持2D的指针索引和不支持的有区别, 支持2D的是从0开始的
-                index -= 1
-                if index < 0 {
-                    index = 0
-                }
-
-                guard let pinitGroup = self.viewModel.getPointerImage(index, isPNG: true,pointerModel: pointerModel) else {
-
-                    // 这里代表获取指针失败, 需要提示用户
-                    bleLog("获取指针数据失败, 需要提示用户")
-                    return
-                }
-
-
-
-                for index in 0..<3{
-
-                    var newElement: Element?
-
-                    switch index {
-                    case 0:
-                        newElement = getPointElement(type: faceBuilder.ELEMENT_NEEDLE_HOUR, isAlpha: 1)
-                        newElement?.setElementForPointerData(isPoint: true, rawSize: pinitGroup.hourRes.rawImageSize, size: pinitGroup.hourRes.imageSize, watchRes: pinitGroup.hourRes)
-                        break
-                    case 1:
-                        newElement = getPointElement(type: faceBuilder.ELEMENT_NEEDLE_MIN, isAlpha: 1)
-                        newElement?.setElementForPointerData(isPoint: true, rawSize: pinitGroup.minRes.rawImageSize, size: pinitGroup.minRes.imageSize, watchRes: pinitGroup.minRes)
-                        break
-                    case 2:
-                        newElement = getPointElement(type: faceBuilder.ELEMENT_NEEDLE_SEC, isAlpha: 1)
-                        newElement?.setElementForPointerData(isPoint: true, rawSize: pinitGroup.secRes.rawImageSize, size: pinitGroup.secRes.imageSize, watchRes: pinitGroup.secRes)
-                        break
-                    default:
-                        break
-                    }
-
-                    newElement?.gravity = pointGravity
-                    newElement?.ignoreBlack = UInt8(1)  // 指针, 不支持2D  ignoreBlack应该使用固定值 1
-                    newElement?.x = bgFrame.width / 2
-                    newElement?.y = bgFrame.height / 2
-                    newElement?.imageCount = UInt8(1)
-
-                    if let tempEle = newElement {
-                        watchFaceElements.append(tempEle)
-                    }
-                }
-            }
-        }
-
-        if watchFaceElements.count > 0{
-
-            #warning("2D accelerated devices are not supported, you should use the faceBuilder.BMP_565 parameter")
-            // 不支持2D加速设备, 应该使用 faceBuilder.BMP_565 参数
-            // 2D accelerated devices are not supported, you should use the faceBuilder.BMP_565 parameter
-            let sendData = buildWatchFace(watchFaceElements, watchFaceElements.count, Int32(faceBuilder.BMP_565))
-            bleLog("不支持2D加速设备, bin文件大小 - \(sendData.toData().count)")
-            //if timeAuto == nil{
-            //    timeAuto = Timer.scheduledTimer(withTimeInterval: TimeInterval(10), repeats: true, block: { _ in
-            //        self.timeAutoCount += 10
-            //        if self.timeAutoCount >= 60{
-            //            bleLog("一分钟没有新进度取消同步")
-            //            self.doneAction(false)
-            //        }
-            //    })
-            //}
-            if mBleConnector.sendStream(.WATCH_FACE, sendData.toData(),0){
-                bleLog("sendStream - WATCH_FACE")
-            }
-
-        }
-    }
+//    private func createBinForNotSupport2DWatchFace(_ dataSourceArray: [String:Any], isFixCoordinate: Bool, bgFrame: WatchFaceRect, pvFrame: WatchFaceRect) {
+//
+//        //固件坐标
+//        var bkGravity = UInt8(faceBuilder.GRAVITY_X_CENTER|faceBuilder.GRAVITY_Y_CENTER)//背景图
+//        var ylGravity = UInt8(faceBuilder.GRAVITY_X_CENTER|faceBuilder.GRAVITY_Y_CENTER)//预览图
+//        let apmGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)//am pm
+//        let hourGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)//hour
+//        let dayGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)//Day
+//        let minGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)//min
+//        let monthGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)//month
+//        let weekSymGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)//weekSym
+//        let weekDayGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)//weekDay
+//        var weekGravity = UInt8(faceBuilder.GRAVITY_X_CENTER|faceBuilder.GRAVITY_Y_TOP)//week
+//        var stepGravity = UInt8(faceBuilder.GRAVITY_X_CENTER|faceBuilder.GRAVITY_Y_CENTER)//step
+//        var hrGravity = UInt8(faceBuilder.GRAVITY_X_CENTER|faceBuilder.GRAVITY_Y_CENTER)
+//        var disGravity = UInt8(faceBuilder.GRAVITY_X_CENTER|faceBuilder.GRAVITY_Y_CENTER)
+//        var calGravity = UInt8(faceBuilder.GRAVITY_X_CENTER|faceBuilder.GRAVITY_Y_CENTER)
+//        let pointGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)
+//
+//
+//        //Realtek需要修正坐标参数
+//        if isFixCoordinate {
+//            bkGravity = UInt8(faceBuilder.GRAVITY_X_CENTER_R|faceBuilder.GRAVITY_Y_CENTER_R)
+//            ylGravity = UInt8(faceBuilder.GRAVITY_X_CENTER_R|faceBuilder.GRAVITY_Y_CENTER_R)
+//            weekGravity = UInt8(faceBuilder.GRAVITY_X_CENTER_R|faceBuilder.GRAVITY_Y_TOP)
+//            stepGravity = UInt8(faceBuilder.GRAVITY_X_CENTER_R|faceBuilder.GRAVITY_Y_CENTER_R)
+//            hrGravity = UInt8(faceBuilder.GRAVITY_X_CENTER_R|faceBuilder.GRAVITY_Y_CENTER_R)
+//            disGravity = UInt8(faceBuilder.GRAVITY_X_CENTER_R|faceBuilder.GRAVITY_Y_CENTER_R)
+//            calGravity = UInt8(faceBuilder.GRAVITY_X_CENTER_R|faceBuilder.GRAVITY_Y_CENTER_R)
+//        }
+//
+//        // 这个背景问题, 有疑问, 参考安卓修改为这个值
+//        if isSupp2D {
+//            bkGravity = UInt8(faceBuilder.GRAVITY_X_LEFT|faceBuilder.GRAVITY_Y_TOP)//背景图
+//        }
+//
+//        // 存储表盘的所有元素数据
+//        var watchFaceElements :[Element] = []
+//
+//        // 不支持2D设备, 背景图片, 由于调用了rearrangePixels(1.0).pixData得出的是8565带透明度的图片, 所以isAlpha需要传递1
+//        // 2D devices and background images are not supported, and the result of calling rearrangePixels(1.0).pixData is 8565 images with transparency, so isAlpha needs to pass 1
+//        var elementBg = Element(type: faceBuilder.ELEMENT_BACKGROUND, isAlpha: 1)
+//        elementBg.w = bgFrame.width
+//        elementBg.h = bgFrame.height
+//        elementBg.gravity = bkGravity
+//        elementBg.ignoreBlack = 0 // 2D is not supported, 0 should be used
+//        // 不支持2D的设备, 传递背景图片的x,y值需要注意
+//        elementBg.x = bgFrame.x
+//        elementBg.y = bgFrame.y
+//        elementBg.imageCount = UInt8(1)
+//        // 不支持2D的背景二进制数据
+//        let bgPngData = image240?.pngData()!
+//        let bgByte = UIImage(data: bgPngData!)?.rearrangePixels(1.0).pixData
+//
+//        elementBg.imageSizes = [UInt32(bgByte!.count)]
+//        elementBg.imageBuffer = bgByte!
+//
+//        watchFaceElements.append(elementBg)
+//
+//
+//        // 不支持2D设备, 预览图片, 由于调用了rearrangePixels(1.0).pixData得出的是8565带透明度的图片, 所以isAlpha需要传递1
+//        // Does not support 2D devices, preview pictures, because rearrangePixels(1.0).pixData is called to get 8565 pictures with transparency, so isAlpha needs to pass 1
+//        var elementPrevie = Element(type: faceBuilder.ELEMENT_PREVIEW, isAlpha: 1)
+//        elementPrevie.w = pvFrame.width
+//        elementPrevie.h = pvFrame.height
+//        elementPrevie.gravity = ylGravity
+//        elementPrevie.ignoreBlack = 0 // 2D is not supported, 0 should be used
+//        elementPrevie.imageCount = UInt8(1)
+//
+//        // 预览图二进制数据
+//        let pvPngData = image150?.pngData()!
+//        let pvByte = UIImage(data: pvPngData!)?.rearrangePixels(1.0).pixData
+//
+//        elementPrevie.imageSizes = [UInt32(pvByte!.count)] //buffer每个元素大小
+//        elementPrevie.imageBuffer = pvByte!
+//        watchFaceElements.append(elementPrevie)
+//
+//        //处理其他元素
+//        var timeColor = dial_select_color1
+//        var itemColor = dial_select_color1
+//        if dataSourceArray.keys.contains("ItemsColor"){
+//            itemColor = dataSourceArray["ItemsColor"] as! UIColor
+//        }
+//        if dataSourceArray.keys.contains("TimeColor"){
+//            timeColor = dataSourceArray["TimeColor"] as! UIColor
+//        }
+//
+//
+//        #warning("The 2D ignoreBlack parameter is not supported to use a fixed value of 0")
+//        // 不支持2D ignoreBlack参数使用固定值0
+//        // The 2D ignoreBlack parameter is not supported to use a fixed value of 0
+//        let kNotSupport2D_IgnoreBlack = 0
+//
+//        for (key,value) in dataSourceArray {
+//
+//            if key.elementsEqual("TimeAM"){
+//                bleLog("TimeAM is \(value)")
+//
+//                // 在资源文件中, 颜色的索引
+//                let colorNum = getColorNumber(timeColor)
+//                let point :CGPoint = dataSourceArray["TimeAM"] as! CGPoint
+//
+//
+//                //am  支持2D  ignoreBlack使用4;
+//                let ampmRes = self.viewModel.getImageBufferArray(.AMPM, false, colorNum)
+//
+//                // hour  支持2D  ignoreBlack使用4;
+//                let hourRes = self.viewModel.getImageBufferArray(.HOUR, false, colorNum)
+//                // min  支持2D  ignoreBlack使用4;
+//                let minRes = self.viewModel.getImageBufferArray(.MINUTES, false, colorNum)
+//
+//
+//                // month  支持2D  ignoreBlack使用4;
+//                let monthRes = self.viewModel.getImageBufferArray(.MONTH, false, colorNum)
+//                let timeWeekMonthSize = monthRes.imageSize
+//                // day  支持2D  ignoreBlack使用4;
+//                let dayRes = self.viewModel.getImageBufferArray(.DAY, false, colorNum)
+//                let timeWeekDaySize = dayRes.imageSize
+//                // week  支持2D  ignoreBlack使用4;
+//                let weekRes = self.viewModel.getImageBufferArray(.WEAK, false, colorNum)
+//                let timeWeekSize = weekRes.imageSize
+//
+//
+//                // 日期之间的分割线  支持2D  ignoreBlack使用4;
+//                let dateSymbolRes = self.viewModel.getImageBufferArray(.dateSymbol, false, colorNum)
+//                let dateSySize = dateSymbolRes.imageSize
+//                // 星期之间的分割线  支持2D  ignoreBlack使用4;
+//                let weekSymbolRes = self.viewModel.getImageBufferArray(.weakSymbol, false, colorNum)
+//                let weekSymSize = weekSymbolRes.imageSize
+//
+//                //point
+//                let hourY = point.y+ampmRes.imageSize.height+2
+//                let weekY = point.y+ampmRes.imageSize.height+hourRes.imageSize.height+4
+//                let hourPoint = CGPoint(x: point.x-((hourRes.imageSize.width*2)+(minRes.imageSize.width*2)+dateSySize.width+4), y: hourY)
+//                let dateSyPoint = CGPoint(x: point.x-((minRes.imageSize.width*2)+dateSySize.width+2), y: hourY)
+//                let minPoint = CGPoint(x: point.x-(minRes.imageSize.width*2), y: hourY)
+//
+//
+//                // 月 / 日, 数据增加偏移值, 在F11上面周一, 周三, 周日出现日期和星期太靠近
+//                let monthEleOffset:CGFloat = 10
+//                let monthPoint = CGPoint(x: point.x-((timeWeekMonthSize.width*2)+(timeWeekDaySize.width*2)+timeWeekSize.width+weekSymSize.width+6) - monthEleOffset, y: weekY)
+//                let monthSyPoint = CGPoint(x: point.x-((timeWeekDaySize.width*2)+timeWeekSize.width+weekSymSize.width+4) - monthEleOffset, y: weekY)
+//                let dayPoint = CGPoint(x: point.x-((timeWeekDaySize.width*2)+timeWeekSize.width+2) - monthEleOffset, y: weekY)
+//
+//                var weekPoint = CGPoint(x: point.x-timeWeekSize.width, y: weekY)
+//                let imageWidth :CGFloat = isBmpResoure ? 1.0:2.0
+//                if isFixCoordinate {
+//                    weekPoint = CGPoint(x: point.x-(timeWeekSize.width*0.5), y: weekY)
+//                }
+//
+//
+//
+//                // am pm  支持2D  ignoreBlack使用1, 否则使用0
+//                let tempAmPmPoint = CGPoint(x: point.x-ampmRes.imageSize.width, y: point.y)
+//
+//                var amElement = Element(type: faceBuilder.ELEMENT_DIGITAL_AMPM, isAlpha: 1)
+//                amElement.setElementData(point: tempAmPmPoint, size: ampmRes.imageSize, ignoreBlack: kNotSupport2D_IgnoreBlack, watchRes: ampmRes)
+//                amElement.gravity = apmGravity
+//
+//                watchFaceElements.append(amElement)
+//
+//
+//                // hour  支持2D  ignoreBlack使用1, 否则使用0
+//                let tempHourSize = CGSize(width: hourRes.imageSize.width * imageWidth, height: hourRes.imageSize.height)
+//
+//                var hourElement = Element(type: faceBuilder.ELEMENT_DIGITAL_HOUR, isAlpha: 1)
+//                hourElement.setElementData(point: hourPoint, size: tempHourSize, ignoreBlack: kNotSupport2D_IgnoreBlack, watchRes: hourRes)
+//                hourElement.gravity = hourGravity
+//
+//                watchFaceElements.append(hourElement)
+//
+//
+//                // 日期之间的分割线  ignoreBlack使用1, 否则使用0
+//                //let dateSymbolImgArray = self.viewModel.identifyItemsColor(.dateSymbol, colorNum)
+//                //let dateSymbolRes = self.viewModel.getImageBufferArray(dateSymbolImgArray, .dateSymbol)
+//
+//                let tempdateSySize = CGSize(width: dateSymbolRes.imageSize.width * imageWidth, height: dateSymbolRes.imageSize.height)
+//
+//                var dateSyElement = Element(type: faceBuilder.ELEMENT_BACKGROUND, isAlpha: 1)
+//                dateSyElement.setElementData(point: dateSyPoint, size: tempdateSySize, ignoreBlack: kNotSupport2D_IgnoreBlack, watchRes: dateSymbolRes)
+//                dateSyElement.gravity = dayGravity
+//
+//                watchFaceElements.append(dateSyElement)
+//
+//
+//
+//                // min  支持2D  ignoreBlack使用1, 否则使用0
+//                //let minImgArray = self.viewModel.identifyItemsColor(.MINUTES, colorNum)
+//                //let minRes = self.viewModel.getImageBufferArray(minImgArray, .MINUTES)
+//
+//                let tempMinSySize = CGSize(width: minRes.imageSize.width * imageWidth, height: minRes.imageSize.height)
+//
+//                var minElement = Element(type: faceBuilder.ELEMENT_DIGITAL_MIN, isAlpha: 1)
+//                minElement.setElementData(point: minPoint, size: tempMinSySize, ignoreBlack: kNotSupport2D_IgnoreBlack, watchRes: minRes)
+//                minElement.gravity = minGravity
+//                watchFaceElements.append(minElement)
+//
+//
+//
+//                // month  支持2D  ignoreBlack使用1, 否则使用0
+//                //let monthImgArray = self.viewModel.identifyItemsColor(.MONTH, colorNum)
+//                //let monthRes = self.viewModel.getImageBufferArray(monthImgArray, .MONTH)
+//
+//                let tempMonthSize = CGSize(width: monthRes.imageSize.width * imageWidth, height: monthRes.imageSize.height)
+//
+//                var monthElement = Element(type: faceBuilder.ELEMENT_DIGITAL_MONTH, isAlpha: 1)
+//                monthElement.setElementData(point: monthPoint, size: tempMonthSize, ignoreBlack: kNotSupport2D_IgnoreBlack, watchRes: monthRes)
+//                monthElement.gravity = monthGravity
+//                watchFaceElements.append(monthElement)
+//
+//
+//
+//                // 日期之间的分割线  支持2D  ignoreBlack使用1, 否则使用0
+//                //let weekSymbolImgArray = self.viewModel.identifyItemsColor(.weakSymbol, colorNum)
+//                //let weekSymbolRes = self.viewModel.getImageBufferArray(weekSymbolImgArray, .weakSymbol)
+//
+//                var weekSymElement = Element(type: faceBuilder.ELEMENT_BACKGROUND, isAlpha: 1)
+//                weekSymElement.setElementData(point: monthSyPoint, size: weekSymbolRes.imageSize, ignoreBlack: kNotSupport2D_IgnoreBlack, watchRes: weekSymbolRes)
+//                weekSymElement.gravity = weekSymGravity
+//
+//                watchFaceElements.append(weekSymElement)
+//
+//
+//
+//                // day  支持2D  ignoreBlack使用1, 否则使用0
+//                //let dayImgArray = self.viewModel.identifyItemsColor(.DAY, colorNum)
+//                //let dayRes = self.viewModel.getImageBufferArray(dayImgArray, .DAY)
+//
+//                let tempDaySize = CGSize(width: dayRes.imageSize.width * imageWidth, height: dayRes.imageSize.height)
+//
+//                var dayElement = Element(type: faceBuilder.ELEMENT_DIGITAL_DAY, isAlpha: 1)
+//                dayElement.setElementData(point: dayPoint, size: tempDaySize, ignoreBlack: kNotSupport2D_IgnoreBlack, watchRes: dayRes)
+//                dayElement.gravity = weekDayGravity
+//                watchFaceElements.append(dayElement)
+//
+//
+//
+//                // week  支持2D  ignoreBlack使用1, 否则使用0
+//                //let weekImgArray = self.viewModel.identifyItemsColor(.WEAK, colorNum)
+//                //let weekRes = self.viewModel.getImageBufferArray(weekImgArray, .DAY)
+//
+//                var weekElement = Element(type: faceBuilder.ELEMENT_DIGITAL_WEEKDAY, isAlpha: 1)
+//                weekElement.setElementData(point: weekPoint, size: weekRes.imageSize, ignoreBlack: kNotSupport2D_IgnoreBlack, watchRes: weekRes)
+//
+//                weekElement.gravity = weekGravity
+//                watchFaceElements.append(weekElement)
+//            }else if key.elementsEqual("Step"){
+//                bleLog("Step is \(value)")
+//                // 在资源文件中, 颜色的索引
+//                let colorNum = getColorNumber(itemColor)
+//                let point :CGPoint = dataSourceArray["Step"] as! CGPoint
+//
+//                // 脚步  支持2D  ignoreBlack使用1, 否则使用0
+//                let stepRes = self.viewModel.getImageBufferArray(.STEP, false, colorNum)
+//
+//                var elementStep = Element(type: faceBuilder.ELEMENT_DIGITAL_STEP, isAlpha: 1)
+//                elementStep.setElementData(point: point, size: stepRes.imageSize, ignoreBlack: kNotSupport2D_IgnoreBlack, watchRes: stepRes)
+//
+//                elementStep.gravity = stepGravity
+//                watchFaceElements.append(elementStep)
+//            }else if key.elementsEqual("HR"){
+//                bleLog("HR is \(value)")
+//                // 在资源文件中, 颜色的索引
+//                let colorNum = getColorNumber(itemColor)
+//                let point :CGPoint = dataSourceArray["HR"] as! CGPoint
+//
+//                // 心率  支持2D  ignoreBlack使用1, 否则使用0
+//                let hrRes = self.viewModel.getImageBufferArray(.HEART_RATE, false, colorNum)
+//
+//                var elementHR = Element(type: faceBuilder.ELEMENT_DIGITAL_HEART, isAlpha: 1)
+//                elementHR.setElementData(point: point, size: hrRes.imageSize, ignoreBlack: kNotSupport2D_IgnoreBlack, watchRes: hrRes)
+//                elementHR.gravity = hrGravity
+//                watchFaceElements.append(elementHR)
+//            }else if key.elementsEqual("Dis"){
+//                bleLog("Dis is \(value)")
+//                // 在资源文件中, 颜色的索引
+//                let colorNum = getColorNumber(itemColor)
+//                let rawDisPoint = dataSourceArray["Dis"] as! CGPoint
+//                bleLog("表盘元素rawDisPoint:\(rawDisPoint)")
+//
+//                // 距离  支持2D  ignoreBlack使用1, 否则使用0
+//                let disRes = self.viewModel.getImageBufferArray(.DISTANCE, false, colorNum)
+//                let disPoint = CGPoint(x: rawDisPoint.x-disRes.imageSize.width, y: rawDisPoint.y)
+//                bleLog("表盘元素disPoint:\(disPoint)")
+//
+//                var elementDis = Element(type: faceBuilder.ELEMENT_DIGITAL_DISTANCE, isAlpha: 1)
+//                elementDis.setElementData(point: disPoint, size: disRes.imageSize, ignoreBlack: kNotSupport2D_IgnoreBlack, watchRes: disRes)
+//                elementDis.gravity = disGravity
+//
+//                watchFaceElements.append(elementDis)
+//            }else if key.elementsEqual("Cal"){
+//                bleLog("Cal is \(value)")
+//                // 在资源文件中, 颜色的索引
+//                let colorNum = getColorNumber(itemColor)
+//                let point :CGPoint = dataSourceArray["Cal"] as! CGPoint
+//
+//                // 卡路里  支持2D  ignoreBlack使用1, 否则使用0
+//                let calRes = self.viewModel.getImageBufferArray(.CALORIES, false, colorNum)
+//
+//                var elementCal = Element(type: faceBuilder.ELEMENT_DIGITAL_CALORIE, isAlpha: 1)
+//                elementCal.setElementData(point: point, size: calRes.imageSize, ignoreBlack: kNotSupport2D_IgnoreBlack, watchRes: calRes)
+//                elementCal.gravity = calGravity
+//                watchFaceElements.append(elementCal)
+//
+//            }else if key.elementsEqual("PointerNumber"){
+//                bleLog("PointerNumber is \(value)")
+//                let tempNum = dataSourceArray["PointerNumber"] as! String
+//
+//                guard var index = Int(tempNum) else {
+//                    bleLog("Get pointer conversion failed 3")
+//                    return
+//                }
+//
+//                // 支持2D的指针索引和不支持的有区别, 支持2D的是从0开始的
+//                index -= 1
+//                if index < 0 {
+//                    index = 0
+//                }
+//
+//                guard let pinitGroup = self.viewModel.getPointerImage(index, isPNG: true,pointerModel: pointerModel) else {
+//
+//                    // 这里代表获取指针失败, 需要提示用户
+//                    bleLog("Failed to obtain pointer data, user needs to be prompted 3")
+//                    return
+//                }
+//
+//
+//
+//                for index in 0..<3{
+//
+//                    var newElement: Element?
+//
+//                    switch index {
+//                    case 0:
+//                        newElement = getPointElement(type: faceBuilder.ELEMENT_NEEDLE_HOUR, isAlpha: 1)
+//                        newElement?.setElementForPointerData(isPoint: true, rawSize: pinitGroup.hourRes.rawImageSize, size: pinitGroup.hourRes.imageSize, watchRes: pinitGroup.hourRes)
+//                        break
+//                    case 1:
+//                        newElement = getPointElement(type: faceBuilder.ELEMENT_NEEDLE_MIN, isAlpha: 1)
+//                        newElement?.setElementForPointerData(isPoint: true, rawSize: pinitGroup.minRes.rawImageSize, size: pinitGroup.minRes.imageSize, watchRes: pinitGroup.minRes)
+//                        break
+//                    case 2:
+//                        newElement = getPointElement(type: faceBuilder.ELEMENT_NEEDLE_SEC, isAlpha: 1)
+//                        newElement?.setElementForPointerData(isPoint: true, rawSize: pinitGroup.secRes.rawImageSize, size: pinitGroup.secRes.imageSize, watchRes: pinitGroup.secRes)
+//                        break
+//                    default:
+//                        break
+//                    }
+//
+//                    newElement?.gravity = pointGravity
+//                    newElement?.ignoreBlack = UInt8(1)  // 指针, 不支持2D  ignoreBlack应该使用固定值 1
+//                    newElement?.x = bgFrame.width / 2
+//                    newElement?.y = bgFrame.height / 2
+//                    newElement?.imageCount = UInt8(1)
+//
+//                    if let tempEle = newElement {
+//                        watchFaceElements.append(tempEle)
+//                    }
+//                }
+//            }
+//        }
+//
+//        if watchFaceElements.count > 0{
+//
+//            #warning("2D accelerated devices are not supported, you should use the faceBuilder.BMP_565 parameter")
+//            // 不支持2D加速设备, 应该使用 faceBuilder.BMP_565 参数
+//            // 2D accelerated devices are not supported, you should use the faceBuilder.BMP_565 parameter
+//            let sendData = buildWatchFace(watchFaceElements, watchFaceElements.count, Int32(faceBuilder.BMP_565))
+//            bleLog("不支持2D加速设备, bin文件大小 - \(sendData.toData().count)")
+//            //if timeAuto == nil{
+//            //    timeAuto = Timer.scheduledTimer(withTimeInterval: TimeInterval(10), repeats: true, block: { _ in
+//            //        self.timeAutoCount += 10
+//            //        if self.timeAutoCount >= 60{
+//            //            bleLog("一分钟没有新进度取消同步")
+//            //            self.doneAction(false)
+//            //        }
+//            //    })
+//            //}
+//            if mBleConnector.sendStream(.WATCH_FACE, sendData.toData(),0){
+//                bleLog("sendStream - WATCH_FACE")
+//            }
+//
+//        }
+//    }
 
     private func getPointElement(type: Int, isAlpha: UInt8) -> Element {
 
@@ -4137,12 +4165,14 @@ extension SwiftSmartbleSdkPlugin {
         }
 
         let colorNum = 0 // 颜色索引, 用于获取资源图片
+
         for (key,value) in dataSourceArray {
 
             if key.elementsEqual("TimeAM"){
                 bleLog("TimeAM is \(value)")
 
                 let point :CGPoint = dataSourceArray["TimeAM"] as! CGPoint
+                let pointDate  = CGPoint(x:digiDateLeft+Int(screenWidth/2), y: digiDateTop)
 
                 //am
                 let ampmRes = self.viewModel.getImageBmpBufferArray(.AMPM, colorNum)
@@ -4172,7 +4202,7 @@ extension SwiftSmartbleSdkPlugin {
 
                 //point
                 let hourY = point.y+ampmRes.imageSize.height+2
-                let weekY = point.y+ampmRes.imageSize.height+hourRes.imageSize.height+4
+                let weekY = pointDate.y+ampmRes.imageSize.height+hourRes.imageSize.height+4
                 let hourPoint = CGPoint(x: point.x-((hourRes.imageSize.width*2)+(minRes.imageSize.width*2)+dateSySize.width+4), y: hourY)
                 let dateSyPoint = CGPoint(x: point.x-((minRes.imageSize.width*2)+dateSySize.width+2), y: hourY)
                 let minPoint = CGPoint(x: point.x-(minRes.imageSize.width*2), y: hourY)
@@ -4180,14 +4210,14 @@ extension SwiftSmartbleSdkPlugin {
 
                 // 月 / 日, 数据增加偏移值, 在F11上面周一, 周三, 周日出现日期和星期太靠近
                 let monthEleOffset:CGFloat = 10
-                let monthPoint = CGPoint(x: point.x-((timeWeekMonthSize.width*2)+(timeWeekDaySize.width*2)+timeWeekSize.width+weekSymSize.width+6) - monthEleOffset, y: weekY)
-                let monthSyPoint = CGPoint(x: point.x-((timeWeekDaySize.width*2)+timeWeekSize.width+weekSymSize.width+4) - monthEleOffset, y: weekY)
-                let dayPoint = CGPoint(x: point.x-((timeWeekDaySize.width*2)+timeWeekSize.width+2) - monthEleOffset, y: weekY)
+                let monthPoint = CGPoint(x: pointDate.x-((timeWeekMonthSize.width*2)+(timeWeekDaySize.width*2)+timeWeekSize.width+weekSymSize.width+6) - monthEleOffset, y: weekY)
+                let monthSyPoint = CGPoint(x: pointDate.x-((timeWeekDaySize.width*2)+timeWeekSize.width+weekSymSize.width+4) - monthEleOffset, y: weekY)
+                let dayPoint = CGPoint(x: pointDate.x-((timeWeekDaySize.width*2)+timeWeekSize.width+2) - monthEleOffset, y: weekY)
 
-                var weekPoint = CGPoint(x: point.x-timeWeekSize.width, y: weekY)
+                var weekPoint = CGPoint(x: pointDate.x-timeWeekSize.width, y: weekY)
                 let imageWidth :CGFloat = isBmpResoure ? 1.0:2.0
                 if isFixCoordinate {
-                    weekPoint = CGPoint(x: point.x-(timeWeekSize.width*0.5), y: weekY)
+                    weekPoint = CGPoint(x: pointDate.x-(timeWeekSize.width*0.5), y: weekY)
                 }
 
 
@@ -4346,7 +4376,7 @@ extension SwiftSmartbleSdkPlugin {
                 let selNum :String = dataSourceArray["PointerNumber"] as! String
 
                 guard var index = Int(selNum) else {
-                    bleLog("获取指针转换失败")
+                    bleLog("Get pointer conversion failed 1")
                     return
                 }
 
@@ -4359,7 +4389,7 @@ extension SwiftSmartbleSdkPlugin {
                 guard let pinitGroup = self.viewModel.getPointerImage(index, isPNG: false,pointerModel: pointerModel) else {
 
                     // 这里代表获取指针失败, 需要提示用户
-                    bleLog("获取指针数据失败, 需要提示用户")
+                    bleLog("Failed to obtain pointer data, user needs to be prompted 1")
                     return
                 }
 
