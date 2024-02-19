@@ -295,11 +295,15 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 if (BuildConfig.DEBUG) {
                     Log.d("onDeviceConnected", "$device")
                 }
-                val item: MutableMap<String, Any> = HashMap()
-                item["deviceName"] = device.name
-                item["deviceMacAddress"] = device.address
-                if (onDeviceConnectedSink != null) {
-                    onDeviceConnectedSink!!.success(item)
+                if (device.name != null && device.address != null) {
+                    val item: MutableMap<String, Any> = HashMap()
+                    item["deviceName"] = device.name
+                    item["deviceMacAddress"] = device.address
+                    if (onDeviceConnectedSink != null) {
+                        onDeviceConnectedSink!!.success(item)
+                    }
+                } else {
+                    Log.d("onDeviceConnected", "Device name or address is null, skipping sending item")
                 }
             }
 
@@ -2490,7 +2494,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             dialAssetsFromFlutter?.get("${dir}/symbol.${fileFormat}")
         }else{
             mContext!!.assets.open("${dir}/symbol.${fileFormat}")
-            .use { it.readBytes() }
+                .use { it.readBytes() }
         }
 
         symbolValue.add(
@@ -2534,7 +2538,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             dialAssetsFromFlutter?.get(symbolFileName)
         }else{
             mContext!!.assets.open(symbolFileName)
-            .use { it.readBytes() }
+                .use { it.readBytes() }
         }
 
         val symbolFile = File(
@@ -4773,6 +4777,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                             val tomorrowDate = Date(tomorrowTime)
 
                             if(weaType==1){
+
                                 BleConnector.sendObject(
                                     BleKey.WEATHER_FORECAST, bleKeyFlag, BleWeatherForecast(
                                         mTime = (Date().time / 1000L).toInt(),
@@ -4823,168 +4828,9 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                                         )
                                     )
                                 )
-
-                                BleConnector.sendObject(
-                                    BleKey.WEATHER_FORECAST, bleKeyFlag, BleWeatherForecast2(
-                                        mTime = (Date().time / 1000L).toInt(),
-                                        mWeather1 = BleWeather2(
-                                            mCurrentTemperature = forecast1["mCurrentTemperature"].toString()
-                                                .toInt(),
-                                            mMaxTemperature = forecast1["mMaxTemperature"].toString()
-                                                .toInt(),
-                                            mMinTemperature = forecast1["mMinTemperature"].toString()
-                                                .toInt(),
-                                            mWeatherCode = forecast1["mWeatherCode"].toString().toInt(),
-                                            mWindSpeed = forecast1["mWindSpeed"].toString().split(".").first().toInt(),
-                                            mHumidity = forecast1["mHumidity"].toString().split(".").first()
-                                                .toInt(),
-                                            mVisibility = forecast1["mVisibility"].toString().split(".").first().toInt(),
-                                            mUltraVioletIntensity = forecast1["mUltraViolet"].toString().split(".").first().toInt(),
-                                            mPrecipitation = forecast1["mPrecipitation"].toString().split(".").first().toInt()
-                                        ),
-                                        mWeather2 = BleWeather2(
-                                            mCurrentTemperature = forecast2["mCurrentTemperature"].toString()
-                                                .toInt(),
-                                            mMaxTemperature = forecast2["mMaxTemperature"].toString()
-                                                .toInt(),
-                                            mMinTemperature = forecast2["mMinTemperature"].toString()
-                                                .toInt(),
-                                            mWeatherCode = forecast2["mWeatherCode"].toString().toInt(),
-                                            mWindSpeed = forecast2["mWindSpeed"].toString().split(".").first().toInt(),
-                                            mHumidity = forecast2["mHumidity"].toString().split(".").first()
-                                                .toInt(),
-                                            mVisibility = forecast2["mVisibility"].toString().split(".").first().toInt(),
-                                            mUltraVioletIntensity = forecast2["mUltraViolet"].toString().split(".").first().toInt(),
-                                            mPrecipitation = forecast2["mPrecipitation"].toString().split(".").first().toInt()
-                                        ),
-                                        mWeather3 = BleWeather2(
-                                            mCurrentTemperature = forecast3["mCurrentTemperature"].toString()
-                                                .toInt(),
-                                            mMaxTemperature = forecast3["mMaxTemperature"].toString()
-                                                .toInt(),
-                                            mMinTemperature = forecast3["mMinTemperature"].toString()
-                                                .toInt(),
-                                            mWeatherCode = forecast3["mWeatherCode"].toString().toInt(),
-                                            mWindSpeed = forecast3["mWindSpeed"].toString().split(".").first().toInt(),
-                                            mHumidity = forecast3["mHumidity"].toString().split(".").first()
-                                                .toInt(),
-                                            mVisibility = forecast3["mVisibility"].toString().split(".").first().toInt(),
-                                            mUltraVioletIntensity = forecast3["mUltraViolet"].toString().split(".").first().toInt(),
-                                            mPrecipitation = forecast3["mPrecipitation"].toString().split(".").first().toInt()
-                                        ),
-                                        mWeather4 = BleWeather2(
-                                            mCurrentTemperature = forecast4["mCurrentTemperature"].toString()
-                                                .toInt(),
-                                            mMaxTemperature = forecast4["mMaxTemperature"].toString()
-                                                .toInt(),
-                                            mMinTemperature = forecast4["mMinTemperature"].toString()
-                                                .toInt(),
-                                            mWeatherCode = forecast4["mWeatherCode"].toString().toInt(),
-                                            mWindSpeed = forecast4["mWindSpeed"].toString().split(".").first().toInt(),
-                                            mHumidity = forecast4["mHumidity"].toString().split(".").first()
-                                                .toInt(),
-                                            mVisibility = forecast4["mVisibility"].toString().split(".").first().toInt(),
-                                            mUltraVioletIntensity = forecast4["mUltraViolet"].toString().split(".").first().toInt(),
-                                            mPrecipitation = forecast4["mPrecipitation"].toString().split(".").first().toInt()
-                                        ),
-                                        mWeather5 = BleWeather2(
-                                            mCurrentTemperature = forecast5["mCurrentTemperature"].toString()
-                                                .toInt(),
-                                            mMaxTemperature = forecast5["mMaxTemperature"].toString()
-                                                .toInt(),
-                                            mMinTemperature = forecast5["mMinTemperature"].toString()
-                                                .toInt(),
-                                            mWeatherCode = forecast5["mWeatherCode"].toString().toInt(),
-                                            mWindSpeed = forecast5["mWindSpeed"].toString().split(".").first().toInt(),
-                                            mHumidity = forecast5["mHumidity"].toString().split(".").first()
-                                                .toInt(),
-                                            mVisibility = forecast5["mVisibility"].toString().split(".").first().toInt(),
-                                            mUltraVioletIntensity = forecast5["mUltraViolet"].toString().split(".").first().toInt(),
-                                            mPrecipitation = forecast5["mPrecipitation"].toString().split(".").first().toInt()
-                                        ),
-                                        mWeather6 = BleWeather2(
-                                            mCurrentTemperature = forecast6["mCurrentTemperature"].toString()
-                                                .toInt(),
-                                            mMaxTemperature = forecast6["mMaxTemperature"].toString()
-                                                .toInt(),
-                                            mMinTemperature = forecast6["mMinTemperature"].toString()
-                                                .toInt(),
-                                            mWeatherCode = forecast6["mWeatherCode"].toString().toInt(),
-                                            mWindSpeed = forecast6["mWindSpeed"].toString().split(".").first().toInt(),
-                                            mHumidity = forecast6["mHumidity"].toString().split(".").first()
-                                                .toInt(),
-                                            mVisibility = forecast6["mVisibility"].toString().split(".").first().toInt(),
-                                            mUltraVioletIntensity = forecast6["mUltraViolet"].toString().split(".").first().toInt(),
-                                            mPrecipitation = forecast6["mPrecipitation"].toString().split(".").first().toInt()
-                                        ),
-                                        mWeather7 = BleWeather2(
-                                            mCurrentTemperature = forecast7["mCurrentTemperature"].toString()
-                                                .toInt(),
-                                            mMaxTemperature = forecast7["mMaxTemperature"].toString()
-                                                .toInt(),
-                                            mMinTemperature = forecast7["mMinTemperature"].toString()
-                                                .toInt(),
-                                            mWeatherCode = forecast7["mWeatherCode"].toString().toInt(),
-                                            mWindSpeed = forecast7["mWindSpeed"].toString().split(".").first().toInt(),
-                                            mHumidity = forecast7["mHumidity"].toString().split(".").first()
-                                                .toInt(),
-                                            mVisibility = forecast7["mVisibility"].toString().split(".").first().toInt(),
-                                            mUltraVioletIntensity = forecast7["mUltraViolet"].toString().split(".").first().toInt(),
-                                            mPrecipitation = forecast7["mPrecipitation"].toString().split(".").first().toInt()
-                                        ),
-                                    )
-                                )
+//
                             }else{
-                                BleConnector.sendObject(
-                                    BleKey.WEATHER_FORECAST, bleKeyFlag, BleWeatherForecast2(
-                                        mTime = (Date().time / 1000L).toInt(),
-                                        mWeather1 = BleWeather2(
-                                            mCurrentTemperature = forecast1["mCurrentTemperature"].toString()
-                                                .toInt(),
-                                            mMaxTemperature = forecast1["mMaxTemperature"].toString()
-                                                .toInt(),
-                                            mMinTemperature = forecast1["mMinTemperature"].toString()
-                                                .toInt(),
-                                            mWeatherCode = forecast1["mWeatherCode"].toString().toInt(),
-                                            mWindSpeed = forecast1["mWindSpeed"].toString().split(".").first().toInt(),
-                                            mHumidity = forecast1["mHumidity"].toString().split(".").first()
-                                                .toInt(),
-                                            mVisibility = forecast1["mVisibility"].toString().split(".").first().toInt(),
-                                            mUltraVioletIntensity = forecast1["mUltraViolet"].toString().split(".").first().toInt(),
-                                            mPrecipitation = forecast1["mPrecipitation"].toString().split(".").first().toInt()
-                                        ),
-                                        mWeather2 = BleWeather2(
-                                            mCurrentTemperature = forecast2["mCurrentTemperature"].toString()
-                                                .toInt(),
-                                            mMaxTemperature = forecast2["mMaxTemperature"].toString()
-                                                .toInt(),
-                                            mMinTemperature = forecast2["mMinTemperature"].toString()
-                                                .toInt(),
-                                            mWeatherCode = forecast2["mWeatherCode"].toString().toInt(),
-                                            mWindSpeed = forecast2["mWindSpeed"].toString().split(".").first().toInt(),
-                                            mHumidity = forecast2["mHumidity"].toString().split(".").first()
-                                                .toInt(),
-                                            mVisibility = forecast2["mVisibility"].toString().split(".").first().toInt(),
-                                            mUltraVioletIntensity = forecast2["mUltraViolet"].toString().split(".").first().toInt(),
-                                            mPrecipitation = forecast2["mPrecipitation"].toString().split(".").first().toInt()
-                                        ),
-                                        mWeather3 = BleWeather2(
-                                            mCurrentTemperature = forecast3["mCurrentTemperature"].toString()
-                                                .toInt(),
-                                            mMaxTemperature = forecast3["mMaxTemperature"].toString()
-                                                .toInt(),
-                                            mMinTemperature = forecast3["mMinTemperature"].toString()
-                                                .toInt(),
-                                            mWeatherCode = forecast3["mWeatherCode"].toString().toInt(),
-                                            mWindSpeed = forecast3["mWindSpeed"].toString().split(".").first().toInt(),
-                                            mHumidity = forecast3["mHumidity"].toString().split(".").first()
-                                                .toInt(),
-                                            mVisibility = forecast3["mVisibility"].toString().split(".").first().toInt(),
-                                            mUltraVioletIntensity = forecast3["mUltraViolet"].toString().split(".").first().toInt(),
-                                            mPrecipitation = forecast3["mPrecipitation"].toString().split(".").first().toInt()
-                                        )
-                                    )
-                                )
+
 
                                 BleConnector.sendObject(
                                     BleKey.WEATHER_FORECAST, bleKeyFlag, BleWeatherForecast2(
@@ -6207,19 +6053,49 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
 }
 
+class DownloadTask(val bleKey: BleKey) : AsyncTask<String, Int, Result<ByteArray>>() {
 
-class DownloadTask(val bleKey: BleKey) : AsyncTask<String, Int, ByteArray>() {
-
-    override fun doInBackground(vararg urls: String): ByteArray {
-        val url = URL(urls[0])
-        val connection = url.openConnection()
-        return connection.getInputStream().readBytes()
+    override fun doInBackground(vararg urls: String): Result<ByteArray> {
+        try {
+            val url = URL(urls[0])
+            val connection = url.openConnection()
+            val inputStream = connection.getInputStream()
+            val bytes = inputStream.readBytes()
+            inputStream.close()
+            return Result.Success(bytes)
+        } catch (e: IOException) {
+            return Result.Error(e)
+        }
     }
 
-    override fun onPostExecute(result: ByteArray) {
-        BleConnector.sendStream(bleKey, result)
+    override fun onPostExecute(result: Result<ByteArray>) {
+        when (result) {
+            is Result.Success -> BleConnector.sendStream(bleKey, result.data)
+            is Result.Error -> {
+                // Handle the error gracefully, such as showing a toast or logging the error.
+                Log.e("DownloadTask", "Error occurred: ${result.exception}")
+            }
+        }
     }
 }
+
+sealed class Result<out T> {
+    data class Success<out T>(val data: T) : Result<T>()
+    data class Error(val exception: Exception) : Result<Nothing>()
+}
+
+//class DownloadTask(val bleKey: BleKey) : AsyncTask<String, Int, ByteArray>() {
+//
+//    override fun doInBackground(vararg urls: String): ByteArray {
+//        val url = URL(urls[0])
+//        val connection = url.openConnection()
+//        return connection.getInputStream().readBytes()
+//    }
+//
+//    override fun onPostExecute(result: ByteArray) {
+//        BleConnector.sendStream(bleKey, result)
+//    }
+//}
 
 
 class DownloadOTA(val context: Context, val bleKey: BleKey, val device: BluetoothDevice) :
@@ -6388,31 +6264,32 @@ class DownloadOTA(val context: Context, val bleKey: BleKey, val device: Bluetoot
 }
 
 
-class DownloadTaskOTA(val bleKey: BleKey) : AsyncTask<String, Int, ByteArray>() {
-    private val REQUEST_CODE_UPGRADE_J = 0x01
-    override fun doInBackground(vararg urls: String): ByteArray {
-        val url = URL(urls[0])
-        val connection = url.openConnection()
-        return connection.getInputStream().readBytes()
-    }
-
-    override fun onPostExecute(result: ByteArray) {
-        BleConnector.sendStream(BleKey.of(REQUEST_CODE_UPGRADE_J), result)
-    }
-}
+//class DownloadTaskOTA(val bleKey: BleKey) : AsyncTask<String, Int, ByteArray>() {
+//    private val REQUEST_CODE_UPGRADE_J = 0x01
+//    override fun doInBackground(vararg urls: String): ByteArray {
+//        val url = URL(urls[0])
+//        val connection = url.openConnection()
+//        return connection.getInputStream().readBytes()
+//    }
+//
+//    override fun onPostExecute(result: ByteArray) {
+//        BleConnector.sendStream(BleKey.of(REQUEST_CODE_UPGRADE_J), result)
+//    }
+//}
 
 @RequiresApi(Build.VERSION_CODES.R)
 class MyCallService : InCallService() {
 
     fun acceptCall() {
-//        calls[0].answer(0)
         if (calls.isNotEmpty()) {
-            calls[0].answer(0);
+            calls[0].answer(0)
         }
     }
 
     fun rejectCall() {
-        calls[0].reject(Call.REJECT_REASON_DECLINED)
+        if (calls.isNotEmpty()) {
+            calls[0].reject(Call.REJECT_REASON_DECLINED)
+        }
     }
 }
 
