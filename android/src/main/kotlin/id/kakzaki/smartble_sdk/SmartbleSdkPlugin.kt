@@ -1,5 +1,8 @@
 package id.kakzaki.smartble_sdk
 
+import java.io.IOException
+import android.os.AsyncTask
+
 import android.Manifest
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
@@ -295,11 +298,15 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 if (BuildConfig.DEBUG) {
                     Log.d("onDeviceConnected", "$device")
                 }
-                val item: MutableMap<String, Any> = HashMap()
-                item["deviceName"] = device.name
-                item["deviceMacAddress"] = device.address
-                if (onDeviceConnectedSink != null) {
-                    onDeviceConnectedSink!!.success(item)
+                if (device.name != null && device.address != null) {
+                    val item: MutableMap<String, Any> = HashMap()
+                    item["deviceName"] = device.name
+                    item["deviceMacAddress"] = device.address
+                    if (onDeviceConnectedSink != null) {
+                        onDeviceConnectedSink!!.success(item)
+                    }
+                } else {
+                    Log.d("onDeviceConnected", "Device name or address is null, skipping sending item")
                 }
             }
 
@@ -6049,19 +6056,49 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
 }
 
+class DownloadTask(val bleKey: BleKey) : AsyncTask<String, Int, ResultDownload<ByteArray>>() {
 
-class DownloadTask(val bleKey: BleKey) : AsyncTask<String, Int, ByteArray>() {
-
-    override fun doInBackground(vararg urls: String): ByteArray {
-        val url = URL(urls[0])
-        val connection = url.openConnection()
-        return connection.getInputStream().readBytes()
+    override fun doInBackground(vararg urls: String): ResultDownload<ByteArray> {
+        try {
+            val url = URL(urls[0])
+            val connection = url.openConnection()
+            val inputStream = connection.getInputStream()
+            val bytes = inputStream.readBytes()
+            inputStream.close()
+            return ResultDownload.Success(bytes)
+        } catch (e: IOException) {
+            return ResultDownload.Error(e)
+        }
     }
 
-    override fun onPostExecute(result: ByteArray) {
-        BleConnector.sendStream(bleKey, result)
+    override fun onPostExecute(result: ResultDownload<ByteArray>) {
+        when (result) {
+            is ResultDownload.Success -> BleConnector.sendStream(bleKey, result.data)
+            is ResultDownload.Error -> {
+                // Handle the error gracefully, such as showing a toast or logging the error.
+                Log.e("DownloadTask", "Error occurred: ${result.exception}")
+            }
+        }
     }
 }
+
+sealed class ResultDownload<out T> {
+    data class Success<out T>(val data: T) : ResultDownload<T>()
+    data class Error(val exception: Exception) : ResultDownload<Nothing>()
+}
+
+//class DownloadTask(val bleKey: BleKey) : AsyncTask<String, Int, ByteArray>() {
+//
+//    override fun doInBackground(vararg urls: String): ByteArray {
+//        val url = URL(urls[0])
+//        val connection = url.openConnection()
+//        return connection.getInputStream().readBytes()
+//    }
+//
+//    override fun onPostExecute(result: ByteArray) {
+//        BleConnector.sendStream(bleKey, result)
+//    }
+//}
 
 
 class DownloadOTA(val context: Context, val bleKey: BleKey, val device: BluetoothDevice) :
@@ -6230,31 +6267,32 @@ class DownloadOTA(val context: Context, val bleKey: BleKey, val device: Bluetoot
 }
 
 
-class DownloadTaskOTA(val bleKey: BleKey) : AsyncTask<String, Int, ByteArray>() {
-    private val REQUEST_CODE_UPGRADE_J = 0x01
-    override fun doInBackground(vararg urls: String): ByteArray {
-        val url = URL(urls[0])
-        val connection = url.openConnection()
-        return connection.getInputStream().readBytes()
-    }
-
-    override fun onPostExecute(result: ByteArray) {
-        BleConnector.sendStream(BleKey.of(REQUEST_CODE_UPGRADE_J), result)
-    }
-}
+//class DownloadTaskOTA(val bleKey: BleKey) : AsyncTask<String, Int, ByteArray>() {
+//    private val REQUEST_CODE_UPGRADE_J = 0x01
+//    override fun doInBackground(vararg urls: String): ByteArray {
+//        val url = URL(urls[0])
+//        val connection = url.openConnection()
+//        return connection.getInputStream().readBytes()
+//    }
+//
+//    override fun onPostExecute(result: ByteArray) {
+//        BleConnector.sendStream(BleKey.of(REQUEST_CODE_UPGRADE_J), result)
+//    }
+//}
 
 @RequiresApi(Build.VERSION_CODES.R)
 class MyCallService : InCallService() {
 
     fun acceptCall() {
-//        calls[0].answer(0)
         if (calls.isNotEmpty()) {
-            calls[0].answer(0);
+            calls[0].answer(0)
         }
     }
 
     fun rejectCall() {
-        calls[0].reject(Call.REJECT_REASON_DECLINED)
+        if (calls.isNotEmpty()) {
+            calls[0].reject(Call.REJECT_REASON_DECLINED)
+        }
     }
 }
 
