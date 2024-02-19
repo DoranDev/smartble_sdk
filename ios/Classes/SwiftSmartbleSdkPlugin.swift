@@ -1453,6 +1453,12 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                               let weatherForecast5 = args?["forecast5"] as? String
                               let weatherForecast6 = args?["forecast6"] as? String
                               let weatherForecast7 = args?["forecast7"] as? String
+                              let forecast4 = try? JSONSerialization.jsonObject(with: weatherForecast4?.data(using: .utf8) ?? Data(), options: []) as? [String:Any]
+                              let forecast5 = try? JSONSerialization.jsonObject(with: weatherForecast5?.data(using: .utf8) ?? Data(), options: []) as? [String:Any]
+                              let forecast6 = try? JSONSerialization.jsonObject(with: weatherForecast6?.data(using: .utf8) ?? Data(), options: []) as? [String:Any]
+                              let forecast7 = try? JSONSerialization.jsonObject(with: weatherForecast7?.data(using: .utf8) ?? Data(), options: []) as? [String:Any]
+                              
+                              
                               let currentTime = Date().timeIntervalSince1970
                               let oneDayInSeconds: TimeInterval = 24 * 60 * 60
                               let tomorrowTime = currentTime + oneDayInSeconds

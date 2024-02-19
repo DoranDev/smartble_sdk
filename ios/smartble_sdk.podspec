@@ -17,8 +17,7 @@ A new Flutter project.
   s.dependency 'Flutter'
   s.dependency 'SnapKit'
   s.dependency 'iOSDFULibrary', '~> 4.13.0'
-  s.vendored_frameworks='FR/BeaconMonitor.framework',
-  'FR/GRDFUSDK.framework',
+  s.vendored_frameworks='FR/GRDFUSDK.framework',
   'FR/JL_BLEKIT.framework',
   'FR/JLDialUnit.framework',
   'FR/ZipZap.framework'

@@ -26,12 +26,12 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/smartble_sdk/ios"
 
 SPEC CHECKSUMS:
-  Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
+  Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   iOSDFULibrary: 3b9de67ed4bfb901b5f09c2fea843f65e152612d
-  smartble_sdk: 919e0a0866cc32a048a17fb7ac69c08c64470964
+  smartble_sdk: 8f0b16b786e920c7ebc64afed829395bb845ee08
   SnapKit: e01d52ebb8ddbc333eefe2132acf85c8227d9c25
   ZIPFoundation: b1f0de4eed33e74a676f76e12559ab6b75990197
 
-PODFILE CHECKSUM: 7368163408c647b7eb699d0d788ba6718e18fb8d
+PODFILE CHECKSUM: 4e8f8b2be68aeea4c0d5beb6ff1e79fface1d048
 
 COCOAPODS: 1.12.1

@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import BeaconMonitor
 import CoreLocation
 import AVFoundation
 
