@@ -6056,25 +6056,25 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
 }
 
-class DownloadTask(val bleKey: BleKey) : AsyncTask<String, Int, Result<ByteArray>>() {
+class DownloadTask(val bleKey: BleKey) : AsyncTask<String, Int, ResultDownload<ByteArray>>() {
 
-    override fun doInBackground(vararg urls: String): Result<ByteArray> {
+    override fun doInBackground(vararg urls: String): ResultDownload<ByteArray> {
         try {
             val url = URL(urls[0])
             val connection = url.openConnection()
             val inputStream = connection.getInputStream()
             val bytes = inputStream.readBytes()
             inputStream.close()
-            return Result.Success(bytes)
+            return ResultDownload.Success(bytes)
         } catch (e: IOException) {
-            return Result.Error(e)
+            return ResultDownload.Error(e)
         }
     }
 
-    override fun onPostExecute(result: Result<ByteArray>) {
+    override fun onPostExecute(result: ResultDownload<ByteArray>) {
         when (result) {
-            is Result.Success -> BleConnector.sendStream(bleKey, result.data)
-            is Result.Error -> {
+            is ResultDownload.Success -> BleConnector.sendStream(bleKey, result.data)
+            is ResultDownload.Error -> {
                 // Handle the error gracefully, such as showing a toast or logging the error.
                 Log.e("DownloadTask", "Error occurred: ${result.exception}")
             }
@@ -6082,9 +6082,9 @@ class DownloadTask(val bleKey: BleKey) : AsyncTask<String, Int, Result<ByteArray
     }
 }
 
-sealed class Result<out T> {
-    data class Success<out T>(val data: T) : Result<T>()
-    data class Error(val exception: Exception) : Result<Nothing>()
+sealed class ResultDownload<out T> {
+    data class Success<out T>(val data: T) : ResultDownload<T>()
+    data class Error(val exception: Exception) : ResultDownload<Nothing>()
 }
 
 //class DownloadTask(val bleKey: BleKey) : AsyncTask<String, Int, ByteArray>() {
