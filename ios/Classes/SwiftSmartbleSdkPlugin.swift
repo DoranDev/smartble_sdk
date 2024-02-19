@@ -1448,6 +1448,11 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                                   bleWeatherForecast
                               )
                           }else{
+
+                              let weatherForecast4 = args?["forecast4"] as? String
+                              let weatherForecast5 = args?["forecast5"] as? String
+                              let weatherForecast6 = args?["forecast6"] as? String
+                              let weatherForecast7 = args?["forecast7"] as? String
                               let currentTime = Date().timeIntervalSince1970
                               let oneDayInSeconds: TimeInterval = 24 * 60 * 60
                               let tomorrowTime = currentTime + oneDayInSeconds
@@ -1486,11 +1491,59 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                               bleWeather3.mUltraVioletIntensity = 4
                               bleWeather3.mPrecipitation = 4
 
+                              let bleWeather4 = BleWeather2()
+                              bleWeather.mCurrentTemperature = ("\(forecast4!["mCurrentTemperature"] ?? 0)" as NSString).integerValue
+                              bleWeather.mMaxTemperature =  ("\(forecast4!["mMaxTemperature"] ?? 0)" as NSString).integerValue
+                              bleWeather.mMinTemperature = ("\(forecast4!["mMinTemperature"] ?? 0)" as NSString).integerValue
+                              bleWeather.mWeatherCode = ("\(forecast4!["mWeatherCode"] ?? 0)" as NSString).integerValue
+                              bleWeather4.mWindSpeed = 4
+                              bleWeather4.mHumidity = 4
+                              bleWeather4.mVisibility = 4
+                              bleWeather4.mUltraVioletIntensity = 4
+                              bleWeather4.mPrecipitation = 4
+
+                              let bleWeather5 = BleWeather2()
+                              bleWeather.mCurrentTemperature = ("\(forecast5!["mCurrentTemperature"] ?? 0)" as NSString).integerValue
+                              bleWeather.mMaxTemperature =  ("\(forecast5!["mMaxTemperature"] ?? 0)" as NSString).integerValue
+                              bleWeather.mMinTemperature = ("\(forecast5!["mMinTemperature"] ?? 0)" as NSString).integerValue
+                              bleWeather.mWeatherCode = ("\(forecast5!["mWeatherCode"] ?? 0)" as NSString).integerValue
+                              bleWeather5.mWindSpeed = 4
+                              bleWeather5.mHumidity = 4
+                              bleWeather5.mVisibility = 4
+                              bleWeather5.mUltraVioletIntensity = 4
+                              bleWeather5.mPrecipitation = 4
+
+                              let bleWeather6 = BleWeather2()
+                              bleWeather.mCurrentTemperature = ("\(forecast6!["mCurrentTemperature"] ?? 0)" as NSString).integerValue
+                              bleWeather.mMaxTemperature =  ("\(forecast6!["mMaxTemperature"] ?? 0)" as NSString).integerValue
+                              bleWeather.mMinTemperature = ("\(forecast6!["mMinTemperature"] ?? 0)" as NSString).integerValue
+                              bleWeather.mWeatherCode = ("\(forecast6!["mWeatherCode"] ?? 0)" as NSString).integerValue
+                              bleWeather6.mWindSpeed = 4
+                              bleWeather6.mHumidity = 4
+                              bleWeather6.mVisibility = 4
+                              bleWeather6.mUltraVioletIntensity = 4
+                              bleWeather6.mPrecipitation = 4
+
+                              let bleWeather7 = BleWeather2()
+                              bleWeather.mCurrentTemperature = ("\(forecast7!["mCurrentTemperature"] ?? 0)" as NSString).integerValue
+                              bleWeather.mMaxTemperature =  ("\(forecast7!["mMaxTemperature"] ?? 0)" as NSString).integerValue
+                              bleWeather.mMinTemperature = ("\(forecast7!["mMinTemperature"] ?? 0)" as NSString).integerValue
+                              bleWeather.mWeatherCode = ("\(forecast7!["mWeatherCode"] ?? 0)" as NSString).integerValue
+                              bleWeather7.mWindSpeed = 4
+                              bleWeather7.mHumidity = 4
+                              bleWeather7.mVisibility = 4
+                              bleWeather7.mUltraVioletIntensity = 4
+                              bleWeather7.mPrecipitation = 4
+
                              let bleWeatherForecast = BleWeatherForecast2()
                               bleWeatherForecast.mTime = Int(Date().timeIntervalSince1970)
                               bleWeatherForecast.mWeather1 = bleWeather
                               bleWeatherForecast.mWeather2 = bleWeather2
                               bleWeatherForecast.mWeather3 = bleWeather3
+                              bleWeatherForecast.mWeather4 = bleWeather4
+                              bleWeatherForecast.mWeather5 = bleWeather5
+                              bleWeatherForecast.mWeather6 = bleWeather6
+                              bleWeatherForecast.mWeather7 = bleWeather7
 
                               _ = mBleConnector.sendObject(
                                   BleKey.WEATHER_FORECAST2,
