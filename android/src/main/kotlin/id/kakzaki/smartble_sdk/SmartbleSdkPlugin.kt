@@ -1,5 +1,8 @@
 package id.kakzaki.smartble_sdk
 
+import java.io.IOException
+import android.os.AsyncTask
+
 import android.Manifest
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
