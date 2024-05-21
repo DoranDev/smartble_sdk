@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">BLE SDK3 for SMA</string>
+    <string name="app_des" formatted="false">BLE SDK3 for Android\nv%s</string>
+    <string name="enable_bluetooth">Please enable the Bluetooth</string>
+    <string name="scan">Scan</string>
+    <string name="scanning">Scanning…</string>
+    <string name="upgrade">upgrade</string>
+    <string name="device_connecting">Device connecting</string>
+    <string name="device_connected">Device connected</string>
+    <string name="device_disconnecting">Device disconnecting</string>
+    <string name="device_disconnected">Device disconnected</string>
+    <string name="dfu_starting">Dfu starting</string>
+    <string name="dfu_started">Dfu started</string>
+    <string name="dfu_progress" formatted="false">Dfu progress:%d%%</string>
+    <string name="dfu_aborted">Dfu aborted</string>
+    <string name="dfu_error">Dfu error:%s</string>
+</resources>

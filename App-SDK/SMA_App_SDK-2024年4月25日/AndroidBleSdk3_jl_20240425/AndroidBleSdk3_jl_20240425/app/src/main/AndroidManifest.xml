@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.szabh.androidblesdk3">
+
+    <uses-permission android:name="android.permission.BLUETOOTH"
+        android:maxSdkVersion="30"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"
+        android:maxSdkVersion="30"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+
+    <application
+        android:name="com.szabh.androidblesdk3.MyApplication"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:largeHeap="true"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme"
+        tools:ignore="GoogleAppIndexingWarning">
+        <activity android:name="com.szabh.androidblesdk3.activity.LauncherActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name="com.szabh.androidblesdk3.activity.MainActivity" />
+        <activity android:name="com.szabh.androidblesdk3.activity.CommandListActivity" />
+        <activity android:name="com.szabh.androidblesdk3.activity.KeyListActivity" />
+        <activity android:name="com.szabh.androidblesdk3.activity.KeyFlagListActivity" />
+        <activity android:name="com.szabh.androidblesdk3.activity.NotificationActivity" />
+        <activity android:name="com.szabh.androidblesdk3.activity.Notification2Activity" />
+        <activity android:name="com.szabh.androidblesdk3.activity.MusicControlActivity" />
+        <activity android:name="com.szabh.androidblesdk3.activity.OtherFunctionActivity" />
+        <activity android:name="com.szabh.androidblesdk3.activity.WatchFaceActivity" />
+        <activity android:name="com.szabh.androidblesdk3.activity.FactoryTestActivity" />
+        <activity android:name="com.szabh.androidblesdk3.firmware.g.FirmwareUpgradeGActivity" />
+        <activity android:name="com.szabh.androidblesdk3.firmware.n.FirmwareUpgradeNActivity" />
+        <activity android:name="com.szabh.androidblesdk3.firmware.n.DfuNotificationActivity" />
+        <activity android:name="com.szabh.androidblesdk3.firmware.r.OtaTargetSelectorR" />
+        <activity android:name="com.szabh.androidblesdk3.firmware.r.FirmwareUpgradeRActivity" />
+        <activity android:name="com.szabh.androidblesdk3.firmware.r.ExtraPackUpgradeRActivity" />
+        <activity android:name="com.szabh.androidblesdk3.firmware.j.FirmwareUpgradeJActivity" />
+        <activity android:name="com.szabh.androidblesdk3.firmware.s.FirmwareUpgradeSActivity" />
+        <activity android:name="com.szabh.androidblesdk3.firmware.j.NetworkFirmwareUpgradeJActivity" />
+
+        <service android:name="com.szabh.androidblesdk3.firmware.n.DfuService" />
+        <service android:name="com.realsil.sdk.dfu.DfuService" />
+
+        <service
+            android:name=".MyNotificationListenerService"
+            android:label="@string/app_name"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
+    </application>
+
+</manifest>
