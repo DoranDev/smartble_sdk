@@ -227,6 +227,8 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private var onBleErrorSink: EventSink? = null
     private var onBluetoothPairingStatusChannel: EventChannel? = null
     private var onBluetoothPairingSink: EventSink? = null
+    private var onReadGpsFirmwareVersionChannel: EventChannel? = null
+    private var onReadGpsFirmwareVersionSink: EventSink? = null
 
     private var blueDevice: BluetoothDevice? = null
 
@@ -1030,8 +1032,15 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 //          6 -> BleConnector.sendStream(BleKey.AGPS_FILE, assets.open("type6_ble_epo_offline.bin"))
 //        }
                 // 实际工程要从url下载aGps文件，然后发送该aGps文件
-                // val file = download(url)
-                // BleConnector.sendStream(BleKey.AGPS_FILE, file)
+//                 val file = download(url)
+//                 BleConnector.sendStream(BleKey.AGPS_FILE, file)
+            }
+
+            override fun onReadGpsFirmwareVersion(version: String) {
+                val item: MutableMap<String, Any> = HashMap()
+                item["version"] = version
+                if (onReadGpsFirmwareVersionSink != null)
+                    onReadGpsFirmwareVersionSink!!.success(item)
             }
 
 
@@ -1473,6 +1482,10 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         onBluetoothPairingStatusChannel =
             EventChannel(flutterPluginBinding.binaryMessenger, "onBluetoothPairingStatus")
         onBluetoothPairingStatusChannel!!.setStreamHandler(onBluetoothPairingResultHandler)
+
+        onReadGpsFirmwareVersionChannel =
+            EventChannel(flutterPluginBinding.binaryMessenger, "onReadGpsFirmwareVersion")
+        onReadGpsFirmwareVersionChannel!!.setStreamHandler(onReadGpsFirmwareVersionResultHandler)
 
         val connector = BleConnector.Builder(flutterPluginBinding.applicationContext)
             .supportRealtekDfu(false) // Whether to support Realtek device Dfu, pass false if no support is required.
@@ -3449,6 +3462,10 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                         mBleKey = BleKey.AGPS_PREREQUISITE
                     }
 
+                    "GPS_FIRMWARE_VERSION" -> {
+                        mBleKey = BleKey.GPS_FIRMWARE_VERSION
+                    }
+
                     "DRINK_WATER" -> {
                         mBleKey = BleKey.DRINK_WATER
                     }
@@ -5192,7 +5209,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                         }
                     }
                     // BleCommand.IO
-                    BleKey.WATCH_FACE, BleKey.AGPS_FILE, BleKey.FONT_FILE, BleKey.UI_FILE, BleKey.LANGUAGE_FILE, BleKey.BRAND_INFO_FILE -> {
+                    BleKey.WATCH_FACE, BleKey.FONT_FILE, BleKey.UI_FILE, BleKey.LANGUAGE_FILE, BleKey.BRAND_INFO_FILE -> {
                         if (bleKeyFlag == BleKeyFlag.UPDATE) {
                             // 发送文件
                             val url: String? = call.argument<String>("url")
@@ -5206,6 +5223,14 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                             }
                         }
 
+                    }
+
+                    BleKey.AGPS_FILE, -> {
+                        if (bleKeyFlag == BleKeyFlag.UPDATE) {
+                            // 发送文件
+                            val url: String = BleCache.mAGpsFileUrl
+                            DownloadTask(bleKey).execute(url)
+                        }
                     }
 
                     BleKey.CONTACT -> {
@@ -5241,6 +5266,17 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     }
 
                     BleKey.DEVICE_FILE -> {
+                        if (bleKeyFlag == BleKeyFlag.READ) {
+                            BleConnector.sendData(bleKey, bleKeyFlag)
+                        }
+                    }
+                    BleKey.GPS_FIRMWARE_FILE -> {
+                        if (bleKeyFlag == BleKeyFlag.READ) {
+                            BleConnector.sendData(bleKey, bleKeyFlag)
+                        }
+                    }
+
+                    BleKey.GPS_FIRMWARE_VERSION -> {
                         if (bleKeyFlag == BleKeyFlag.READ) {
                             BleConnector.sendData(bleKey, bleKeyFlag)
                         }
@@ -6051,6 +6087,19 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 }
             }
         }
+
+    private val onReadGpsFirmwareVersionResultHandler: EventChannel.StreamHandler =
+        object : EventChannel.StreamHandler {
+            override fun onListen(o: Any?, eventSink: EventSink?) {
+                if (eventSink != null) {
+                    onReadGpsFirmwareVersionSink = eventSink
+                }
+            }
+
+            override fun onCancel(o: Any?) {
+            }
+        }
+
 
     fun Boolean.toInt() = if (this) 1 else 0
 

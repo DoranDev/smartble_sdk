@@ -563,15 +563,16 @@ class SmartbleSdk {
       _channel.invokeMethod('WEATHER_REALTIME',
           {'flag': flag.name, 'realTime': realTime, 'type': type});
 
-  Future<dynamic> kWEATHER_FORECAST({required SelectedBlekeyFlag flag,
-    required String forecast1,
-    required String forecast2,
-    required String forecast3,
-    required String forecast4,
-    required String forecast5,
-    required String forecast6,
-    required String forecast7,
-    required String type}) =>
+  Future<dynamic> kWEATHER_FORECAST(
+          {required SelectedBlekeyFlag flag,
+          required String forecast1,
+          required String forecast2,
+          required String forecast3,
+          required String forecast4,
+          required String forecast5,
+          required String forecast6,
+          required String forecast7,
+          required String type}) =>
       _channel.invokeMethod('WEATHER_FORECAST', {
         'flag': flag.name,
         'forecast1': forecast1,
@@ -1280,6 +1281,15 @@ class SmartbleSdk {
   static Stream<dynamic> get onBluetoothPairingStatus {
     return _onBluetoothPairingStatus
         .receiveBroadcastStream(_onBluetoothPairingStatus.name)
+        .cast();
+  }
+
+  static const EventChannel _onReadGpsFirmwareVersion =
+      EventChannel("onReadGpsFirmwareVersion");
+
+  static Stream<dynamic> get onReadGpsFirmwareVersion {
+    return _onReadGpsFirmwareVersion
+        .receiveBroadcastStream(_onReadGpsFirmwareVersion.name)
         .cast();
   }
 }
