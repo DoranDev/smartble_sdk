@@ -508,24 +508,26 @@ class CustomWatchFaceViewModel {
             imageSize = "dial_customize_360/"
             break
         case BleDeviceInfo.WATCH_FACE_320x363:
-            imageSize = "dial_customize_320/"
+            imageSize = "dial_customize_360/"
+            //imageSize = "dial_customize_320/"
             break
         case BleDeviceInfo.WATCH_FACE_REALTEK_ROUND_454x454:
             imageSize = "dial_customize_454/"
             break
         case BleDeviceInfo.WATCH_FACE_SERVER: // 99, 这里代表自定义表盘的哪些判断
-            
+
             if BleCache.shared.mPrototype == BleDeviceInfo.PROTOTYPE_F12 ||
                 BleCache.shared.mPrototype == BleDeviceInfo.PROTOTYPE_V2 ||
                 dialCustomIs360_360() || dialCustomIs412_412() || dialCustomIs368_448() ||
                 dialCustomIs356_400() || dialCustomIs410_502() {
-                
+
                 imageSize = "dial_customize_360/"  // 已经更改, 支持2D表盘的路径
             } else if dialCustomIs240_286() {
                 imageSize = "dial_customize_240/"
             }else if dialCustomIs320_320() || dialCustomIs320_385() {
                 // 需要注意, PROTOTYPE_F12Pro 屏幕是 320 X 385屏幕 由于没有资源, 只能使用 320x320
-                imageSize = "dial_customize_320/"  // 已经更改, 支持2D表盘的路径
+                imageSize = "dial_customize_360/"
+              //  imageSize = "dial_customize_320/"  // 已经更改, 支持2D表盘的路径
             } else if dialCustomIs466_466() {
                 // 这个和 WATCH_FACE_REALTEK_ROUND_454x454 相差10 可以参考
                 imageSize = "dial_customize_454/" // 已经更改, 支持2D表盘的路径
