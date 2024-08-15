@@ -3,6 +3,7 @@ package id.kakzaki.smartble_sdk
 import java.io.IOException
 import android.os.AsyncTask
 
+import java.io.FileInputStream
 import android.Manifest
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
@@ -610,6 +611,8 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 if (onStreamProgressSink != null)
                     onStreamProgressSink!!.success(item)
             }
+
+
 
 
             override fun onIncomingCallStatus(status: Int) {
@@ -5218,8 +5221,29 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                             }
                             val path: String? = call.argument<String>("path")
                             if (path != null) {
-                                val inputStream: InputStream = mContext!!.assets.open(path)
-                                BleConnector.sendStream(bleKey, inputStream, 0)
+                                // Create a File object from the provided path
+                                val file = File(path)
+
+                                // Check if the file exists
+                                if (file.exists()) {
+                                    // Open the file as an InputStream
+                                    val inputStream: InputStream = FileInputStream(file)
+                                    try {
+                                        // Send the file stream via BLE
+                                        BleConnector.sendStream(bleKey, inputStream, 0)
+                                    } catch (e: Exception) {
+                                        // Handle any exceptions during the BLE transmission
+                                        Log.e("BLE Error", "Error sending file via BLE: ${e.message}")
+                                    } finally {
+                                        // Close the InputStream after sending
+                                        inputStream.close()
+                                    }
+                                } else {
+                                    // Handle the error: file does not exist
+                                    Log.e("File Error", "File not found at path: $path")
+                                }
+//                                val inputStream: InputStream = mContext!!.assets.open(path)
+//                                BleConnector.sendStream(bleKey, inputStream, 0)
                             }
                         }
 
