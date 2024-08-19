@@ -3779,6 +3779,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 // Send the unbinding command, some devices will trigger BleHandleCallback.onIdentityDelete() after replying
                 BleConnector.sendData(bleKey, bleKeyFlag)
                 // wait for a while to unbind
+                BleCache.clear()
                 Handler().postDelayed({
                     BleConnector.unbind()
                     unbindCompleted()
