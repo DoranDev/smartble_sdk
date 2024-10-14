@@ -21,6 +21,7 @@ class BleCache {
         BleDeviceInfo.AGPS_AGNSS: "https://api.smawatch.cn/epo/ble_epo_offline.bin",
         BleDeviceInfo.AGPS_EPO_ONLY: "https://sma-product.oss-accelerate.aliyuncs.com/a-gps/file_info_3335_epo.DAT",
         BleDeviceInfo.AGPS_LTO: "https://sma-product.oss-accelerate.aliyuncs.com/a-gps/file_info_7dv5_lto.brm",
+        BleDeviceInfo.AGPS_6228:  "https://api-oss.iot-solution.net/a-gps/f1e1G7C7J7.pgl"
     ]
 
     // 必须在绑定设备之后调用，否则返回的信息没有任何意义。
