@@ -1,4 +1,0 @@
-framework module BeaconMonitor {
-  header "BeaconMonitor-Swift.h"
-  requires objc
-}
