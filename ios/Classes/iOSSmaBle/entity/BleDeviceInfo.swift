@@ -127,6 +127,7 @@ class BleDeviceInfo: BleReadable {
     static let AGPS_AGNSS = 6 // 中科微
     static let AGPS_EPO_ONLY  = 7 //MTK EPO
     static let AGPS_LTO = 8
+    static let AGPS_6228 = 9 // for volt
 
     static let WATCH_FACE_NONE = 0 // 不支持表盘
     static let WATCH_FACE_10G = 1
