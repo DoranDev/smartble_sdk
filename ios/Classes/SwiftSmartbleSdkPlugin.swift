@@ -441,7 +441,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
     var disImageSize: [UInt32] = .init()
     var calImageSize: [UInt32] = .init()
 
-    private let isSupp2D = BleCache.shared.mSupport2DAcceleration != 0
+    private var isSupp2D = BleCache.shared.mSupport2DAcceleration != 0
 
     var pointerHourBuffer: Data = .init()
     var pointerMinBuffer: Data = .init()
@@ -723,6 +723,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
     }
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+
         // result("iOS " + UIDevice.current.systemVersion)
         let args = call.arguments as? [String: Any]
         let flag = args?["flag"] as? String
@@ -752,8 +753,10 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         case "unbind":
             mBleConnector.unbind()
         case "isSupport2DAcceleration":
+            isSupp2D = BleCache.shared.mSupport2DAcceleration != 0
             result(isSupp2D)
         case "isTo8565":
+            isSupp2D = BleCache.shared.mSupport2DAcceleration != 0
             result(isSupp2D)
         case "customDials":
             timeDigitalView = args?["isDigital"] as! Bool
@@ -3044,6 +3047,9 @@ extension SwiftSmartbleSdkPlugin {
             bleLog("type default")
         }
 
+
+        bleLog("BleCache is \(BleCache.shared)")
+        isSupp2D = BleCache.shared.mSupport2DAcceleration != 0
         if isSupp2D {
             // 支持2D表盘, x, y传递0即可
 //            let bgFrame = WatchFaceRect(x: 0, y: 0, width: bgWidth, height: bgHeight)
