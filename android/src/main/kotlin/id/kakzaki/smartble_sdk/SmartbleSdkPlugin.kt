@@ -85,12 +85,10 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private var mType = 0
     val SIZE_4 = 4
 
-    private val isSupport2DAcceleration
-        get() = BleCache.mSupport2DAcceleration == BleDeviceInfo.SUPPORT_2D_ACCELERATION_1
+    private var isSupport2DAcceleration = false;
 
 
-    private var isTo8565 =
-        BleCache.mPlatform == BleDeviceInfo.PLATFORM_JL && !isSupport2DAcceleration
+    private var isTo8565 = false;
 
 
     data class Contact(var name: String, var phone: String)
@@ -300,7 +298,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     }
                 }
 
-//
+
 //                override fun onDeviceFound(device: BleDevice) {
 //                    val item: MutableMap<String, Any> = HashMap()
 //                    item["deviceName"] = device.mBluetoothDevice.name
@@ -3001,10 +2999,13 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             }
 
             "isSupport2DAcceleration" -> {
+                isSupport2DAcceleration = BleCache.mSupport2DAcceleration == BleDeviceInfo.SUPPORT_2D_ACCELERATION_1
                 mResult?.success(isSupport2DAcceleration)
             }
 
             "isTo8565" -> {
+                isTo8565 =
+                    BleCache.mPlatform == BleDeviceInfo.PLATFORM_JL && !isSupport2DAcceleration
                 mResult?.success(isTo8565);
             }
 
@@ -3047,6 +3048,10 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             }
 
             "customDials" -> {
+                isSupport2DAcceleration = BleCache.mSupport2DAcceleration == BleDeviceInfo.SUPPORT_2D_ACCELERATION_1
+                isTo8565 =
+                    BleCache.mPlatform == BleDeviceInfo.PLATFORM_JL && !isSupport2DAcceleration
+
                 elements.clear()
                 timeDigitalView = call.argument<Boolean>("isDigital")!!
                 isRound = call.argument<Boolean>("isRound")!!
