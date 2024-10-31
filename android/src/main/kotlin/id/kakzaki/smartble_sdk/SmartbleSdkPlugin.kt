@@ -263,32 +263,71 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 }
 
                 override fun onDeviceFound(device: BleDevice) {
-                    val item: MutableMap<String, Any> = HashMap()
-                    item["deviceName"] = device.mBluetoothDevice.name
-                    item["deviceMacAddress"] = device.mBluetoothDevice.address
-                    item["rssi"] = device.mRssi
-//                    if (!(mDevices.contains(item))) {
-//                        mDevices.add(item)
-//                    }
-                    val existingIndex =
-                        mDevices.indexOfFirst { (it as? Map<String, Any>)?.get("deviceMacAddress") == item["deviceMacAddress"] }
+                    try {
+                        // Initialize the map with safe defaults for each field
+                        val item: MutableMap<String, Any> = mutableMapOf(
+                            "deviceName" to (device.mBluetoothDevice.name ?: "Unknown"),
+                            "deviceMacAddress" to (device.mBluetoothDevice.address ?: "Unknown"),
+                            "rssi" to (device.mRssi ?: -100) // Default to -100 if RSSI is null
+                        )
 
-                    if (existingIndex != -1) {
-                        mDevices[existingIndex] = item
-                    } else {
-                        mDevices.add(item)
-                    }
+                        // Check if device is already in the list by its MAC address
+                        val existingIndex = mDevices.indexOfFirst {
+                            (it as? Map<String, Any>)?.get("deviceMacAddress") == item["deviceMacAddress"]
+                        }
 
-                    mDevices.sortWith(compareByDescending {
-                        (it as? Map<String, Any>)?.get("rssi") as? Int ?: -100
-                    })
-//         Handler(Looper.getMainLooper()).post {
-                    scanSink.success(mDevices)
-//          }
-                    if (BuildConfig.DEBUG) {
-                        Log.d("mDevices Found ", "$mDevices")
+                        // Update existing entry or add new item to the list
+                        if (existingIndex != -1) {
+                            mDevices[existingIndex] = item
+                        } else {
+                            mDevices.add(item)
+                        }
+
+                        // Sort `mDevices` by RSSI in descending order
+                        mDevices.sortWith(compareByDescending {
+                            (it as? Map<String, Any>)?.get("rssi") as? Int ?: -100
+                        })
+
+                        // Send the updated device list to the scan sink
+                        scanSink.success(mDevices)
+
+                        // Optional debug log for verification
+                        if (BuildConfig.DEBUG) {
+                            Log.d("mDevices Found", "$mDevices")
+                        }
+                    } catch (e: Exception) {
+                        Log.e("DeviceScanError", "Error in onDeviceFound: ${e.message}")
                     }
                 }
+
+//
+//                override fun onDeviceFound(device: BleDevice) {
+//                    val item: MutableMap<String, Any> = HashMap()
+//                    item["deviceName"] = device.mBluetoothDevice.name
+//                    item["deviceMacAddress"] = device.mBluetoothDevice.address
+//                    item["rssi"] = device.mRssi
+////                    if (!(mDevices.contains(item))) {
+////                        mDevices.add(item)
+////                    }
+//                    val existingIndex =
+//                        mDevices.indexOfFirst { (it as? Map<String, Any>)?.get("deviceMacAddress") == item["deviceMacAddress"] }
+//
+//                    if (existingIndex != -1) {
+//                        mDevices[existingIndex] = item
+//                    } else {
+//                        mDevices.add(item)
+//                    }
+//
+//                    mDevices.sortWith(compareByDescending {
+//                        (it as? Map<String, Any>)?.get("rssi") as? Int ?: -100
+//                    })
+////         Handler(Looper.getMainLooper()).post {
+//                    scanSink.success(mDevices)
+////          }
+//                    if (BuildConfig.DEBUG) {
+//                        Log.d("mDevices Found ", "$mDevices")
+//                    }
+//                }
             })
     }
 
