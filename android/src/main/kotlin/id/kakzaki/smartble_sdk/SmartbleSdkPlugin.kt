@@ -3004,8 +3004,8 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             }
 
             "isTo8565" -> {
-                isTo8565 =
-                    BleCache.mPlatform == BleDeviceInfo.PLATFORM_JL && !isSupport2DAcceleration
+//                isTo8565 =
+//                    BleCache.mPlatform == BleDeviceInfo.PLATFORM_JL && !isSupport2DAcceleration
                 mResult?.success(isTo8565);
             }
 
@@ -3049,8 +3049,10 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
             "customDials" -> {
                 isSupport2DAcceleration = BleCache.mSupport2DAcceleration == BleDeviceInfo.SUPPORT_2D_ACCELERATION_1
-                isTo8565 =
-                    BleCache.mPlatform == BleDeviceInfo.PLATFORM_JL && !isSupport2DAcceleration
+//                isTo8565 =
+//                    BleCache.mPlatform == BleDeviceInfo.PLATFORM_JL && !isSupport2DAcceleration
+
+//                isTo8565 = false
 
                 elements.clear()
                 timeDigitalView = call.argument<Boolean>("isDigital")!!
@@ -3097,6 +3099,9 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 if(isColor){
                     pickedColor = call.argument<HashMap<String, Int>>("pickedColor")!!
                 }
+
+                LogUtils.d("isSupport2DAcceleration: ${isSupport2DAcceleration}")
+                LogUtils.d("isTo8565: ${isTo8565}")
 
                 dialAssetsFromFlutter = call.argument<HashMap<String, ByteArray>>("assets")!!
 
@@ -3158,7 +3163,6 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                  * The bin file will become larger.
                  */
                 val bgBytesNew = getBg(isRound!!, bgBitmapX!!)
-                LogUtils.d("isSupport2DAcceleration: ${isSupport2DAcceleration}")
 
                 if (isSupport2DAcceleration) {
                     //获取预览
