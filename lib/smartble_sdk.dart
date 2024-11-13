@@ -41,6 +41,10 @@ class SmartbleSdk {
   Future<dynamic> scan({required bool isScan}) =>
       _channel.invokeMethod('scan', {'isScan': isScan});
 
+  ///stop scan(BluetoothDevice device)
+  Future<dynamic> stopScan({required bool isScan}) =>
+      _channel.invokeMethod('stopScan');
+
   ///setAddress(BluetoothDevice device)
   Future<dynamic> setAddress({required String bname, required String bmac}) =>
       _channel.invokeMethod('setAddress', {'bname': bname, 'bmac': bmac});

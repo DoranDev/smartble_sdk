@@ -2945,6 +2945,10 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 }
             }
 
+            "stopScan" ->{
+                mBleScanner.scan(false)
+            }
+
             "setAddress" -> {
                 mBleScanner.scan(false)
                 val bmac: String? = call.argument<String>("bmac")
