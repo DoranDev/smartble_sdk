@@ -3754,6 +3754,10 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                         mBleKey = BleKey.WATCH_FACE
                     }
 
+                    "GPS_FIRMWARE_FILE" -> {
+                        mBleKey = BleKey.GPS_FIRMWARE_FILE
+                    }
+
                     "AGPS_FILE" -> {
                         mBleKey = BleKey.AGPS_FILE
                     }
