@@ -5265,7 +5265,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                         }
                     }
                     // BleCommand.IO
-                    BleKey.WATCH_FACE, BleKey.FONT_FILE, BleKey.UI_FILE, BleKey.LANGUAGE_FILE, BleKey.BRAND_INFO_FILE -> {
+                    BleKey.WATCH_FACE, BleKey.FONT_FILE, BleKey.UI_FILE, BleKey.LANGUAGE_FILE, BleKey.BRAND_INFO_FILE, BleKey.GPS_FIRMWARE_FILE -> {
                         if (bleKeyFlag == BleKeyFlag.UPDATE) {
                             // 发送文件
                             val url: String? = call.argument<String>("url")
@@ -5347,11 +5347,11 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                             BleConnector.sendData(bleKey, bleKeyFlag)
                         }
                     }
-                    BleKey.GPS_FIRMWARE_FILE -> {
-                        if (bleKeyFlag == BleKeyFlag.READ) {
-                            BleConnector.sendData(bleKey, bleKeyFlag)
-                        }
-                    }
+//                    BleKey.GPS_FIRMWARE_FILE -> {
+//                        if (bleKeyFlag == BleKeyFlag.READ) {
+//                            BleConnector.sendData(bleKey, bleKeyFlag)
+//                        }
+//                    }
 
                     BleKey.GPS_FIRMWARE_VERSION -> {
                         if (bleKeyFlag == BleKeyFlag.READ) {
