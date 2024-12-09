@@ -41,6 +41,10 @@ class SmartbleSdk {
   Future<dynamic> scan({required bool isScan}) =>
       _channel.invokeMethod('scan', {'isScan': isScan});
 
+  ///stop scan(BluetoothDevice device)
+  Future<dynamic> stopScan({required bool isScan}) =>
+      _channel.invokeMethod('stopScan');
+
   ///setAddress(BluetoothDevice device)
   Future<dynamic> setAddress({required String bname, required String bmac}) =>
       _channel.invokeMethod('setAddress', {'bname': bname, 'bmac': bmac});
@@ -707,6 +711,11 @@ class SmartbleSdk {
 
   Future<dynamic> kAGPS_FILE({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('AGPS_FILE', {'flag': flag.name});
+
+  Future<dynamic> kGPS_FIRMWARE_FILE(
+      {required SelectedBlekeyFlag flag, String? path, String? url}) =>
+      _channel.invokeMethod(
+          'GPS_FIRMWARE_FILE', {'flag': flag.name, 'path': path, 'url': url});
 
   Future<dynamic> kFONT_FILE(
           {required SelectedBlekeyFlag flag, String? path, String? url}) =>

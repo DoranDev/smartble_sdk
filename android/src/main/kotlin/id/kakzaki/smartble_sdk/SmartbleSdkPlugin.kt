@@ -85,12 +85,10 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private var mType = 0
     val SIZE_4 = 4
 
-    private val isSupport2DAcceleration
-        get() = BleCache.mSupport2DAcceleration == BleDeviceInfo.SUPPORT_2D_ACCELERATION_1
+    private var isSupport2DAcceleration = false;
 
 
-    private var isTo8565 =
-        BleCache.mPlatform == BleDeviceInfo.PLATFORM_JL && !isSupport2DAcceleration
+    private var isTo8565 = false;
 
 
     data class Contact(var name: String, var phone: String)
@@ -263,32 +261,71 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 }
 
                 override fun onDeviceFound(device: BleDevice) {
-                    val item: MutableMap<String, Any> = HashMap()
-                    item["deviceName"] = device.mBluetoothDevice.name
-                    item["deviceMacAddress"] = device.mBluetoothDevice.address
-                    item["rssi"] = device.mRssi
-//                    if (!(mDevices.contains(item))) {
-//                        mDevices.add(item)
-//                    }
-                    val existingIndex =
-                        mDevices.indexOfFirst { (it as? Map<String, Any>)?.get("deviceMacAddress") == item["deviceMacAddress"] }
+                    try {
+                        // Initialize the map with safe defaults for each field
+                        val item: MutableMap<String, Any> = mutableMapOf(
+                            "deviceName" to (device.mBluetoothDevice.name ?: "Unknown"),
+                            "deviceMacAddress" to (device.mBluetoothDevice.address ?: "Unknown"),
+                            "rssi" to (device.mRssi ?: -100) // Default to -100 if RSSI is null
+                        )
 
-                    if (existingIndex != -1) {
-                        mDevices[existingIndex] = item
-                    } else {
-                        mDevices.add(item)
-                    }
+                        // Check if device is already in the list by its MAC address
+                        val existingIndex = mDevices.indexOfFirst {
+                            (it as? Map<String, Any>)?.get("deviceMacAddress") == item["deviceMacAddress"]
+                        }
 
-                    mDevices.sortWith(compareByDescending {
-                        (it as? Map<String, Any>)?.get("rssi") as? Int ?: -100
-                    })
-//         Handler(Looper.getMainLooper()).post {
-                    scanSink.success(mDevices)
-//          }
-                    if (BuildConfig.DEBUG) {
-                        Log.d("mDevices Found ", "$mDevices")
+                        // Update existing entry or add new item to the list
+                        if (existingIndex != -1) {
+                            mDevices[existingIndex] = item
+                        } else {
+                            mDevices.add(item)
+                        }
+
+                        // Sort `mDevices` by RSSI in descending order
+                        mDevices.sortWith(compareByDescending {
+                            (it as? Map<String, Any>)?.get("rssi") as? Int ?: -100
+                        })
+
+                        // Send the updated device list to the scan sink
+                        scanSink.success(mDevices)
+
+                        // Optional debug log for verification
+                        if (BuildConfig.DEBUG) {
+                            Log.d("mDevices Found", "$mDevices")
+                        }
+                    } catch (e: Exception) {
+                        Log.e("DeviceScanError", "Error in onDeviceFound: ${e.message}")
                     }
                 }
+
+
+//                override fun onDeviceFound(device: BleDevice) {
+//                    val item: MutableMap<String, Any> = HashMap()
+//                    item["deviceName"] = device.mBluetoothDevice.name
+//                    item["deviceMacAddress"] = device.mBluetoothDevice.address
+//                    item["rssi"] = device.mRssi
+////                    if (!(mDevices.contains(item))) {
+////                        mDevices.add(item)
+////                    }
+//                    val existingIndex =
+//                        mDevices.indexOfFirst { (it as? Map<String, Any>)?.get("deviceMacAddress") == item["deviceMacAddress"] }
+//
+//                    if (existingIndex != -1) {
+//                        mDevices[existingIndex] = item
+//                    } else {
+//                        mDevices.add(item)
+//                    }
+//
+//                    mDevices.sortWith(compareByDescending {
+//                        (it as? Map<String, Any>)?.get("rssi") as? Int ?: -100
+//                    })
+////         Handler(Looper.getMainLooper()).post {
+//                    scanSink.success(mDevices)
+////          }
+//                    if (BuildConfig.DEBUG) {
+//                        Log.d("mDevices Found ", "$mDevices")
+//                    }
+//                }
             })
     }
 
@@ -2908,6 +2945,10 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 }
             }
 
+            "stopScan" ->{
+                mBleScanner.scan(false)
+            }
+
             "setAddress" -> {
                 mBleScanner.scan(false)
                 val bmac: String? = call.argument<String>("bmac")
@@ -2962,10 +3003,13 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             }
 
             "isSupport2DAcceleration" -> {
+                isSupport2DAcceleration = BleCache.mSupport2DAcceleration == BleDeviceInfo.SUPPORT_2D_ACCELERATION_1
                 mResult?.success(isSupport2DAcceleration)
             }
 
             "isTo8565" -> {
+//                isTo8565 =
+//                    BleCache.mPlatform == BleDeviceInfo.PLATFORM_JL && !isSupport2DAcceleration
                 mResult?.success(isTo8565);
             }
 
@@ -3008,6 +3052,12 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             }
 
             "customDials" -> {
+                isSupport2DAcceleration = BleCache.mSupport2DAcceleration == BleDeviceInfo.SUPPORT_2D_ACCELERATION_1
+//                isTo8565 =
+//                    BleCache.mPlatform == BleDeviceInfo.PLATFORM_JL && !isSupport2DAcceleration
+
+//                isTo8565 = false
+
                 elements.clear()
                 timeDigitalView = call.argument<Boolean>("isDigital")!!
                 isRound = call.argument<Boolean>("isRound")!!
@@ -3053,6 +3103,9 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 if(isColor){
                     pickedColor = call.argument<HashMap<String, Int>>("pickedColor")!!
                 }
+
+                LogUtils.d("isSupport2DAcceleration: ${isSupport2DAcceleration}")
+                LogUtils.d("isTo8565: ${isTo8565}")
 
                 dialAssetsFromFlutter = call.argument<HashMap<String, ByteArray>>("assets")!!
 
@@ -3114,7 +3167,6 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                  * The bin file will become larger.
                  */
                 val bgBytesNew = getBg(isRound!!, bgBitmapX!!)
-                LogUtils.d("isSupport2DAcceleration: ${isSupport2DAcceleration}")
 
                 if (isSupport2DAcceleration) {
                     //获取预览
@@ -3700,6 +3752,10 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
                     "WATCH_FACE" -> {
                         mBleKey = BleKey.WATCH_FACE
+                    }
+
+                    "GPS_FIRMWARE_FILE" -> {
+                        mBleKey = BleKey.GPS_FIRMWARE_FILE
                     }
 
                     "AGPS_FILE" -> {
@@ -5213,7 +5269,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                         }
                     }
                     // BleCommand.IO
-                    BleKey.WATCH_FACE, BleKey.FONT_FILE, BleKey.UI_FILE, BleKey.LANGUAGE_FILE, BleKey.BRAND_INFO_FILE -> {
+                    BleKey.WATCH_FACE, BleKey.FONT_FILE, BleKey.UI_FILE, BleKey.LANGUAGE_FILE, BleKey.BRAND_INFO_FILE, BleKey.GPS_FIRMWARE_FILE -> {
                         if (bleKeyFlag == BleKeyFlag.UPDATE) {
                             // 发送文件
                             val url: String? = call.argument<String>("url")
@@ -5295,11 +5351,11 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                             BleConnector.sendData(bleKey, bleKeyFlag)
                         }
                     }
-                    BleKey.GPS_FIRMWARE_FILE -> {
-                        if (bleKeyFlag == BleKeyFlag.READ) {
-                            BleConnector.sendData(bleKey, bleKeyFlag)
-                        }
-                    }
+//                    BleKey.GPS_FIRMWARE_FILE -> {
+//                        if (bleKeyFlag == BleKeyFlag.READ) {
+//                            BleConnector.sendData(bleKey, bleKeyFlag)
+//                        }
+//                    }
 
                     BleKey.GPS_FIRMWARE_VERSION -> {
                         if (bleKeyFlag == BleKeyFlag.READ) {
