@@ -472,6 +472,7 @@ class CustomWatchFaceViewModel {
             }else if BleCache.shared.mPrototype == BleDeviceInfo.PROTOTYPE_F12 ||
                         BleCache.shared.mPrototype == BleDeviceInfo.PROTOTYPE_F17 ||
                         BleCache.shared.mPrototype == BleDeviceInfo.PROTOTYPE_HW01 ||
+                        dialCustomIsVenus() ||
                         BleCache.shared.mPrototype == BleDeviceInfo.PROTOTYPE_AM01J ||
                         BleCache.shared.mPrototype == BleDeviceInfo.PROTOTYPE_V2 ||
                         dialCustomIs360_360() || dialCustomIs412_412() ||
@@ -500,10 +501,10 @@ class CustomWatchFaceViewModel {
     /// 根据设备类型, 获取指定的图片资源
     private func getImageDeviceType_2()-> String{
 
-        
+
         var imageSize = "dial_customize_240/"
         switch BleCache.shared.mWatchFaceType {
-            
+
         case BleDeviceInfo.WATCH_FACE_REALTEK_ROUND_360x360:
             imageSize = "dial_customize_360/"
             break
@@ -518,6 +519,7 @@ class CustomWatchFaceViewModel {
 
             if BleCache.shared.mPrototype == BleDeviceInfo.PROTOTYPE_F12 ||
                 BleCache.shared.mPrototype == BleDeviceInfo.PROTOTYPE_V2 ||
+                dialCustomIsVenus() ||
                 dialCustomIs360_360() || dialCustomIs412_412() || dialCustomIs368_448() ||
                 dialCustomIs356_400() || dialCustomIs410_502() {
 

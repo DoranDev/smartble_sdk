@@ -129,6 +129,9 @@ func getWatchDialBKWidthHeight()->[Int]{
         // 需要注意, 410_502 由于没有资源, 只能使用 360x360
         width = 410
         height = 502
+    }else if dialCustomIsVenus() {
+        width = 390
+        height = 450
     }
     return [width,height]
 }
@@ -188,6 +191,9 @@ func getThumbnailImageWidthHeight()->[Int]{
     }else if dialCustomIs410_502() {
         width = 260
         height = 300
+    }else if dialCustomIsVenus(){
+        width = 250
+        height = 288
     }
     return [width,height]
 }
@@ -224,7 +230,7 @@ func dialCustomIs320_320()->Bool{
 /// 需要注意, PROTOTYPE_A8_Ultra_Pro 这个是320x386 由于没有资源, 只能使用 320x320
 /// 需要注意, PROTOTYPE_AM11 这个是336 X 480 由于没有资源, 只能使用 320x320
 func dialCustomIs320_385()->Bool{
-    
+
     var isDial = false
     switch BleCache.shared.mPrototype {
     case BleDeviceInfo.PROTOTYPE_F12Pro,
@@ -234,23 +240,23 @@ func dialCustomIs320_385()->Bool{
     default:
         isDial = false
     }
-    
+
     return isDial
 }
 
 /// 屈: 是否为表盘 240x240 圆形 表盘设备
 func dialCustomIs240_240()->Bool{
     var isDial320 = false
-    
+
     switch BleCache.shared.mPrototype {
     case BleDeviceInfo.PROTOTYPE_FC1:
 
         isDial320 = true
-        
+
     default:
         isDial320 = false
     }
-    
+
     return isDial320
 }
 
@@ -266,7 +272,7 @@ func dialCustomIs240_284()->Bool{
 /// 屈: 是否为表盘 240X286 方形 表盘设备
 /// JX621D 240 X 296没资源, 就使用这个了
 func dialCustomIs240_286()->Bool{
-    
+
     var isDia = false
     switch BleCache.shared.mPrototype {
     case BleDeviceInfo.PROTOTYPE_F11,
@@ -277,7 +283,7 @@ func dialCustomIs240_286()->Bool{
         BleDeviceInfo.PROTOTYPE_JX621D:
 
         isDia = true
-        
+
     default:
         isDia = false
     }
@@ -294,7 +300,7 @@ func dialCustomIs368_448()->Bool{
         BleDeviceInfo.PROTOTYPE_F12:
 
         isDia = true
-        
+
     default:
         isDia = false
     }
@@ -304,14 +310,14 @@ func dialCustomIs368_448()->Bool{
 /// 屈: 是否为表盘 360x360 圆形 表盘设备
 func dialCustomIs360_360()->Bool{
     var isDial320 = false
-    
+
     switch BleCache.shared.mPrototype {
     case BleDeviceInfo.PROTOTYPE_HW01,
         BleDeviceInfo.PROTOTYPE_FC2,
         BleDeviceInfo.PROTOTYPE_V61:
 
         isDial320 = true
-        
+
     default:
         isDial320 = false
     }
@@ -320,11 +326,12 @@ func dialCustomIs360_360()->Bool{
 
 /// 判断是否为方形屏幕
 func isSquareDial() -> Bool {
-    
+
     // 需要注意, PROTOTYPE_F12Pro 屏幕是 320 X 385屏幕 由于没有资源, 只能使用 320x320
     if dialCustomIs240_284() || dialCustomIs240_286() || dialCustomIs368_448() || dialCustomIs320_385() || dialCustomIs356_400() ||
+        dialCustomIsVenus() ||
         dialCustomIs410_502() {
-        
+
         return true
     } else {
         return false
@@ -338,18 +345,18 @@ func dialCustomSenderImageFormat()->Bool{
         isImage = false
     }
     return isImage
-    
+
 }
 
 /// 是否为表盘 412 x412 圆形 表盘设备
 func dialCustomIs412_412()->Bool{
     var isDial = false
-    
+
     switch BleCache.shared.mPrototype {
     case BleDeviceInfo.PROTOTYPE_R16:
 
         isDial = true
-        
+
     default:
         isDial = false
     }
@@ -359,12 +366,12 @@ func dialCustomIs412_412()->Bool{
 /// 是否为表盘 466x466 圆形 表盘设备
 func dialCustomIs466_466() -> Bool{
     var isDial = false
-    
+
     switch BleCache.shared.mPrototype {
     case BleDeviceInfo.PROTOTYPE_AM05:
 
         isDial = true
-        
+
     default:
         isDial = false
     }
@@ -375,12 +382,12 @@ func dialCustomIs466_466() -> Bool{
 /// 是否为表盘 356 X 400 方形 表盘设备
 func dialCustomIs356_400() -> Bool{
     var isDial = false
-    
+
     switch BleCache.shared.mPrototype {
     case BleDeviceInfo.PROTOTYPE_F17:
 
         isDial = true
-        
+
     default:
         isDial = false
     }
@@ -390,17 +397,33 @@ func dialCustomIs356_400() -> Bool{
 /// 是否为表盘 356 X 400 方形 表盘设备, 2023-01-09 自定义表盘还未有对应的资源文件, 暂时使用360*360
 func dialCustomIs410_502() -> Bool{
     var isDial = false
-    
+
     switch BleCache.shared.mPrototype {
     case BleDeviceInfo.PROTOTYPE_AM08:
 
         isDial = true
-        
+
     default:
         isDial = false
     }
     return isDial
 }
+
+/// tambah dewe
+func dialCustomIsVenus() -> Bool{
+    var isDial = false
+
+    switch BleCache.shared.mPrototype {
+    case "A9mini":
+
+        isDial = true
+
+    default:
+        isDial = false
+    }
+    return isDial
+}
+
 
 
 func dialCustomIsRound()->Bool{
@@ -414,6 +437,7 @@ func dialCustomIsRound()->Bool{
         BleCache.shared.mWatchFaceType == BleDeviceInfo.WATCH_FACE_REALTEK_SQUARE_240x280_20 ||
         BleCache.shared.mWatchFaceType == BleDeviceInfo.WATCH_FACE_REALTEK_SQUARE_240x295_21 ||
         BleCache.shared.mWatchFaceType == BleDeviceInfo.WATCH_FACE_REALTEK_SQUARE_240x280_2 ||
+        dialCustomIsVenus() ||
         dial99CustomIsRound() == false{
         isRound = false
     }

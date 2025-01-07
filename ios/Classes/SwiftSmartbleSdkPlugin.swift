@@ -3035,6 +3035,7 @@ extension SwiftSmartbleSdkPlugin {
             pvX = pvWidth/2
             pvY = pvHeight/2
             bleLog("type WATCH_FACE_SERVER")
+
         default:
             bgWidth = 240
             bgHeight = 240
@@ -3438,6 +3439,8 @@ extension SwiftSmartbleSdkPlugin {
             //        }
             //    })
             // }
+            bleLog("mPrototype \(BleCache.shared.mPrototype) ")
+            bleLog("dialCustomIsVenus \(dialCustomIsVenus()) ")
             if mBleConnector.sendStream(.WATCH_FACE, sendData.toData(), 0) {
                 bleLog("sendStream - WATCH_FACE")
             }
@@ -4365,7 +4368,8 @@ extension SwiftSmartbleSdkPlugin {
                 dialCustomIs360_360() || dialCustomIs412_412() ||
                 dialCustomIs368_448() ||
                 dialCustomIs356_400() ||
-                dialCustomIs410_502()
+                dialCustomIs410_502() ||
+                        dialCustomIsVenus()
             {
                 imageSize = "device360_"
             } else if dialCustomIs320_320() || dialCustomIs320_385() {
@@ -4400,7 +4404,8 @@ extension SwiftSmartbleSdkPlugin {
             if BleCache.shared.mPrototype == BleDeviceInfo.PROTOTYPE_F12 ||
                 BleCache.shared.mPrototype == BleDeviceInfo.PROTOTYPE_V2 ||
                 dialCustomIs360_360() || dialCustomIs412_412() || dialCustomIs368_448() ||
-                dialCustomIs356_400() || dialCustomIs410_502()
+
+                dialCustomIs356_400() || dialCustomIs410_502() || dialCustomIsVenus()
             {
                 imageSize = "dial_customize_360/" // 已经更改, 支持2D表盘的路径
             } else if dialCustomIs240_286() {
@@ -5053,6 +5058,15 @@ extension SwiftSmartbleSdkPlugin {
                 OffsetCalX = 0
                 OffsetCalY = 18
             } else if dialCustomIs410_502() {
+                OffsetDisX = 15
+                OffsetDisY = 18
+
+                OffsetHR_X = 0
+                OffsetHR_Y = 13
+
+                OffsetCalX = 0
+                OffsetCalY = 18
+            } else if dialCustomIsVenus(){
                 OffsetDisX = 15
                 OffsetDisY = 18
 
