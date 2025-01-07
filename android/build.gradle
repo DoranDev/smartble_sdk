@@ -43,6 +43,7 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 
 android {
+    namespace 'id.kakzaki.smartble_sdk'
     compileSdk 34
 
     compileOptions {

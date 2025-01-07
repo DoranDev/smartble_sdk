@@ -4,6 +4,13 @@ import 'dart:core';
 
 import 'package:flutter/services.dart';
 
+export 'digital_dial.dart';
+export 'model/ble_app_sport.dart';
+export 'model/ble_notification_category.dart';
+export 'model/ble_repeat.dart';
+export 'model/kdate_format.dart';
+export 'model/prayer_time.dart';
+
 enum SelectedBlekeyFlag {
   UPDATE,
   READ,
@@ -399,8 +406,18 @@ class SmartbleSdk {
   Future<dynamic> kWATCH_FACE_SWITCH({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('WATCH_FACE_SWITCH', {'flag': flag.name});
 
-  Future<dynamic> kAGPS_PREREQUISITE({required SelectedBlekeyFlag flag}) =>
-      _channel.invokeMethod('AGPS_PREREQUISITE', {'flag': flag.name});
+  Future<dynamic> kAGPS_PREREQUISITE({
+    required SelectedBlekeyFlag flag,
+    required double mLongitude,
+    required double mLatitude,
+    required int mAltitude,
+  }) =>
+      _channel.invokeMethod('AGPS_PREREQUISITE', {
+        'flag': flag.name,
+        'mLongitude': mLongitude,
+        'mLatitude': mLatitude,
+        'mAltitude': mAltitude,
+      });
 
   Future<dynamic> kDRINK_WATER({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('DRINK_WATER', {'flag': flag.name});
@@ -713,7 +730,7 @@ class SmartbleSdk {
       _channel.invokeMethod('AGPS_FILE', {'flag': flag.name});
 
   Future<dynamic> kGPS_FIRMWARE_FILE(
-      {required SelectedBlekeyFlag flag, String? path, String? url}) =>
+          {required SelectedBlekeyFlag flag, String? path, String? url}) =>
       _channel.invokeMethod(
           'GPS_FIRMWARE_FILE', {'flag': flag.name, 'path': path, 'url': url});
 
@@ -1301,41 +1318,4 @@ class SmartbleSdk {
         .receiveBroadcastStream(_onReadGpsFirmwareVersion.name)
         .cast();
   }
-}
-
-class BleNotificationCategory {
-  static String categoryIncomingCall = "1";
-  static String categoryMessage = "2";
-}
-
-class KDateFormat {
-  static int yearMonthDay = 0;
-  static int dayMonthYear = 1;
-  static int monthDayYear = 2;
-}
-
-class BleRepeat {
-  static String MONDAY = "MONDAY";
-  static String TUESDAY = "TUESDAY";
-  static String WEDNESDAY = "WEDNESDAY";
-  static String THURSDAY = "THURSDAY";
-  static String FRIDAY = "FRIDAY";
-  static String SATURDAY = "SATURDAY";
-  static String SUNDAY = "SUNDAY";
-  static String ONCE = "ONCE";
-  static String WORKDAY = "WORKDAY";
-  static String WEEKEND = "WEEKEND";
-  static String EVERYDAY = "EVERYDAY";
-}
-
-class BleAppSport {
-  static int STATE_START = 1;
-  static int STATE_RESUME = 2;
-  static int STATE_PAUSE = 3;
-  static int STATE_END = 4;
-
-  static int INDOOR = 1;
-  static int OUTDOOR = 2;
-  static int CYCLING = 3;
-  static int CLIMBING = 4;
 }

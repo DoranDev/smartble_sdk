@@ -635,7 +635,8 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 status: Boolean,
                 errorCode: Int,
                 total: Int,
-                completed: Int
+                completed: Int,
+                bleKey: BleKey
             ) {
                 if (BuildConfig.DEBUG) {
                     Log.d("onStreamProgress", "$status $errorCode $total $completed")
@@ -3790,6 +3791,10 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                         mBleKey = BleKey.BLOOD_PRESSURE
                     }
 
+                    "QIBLA_SET" ->{
+                        mBleKey = BleKey.QIBLA_SET
+                    }
+
                     else -> {
                         mBleKey = BleKey.NONE
                     }
@@ -5185,7 +5190,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                             mStep = call.argument<Int>("mStep")!!,
                             mDistance = call.argument<Int>("mDistance")!!,
                             mCalorie = call.argument<Int>("mCalorie")!!,
-                            mSpeed = call.argument<Int>("mSpeed")!!,
+                            mSpeed = call.argument<Int>("mSpeed")!!.toFloat(),
                             mPace = call.argument<Int>("mPace")!!,
                         )
                         BleConnector.sendObject(bleKey, bleKeyFlag, reply)
@@ -5361,6 +5366,49 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                         if (bleKeyFlag == BleKeyFlag.READ) {
                             BleConnector.sendData(bleKey, bleKeyFlag)
                         }
+                    }
+
+                    BleKey.AGPS_PREREQUISITE -> {
+                        // Handling AGPS Prerequisite update
+                        val agpsPrerequisite = BleAgpsPrerequisite(
+                            mLongitude = call.argument<Float>("mLongitude")!!,
+                            mLatitude = call.argument<Float>("mLatitude")!!,
+                            mAltitude = call.argument<Int>("mAltitude")!!
+                        )
+                        BleConnector.sendObject(bleKey, bleKeyFlag, agpsPrerequisite)
+                        print("$agpsPrerequisite")
+                        LogUtils.d(agpsPrerequisite)
+                    }
+
+                    BleKey.QIBLA_SET -> {
+                        // Handling Qibla settings update
+                        val qiblaSettings = BleQiblaSettings(
+                            mEnabled = call.argument<Int>("mEnabled")!!,
+                            mReminderMinute = call.argument<Int>("mReminderMinute")!!,
+                            mStartTime = call.argument<Int>("mStartTime")!!,
+                            mHijriYear = call.argument<Int>("mHijriYear")!!,
+                            mHijriMonth = call.argument<Int>("mHijriMonth")!!,
+                            mHijriDay = call.argument<Int>("mHijriDay")!!,
+                            mPrayerTimes = call.argument<List<Map<String, Int>>>("mPrayerTimes")!!.map { prayerTime ->
+                                BlePrayerTimes(
+                                    mFajrHour = prayerTime["mFajrHour"]!!,
+                                    mFajrMinite = prayerTime["mFajrMinute"]!!,
+                                    mSunriseHour = prayerTime["mSunriseHour"]!!,
+                                    mSunriseMinite = prayerTime["mSunriseMinute"]!!,
+                                    mDhuhrHour = prayerTime["mDhuhrHour"]!!,
+                                    mDhuhrMinite = prayerTime["mDhuhrMinute"]!!,
+                                    mAsrHour = prayerTime["mAsrHour"]!!,
+                                    mAsrMinite = prayerTime["mAsrMinute"]!!,
+                                    mMaghribHour = prayerTime["mMaghribHour"]!!,
+                                    mMaghribMinite = prayerTime["mMaghribMinute"]!!,
+                                    mIshaHour = prayerTime["mIshaHour"]!!,
+                                    mIshaMinite = prayerTime["mIshaMinute"]!!
+                                )
+                            }
+                        )
+                        BleConnector.sendObject(bleKey, bleKeyFlag, qiblaSettings)
+                        print("$qiblaSettings")
+                        LogUtils.d(qiblaSettings)
                     }
 
                     else -> {
