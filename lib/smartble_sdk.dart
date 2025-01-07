@@ -3,6 +3,7 @@
 import 'dart:core';
 
 import 'package:flutter/services.dart';
+import 'package:smartble_sdk/model/prayer_time.dart';
 
 export 'digital_dial.dart';
 export 'model/ble_app_sport.dart';
@@ -758,6 +759,27 @@ class SmartbleSdk {
 
   Future<dynamic> kBRAND_INFO_FILE({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('BRAND_INFO_FILE', {'flag': flag.name});
+
+  Future<dynamic> kQIBLA_SET({
+    required SelectedBlekeyFlag flag,
+    required int mEnabled,
+    required int mReminderMinute,
+    required int mStartTime,
+    required int mHijriYear,
+    required int mHijriMonth,
+    required int mHijriDay,
+    required List<PrayerTime> mPrayerTimes,
+  }) =>
+      _channel.invokeMethod('QIBLA_SET', {
+        'flag': flag.name,
+        'mEnabled': mEnabled,
+        'mReminderMinute': mReminderMinute,
+        'mStartTime': mStartTime,
+        'mHijriYear': mHijriYear,
+        'mHijriMonth': mHijriMonth,
+        'mHijriDay': mHijriDay,
+        'mPrayerTimes': mPrayerTimes.map((e) => e.toMap()).toList(),
+      });
 
   static const EventChannel _scanChannel = EventChannel('smartble_sdk/scan');
 
