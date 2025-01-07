@@ -228,6 +228,8 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private var onBluetoothPairingSink: EventSink? = null
     private var onReadGpsFirmwareVersionChannel: EventChannel? = null
     private var onReadGpsFirmwareVersionSink: EventSink? = null
+    private var onReadQiblaSettingsChannel: EventChannel? = null
+    private var onReadQiblaSettingsSink: EventSink? = null
 
     private var blueDevice: BluetoothDevice? = null
 
@@ -362,6 +364,16 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 item["deviceInfo"] = gson.toJson(deviceInfo)
                 if (onIdentityCreateSink != null)
                     onIdentityCreateSink!!.success(item)
+            }
+
+            override fun onReadQiblaSettings(qiblaSettings: BleQiblaSettings) {
+                if (BuildConfig.DEBUG) {
+                    Log.d("onReadQiblaSettings", "$qiblaSettings")
+                }
+                val item: MutableMap<String, Any> = HashMap()
+                item["qiblaSettings"] = gson.toJson(qiblaSettings)
+                if (onReadQiblaSettingsSink != null)
+                    onReadQiblaSettingsSink!!.success(item)
             }
 
             override fun onCommandReply(bleKey: BleKey, bleKeyFlag: BleKeyFlag, status: Boolean) {
@@ -1339,6 +1351,7 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
             }
 
+
             fun currentVolumeSmartWarch(currentVolume: Int): Double {
                 var smartWatchValue = (currentVolume.toDouble() / maxVolume.toDouble()) * 1.0
                 return smartWatchValue
@@ -1527,6 +1540,9 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         onReadGpsFirmwareVersionChannel =
             EventChannel(flutterPluginBinding.binaryMessenger, "onReadGpsFirmwareVersion")
         onReadGpsFirmwareVersionChannel!!.setStreamHandler(onReadGpsFirmwareVersionResultHandler)
+
+        onReadQiblaSettingsChannel = EventChannel(flutterPluginBinding.binaryMessenger, "onReadQiblaSettings")
+        onReadQiblaSettingsChannel!!.setStreamHandler(onReadQiblaSettingsResultHandler)
 
         val connector = BleConnector.Builder(flutterPluginBinding.applicationContext)
             .supportRealtekDfu(false) // Whether to support Realtek device Dfu, pass false if no support is required.
@@ -6229,6 +6245,17 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             }
         }
 
+    private val onReadQiblaSettingsResultHandler: EventChannel.StreamHandler =
+        object : EventChannel.StreamHandler {
+            override fun onListen(o: Any?, eventSink: EventSink?) {
+                if (eventSink != null) {
+                    onReadQiblaSettingsSink = eventSink
+                }
+            }
+
+            override fun onCancel(o: Any?) {
+            }
+        }
 
     fun Boolean.toInt() = if (this) 1 else 0
 

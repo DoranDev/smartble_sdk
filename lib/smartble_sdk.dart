@@ -1340,4 +1340,13 @@ class SmartbleSdk {
         .receiveBroadcastStream(_onReadGpsFirmwareVersion.name)
         .cast();
   }
+
+  static const EventChannel _onReadQiblaSettings =
+      EventChannel("onReadQiblaSettings");
+
+  static Stream<dynamic> get onReadQiblaSettings {
+    return _onReadQiblaSettings
+        .receiveBroadcastStream(_onReadQiblaSettings.name)
+        .cast();
+  }
 }
