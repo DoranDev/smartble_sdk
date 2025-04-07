@@ -1032,6 +1032,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
 
             let enabled = args?["mEnabled"] as? Int ?? 1
             let reminderMinute = args?["mReminderMinute"] as? Int ?? 5
+            let startTime = args?["mStartTime"] as? Int ?? 0
             let hijriYear = args?["mHijriYear"] as? Int ?? 1446
             let hijriMonth = args?["mHijriMonth"] as? Int ?? 6
             let hijriDay = args?["mHijriDay"] as? Int ?? 17
