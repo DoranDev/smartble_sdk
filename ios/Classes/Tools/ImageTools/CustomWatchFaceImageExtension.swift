@@ -24,7 +24,7 @@ extension UIImage {
         
         
         guard let pixArray = self.extraPixels(in: self.size) else {
-            bleLog("获取hourImg 像素点失败")
+            print("获取hourImg 像素点失败")
             return (nil, 0, 0)
         }
         //print("测试pixArray:\(String(describing: pixArray))")

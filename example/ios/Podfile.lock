@@ -6,7 +6,9 @@ PODS:
     - Flutter
     - iOSDFULibrary (~> 4.13.0)
     - SnapKit
-  - SnapKit (5.6.0)
+    - SSZipArchive
+  - SnapKit (5.7.1)
+  - SSZipArchive (2.4.3)
   - ZIPFoundation (0.9.11)
 
 DEPENDENCIES:
@@ -17,6 +19,7 @@ SPEC REPOS:
   trunk:
     - iOSDFULibrary
     - SnapKit
+    - SSZipArchive
     - ZIPFoundation
 
 EXTERNAL SOURCES:
@@ -27,11 +30,12 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
-  iOSDFULibrary: 3b9de67ed4bfb901b5f09c2fea843f65e152612d
-  smartble_sdk: 8f0b16b786e920c7ebc64afed829395bb845ee08
-  SnapKit: e01d52ebb8ddbc333eefe2132acf85c8227d9c25
+  iOSDFULibrary: ae1bcb1cb921e6e3ff551755f6fdff1b77e07e15
+  smartble_sdk: 35317ff79836cb694cf2a5350e53928f0171879a
+  SnapKit: d612e99e678a2d3b95bf60b0705ed0a35c03484a
+  SSZipArchive: fe6a26b2a54d5a0890f2567b5cc6de5caa600aef
   ZIPFoundation: b1f0de4eed33e74a676f76e12559ab6b75990197
 
 PODFILE CHECKSUM: 4e8f8b2be68aeea4c0d5beb6ff1e79fface1d048
 
-COCOAPODS: 1.15.2
+COCOAPODS: 1.16.2
