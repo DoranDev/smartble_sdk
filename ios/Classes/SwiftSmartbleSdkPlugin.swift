@@ -3,9 +3,10 @@ import CoreBluetooth
 import Flutter
 import MobileCoreServices
 import UIKit
+import SmartWatchCodingBleKit
 
 public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandler, BleHandleDelegate, BleScanDelegate, BleScanFilter {
-    func onReadDeviceInfo(_ status: Bool, _ deviceInfo: BleDeviceInfo) {
+    public func onReadDeviceInfo(_ status: Bool, _ deviceInfo: BleDeviceInfo) {
         var item = [String: Any]()
         item["deviceInfo"] = toJSON(deviceInfo)
 
@@ -14,7 +15,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         }
     }
 
-    func onReadDeviceInfo2(_ deviceInfo2: BleDeviceInfo2) {
+    public func onReadDeviceInfo2(_ deviceInfo2: BleDeviceInfo2) {
         var item = [String: Any]()
         item["deviceInfo2"] = toJSON(deviceInfo2)
 
@@ -1013,6 +1014,62 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
 //            bleKey = BleKey.BRAND_INFO_FILE
         case "BLOOD_PRESSURE":
             bleKey = BleKey.BLOOD_PRESSURE
+        case "QIBLA_SET":
+//            bleKey = BleKey.QIBLA_SET
+//            let qiblaSetModel = BleQiblaSettings()
+//            qiblaSetModel.mEnabled = 1
+//            qiblaSetModel.mReminderMinute = 5
+//            qiblaSetModel.mHijriYear = 1446
+//            qiblaSetModel.mHijriMonth = 6
+//            qiblaSetModel.mHijriDay = 17
+//            // 朝拜时间表开时间, 传递当前时间戳(秒值)
+//            qiblaSetModel.mStartTime = Int(DateInRegion(Date(), region: .current).timeIntervalSince1970)
+//            // 未来30天的朝拜时间信息
+//            qiblaSetModel.mPrayerTimes = self.viewModel.getPrayerTimes()
+//            //5.发送数据到设备, 让设备显示朝拜信息
+//            _ = BleConnector.shared.sendObject(.QIBLA_SET, .UPDATE, qiblaSetModel)
+            bleKey = BleKey.QIBLA_SET
+
+            let enabled = args?["mEnabled"] as? Int ?? 1
+            let reminderMinute = args?["mReminderMinute"] as? Int ?? 5
+            let startTime = args?["mStartTime"] as? Int ?? 0
+            let hijriYear = args?["mHijriYear"] as? Int ?? 1446
+            let hijriMonth = args?["mHijriMonth"] as? Int ?? 6
+            let hijriDay = args?["mHijriDay"] as? Int ?? 17
+
+            // Perbaikan bagian prayerTimes
+            guard let prayerTimesArray = args?["mPrayerTimes"] as? [[String: Int]] else {
+                print("mPrayerTimes is missing or invalid")
+                return
+            }
+
+            let prayerTimes = prayerTimesArray.map { prayerTimeDict -> BlePrayerTimes in
+                let prayerTime = BlePrayerTimes()
+                prayerTime.mFajrHour = prayerTimeDict["mFajrHour"] ?? 0
+                prayerTime.mFajrMinite = prayerTimeDict["mFajrMinute"] ?? 0
+                prayerTime.mSunriseHour = prayerTimeDict["mSunriseHour"] ?? 0
+                prayerTime.mSunriseMinite = prayerTimeDict["mSunriseMinute"] ?? 0
+                prayerTime.mDhuhrHour = prayerTimeDict["mDhuhrHour"] ?? 0
+                prayerTime.mDhuhrMinite = prayerTimeDict["mDhuhrMinute"] ?? 0
+                prayerTime.mAsrHour = prayerTimeDict["mAsrHour"] ?? 0
+                prayerTime.mAsrMinite = prayerTimeDict["mAsrMinute"] ?? 0
+                prayerTime.mMaghribHour = prayerTimeDict["mMaghribHour"] ?? 0
+                prayerTime.mMaghribMinite = prayerTimeDict["mMaghribMinute"] ?? 0
+                prayerTime.mIshaHour = prayerTimeDict["mIshaHour"] ?? 0
+                prayerTime.mIshaMinite = prayerTimeDict["mIshaMinute"] ?? 0
+                return prayerTime
+            }
+
+            let qiblaSetModel = BleQiblaSettings()
+            qiblaSetModel.mEnabled = enabled
+            qiblaSetModel.mReminderMinute = reminderMinute
+            qiblaSetModel.mStartTime = Int(Date().timeIntervalSince1970)
+            qiblaSetModel.mHijriYear = hijriYear
+            qiblaSetModel.mHijriMonth = hijriMonth
+            qiblaSetModel.mHijriDay = hijriDay
+            qiblaSetModel.mPrayerTimes = prayerTimes
+
+            _ = BleConnector.shared.sendObject(.QIBLA_SET, .UPDATE, qiblaSetModel)
         default:
             bleKey = BleKey.NONE
         }
@@ -1532,11 +1589,11 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                         case "WeChat":
                             bleNotificationSettings.enable(BleNotificationSettings.WE_CHAT)
                         case "Facebook Messenger":
-                            bleNotificationSettings.enable(BleNotificationSettings.FACEBOOK_MESSENGER)
+                            bleNotificationSettings.enable(BleNotificationSettings.FACEBOOK)
                         case "Twitter":
                             bleNotificationSettings.enable(BleNotificationSettings.TWITTER)
                         case "Facebook":
-                            bleNotificationSettings.enable(BleNotificationSettings.FACEBOOK_MESSENGER)
+                            bleNotificationSettings.enable(BleNotificationSettings.FACEBOOK)
                         case "LINE":
                             bleNotificationSettings.enable(BleNotificationSettings.LINE)
                         case "Instagram":
@@ -1906,35 +1963,35 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
                 }
             case BleKey.APP_SPORT_STATE:
                 bleLog("PHONE_WORKOUT_SWITCH")
-                let mode = BlePhoneWorkOutStatus()
-                mode.mMode = PhoneWorkOutStatus.Treadmill
-                mode.mStatus = PhoneWorkOutStatus.modeEnd
+                let mode = BleAppSportState()
+                mode.mMode = BleActivity.RUNNING
+                mode.mState = BleAppSportStateType.modeEnd
                 let sportStateInt = args?["sportState"] as? Int
                 let sportModeInt = args?["sportMode"] as? Int
                 switch sportStateInt {
                 case 1:
-                    mode.mStatus = PhoneWorkOutStatus.modeStart
+                    mode.mState = BleAppSportStateType.modeStart
                 case 2:
-                    mode.mStatus = PhoneWorkOutStatus.modeContinues
+                    mode.mState = BleAppSportStateType.modeContinues
                 case 3:
-                    mode.mStatus = PhoneWorkOutStatus.modePause
+                    mode.mState = BleAppSportStateType.modePause
                 case 4:
-                    mode.mStatus = PhoneWorkOutStatus.modeEnd
+                    mode.mState = BleAppSportStateType.modeEnd
                 default:
-                    mode.mStatus = PhoneWorkOutStatus.modeEnd
+                    mode.mState = BleAppSportStateType.modeEnd
                 }
 
                 switch sportModeInt {
                 case 1:
-                    mode.mStatus = PhoneWorkOutStatus.Treadmill
+                    mode.mMode = BleActivity.INDOOR
                 case 2:
-                    mode.mStatus = PhoneWorkOutStatus.OutdoorRun
+                    mode.mMode = BleActivity.RUNNING
                 case 3:
-                    mode.mStatus = PhoneWorkOutStatus.Cycling
+                    mode.mMode = BleActivity.CYCLING
                 case 4:
-                    mode.mStatus = PhoneWorkOutStatus.Climbing
+                    mode.mMode = BleActivity.CLIMBING
                 default:
-                    mode.mStatus = PhoneWorkOutStatus.Treadmill
+                    mode.mMode = BleActivity.RUNNING
                 }
 
                 _ = bleConnector.sendObject(bleKey, bleKeyFlag, mode)
@@ -2132,15 +2189,15 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         }
     }
 
-    func onBluetoothDisabled() {
+    public func onBluetoothDisabled() {
         // btnScan.setTitle("Please enable the Bluetooth", for: BleKey.normal)
     }
 
-    func onBluetoothEnabled() {
+    public func onBluetoothEnabled() {
         // btnScan.setTitle("Scan", for: BleKey.normal)
     }
 
-    func onScan(_ scan: Bool) {
+    public func onScan(_ scan: Bool) {
         print("onScan")
         if scan {
             // btnScan.setTitle("Scanning", for: BleKey.normal)
@@ -2151,7 +2208,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         }
     }
 
-    func onDeviceFound(_ device: BleDevice) {
+    public func onDeviceFound(_ device: BleDevice) {
         var item = [String: String]()
         if device.name.isEmpty { return }
         item["deviceName"] = device.name
@@ -2182,12 +2239,12 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         }
     }
 
-    func match(_ device: BleDevice) -> Bool {
+    public func match(_ device: BleDevice) -> Bool {
         // device.mRssi > -890
         true
     }
 
-    func onDeviceConnected(_ peripheral: CBPeripheral) {
+    public func onDeviceConnected(_ peripheral: CBPeripheral) {
         print("onDeviceConnected - \(peripheral)")
         var item = [String: Any]()
 //        item["deviceName"] = peripheral.name
@@ -2198,11 +2255,11 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         }
     }
 
-    func onDeviceConnecting(_ status: Bool) {
+    public func onDeviceConnecting(_ status: Bool) {
         print("onDeviceConnecting - \(status)")
     }
 
-    func onIdentityCreate(_ status: Bool, _ deviceInfo: BleDeviceInfo?) {
+    public func onIdentityCreate(_ status: Bool, _ deviceInfo: BleDeviceInfo?) {
         if status {
             _ = mBleConnector.sendData(.PAIR, BleKeyFlag.UPDATE)
 //            dismiss(animated: true)
@@ -2217,11 +2274,11 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         }
     }
 
-    func onOTA(_ status: Bool) {
+    public func onOTA(_ status: Bool) {
         print("onOTA \(status)")
     }
 
-    func onReadPower(_ power: Int) {
+    public func onReadPower(_ power: Int) {
         print("onReadPower \(power)")
         var item = [String: Any]()
         item["power"] = power
@@ -2231,7 +2288,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         }
     }
 
-    func onReadFirmwareVersion(_ version: String) {
+    public func onReadFirmwareVersion(_ version: String) {
         print("onReadFirmwareVersion \(version)")
         var item = [String: Any]()
         item["version"] = version
@@ -2241,7 +2298,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         }
     }
 
-    func onReadBleAddress(_ address: String) {
+    public func onReadBleAddress(_ address: String) {
         print("onReadBleAddress \(address)")
         var item = [String: Any]()
         item["address"] = address
@@ -2251,7 +2308,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         }
     }
 
-    func onReadSedentariness(_ sedentarinessSettings: BleSedentarinessSettings) {
+    public func onReadSedentariness(_ sedentarinessSettings: BleSedentarinessSettings) {
         print("onReadSedentariness \(sedentarinessSettings)")
         var item = [String: Any]()
 
@@ -2262,7 +2319,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         }
     }
 
-    func onReadNoDisturb(_ noDisturbSettings: BleNoDisturbSettings) {
+    public func onReadNoDisturb(_ noDisturbSettings: BleNoDisturbSettings) {
         print("onReadNoDisturb \(noDisturbSettings)")
         var item = [String: Any]()
         item["noDisturbSettings"] = toJSON(noDisturbSettings)
@@ -2272,7 +2329,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         }
     }
 
-    func onReadAlarm(_ alarms: [BleAlarm]) {
+    public func onReadAlarm(_ alarms: [BleAlarm]) {
         print("onReadAlarm \(alarms)")
         var item = [String: Any]()
         let i = alarms.map { data -> [String: Any] in
@@ -2285,18 +2342,18 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         }
     }
 
-    func onIdentityDelete(_ status: Bool) {
+    public func onIdentityDelete(_ status: Bool) {
         print("onIdentityDelete \(status)")
 //        if status {
 //            unbindCompleted()
 //        }
     }
 
-    func onSyncData(_ syncState: Int, _ bleKey: Int) {
+    public func onSyncData(_ syncState: Int, _ bleKey: Int) {
         print("onSyncData \(syncState) \(bleKey)")
     }
 
-    func onReadActivity(_ activities: [BleActivity]) {
+    public func onReadActivity(_ activities: [BleActivity]) {
         print("onReadActivity \(activities)")
         var item = [String: Any]()
 
@@ -2311,7 +2368,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         }
     }
 
-    func onReadHeartRate(_ heartRates: [BleHeartRate]) {
+    public func onReadHeartRate(_ heartRates: [BleHeartRate]) {
         print("onReadHeartRate \(heartRates)")
         var item = [String: Any]()
         let i = heartRates.map { data -> [String: Any] in
@@ -2324,7 +2381,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         }
     }
 
-    func onReadBloodPressure(_ bloodPressures: [BleBloodPressure]) {
+    public func onReadBloodPressure(_ bloodPressures: [BleBloodPressure]) {
         print("onReadBloodPressure \(bloodPressures)")
         var item = [String: Any]()
 
@@ -2339,7 +2396,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         }
     }
 
-    func onReadSleep(_ sleeps: [BleSleep]) {
+    public func onReadSleep(_ sleeps: [BleSleep]) {
 //        if BleCache.shared.mSleepAlgorithmType == 1 {
 //            for item in sleeps {
 //                if item.mMode == 4 {
@@ -2372,7 +2429,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         }
     }
 
-    func onReadSleepRaw(_ sleepRawData: Data) {
+    public func onReadSleepRaw(_ sleepRawData: Data) {
         /**
          this is the original firmware data, which can be saved to a text file for the firmware technician to
          analyze the problem
@@ -2381,7 +2438,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         print("onReadSleepRaw - \(sleepRawData.mHexString)")
     }
 
-    func onReadLocation(_ locations: [BleLocation]) {
+    public func onReadLocation(_ locations: [BleLocation]) {
         print("onReadLocation \(locations)")
         var item = [String: Any]()
 
@@ -2396,7 +2453,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         }
     }
 
-    func onReadTemperature(_ temperatures: [BleTemperature]) {
+    public func onReadTemperature(_ temperatures: [BleTemperature]) {
         print("onReadTemperature \(temperatures)")
         var item = [String: Any]()
 
@@ -2411,7 +2468,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         }
     }
 
-    func onCameraStateChange(_ cameraState: Int) {
+    public func onCameraStateChange(_ cameraState: Int) {
         print("onCameraStateChange \(CameraState.getState(cameraState))")
 //        if cameraState == CameraState.ENTER {
 //            mCameraEntered = true
@@ -2426,7 +2483,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         }
     }
 
-    func onCameraResponse(_ status: Bool, _ cameraState: Int) {
+    public func onCameraResponse(_ status: Bool, _ cameraState: Int) {
         print("onCameraResponse \(status) \(CameraState.getState(cameraState))")
 //        if status {
 //            if cameraState == CameraState.ENTER {
@@ -2445,7 +2502,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         }
     }
 
-    func onStreamProgress(_ status: Bool, _ errorCode: Int, _ total: Int, _ completed: Int) {
+    public func onStreamProgress(_ status: Bool, _ errorCode: Int, _ total: Int, _ completed: Int) {
 //        let progressValue = CGFloat(completed) / CGFloat(total)
 //        var mSpeed :Double = 0.0
 //        let nowTime = Int(Date().timeIntervalSince1970)
@@ -2475,11 +2532,11 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         }
     }
 
-    func onReadAerobicSettings(_ AerobicSettings: BleAerobicSettings) {
+    public func onReadAerobicSettings(_ AerobicSettings: BleAerobicSettings) {
         print("onReadAerobicSettings - \(AerobicSettings)")
     }
 
-    func onReadTemperatureUnitSettings(_ state: Int) {
+    public func onReadTemperatureUnitSettings(_ state: Int) {
         print("onReadTemperatureUnitSettings - \(state)")
         var item = [String: Any]()
 
@@ -2489,7 +2546,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         }
     }
 
-    func onReadDateFormatSettings(_ status: Int) {
+    public func onReadDateFormatSettings(_ status: Int) {
         print("onReadDateFormatSettings - \(status)")
 
         var item = [String: Any]()
@@ -2500,17 +2557,17 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         }
     }
 
-    func onReadWatchFaceSwitch(_ value: Int) {
+    public func onReadWatchFaceSwitch(_ value: Int) {
         print("onReadWatchFaceSwitch - \(value)")
     }
 
-    func onUpdateWatchFaceSwitch(_ status: Bool) {
+    public func onUpdateWatchFaceSwitch(_ status: Bool) {
         if status {
             print("set the default watch face success")
         }
     }
 
-    func onUpdateSettings(_ bleKey: BleKey.RawValue) {
+    public func onUpdateSettings(_ bleKey: BleKey.RawValue) {
         switch bleKey {
         case BleKey.NO_DISTURB_RANGE.rawValue:
             bleLog("NO_DISTURB_RANGE is success")
@@ -2519,15 +2576,15 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         }
     }
 
-    func onReadWatchFaceId(_ watchFaceId: BleWatchFaceId) {
+    public func onReadWatchFaceId(_ watchFaceId: BleWatchFaceId) {
         // bleWatchFaceID = watchFaceId
     }
 
-    func onWatchFaceIdUpdate(_ status: Bool) {
+    public func onWatchFaceIdUpdate(_ status: Bool) {
         // senderBinFile()
     }
 
-    func onSessionStateChange(_ status: Bool) {
+    public func onSessionStateChange(_ status: Bool) {
         print("onSessionStateChange \(status)")
         if status {
             _ = BleConnector.shared.sendObject(BleKey.TIME_ZONE, BleKeyFlag.UPDATE, BleTimeZone())
@@ -2544,7 +2601,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         }
     }
 
-    func onNoDisturbUpdate(_ noDisturbSettings: BleNoDisturbSettings) {
+    public func onNoDisturbUpdate(_ noDisturbSettings: BleNoDisturbSettings) {
         print("onNoDisturbUpdate \(noDisturbSettings)")
         var item = [String: Any]()
 
@@ -2554,7 +2611,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         }
     }
 
-    func onAlarmUpdate(_ alarm: BleAlarm) {
+    public func onAlarmUpdate(_ alarm: BleAlarm) {
         print("onAlarmUpdate \(alarm)")
         var item = [String: Any]()
 
@@ -2565,11 +2622,11 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         }
     }
 
-    func onAlarmDelete(_ id: Int) {
+    public func onAlarmDelete(_ id: Int) {
         print("onAlarmDelete \(id)")
     }
 
-    func onAlarmAdd(_ alarm: BleAlarm) {
+    public func onAlarmAdd(_ alarm: BleAlarm) {
         print("onAlarmAdd \(alarm)")
         var item = [String: Any]()
 
@@ -2580,7 +2637,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         }
     }
 
-    func onFindPhone(_ start: Bool) {
+    public func onFindPhone(_ start: Bool) {
         print("onFindPhone \(start ? "started":"stopped")")
         var item = [String: Any]()
 
@@ -2591,7 +2648,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         }
     }
 
-    func onPhoneGPSSport(_ workoutState: Int) {
+    public func onPhoneGPSSport(_ workoutState: Int) {
         print("onPhoneGPSSport \(WorkoutState.getState(workoutState))")
         var item = [String: Any]()
 
@@ -2602,7 +2659,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         }
     }
 
-    func onDeviceRequestAGpsFile(_ url: String) {
+    public func onDeviceRequestAGpsFile(_ url: String) {
         print("onDeviceRequestAGpsFile \(url)")
         // 以下是示例代码，sdk中的文件会过期，只是用于演示
         if BleCache.shared.mAGpsType == 1 {
@@ -2617,21 +2674,21 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         // _ = BleConnector.shared.sendStream(.AGPS_FILE, path)
     }
 
-    func onIdentityDeleteByDevice(_ status: Bool) {}
+    public func onIdentityDeleteByDevice(_ status: Bool) {}
 
-    func onCommandReply(_ bleKey: Int, _ keyFlag: Int, _ status: Bool) {}
+    public func onCommandReply(_ bleKey: Int, _ keyFlag: Int, _ status: Bool) {}
 
-    func onReadMtkOtaMeta() {}
+    public func onReadMtkOtaMeta() {}
 
-    func onXModem(_ status: UInt8) {}
+    public func onXModem(_ status: UInt8) {}
 
-    func onReadCoachingIds(_ coachingIds: BleCoachingIds) {}
+    public func onReadCoachingIds(_ coachingIds: BleCoachingIds) {}
 
-    func onReadUiPackVersion(_ version: String) {}
+    public func onReadUiPackVersion(_ version: String) {}
 
-    func onReadLanguagePackVersion(_ version: BleLanguagePackVersion) {}
+    public func onReadLanguagePackVersion(_ version: BleLanguagePackVersion) {}
 
-    func onReadWorkOut(_ WorkOut: [BleWorkOut]) {
+    public func onReadWorkOut(_ WorkOut: [BleWorkOut]) {
         print("onReadWorkOut \(WorkOut)")
         var item = [String: Any]()
 
@@ -2659,7 +2716,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         }
     }
 
-    func onReadWorkOut2(_ WorkOut: [BleWorkOut2]) {
+    public func onReadWorkOut2(_ WorkOut: [BleWorkOut2]) {
         print("onReadWorkOut2 \(WorkOut)")
         var item = [String: Any]()
 
@@ -2693,7 +2750,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         }
     }
 
-    func onReadMatchRecord(_ matchRecord: [BleMatchRecord]) {
+    public func onReadMatchRecord(_ matchRecord: [BleMatchRecord]) {
         print("onReadMatchRecord \(matchRecord)")
 //        var item = [String: Any]()
 //
@@ -2708,7 +2765,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
 //        }
     }
 
-    func onReadBloodOxygen(_ BloodOxygen: [BleBloodOxygen]) {
+    public func onReadBloodOxygen(_ BloodOxygen: [BleBloodOxygen]) {
         print("onReadBloodOxygen \(BloodOxygen)")
         var item = [String: Any]()
 
@@ -2725,7 +2782,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         }
     }
 
-    func onReadHeartRateVariability(_ HeartRateVariability: [BleHeartRateVariability]) {
+    public func onReadHeartRateVariability(_ HeartRateVariability: [BleHeartRateVariability]) {
         print("onReadHeartRateVariability \(HeartRateVariability)")
 //        var item = [String: Any]()
 //
@@ -2740,7 +2797,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
 //        }
     }
 
-    func onReadPressures(_ pressures: [BlePressure]) {
+    public func onReadPressures(_ pressures: [BlePressure]) {
         print("onReadPressures \(pressures)")
         var item = [String: Any]()
 
@@ -2757,37 +2814,36 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         }
     }
 
-    func onReadMediaFile(_ media: BleFileTransmission) {}
+    public func onReadMediaFile(_ media: BleFileTransmission) {}
 
-    func onFollowSystemLanguage(_ systemLanguage: Bool) {}
+    public func onFollowSystemLanguage(_ systemLanguage: Bool) {}
 
-    func onReadWeatherRealtime(_ update: Bool) {}
+    public func onReadWeatherRealtime(_ update: Bool) {}
 
-    func onReadDataLog(_ logs: [BleLogText]) {}
+    public func onReadDataLog(_ logs: [BleLogText]) {}
 
-    func onRequestAgpsPrerequisite() {}
+    public func onRequestAgpsPrerequisite() {}
 
-    func onReadDrinkWaterSettings(_ drinkWater: BleDrinkWaterSettings) {}
+    public func onReadDrinkWaterSettings(_ drinkWater: BleDrinkWaterSettings) {}
 
-    func onReadBloodOxyGenSettings(_ bloodOxyGenSet: BleBloodOxyGenSettings) {}
+    public func onReadBloodOxyGenSettings(_ bloodOxyGenSet: BleBloodOxyGenSettings) {}
 
-    func onReadWashSettings(_ washSet: BleWashSettings) {}
+    public func onReadWashSettings(_ washSet: BleWashSettings) {}
 
-    func onUpdateRealTimeHR(_ itemHR: ABHRealTimeHR) {}
 
-    func onUpdateRealTimeTemperature(_ temperature: BleTemperature) {}
+    public func onUpdateRealTimeTemperature(_ temperature: BleTemperature) {}
 
-    func onUpdateRealTimeBloodPressure(_ bloodPressures: BleBloodPressure) {}
+    public func onUpdateRealTimeBloodPressure(_ bloodPressures: BleBloodPressure) {}
 
-    func onUpdatePhoneWorkOutStatus(_ status: BlePhoneWorkOutStatus) {}
+    public func onUpdatePhoneWorkOutStatus(_ state: BleAppSportState) {}
 
-    func onVibrationUpdate(_ value: Int) {}
+    public func onVibrationUpdate(_ value: Int) {}
 
-    func onReadiBeaconStatus(_ value: Int) {}
+    public func onReadiBeaconStatus(_ value: Int) {}
 
-    func onCommandSendTimeout(_ bleKey: Int, _ bleKeyFlag: Int) {}
+    public func onCommandSendTimeout(_ bleKey: Int, _ bleKeyFlag: Int) {}
 
-    func onReadWorldClock(_ worldClocks: [BleWorldClock]) {
+    public func onReadWorldClock(_ worldClocks: [BleWorldClock]) {
         // print("onReadWorldClock \(worldClocks)")
         var item = [String: Any]()
 
@@ -2802,7 +2858,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         }
     }
 
-    func onWorldClockDelete(_ clockID: Int) {
+    public func onWorldClockDelete(_ clockID: Int) {
         var item = [String: Any]()
 
         item["id"] = toJSON(clockID)
@@ -2812,7 +2868,7 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
         }
     }
 
-    func onReadStock(_ stocks: [BleStock]) {
+    public func onReadStock(_ stocks: [BleStock]) {
         // print("onReadStock \(stocks)")
 //        var item = [String: Any]()
 //
@@ -2827,11 +2883,11 @@ public class SwiftSmartbleSdkPlugin: NSObject, FlutterPlugin, FlutterStreamHandl
 //        }
     }
 
-    func onStockDelete(_ stockID: Int) {}
+    public func onStockDelete(_ stockID: Int) {}
 
-    func onDeviceReadStock(_ status: Bool) {}
+    public func onDeviceReadStock(_ status: Bool) {}
 
-    func onRealTimeMeasurement(_ measurement: BleRealTimeMeasurement) {}
+    public func onRealTimeMeasurement(_ measurement: BleRealTimeMeasurement) {}
 }
 
 func toJSON<T: Encodable>(_ value: T) -> String? {

@@ -7,6 +7,8 @@
 //
 
 import UIKit
+import SmartWatchCodingBleKit
+
 
 
 public extension UIColor {

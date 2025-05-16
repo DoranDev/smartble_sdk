@@ -2,7 +2,7 @@ import Foundation
 import UIKit
 import CoreBluetooth
 import iOSDFULibrary
-
+import SmartWatchCodingBleKit
 
 class OTAController {
 

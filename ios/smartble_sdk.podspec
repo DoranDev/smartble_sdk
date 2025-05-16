@@ -16,10 +16,15 @@ A new Flutter project.
   s.source_files = 'Classes/**/*','Resource/**/*'
   s.dependency 'Flutter'
   s.dependency 'SnapKit'
+  s.dependency 'SSZipArchive'
   s.dependency 'iOSDFULibrary', '~> 4.13.0'
   s.vendored_frameworks='FR/GRDFUSDK.framework',
   'FR/JL_BLEKIT.framework',
   'FR/JLDialUnit.framework',
+  'FR/JL_HashPair.framework',
+  'FR/JLLogHelper.framework',
+  'FR/JL_OTAlib.framework',
+  'FR/SmartWatchCodingBleKit.framework',
   'FR/ZipZap.framework'
   s.platform = :ios, '9.0'
 

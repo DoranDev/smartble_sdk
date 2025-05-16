@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import SmartWatchCodingBleKit
 
 
 /// 表盘元素类型

@@ -1,0 +1,11 @@
+framework module SmartWatchCodingBleKit {
+  umbrella header "SmartWatchCodingBleKit.h"
+  export *
+
+  module * { export * }
+}
+
+module SmartWatchCodingBleKit.Swift {
+  header "SmartWatchCodingBleKit-Swift.h"
+  requires objc
+}

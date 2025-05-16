@@ -9,6 +9,7 @@
 import Foundation
 import CoreLocation
 import AVFoundation
+import SmartWatchCodingBleKit
 
 class ABHBackgroundMonitoring :NSObject{
     

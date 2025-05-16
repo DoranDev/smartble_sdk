@@ -1,0 +1,3 @@
+./FR/JL_BLEKit.framework/JL_BLEKit
+./FR/JL_HashPair.framework/JL_HashPair
+./FR/SmartWatchCodingBleKit.framework/SmartWatchCodingBleKit
