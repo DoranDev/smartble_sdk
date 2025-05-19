@@ -207,8 +207,8 @@ class SmartbleSdk {
   Future<dynamic> kUSER_PROFILE({required SelectedBlekeyFlag flag}) =>
       _channel.invokeMethod('USER_PROFILE', {'flag': flag.name});
 
-  Future<dynamic> kSTEP_GOAL({required SelectedBlekeyFlag flag}) =>
-      _channel.invokeMethod('STEP_GOAL', {'flag': flag.name});
+  Future<dynamic> kSTEP_GOAL({required SelectedBlekeyFlag flag, int? goal}) =>
+      _channel.invokeMethod('STEP_GOAL', {'flag': flag.name, 'goal': goal});
 
   Future<dynamic> kBACK_LIGHT(
           {required SelectedBlekeyFlag flag, required int times}) =>

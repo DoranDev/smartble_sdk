@@ -4076,8 +4076,10 @@ class SmartbleSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
                     BleKey.STEP_GOAL -> {
                         if (bleKeyFlag == BleKeyFlag.UPDATE) {
-                            // 设置目标步数
-                            BleConnector.sendInt32(bleKey, bleKeyFlag, 10)
+                            val goal: Int? = call.argument<Int>("goal")
+                            if(goal != null) {
+                                BleConnector.sendInt32(bleKey, bleKeyFlag, goal)
+                            }
                         } else if (bleKeyFlag == BleKeyFlag.READ) {
                             BleConnector.sendData(bleKey, bleKeyFlag)
                         }
